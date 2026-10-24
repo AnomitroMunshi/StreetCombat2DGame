@@ -1,0 +1,13 @@
+# Godot 4 generated data
+.godot/
+/android/
+
+# Export output and credentials
+/build/
+export_credentials.cfg
+*.translation
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/settings.json

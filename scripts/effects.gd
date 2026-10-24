@@ -1,0 +1,169 @@
+class_name FxLayer
+extends Node2D
+## World-space visual effects: hit sparks, particles, shockwave rings, speed-line
+## bursts, dust and persistent crack decals. Presentation only; nothing here
+## affects combat. Effects age once per physics tick, so they keep animating
+## during hitstop and slow down with slow motion.
+##
+## Decals (cracks) are drawn by the arena (main.gd) beneath the fighters via
+## draw_decals(); everything else draws on this layer above them.
+
+signal decals_changed
+
+const DEFAULT_LIFE: int = 14
+const PARTICLE_GRAVITY: float = 0.45
+
+var _effects: Array[Dictionary] = []
+var _decals: Array[PackedVector2Array] = []
+var _rng := RandomNumberGenerator.new()
+
+
+func _ready() -> void:
+	_rng.seed = 4242
+
+
+func _physics_process(_delta: float) -> void:
+	for i in range(_effects.size() - 1, -1, -1):
+		var e := _effects[i]
+		e["age"] += 1
+		if e["kind"] == "particle":
+			var vel: Vector2 = e["vel"]
+			vel.y += e["gravity"]
+			vel *= 0.97
+			e["vel"] = vel
+			e["pos"] = (e["pos"] as Vector2) + vel
+		if e["age"] >= e["life"]:
+			_effects.remove_at(i)
+	queue_redraw()
+
+
+# --- Spawning -----------------------------------------------------------------
+
+## A full hit: spark + shockwave ring + flying particles (+ speed lines at power 3).
+func impact(pos: Vector2, power: int, color: Color) -> void:
+	spark(pos, color, 14.0 + power * 8.0)
+	ring(pos, color, 18.0 + power * 14.0, 10 + power * 3)
+	particles(pos, color, 4 + power * 4, 3.0 + power * 1.8, 10 + power * 4)
+	if power >= 3:
+		burst(pos, Color(1.0, 1.0, 1.0, 0.9), 22)
+
+
+func spark(pos: Vector2, color: Color, size: float) -> void:
+	_effects.append({"kind": "spark", "pos": pos, "age": 0, "life": DEFAULT_LIFE, "color": color,
+		"size": size, "angle": _rng.randf() * TAU})
+
+
+func ring(pos: Vector2, color: Color, size: float, life: int) -> void:
+	_effects.append({"kind": "ring", "pos": pos, "age": 0, "life": life, "color": color, "size": size})
+
+
+## Flat elliptical shockwave along the floor.
+func ground_ring(pos: Vector2, size: float, life: int) -> void:
+	_effects.append({"kind": "ground_ring", "pos": pos, "age": 0, "life": life,
+		"color": Color(0.95, 0.85, 0.7), "size": size})
+
+
+func particles(pos: Vector2, color: Color, count: int, speed: float, life: int) -> void:
+	for i in count:
+		var a := _rng.randf_range(-PI, PI)
+		var v := Vector2(cos(a), sin(a) - 0.6) * speed * _rng.randf_range(0.5, 1.2)
+		_effects.append({"kind": "particle", "pos": pos, "vel": v, "gravity": PARTICLE_GRAVITY, "age": 0,
+			"life": life + _rng.randi_range(-3, 3), "color": color, "size": _rng.randf_range(2.0, 4.0)})
+
+
+## Anime-style radial speed lines around a big impact.
+func burst(pos: Vector2, color: Color, life: int) -> void:
+	var lines := PackedVector3Array()  # x = angle, y = inner radius factor, z = length factor
+	for i in 26:
+		lines.append(Vector3(_rng.randf() * TAU, _rng.randf_range(0.6, 1.1), _rng.randf_range(0.4, 1.0)))
+	_effects.append({"kind": "burst", "pos": pos, "age": 0, "life": life, "color": color, "lines": lines})
+
+
+## Bright arc in front of a blocking fighter (the guard absorbing the hit).
+func guard_flash(pos: Vector2, facing: int) -> void:
+	_effects.append({"kind": "guard", "pos": pos, "age": 0, "life": 12,
+		"color": Color(0.65, 0.85, 1.0), "facing": facing})
+
+
+func dust(pos: Vector2, size: float) -> void:
+	_effects.append({"kind": "dust", "pos": pos, "age": 0, "life": DEFAULT_LIFE + int(size * 4.0),
+		"color": Color(0.78, 0.68, 0.56), "size": size})
+
+
+## Persistent crack decal. `vertical` cracks run up a wall; otherwise along the floor.
+func crack(pos: Vector2, size: float, vertical: bool) -> void:
+	for branch in 6:
+		var line := PackedVector2Array([pos])
+		var base := TAU * branch / 6.0 + _rng.randf_range(-0.4, 0.4)
+		var p := pos
+		var seg := size / 4.0
+		for s in 4:
+			base += _rng.randf_range(-0.5, 0.5)
+			var step := Vector2(cos(base), sin(base)) * seg * _rng.randf_range(0.6, 1.2)
+			if not vertical:
+				step.y *= 0.25  # foreshortened floor
+			p += step
+			line.append(p)
+		_decals.append(line)
+	decals_changed.emit()
+
+
+# --- Drawing ------------------------------------------------------------------
+
+## Called by the arena's _draw so cracks sit under the fighters.
+func draw_decals(canvas: CanvasItem) -> void:
+	for line in _decals:
+		canvas.draw_polyline(line, Color(0.06, 0.045, 0.04, 0.85), 3.0, true)
+		canvas.draw_polyline(line, Color(0.6, 0.48, 0.36, 0.35), 1.0, true)
+
+
+func _draw() -> void:
+	for e in _effects:
+		var t := float(e["age"]) / float(e["life"])
+		var color: Color = e["color"]
+		var pos: Vector2 = e["pos"]
+		match e["kind"]:
+			"spark":
+				color.a = 1.0 - t
+				var size: float = e["size"]
+				draw_circle(pos, size * 0.45 * (1.0 - t), Color(1.0, 1.0, 1.0, (1.0 - t) * 0.9))
+				for i in 8:
+					var a: float = e["angle"] + TAU * i / 8.0
+					var dir := Vector2(cos(a), sin(a))
+					var reach := size * (0.6 + t * 1.3) * (1.0 if i % 2 == 0 else 0.6)
+					draw_line(pos + dir * size * 0.2 * (1.0 + t), pos + dir * reach, color, 3.0 * (1.0 - t) + 1.0, true)
+			"ring":
+				color.a = (1.0 - t) * 0.9
+				var r: float = e["size"] * (0.3 + t * 1.8)
+				draw_arc(pos, r, 0.0, TAU, 40, color, 6.0 * (1.0 - t) + 1.0, true)
+			"ground_ring":
+				color.a = (1.0 - t) * 0.8
+				var gr: float = e["size"] * (0.2 + t * 1.6)
+				draw_set_transform(pos, 0.0, Vector2(1.0, 0.22))
+				draw_arc(Vector2.ZERO, gr, 0.0, TAU, 48, color, 10.0 * (1.0 - t) + 2.0, true)
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"particle":
+				color.a = 1.0 - t
+				var vel: Vector2 = e["vel"]
+				draw_line(pos, pos - vel * 1.5, color, e["size"], true)
+			"burst":
+				color.a = 0.85 * (1.0 - t)
+				var lines: PackedVector3Array = e["lines"]
+				var spread := 70.0 + t * 260.0
+				for l in lines:
+					var dir := Vector2(cos(l.x), sin(l.x))
+					var inner := spread * l.y
+					draw_line(pos + dir * inner, pos + dir * (inner + 90.0 * l.z * (1.0 - t * 0.5)), color, 2.0, true)
+			"guard":
+				color.a = 0.9 * (1.0 - t)
+				var face: int = e["facing"]
+				var centre := pos - Vector2(face * 18.0, 0.0)
+				var from := -PI * 0.42 if face > 0 else PI - PI * 0.42
+				draw_arc(centre, 34.0 + t * 10.0, from, from + PI * 0.84, 20, color, 5.0 * (1.0 - t) + 1.5, true)
+			"dust":
+				color.a = 0.5 * (1.0 - t)
+				var ds: float = e["size"]
+				for side in [-1.0, 1.0]:
+					for j in 3:
+						var puff := pos + Vector2(side * (8.0 + t * 30.0 + j * 7.0) * ds, -4.0 - j * 2.0 - t * 7.0 * ds)
+						draw_circle(puff, (6.0 - j * 1.5) * (1.0 - t * 0.4) * ds, color)

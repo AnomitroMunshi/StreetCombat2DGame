@@ -1,0 +1,418 @@
+class_name GameAudio
+extends Node
+## Procedural audio. Every sound effect and the background music are synthesized
+## in code (no audio files). SFX are short and built in _ready; the music loop is
+## rendered on a worker thread and starts playing as soon as it is ready.
+
+const MIX_RATE: int = 22050
+const VOICES: int = 14
+const BGM_VOLUME_DB: float = -12.0
+const BGM_BPM: float = 140.0
+const BGM_BARS: int = 16
+## Headroom for stacked impacts; a hard limiter on the master bus catches the rest.
+const SFX_VOLUME_DB: float = -5.0
+const LIMITER_CEILING_DB: float = -1.0
+
+var _sfx: Dictionary = {}
+var _voices: Array[AudioStreamPlayer] = []
+var _next_voice: int = 0
+var _bgm: AudioStreamPlayer = null
+var _bgm_thread: Thread = null
+var _bgm_duck_db: float = 0.0
+var _rng := RandomNumberGenerator.new()
+
+
+func _ready() -> void:
+	_rng.seed = 5
+	_install_limiter()
+	for i in VOICES:
+		var voice := AudioStreamPlayer.new()
+		add_child(voice)
+		_voices.append(voice)
+	_bgm = AudioStreamPlayer.new()
+	_bgm.volume_db = BGM_VOLUME_DB
+	add_child(_bgm)
+	_build_sfx()
+	_bgm_thread = Thread.new()
+	_bgm_thread.start(_render_bgm)
+
+
+func _process(delta: float) -> void:
+	if _bgm_thread != null and not _bgm_thread.is_alive():
+		var stream: AudioStreamWAV = _bgm_thread.wait_to_finish()
+		_bgm_thread = null
+		_bgm.stream = stream
+		_bgm.play()
+	var real_delta := delta / maxf(Engine.time_scale, 0.01)
+	_bgm.volume_db = lerpf(_bgm.volume_db, BGM_VOLUME_DB + _bgm_duck_db, 1.0 - exp(-3.0 * real_delta))
+
+
+func _exit_tree() -> void:
+	if _bgm_thread != null:
+		_bgm_thread.wait_to_finish()
+		_bgm_thread = null
+	# Release streams so nothing is still playing when the audio server shuts down.
+	for voice: AudioStreamPlayer in _voices + [_bgm]:
+		voice.stop()
+		voice.stream = null
+
+
+# --- Public API -----------------------------------------------------------------
+
+func play(sound: StringName, volume_db: float = 0.0, pitch_jitter: float = 0.06) -> void:
+	var stream: AudioStreamWAV = _sfx.get(sound)
+	if stream == null:
+		push_warning("Unknown sound: %s" % sound)
+		return
+	var voice := _voices[_next_voice]
+	_next_voice = (_next_voice + 1) % _voices.size()
+	voice.stream = stream
+	voice.volume_db = SFX_VOLUME_DB + volume_db
+	voice.pitch_scale = 1.0 + _rng.randf_range(-pitch_jitter, pitch_jitter)
+	voice.play()
+
+
+## Lowers the music by `db` (0 = normal). Eases over ~0.3 s.
+func duck_bgm(db: float) -> void:
+	_bgm_duck_db = db
+
+
+func has_sound(sound: StringName) -> bool:
+	return _sfx.has(sound)
+
+
+func is_bgm_playing() -> bool:
+	return _bgm != null and _bgm.stream != null and _bgm.playing
+
+
+func get_bgm_length() -> float:
+	return (_bgm.stream as AudioStreamWAV).get_length() if _bgm != null and _bgm.stream != null else 0.0
+
+
+## Big finishers stack many loud sounds; limit the master bus instead of clipping.
+func _install_limiter() -> void:
+	for i in AudioServer.get_bus_effect_count(0):
+		if AudioServer.get_bus_effect(0, i) is AudioEffectHardLimiter:
+			return
+	var limiter := AudioEffectHardLimiter.new()
+	limiter.ceiling_db = LIMITER_CEILING_DB
+	AudioServer.add_bus_effect(0, limiter)
+
+
+# --- Sound effects --------------------------------------------------------------
+
+func _build_sfx() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	var b: PackedFloat32Array
+
+	b = _buffer(0.18)
+	_whoosh(b, 0.0, 0.16, 0.04, 0.35, 0.55, rng)
+	_sfx[&"whoosh_light"] = _finish(b)
+
+	b = _buffer(0.32)
+	_whoosh(b, 0.0, 0.28, 0.02, 0.22, 0.8, rng)
+	_thump(b, 0.0, 0.2, 90.0, 60.0, 0.08, 0.15)
+	_sfx[&"whoosh_heavy"] = _finish(b)
+
+	b = _buffer(0.16)
+	_whoosh(b, 0.0, 0.14, 0.05, 0.3, 0.35, rng)
+	_sfx[&"jump"] = _finish(b, 0.6)
+
+	b = _buffer(0.16)
+	_thump(b, 0.0, 0.12, 240.0, 95.0, 0.03, 0.9)
+	_noise(b, 0.0, 0.05, 0.012, 0.7, 0.6, rng)
+	_soft_clip(b, 1.5)
+	_sfx[&"hit_light"] = _finish(b)
+
+	b = _buffer(0.4)
+	_thump(b, 0.0, 0.32, 150.0, 42.0, 0.08, 1.0)
+	_noise(b, 0.0, 0.12, 0.03, 0.45, 0.7, rng)
+	_noise(b, 0.0, 0.03, 0.005, 0.95, 0.5, rng)
+	_soft_clip(b, 2.0)
+	_sfx[&"hit_heavy"] = _finish(b)
+
+	b = _buffer(0.14)
+	_thump(b, 0.0, 0.08, 820.0, 520.0, 0.02, 0.45)
+	_noise(b, 0.0, 0.07, 0.015, 0.85, 0.45, rng)
+	_thump(b, 0.0, 0.1, 300.0, 240.0, 0.03, 0.3)
+	_sfx[&"block"] = _finish(b, 0.75)
+
+	b = _buffer(0.2)
+	_thump(b, 0.0, 0.16, 110.0, 55.0, 0.04, 0.55)
+	_noise(b, 0.0, 0.08, 0.02, 0.15, 0.25, rng)
+	_sfx[&"land"] = _finish(b, 0.6)
+
+	b = _buffer(0.55)
+	_thump(b, 0.0, 0.45, 95.0, 38.0, 0.12, 1.0)
+	_noise(b, 0.0, 0.4, 0.09, 0.12, 0.6, rng)
+	_soft_clip(b, 1.6)
+	_sfx[&"body_fall"] = _finish(b)
+
+	b = _buffer(0.55)
+	_thump(b, 0.0, 0.45, 120.0, 40.0, 0.1, 1.0)
+	_noise(b, 0.0, 0.18, 0.03, 0.9, 0.8, rng)
+	_noise(b, 0.0, 0.35, 0.08, 0.2, 0.5, rng)
+	_soft_clip(b, 2.2)
+	_sfx[&"wall_hit"] = _finish(b)
+
+	b = _buffer(0.7)
+	for k in 3:
+		_thump(b, k * 0.15, 0.14, 85.0, 50.0, 0.04, 0.5)
+	_noise(b, 0.0, 0.6, 0.25, 0.08, 0.3, rng)
+	_sfx[&"roll"] = _finish(b, 0.7)
+
+	b = _buffer(1.8)
+	_thump(b, 0.0, 1.3, 85.0, 26.0, 0.4, 1.0)
+	_noise(b, 0.0, 1.1, 0.3, 0.06, 0.7, rng)
+	_noise(b, 0.0, 0.06, 0.01, 0.9, 0.6, rng)
+	_echo(b, 0.13, 0.35)
+	_soft_clip(b, 1.8)
+	_sfx[&"ko_boom"] = _finish(b)
+
+	b = _buffer(2.6)
+	_whoosh(b, 0.0, 0.45, 0.01, 0.5, 0.6, rng)
+	_gong(b, 0.35, 2.1, 147.0, 0.7)
+	_thump(b, 0.35, 0.6, 70.0, 40.0, 0.2, 0.7)
+	_echo(b, 0.18, 0.3)
+	_sfx[&"finisher_sting"] = _finish(b)
+
+
+# --- Background music (worker thread) -------------------------------------------
+
+func _render_bgm() -> AudioStreamWAV:
+	# Driving fight track, 140 BPM in A minor: punchy kick and snare, 16th hats,
+	# distorted saw bass, taiko accents, a stabbing lead riff (bars 0-7) that
+	# opens into a melody (bars 8-15), crashes and drum fills. Loops seamlessly.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2026
+	var beat := 60.0 / BGM_BPM
+	var step := beat / 4.0  # 16th note
+	var bar_len := beat * 4.0
+	var buf := _buffer(bar_len * BGM_BARS)
+	var roots: Array[float] = [55.0, 55.0, 43.65, 49.0, 55.0, 55.0, 43.65, 41.2,
+		43.65, 49.0, 55.0, 55.0, 43.65, 49.0, 41.2, 41.2]
+	for bar in BGM_BARS:
+		var t0 := bar * bar_len
+		var fill := bar % 8 == 7
+		# Crash + taiko boom at the top of each 8-bar section.
+		if bar % 8 == 0:
+			_noise(buf, t0, 1.6, 0.55, 0.9, 0.35, rng, true)
+			_thump(buf, t0, 0.8, 70.0, 38.0, 0.3, 0.9, true)
+		# Kick: driving, syncopated.
+		for k in ([0, 3, 8, 10] if bar % 2 == 0 else [0, 6, 8, 11, 14]):
+			_thump(buf, t0 + k * step, 0.28, 130.0, 42.0, 0.08, 1.0, true)
+			_noise(buf, t0 + k * step, 0.012, 0.004, 0.9, 0.35, rng, true)
+		# Snare on 2 and 4 (16th roll on the last beat of a fill bar).
+		var snares := [4, 12] if not fill else [4, 12, 13, 14, 15]
+		for sn in snares:
+			var vel: float = 0.75 if sn == 4 or sn == 12 else 0.45 + (sn - 12) * 0.1
+			_noise(buf, t0 + sn * step, 0.2, 0.06, 0.72, vel, rng, true)
+			_thump(buf, t0 + sn * step, 0.1, 230.0, 170.0, 0.035, vel * 0.5, true)
+		# Hats: closed 8ths with ghosted 16ths, open hat before the bar turns.
+		for h in 16:
+			if h == 14:
+				_noise(buf, t0 + h * step, 0.12, 0.05, 0.97, 0.16, rng, true)
+			elif h % 2 == 0:
+				_noise(buf, t0 + h * step, 0.04, 0.01, 0.98, 0.14, rng, true)
+			else:
+				_noise(buf, t0 + h * step, 0.03, 0.007, 0.98, 0.06, rng, true)
+		# Taiko accent on beat 3 for the martial-arts flavour.
+		_thump(buf, t0 + 8 * step, 0.4, 85.0, 50.0, 0.12, 0.45, true)
+		# Distorted bass: driving 8ths with octave jumps.
+		var root := roots[bar]
+		var bass_pattern: Array[float] = [1.0, 1.0, 2.0, 1.0, 1.0, 1.5, 2.0, 1.0]
+		for e in 8:
+			var f := root * bass_pattern[e]
+			_saw(buf, t0 + e * step * 2.0, f, step * 1.8, 0.42, 0.14)
+			_bass(buf, t0 + e * step * 2.0, f, step * 1.6, 0.3)
+	# Lead: A minor pentatonic. Riff (stabs) for bars 0-7, melody for 8-15.
+	var note := {"G4": 392.0, "A4": 440.0, "C5": 523.25, "D5": 587.33, "E5": 659.25, "G5": 783.99, "A5": 880.0}
+	var riff: Array = [[0, "A4"], [3, "A4"], [6, "C5"], [8, "A4"], [11, "D5"], [14, "C5"],
+		[16, "A4"], [19, "A4"], [22, "E5"], [24, "D5"], [27, "C5"], [30, "G4"]]
+	var melody: Array = [[0, "E5", 4], [4, "G5", 4], [8, "A5", 4], [12, "G5", 2], [14, "E5", 2],
+		[16, "D5", 4], [20, "E5", 4], [24, "C5", 4], [28, "D5", 2], [30, "E5", 2]]
+	for phrase in 4:
+		var p0 := phrase * 2 * bar_len
+		for n in riff:
+			_square(buf, p0 + n[0] * step, note[n[1]], step * 1.3, 0.2, 0.3)
+	for phrase in range(4, 8):
+		var p0 := phrase * 2 * bar_len
+		for n in melody:
+			_square(buf, p0 + n[0] * step, note[n[1]], step * n[2] * 0.95, 0.22, 0.22)
+			_pluck(buf, p0 + n[0] * step, note[n[1]] * 0.5, 0.5, 0.12, rng)
+	_soft_clip(buf, 1.6)
+	_normalize(buf, 0.85)
+	var wav := _to_wav(buf)
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_begin = 0
+	wav.loop_end = buf.size()
+	return wav
+
+
+# --- Synthesis helpers (static: safe to use from the worker thread) -------------
+
+static func _buffer(seconds: float) -> PackedFloat32Array:
+	var b := PackedFloat32Array()
+	b.resize(int(seconds * MIX_RATE))
+	b.fill(0.0)
+	return b
+
+
+## Adds `value` at sample index `idx`; wraps around the buffer end for loops.
+static func _put(buf: PackedFloat32Array, idx: int, value: float, wrap: bool) -> bool:
+	if idx >= buf.size():
+		if not wrap:
+			return false
+		idx -= buf.size()
+	buf[idx] += value
+	return true
+
+
+## Pitched sine with an exponential pitch drop: kicks, thuds, impacts.
+static func _thump(buf: PackedFloat32Array, start: float, dur: float, f0: float, f1: float,
+		decay: float, amp: float, wrap: bool = false) -> void:
+	var n := int(dur * MIX_RATE)
+	var off := int(start * MIX_RATE)
+	var phase := 0.0
+	for i in n:
+		var t := float(i) / MIX_RATE
+		phase += TAU * f0 * pow(f1 / f0, t / dur) / MIX_RATE
+		if not _put(buf, off + i, sin(phase) * exp(-t / decay) * amp, wrap):
+			break
+
+
+## Low-passed noise burst (cutoff 0..1 = dark..bright).
+static func _noise(buf: PackedFloat32Array, start: float, dur: float, decay: float, cutoff: float,
+		amp: float, rng: RandomNumberGenerator, wrap: bool = false) -> void:
+	var n := int(dur * MIX_RATE)
+	var off := int(start * MIX_RATE)
+	var y := 0.0
+	for i in n:
+		var t := float(i) / MIX_RATE
+		y += cutoff * (rng.randf_range(-1.0, 1.0) - y)
+		if not _put(buf, off + i, y * exp(-t / decay) * amp, wrap):
+			break
+
+
+## Air whoosh: noise with a sweeping filter and a swelling envelope.
+static func _whoosh(buf: PackedFloat32Array, start: float, dur: float, c0: float, c1: float,
+		amp: float, rng: RandomNumberGenerator) -> void:
+	var n := int(dur * MIX_RATE)
+	var off := int(start * MIX_RATE)
+	var y := 0.0
+	var slow := 0.0
+	for i in n:
+		var u := float(i) / n
+		var cutoff := lerpf(c0, c1, sin(PI * u))
+		y += cutoff * (rng.randf_range(-1.0, 1.0) - y)
+		slow += 0.02 * (y - slow)
+		var env := pow(sin(PI * u), 2.0)
+		if not _put(buf, off + i, (y - slow) * env * amp * 2.0, false):
+			break
+
+
+## Karplus-Strong plucked string (koto / shamisen flavour).
+static func _pluck(buf: PackedFloat32Array, start: float, freq: float, dur: float, amp: float,
+		rng: RandomNumberGenerator) -> void:
+	var period := maxi(int(MIX_RATE / freq), 2)
+	var line := PackedFloat32Array()
+	line.resize(period)
+	for i in period:
+		line[i] = rng.randf_range(-1.0, 1.0)
+	var off := int(start * MIX_RATE)
+	var idx := 0
+	for i in int(dur * MIX_RATE):
+		var nxt := (idx + 1) % period
+		var out := line[idx]
+		line[idx] = 0.5 * (line[idx] + line[nxt]) * 0.996
+		idx = nxt
+		_put(buf, off + i, out * amp, true)
+
+
+## Filtered sawtooth with a plucky envelope (aggressive bass / lead body).
+static func _saw(buf: PackedFloat32Array, start: float, freq: float, dur: float, amp: float, cutoff: float) -> void:
+	var off := int(start * MIX_RATE)
+	var phase := 0.0
+	var y := 0.0
+	for i in int(dur * MIX_RATE):
+		var t := float(i) / MIX_RATE
+		phase = fmod(phase + freq / MIX_RATE, 1.0)
+		y += cutoff * ((phase * 2.0 - 1.0) - y)
+		var env := minf(t / 0.004, 1.0) * exp(-t / (dur * 0.5))
+		_put(buf, off + i, tanh(y * 2.2) * env * amp, true)
+
+
+## Filtered square wave with slight vibrato (lead synth).
+static func _square(buf: PackedFloat32Array, start: float, freq: float, dur: float, amp: float, cutoff: float) -> void:
+	var off := int(start * MIX_RATE)
+	var phase := 0.0
+	var y := 0.0
+	for i in int(dur * MIX_RATE):
+		var t := float(i) / MIX_RATE
+		var f := freq * (1.0 + 0.006 * sin(TAU * 5.5 * t) * minf(t / 0.15, 1.0))
+		phase = fmod(phase + f / MIX_RATE, 1.0)
+		y += cutoff * ((1.0 if phase < 0.5 else -1.0) - y)
+		var env := minf(t / 0.005, 1.0) * (1.0 - 0.35 * minf(t / dur, 1.0)) * minf((dur - t) / 0.02, 1.0)
+		_put(buf, off + i, y * env * amp, true)
+
+
+static func _bass(buf: PackedFloat32Array, start: float, freq: float, dur: float, amp: float) -> void:
+	var off := int(start * MIX_RATE)
+	for i in int(dur * MIX_RATE):
+		var t := float(i) / MIX_RATE
+		var env := minf(t / 0.01, 1.0) * exp(-t / 0.3)
+		var v := sin(TAU * freq * t) + 0.35 * sin(TAU * freq * 2.0 * t) + 0.15 * sin(TAU * freq * 3.0 * t)
+		_put(buf, off + i, v * env * amp, true)
+
+
+## Inharmonic partials with long decays: a temple gong.
+static func _gong(buf: PackedFloat32Array, start: float, dur: float, base: float, amp: float) -> void:
+	var ratios: Array[float] = [1.0, 1.59, 2.14, 2.92, 3.76, 4.4]
+	var off := int(start * MIX_RATE)
+	for i in int(dur * MIX_RATE):
+		var t := float(i) / MIX_RATE
+		var v := 0.0
+		for k in ratios.size():
+			v += sin(TAU * base * ratios[k] * t) * exp(-t / (1.2 / (1.0 + k * 0.5))) / (1.0 + k * 0.6)
+		if not _put(buf, off + i, v * amp * minf(t / 0.005, 1.0), false):
+			break
+
+
+static func _echo(buf: PackedFloat32Array, delay: float, gain: float) -> void:
+	var d := int(delay * MIX_RATE)
+	for i in range(d, buf.size()):
+		buf[i] += buf[i - d] * gain
+
+
+static func _soft_clip(buf: PackedFloat32Array, drive: float) -> void:
+	for i in buf.size():
+		buf[i] = tanh(buf[i] * drive)
+
+
+static func _normalize(buf: PackedFloat32Array, peak: float) -> void:
+	var m := 0.0
+	for v in buf:
+		m = maxf(m, absf(v))
+	if m > 0.0:
+		var k := peak / m
+		for i in buf.size():
+			buf[i] *= k
+
+
+static func _finish(buf: PackedFloat32Array, peak: float = 0.9) -> AudioStreamWAV:
+	_normalize(buf, peak)
+	return _to_wav(buf)
+
+
+static func _to_wav(buf: PackedFloat32Array) -> AudioStreamWAV:
+	var bytes := PackedByteArray()
+	bytes.resize(buf.size() * 2)
+	for i in buf.size():
+		bytes.encode_s16(i * 2, int(clampf(buf[i], -1.0, 1.0) * 32767.0))
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = MIX_RATE
+	wav.stereo = false
+	wav.data = bytes
+	return wav

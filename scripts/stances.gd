@@ -1,0 +1,88 @@
+class_name Stances
+extends RefCounted
+## Fighting stances (starting positions). Presentation and style only: a stance
+## sets the guard pose every move starts from and returns to, the idle rhythm,
+## and which foot leads. It does not change frame data or damage.
+##
+## Pose channels match FighterVisual:
+##   torso, head, ua_f, la_f, ua_b, la_b, th_f, sh_f, th_b, sh_b, hip_x, drop, pivot, spread
+## Every stance keeps at least one hand at the chin and both knees bent; spread
+## (body rotation) gives each stance its own silhouette.
+
+enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNTER }
+
+## name, guard pose, southpaw (right foot forward), idle: [bounce Hz, knee flex, torso sway]
+const DATA: Dictionary = {
+	Kind.BLADED: {
+		"name": "BLADED", "southpaw": false, "idle": [2.6, 0.07, 0.02],
+		# Mobile, side-on, open lead hand reaching forward, rear hand at the chin.
+		"pose": [0.12, 0.08, 1.15, 2.2, 0.95, 3.0, 0.55, -0.1, -0.6, -0.15, 0.0, 0.0, 0.0, 13.0],
+	},
+	Kind.SQUARED: {
+		"name": "SQUARED", "southpaw": true, "idle": [1.4, 0.05, 0.05],
+		# Pressure fighter: squared up, crouched forward, both fists high and closed.
+		"pose": [0.35, 0.2, 0.85, 2.95, 0.8, 2.95, 0.7, -0.2, -0.5, -0.5, 4.0, 0.0, 0.0, 2.0],
+	},
+	Kind.BOXING: {
+		"name": "BOXING GUARD", "southpaw": false, "idle": [3.0, 0.08, 0.02],
+		# High guard, gloves at the temples, balanced on the balls of the feet.
+		"pose": [0.2, 0.2, 0.95, 2.95, 0.85, 3.0, 0.5, -0.15, -0.45, -0.45, 0.0, 0.0, 0.0, 7.0],
+	},
+	Kind.MUAY_THAI: {
+		"name": "MUAY THAI GUARD", "southpaw": false, "idle": [1.6, 0.1, 0.03],
+		# Upright, high hands, elbows in, lead knee lifted and ready to check.
+		"pose": [0.02, 0.05, 1.05, 3.0, 0.9, 3.05, 0.75, -0.6, -0.3, -0.3, 0.0, 0.0, 0.0, 4.0],
+	},
+	Kind.KARATE: {
+		"name": "KARATE STANCE", "southpaw": false, "idle": [0.8, 0.03, 0.01],
+		# Side-on long stance, low centre, extended lead guard, rear hand close to the body.
+		"pose": [0.05, 0.1, 1.45, 1.9, 0.9, 2.75, 0.95, -0.2, -0.85, -0.35, 0.0, 0.0, 0.0, 15.0],
+	},
+	Kind.KUNG_FU: {
+		"name": "KUNG FU STANCE", "southpaw": false, "idle": [0.9, 0.04, 0.04],
+		# Low and wide, both hands open and forward, fluid.
+		"pose": [0.15, 0.1, 1.3, 2.4, 1.0, 2.85, 1.0, -0.4, -0.95, -0.55, 0.0, 0.0, 0.0, 10.0],
+	},
+	Kind.GRAPPLER: {
+		"name": "GRAPPLER STANCE", "southpaw": false, "idle": [1.8, 0.06, 0.03],
+		# Judo: low posture, bent forward, open hands reaching to clinch.
+		"pose": [0.45, 0.3, 1.35, 1.7, 1.0, 2.9, 0.7, -0.35, -0.45, -0.6, 6.0, 0.0, 0.0, 4.0],
+	},
+	Kind.COUNTER: {
+		"name": "COUNTER-FIGHTER", "southpaw": false, "idle": [2.2, 0.05, 0.08],
+		# Elusive: upright, lead hand low and loose, rear hand high, lots of head movement.
+		"pose": [0.05, 0.05, 0.6, 1.9, 0.9, 3.0, 0.5, -0.12, -0.45, -0.3, 0.0, 0.0, 0.0, 11.0],
+	},
+}
+
+## The player's stance survives restarts (scene reloads).
+static var player_choice: Kind = Kind.BLADED
+
+
+static func count() -> int:
+	return DATA.size()
+
+
+static func stance_name(kind: Kind) -> String:
+	return DATA[kind]["name"]
+
+
+static func pose(kind: Kind) -> PackedFloat32Array:
+	return PackedFloat32Array(DATA[kind]["pose"])
+
+
+static func is_southpaw(kind: Kind) -> bool:
+	return DATA[kind]["southpaw"]
+
+
+static func idle_style(kind: Kind) -> Array:
+	return DATA[kind]["idle"]
+
+
+## A random stance that is never the excluded one.
+static func random_except(excluded: Kind, rng: RandomNumberGenerator) -> Kind:
+	var options: Array[Kind] = []
+	for k in DATA.keys():
+		if k != excluded:
+			options.append(k)
+	return options[rng.randi_range(0, options.size() - 1)]
