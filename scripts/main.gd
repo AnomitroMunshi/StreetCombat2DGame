@@ -411,6 +411,15 @@ func _resolve_hits() -> void:
 			"contact": hitbox.intersection(hurtbox).get_center(),
 		})
 
+	# Clash: two active strikes meeting in mid-air. Sparks and a sharp clap at
+	# the meeting point; nothing else changes (hurtbox hits below still land).
+	if Fighter.hitboxes_clash(player, enemy):
+		var meet := player.get_hitbox_world().intersection(enemy.get_hitbox_world()).get_center()
+		fx.clash(meet)
+		audio.play(&"clash", 0.0, 0.05)
+		_hitstop = maxi(_hitstop, 4)
+		_shake(5, 2.5)
+
 	var killing_attack: CombatData.Attack = null
 	for hit: Dictionary in pending:
 		var attacker: Fighter = hit["attacker"]
@@ -486,6 +495,9 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 	if result == CombatData.HitResult.HIT and defender.last_hit_counter:
 		hud.popup(attacker_of(defender), "COUNTER", Color(1.0, 0.8, 0.35))
 		fx.ring(contact, Color(1.0, 0.8, 0.35), 34.0, 10)
+		fx.streaks(contact, Vector2(float(attacker_of(defender).facing), 0.0), 10, Color(1.0, 0.85, 0.45))
+		audio.play(&"counter", 0.0, 0.04)
+		_hitstop += CombatData.COUNTER_HITSTOP_BONUS
 	if result == CombatData.HitResult.HIT and defender.state == Fighter.State.KNOCKDOWN:
 		_hitstop = maxi(_hitstop, attack.hitstop + 4)
 		_shake(14, 7.0)

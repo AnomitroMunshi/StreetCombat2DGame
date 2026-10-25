@@ -73,6 +73,10 @@ const POSTURE_RECOVER_RATE_GUARD: float = 0.15
 const POSTURE_BREAK_FRAMES: int = 54
 const POSTURE_LOCK_FRAMES: int = 120
 const GUARD_BREAK_HITSTOP_FRAMES: int = 12
+## Counter hit (caught staggering or in an attack's startup): extra hitstun on
+## top of the attack's own, plus extra hitstop for the feel of it.
+const COUNTER_HITSTUN_BONUS: int = 6
+const COUNTER_HITSTOP_BONUS: int = 2
 
 ## Jumping. Velocities in pixels per tick; gravity in pixels per tick².
 ## Falling uses stronger gravity than rising for a snappy, less floaty arc.

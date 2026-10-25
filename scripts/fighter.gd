@@ -760,6 +760,8 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	_enter_state(State.HITSTUN)
 	var base_stun := attack.hitstun + (CombatData.FINISHER_HITSTUN_BONUS if finisher else 0)
 	stun_frames = maxi(base_stun - CombatData.COMBO_HITSTUN_DECAY * maxi(received_combo - CombatData.MAX_COMBO_CHAIN, 0), CombatData.MIN_COMBO_HITSTUN)
+	if last_hit_counter:
+		stun_frames += CombatData.COUNTER_HITSTUN_BONUS
 	return CombatData.HitResult.HIT
 
 
@@ -892,6 +894,12 @@ func get_hitbox_world() -> Rect2:
 func get_hurtbox_world() -> Rect2:
 	var box := HURTBOX_CROUCH if is_crouched() else HURTBOX
 	return Rect2(position + box.position, box.size)
+
+
+## Two strikes collide: both fighters' active hitboxes overlap this tick.
+## Presentation only (hits still resolve against hurtboxes, trades still trade).
+static func hitboxes_clash(a: Fighter, b: Fighter) -> bool:
+	return a.is_hitbox_active() and b.is_hitbox_active() and a.get_hitbox_world().intersects(b.get_hitbox_world())
 
 
 func can_be_hit() -> bool:

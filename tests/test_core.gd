@@ -1033,6 +1033,52 @@ func _initialize() -> void:
 	va.queue_free()
 	vb.queue_free()
 
+	print("[counter hits and clashes]")
+	var jab_a := CombatData.get_attack(CombatData.AttackType.LIGHT)
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	b.receive_hit(jab_a, a, 1)
+	var normal_stun := b.stun_frames
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	b.push_intent(_intent(CombatData.AttackType.HEAVY))
+	b.tick()  # b now in the startup of a cross
+	b.receive_hit(jab_a, a, 1)
+	_check(b.last_hit_counter and b.stun_frames == normal_stun + CombatData.COUNTER_HITSTUN_BONUS,
+		"counter hit (caught in startup) stuns longer: %d vs %d" % [b.stun_frames, normal_stun])
+	# Two jabs thrown at the same time from close range meet in the middle.
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	b.position.x = a.position.x + 70.0
+	var clashed := false
+	for t in 10:
+		a.push_intent(_intent(CombatData.AttackType.LIGHT) if t == 0 else none)
+		b.push_intent(_intent(CombatData.AttackType.LIGHT) if t == 0 else none)
+		a.tick()
+		b.tick()
+		clashed = clashed or Fighter.hitboxes_clash(a, b)
+	_check(clashed, "simultaneous jabs at close range register a clash")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	b.position.x = a.position.x + 70.0
+	var lone_clash := false
+	for t in 10:
+		a.push_intent(_intent(CombatData.AttackType.LIGHT) if t == 0 else none)
+		a.tick()
+		b.tick()
+		lone_clash = lone_clash or Fighter.hitboxes_clash(a, b)
+	_check(not lone_clash, "a single strike never counts as a clash")
+	var fx3 := FxLayer.new()
+	root.add_child(fx3)
+	for i in 100:
+		fx3.impact(Vector2(600, 400), 3, Color.WHITE)
+	_check(fx3.get_effect_count() == FxLayer.MAX_EFFECTS, "transient effects capped at %d (%d)" % [FxLayer.MAX_EFFECTS, fx3.get_effect_count()])
+	fx3.queue_free()
+
 	print("[perfect dodge]")
 	p = _make_pair()
 	a = p[0]
@@ -1054,11 +1100,11 @@ func _initialize() -> void:
 	await process_frame  # _ready runs once the tree processes
 	var all_sfx := true
 	for snd in [&"whoosh_light", &"whoosh_heavy", &"jump", &"hit_light", &"hit_heavy", &"block", &"land",
-			&"body_fall", &"wall_hit", &"roll", &"ko_boom", &"finisher_sting", &"count_tick", &"fight_call", &"parry", &"guard_break", &"finisher_drums", &"victory"]:
+			&"body_fall", &"wall_hit", &"roll", &"ko_boom", &"finisher_sting", &"count_tick", &"fight_call", &"parry", &"guard_break", &"finisher_drums", &"victory", &"counter", &"clash"]:
 		if not audio.has_sound(snd):
 			all_sfx = false
 			printerr("missing sound ", snd)
-	_check(all_sfx, "all 18 sound effects synthesized")
+	_check(all_sfx, "all 20 sound effects synthesized")
 	var t0 := Time.get_ticks_msec()
 	while not audio.is_bgm_playing() and Time.get_ticks_msec() - t0 < 20000:
 		await process_frame

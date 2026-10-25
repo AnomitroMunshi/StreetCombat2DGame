@@ -25,6 +25,7 @@ const DEFAULT_LIFE: int = 14
 const PARTICLE_GRAVITY: float = 0.45
 ## Caps (oldest removed first) so long matches never pile up effects.
 const MAX_DEBRIS: int = 90
+const MAX_EFFECTS: int = 260
 const MAX_DECALS: int = 140
 const DEBRIS_LIFE: int = 150
 const CRACK_GROW_TICKS: int = 14
@@ -101,17 +102,17 @@ func impact(pos: Vector2, power: int, color: Color) -> void:
 
 
 func spark(pos: Vector2, color: Color, size: float) -> void:
-	_effects.append({"kind": "spark", "pos": pos, "age": 0, "life": DEFAULT_LIFE, "color": color,
+	_spawn({"kind": "spark", "pos": pos, "age": 0, "life": DEFAULT_LIFE, "color": color,
 		"size": size, "angle": _rng.randf() * TAU})
 
 
 func ring(pos: Vector2, color: Color, size: float, life: int) -> void:
-	_effects.append({"kind": "ring", "pos": pos, "age": 0, "life": life, "color": color, "size": size})
+	_spawn({"kind": "ring", "pos": pos, "age": 0, "life": life, "color": color, "size": size})
 
 
 ## Flat elliptical shockwave along the floor.
 func ground_ring(pos: Vector2, size: float, life: int) -> void:
-	_effects.append({"kind": "ground_ring", "pos": pos, "age": 0, "life": life,
+	_spawn({"kind": "ground_ring", "pos": pos, "age": 0, "life": life,
 		"color": Color(0.95, 0.85, 0.7), "size": size})
 
 
@@ -119,7 +120,7 @@ func particles(pos: Vector2, color: Color, count: int, speed: float, life: int) 
 	for i in count:
 		var a := _rng.randf_range(-PI, PI)
 		var v := Vector2(cos(a), sin(a) - 0.6) * speed * _rng.randf_range(0.5, 1.2)
-		_effects.append({"kind": "particle", "pos": pos, "vel": v, "gravity": PARTICLE_GRAVITY, "age": 0,
+		_spawn({"kind": "particle", "pos": pos, "vel": v, "gravity": PARTICLE_GRAVITY, "age": 0,
 			"life": life + _rng.randi_range(-3, 3), "color": color, "size": _rng.randf_range(2.0, 4.0)})
 
 
@@ -128,19 +129,38 @@ func burst(pos: Vector2, color: Color, life: int) -> void:
 	var lines := PackedVector3Array()  # x = angle, y = inner radius factor, z = length factor
 	for i in 26:
 		lines.append(Vector3(_rng.randf() * TAU, _rng.randf_range(0.6, 1.1), _rng.randf_range(0.4, 1.0)))
-	_effects.append({"kind": "burst", "pos": pos, "age": 0, "life": life, "color": color, "lines": lines})
+	_spawn({"kind": "burst", "pos": pos, "age": 0, "life": life, "color": color, "lines": lines})
 
 
 ## Bright arc in front of a blocking fighter (the guard absorbing the hit).
 func guard_flash(pos: Vector2, facing: int) -> void:
-	_effects.append({"kind": "guard", "pos": pos, "age": 0, "life": 12,
+	_spawn({"kind": "guard", "pos": pos, "age": 0, "life": 12,
 		"color": Color(0.65, 0.85, 1.0), "facing": facing})
+
+
+## Directional impact streaks: fast lines shooting out along `dir` in a cone
+## (counter hits, finisher blows, palm blasts).
+func streaks(pos: Vector2, dir: Vector2, count: int, color: Color, spread: float = 0.5, length: float = 70.0) -> void:
+	var lines := PackedVector3Array()  # x = angle, y = start offset, z = length factor
+	var base := dir.angle()
+	for i in count:
+		lines.append(Vector3(base + _rng.randf_range(-spread, spread), _rng.randf_range(0.0, 20.0), _rng.randf_range(0.5, 1.0)))
+	_spawn({"kind": "streaks", "pos": pos, "age": 0, "life": 12, "color": color, "lines": lines, "length": length})
+
+
+## Two strikes meeting: white-gold sparks bursting both ways and a small ring.
+func clash(pos: Vector2) -> void:
+	var c := Color(1.0, 0.92, 0.6)
+	spark(pos, c, 26.0)
+	ring(pos, Color.WHITE, 26.0, 10)
+	streaks(pos, Vector2.UP, 8, c, PI, 40.0)
+	particles(pos, c, 12, 6.0, 12)
 
 
 ## Perfect parry: a sharp four-point glint, a fast ring and bright sparks.
 func parry_flash(pos: Vector2, facing: int) -> void:
 	var c := Color(0.75, 0.95, 1.0)
-	_effects.append({"kind": "glint", "pos": pos, "age": 0, "life": 16, "color": c})
+	_spawn({"kind": "glint", "pos": pos, "age": 0, "life": 16, "color": c})
 	ring(pos, c, 30.0, 10)
 	particles(pos, c, 10, 5.0, 12)
 	guard_flash(pos, facing)
@@ -154,13 +174,13 @@ func shatter(pos: Vector2) -> void:
 	for i in 12:
 		var a := _rng.randf_range(-PI, 0.2)
 		var v := Vector2(cos(a), sin(a)) * _rng.randf_range(4.0, 8.0)
-		_effects.append({"kind": "shard", "pos": pos, "vel": v, "gravity": PARTICLE_GRAVITY, "age": 0,
+		_spawn({"kind": "shard", "pos": pos, "vel": v, "gravity": PARTICLE_GRAVITY, "age": 0,
 			"life": 22 + _rng.randi_range(-4, 4), "color": c, "size": _rng.randf_range(5.0, 9.0),
 			"angle": _rng.randf() * TAU})
 
 
 func dust(pos: Vector2, size: float) -> void:
-	_effects.append({"kind": "dust", "pos": pos, "age": 0, "life": DEFAULT_LIFE + int(size * 4.0),
+	_spawn({"kind": "dust", "pos": pos, "age": 0, "life": DEFAULT_LIFE + int(size * 4.0),
 		"color": Color(0.78, 0.68, 0.56), "size": size})
 
 
@@ -284,13 +304,25 @@ func dust_cloud(pos: Vector2, size: float, life: int = 40) -> void:
 	for i in 7:
 		var off := Vector2(_rng.randf_range(-1.0, 1.0) * 30.0 * size, _rng.randf_range(-8.0, 0.0))
 		var drift := Vector2(signf(off.x) * _rng.randf_range(0.6, 1.6), -_rng.randf_range(0.3, 0.9))
-		_effects.append({"kind": "cloud", "pos": pos + off, "vel": drift, "age": 0, "life": life + _rng.randi_range(-8, 8),
+		_spawn({"kind": "cloud", "pos": pos + off, "vel": drift, "age": 0, "life": life + _rng.randi_range(-8, 8),
 			"color": Color(0.74, 0.65, 0.54), "size": size * _rng.randf_range(14.0, 24.0)})
 
 
 ## Pillar shake on side -1 (left) or +1 (right).
 func jolt_wall(side: int, amount: float) -> void:
 	wall_jolt[side] = maxf(wall_jolt[side], amount)
+
+
+## Every transient effect goes through here: past MAX_EFFECTS the oldest are
+## dropped, so big finishers can never pile up unbounded work.
+func _spawn(e: Dictionary) -> void:
+	_effects.append(e)
+	if _effects.size() > MAX_EFFECTS:
+		_effects.remove_at(0)
+
+
+func get_effect_count() -> int:
+	return _effects.size()
 
 
 func _add_decal(d: Dictionary) -> void:
@@ -502,6 +534,14 @@ func _draw() -> void:
 					var dir := Vector2.from_angle(PI * 0.25 + k * PI * 0.5)
 					var reach := 75.0 if k % 2 == 0 else 45.0
 					draw_line(pos - dir * 4.0, pos + dir * reach * g, color, 4.0 * (1.0 - t) + 1.0, true)
+			"streaks":
+				color.a = 0.9 * (1.0 - t)
+				var sl: PackedVector3Array = e["lines"]
+				var ln: float = e["length"]
+				for l in sl:
+					var d := Vector2.from_angle(l.x)
+					var s0 := l.y + t * ln * 1.4
+					draw_line(pos + d * s0, pos + d * (s0 + ln * l.z * (1.0 - t * 0.6)), color, 2.5 * (1.0 - t) + 0.8, true)
 			"cloud":
 				color.a = 0.32 * sin(PI * minf(t * 1.6, 1.0)) * (1.0 - t * 0.6)
 				draw_circle(pos, e["size"] * (0.5 + t * 0.9), color)

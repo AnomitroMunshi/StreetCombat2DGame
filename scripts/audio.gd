@@ -219,6 +219,21 @@ func _build_sfx() -> void:
 	_echo(b, 0.21, 0.3)
 	_sfx[&"victory"] = _finish(b, 0.8)
 
+	# Counter hit: a sharp high crack on top of a punchy thud.
+	b = _buffer(0.35)
+	_noise(b, 0.0, 0.03, 0.006, 0.98, 0.9, rng)
+	_thump(b, 0.0, 0.25, 320.0, 90.0, 0.05, 0.9)
+	_gong(b, 0.0, 0.3, 880.0, 0.12)
+	_soft_clip(b, 1.8)
+	_sfx[&"counter"] = _finish(b, 0.8)
+
+	# Clash: two strikes meeting - a dry clap with a short bright ring.
+	b = _buffer(0.3)
+	_noise(b, 0.0, 0.05, 0.01, 0.9, 1.0, rng)
+	_thump(b, 0.0, 0.08, 600.0, 400.0, 0.02, 0.5)
+	_gong(b, 0.0, 0.25, 1500.0, 0.15)
+	_sfx[&"clash"] = _finish(b, 0.7)
+
 	# Countdown: a dry taiko beat with a short high ping (3, 2, 1).
 	b = _buffer(0.6)
 	_thump(b, 0.0, 0.4, 120.0, 62.0, 0.09, 1.0)
