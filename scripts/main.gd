@@ -88,6 +88,10 @@ var _slowmo_ticks: int = 0
 # Double-tap detection for dodges: tick of the last A / D tap.
 var _last_tap := {-1: -1000, 1: -1000}
 var _block_was_held: bool = false
+## Developer overlay: recent contact points {pos, age, gap} (gap = distance from
+## the drawn fist / foot to the contact point at impact, -1 if unknown).
+var _contacts: Array[Dictionary] = []
+const CONTACT_SHOW_TICKS: int = 45
 # Back kick detection: when the current movement started and how long the
 # player stood still before it.
 var _move_prev: int = 0
@@ -181,6 +185,10 @@ func _physics_process(_delta: float) -> void:
 			_tick_round_over()
 	_tick_slowmo()
 	_trail_rolling_dust()
+	for c in _contacts:
+		c["age"] += 1
+	while not _contacts.is_empty() and _contacts[0]["age"] > CONTACT_SHOW_TICKS:
+		_contacts.pop_front()
 
 	player.hitstop_frames = _hitstop
 	enemy.hitstop_frames = _hitstop
@@ -414,6 +422,7 @@ func _resolve_hits() -> void:
 			killing_attack = attack
 		attacker.confirm_hit(result)
 		_hit_feedback(result, attack, step, hit["contact"], defender)
+		_record_contact(attacker, hit["contact"])
 		_last_event = "%s %s #%d -> %s %s" % [attacker.fighter_name, attack.display_name, step,
 			defender.fighter_name, CombatData.HitResult.keys()[result]]
 
@@ -428,6 +437,16 @@ func _resolve_hits() -> void:
 		var victim := player if player_lost else enemy
 		var winner := enemy if player_lost else player
 		_start_finisher(winner, victim, FinisherDirector.choose(winner, victim, killing_attack, _finisher_rng))
+
+
+## Developer overlay bookkeeping: where a hit connected, and how far the drawn
+## striking limb was from it (a large gap means the visual and hitbox disagree).
+func _record_contact(attacker: Fighter, contact: Vector2) -> void:
+	var limb: Vector2 = (attacker.get_node("Visual") as FighterVisual).get_strike_point()
+	var gap := -1.0 if limb == Vector2.INF else limb.distance_to(contact)
+	_contacts.append({"pos": contact, "age": 0, "gap": gap})
+	if _contacts.size() > 6:
+		_contacts.pop_front()
 
 
 func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step: int, contact: Vector2, defender: Fighter) -> void:
@@ -750,6 +769,9 @@ func _refresh_presentation() -> void:
 		lines.append("posture  %s %d   %s %d" % [player.fighter_name, roundi(player.posture), enemy.fighter_name, roundi(enemy.posture)])
 		lines.append("AI  %s" % enemy_ai.get_state_name())
 		lines.append("last  %s" % _last_event)
+		if not _contacts.is_empty() and _contacts[-1]["gap"] >= 0.0:
+			lines.append("contact: drawn limb %.0f px from contact point" % _contacts[-1]["gap"])
+		lines.append("overlay: green hurtbox · yellow pushbox · red hitbox · cyan + drawn limb · yellow o contact")
 	hud.set_debug(_debug_visible, lines)
 
 
@@ -842,3 +864,13 @@ func _draw_overlay() -> void:
 		var label_pos := Vector2(f.position.x - 120.0, f.position.y - label_y)
 		overlay.draw_string(font, label_pos + Vector2(1.0, 1.0), f.get_debug_label(), HORIZONTAL_ALIGNMENT_CENTER, 240.0, 13, Color.BLACK)
 		overlay.draw_string(font, label_pos, f.get_debug_label(), HORIZONTAL_ALIGNMENT_CENTER, 240.0, 13, Color(0.75, 1.0, 0.8))
+		# Where the striking fist / foot is actually drawn.
+		var limb: Vector2 = (f.get_node("Visual") as FighterVisual).get_strike_point()
+		if f.state == Fighter.State.ATTACK and limb != Vector2.INF:
+			var c := Color(0.3, 0.95, 1.0)
+			overlay.draw_line(limb - Vector2(7, 0), limb + Vector2(7, 0), c, 2.0)
+			overlay.draw_line(limb - Vector2(0, 7), limb + Vector2(0, 7), c, 2.0)
+	# Recent contact points.
+	for cp in _contacts:
+		var a := 1.0 - float(cp["age"]) / CONTACT_SHOW_TICKS
+		overlay.draw_arc(cp["pos"], 6.0, 0.0, TAU, 16, Color(1.0, 0.9, 0.2, a), 2.0)

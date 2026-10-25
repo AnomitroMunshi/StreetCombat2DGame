@@ -307,6 +307,8 @@ var _body_speed: float = 0.0
 # Idle breathing (0 = off), scales the torso length slightly.
 var _breath: float = 0.0
 var _pose_ready: bool = false
+## Skeleton as last drawn (world space), for the developer overlay.
+var _last_joints := PackedVector2Array()
 # Active idle: amount (0..1), hip dip in px and heel lifts (x lead, y rear).
 var _idle_amount: float = 0.0
 var _bob: float = 0.0
@@ -1077,6 +1079,7 @@ func _draw() -> void:
 	_draw_swoosh(accent)
 	var forward := Vector2(signf(face), 0.0)
 	_draw_body(world_joints, front, back, accent, forward, Stances.is_southpaw(fighter.stance) and not _rag_on)
+	_last_joints = world_joints
 	draw_set_transform_matrix(Transform2D.IDENTITY)
 
 
@@ -1350,6 +1353,14 @@ static func _ik_leg(hip: Vector2, foot: Vector2, forward: Vector2) -> Array:
 
 
 ## Which joint is doing the striking right now (-1 = none).
+## Developer overlay: where the striking fist / foot was last drawn (world
+## space), or Vector2.INF when not attacking or not drawn yet.
+func get_strike_point() -> Vector2:
+	if fighter.current_attack == null or _last_joints.size() != JOINTS:
+		return Vector2.INF
+	return _last_joints[_attack_joint(fighter.current_attack.type)]
+
+
 ## Which joint leads an attack (the one that lands).
 static func _attack_joint(type: CombatData.AttackType) -> int:
 	match type:

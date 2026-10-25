@@ -222,7 +222,9 @@ func wall_crack(pos: Vector2, power: int, clip: Rect2) -> void:
 		var up := b % 2 == 0
 		var ang := (-PI * 0.5 if up else PI * 0.5) + _rng.randf_range(-0.7, 0.7)
 		var length := (26.0 + power * 24.0) * _rng.randf_range(0.6, 1.15)
-		var pts := PackedVector2Array([pos + Vector2(cos(ang), sin(ang)) * r * 0.8])
+		var start := pos + Vector2(cos(ang), sin(ang)) * r * 0.8
+		start.x = clampf(start.x, clip.position.x + 2.0, clip.end.x - 2.0)
+		var pts := PackedVector2Array([start])
 		var p: Vector2 = pts[0]
 		var travelled := 0.0
 		while travelled < length:

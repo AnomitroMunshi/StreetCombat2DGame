@@ -449,15 +449,22 @@ func _initialize() -> void:
 	var fx2 := FxLayer.new()
 	root.add_child(fx2)
 	var pillar := Rect2(1210, 96, 46, 470)
-	for pw in [2, 2, 3]:
-		fx2.wall_crack(Vector2(1215, 430), pw, pillar)
 	var inside := true
-	for d in fx2.get("_decals"):
-		var pts: PackedVector2Array = d["pts"] if d.has("pts") else PackedVector2Array([d["pos"]])
-		for q in pts:
-			if not pillar.grow(1.0).has_point(q):
-				inside = false
-	_check(inside and fx2.get_decal_count() > 3, "wall damage (dents, cracks, specks) stays on the pillar (%d decals)" % fx2.get_decal_count())
+	var total := 0
+	for seed_i in 20:
+		fx2.set_seed(seed_i)
+		fx2.set("_decals", [] as Array[Dictionary])
+		# Hits near both pillar edges and the middle.
+		for hx in [1212.0, 1233.0, 1254.0]:
+			for pw in [2, 2, 3]:
+				fx2.wall_crack(Vector2(hx, 430), pw, pillar)
+		total += fx2.get_decal_count()
+		for d in fx2.get("_decals"):
+			var pts: PackedVector2Array = d["pts"] if d.has("pts") else PackedVector2Array([d["pos"]])
+			for q in pts:
+				if not pillar.grow(1.0).has_point(q):
+					inside = false
+	_check(inside and total > 100, "wall damage (dents, cracks, specks) stays on the pillar (20 seeds, %d decals)" % total)
 	fx2.queue_free()
 	fxl.jolt_wall(1, 6.0)
 	for t in 60:
