@@ -12,7 +12,7 @@ if "$GODOT" --headless --path . --import 2>&1 | grep -E "SCRIPT ERROR|Parse Erro
 else
 	echo "=== import: ok"
 fi
-for t in core input flow match ai_finisher ai_defense movement styles; do
+for t in core input flow match ai_finisher ai_defense movement styles training; do
 	out=$(timeout 300 "$GODOT" --headless --path . -s "tests/test_$t.gd" 2>&1)
 	code=$?
 	echo "$out" | grep -E "FAIL|SCRIPT ERROR|Parse Error" | head -20

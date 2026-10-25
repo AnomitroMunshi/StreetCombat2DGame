@@ -109,6 +109,33 @@ dangerous. Styles are data
 files in `styles/`; see `docs/ADDING_A_STYLE.md` and
 `docs/M6.5_ARCHITECTURE.md`.
 
+## Training ground
+
+Press **TRAINING** (or **T**) on the pre-match screen to practise against a
+dummy and inspect every move. The dummy never goes down: both fighters keep at
+least 1 HP, and health and posture refill once the action settles.
+
+| Key | Action |
+|---|---|
+| 1 | Dummy mode: stand, crouch, block all (low-blocks low attacks), jump, or fight back (the real AI) |
+| 2 | Dummy martial art |
+| 3 | Speed: 100%, 50% or 25% |
+| 4 | Unlimited Focus on or off (for signatures) |
+| 5 / 6 | Pick a finisher (your style's own, Wall Crush, Air Smash) / play it on the dummy |
+| P / . | Pause / step one frame |
+| F1 | Hitboxes, hurtboxes and pushboxes |
+| R | Reset positions |
+| H | Hide or show the panels |
+| Esc | Back to the pre-match screen |
+
+The panels show:
+- your style's move list;
+- your last move's frame data (startup, active, recovery, damage);
+- what it did: hit, blocked, parried or whiffed;
+- the measured frame advantage once both fighters can act again, for example
+  "+2 on hit" or "-4 on blocked" (positive means you recover first);
+- combo hits and damage.
+
 ## Controls
 
 | Key        | Action                      |

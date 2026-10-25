@@ -133,6 +133,8 @@ var _still_before_move: int = 0
 var _stance_rng := RandomNumberGenerator.new()
 ## Name of the finisher played this round ("" if none). Read by tests/HUD.
 var last_finisher_name: String = ""
+## Training ground (null in a normal match). See TrainingMode.
+var training: TrainingMode = null
 
 
 func _ready() -> void:
@@ -178,16 +180,25 @@ func _ready() -> void:
 	hud.change_style_pressed.connect(change_style)
 	hud.style_chosen.connect(select_style)
 	hud.style_confirmed.connect(confirm_style)
+	hud.training_pressed.connect(start_training)
+	hud.training_action.connect(training_action)
 	overlay.draw.connect(_draw_overlay)
 	_enter_pre_match()
 
 
 func _physics_process(_delta: float) -> void:
-	if Input.is_action_just_pressed("restart"):
-		restart_match()
-		return
 	if Input.is_action_just_pressed("toggle_debug"):
 		_debug_visible = not _debug_visible
+	if training != null and get_tree().paused:
+		# Paused training: everything is frozen; keep the readouts live.
+		_refresh_presentation()
+		return
+	if Input.is_action_just_pressed("restart"):
+		if training != null:
+			training_action(&"reset")
+		else:
+			restart_match()
+		return
 	if Input.is_action_just_pressed("cycle_stance") and _round_state == RoundState.STYLE_SELECT:
 		_cycle_style_choice()
 
@@ -212,7 +223,10 @@ func _physics_process(_delta: float) -> void:
 		if _finisher.done:
 			_end_round()
 	else:
-		enemy.push_intent(enemy_ai.compute_intent() if fighting else _prefight_intent(enemy, ENEMY_START_X))
+		if fighting and training != null and training.dummy_mode != TrainingMode.Dummy.CPU:
+			enemy.push_intent(training.dummy_intent())
+		else:
+			enemy.push_intent(enemy_ai.compute_intent() if fighting else _prefight_intent(enemy, ENEMY_START_X))
 		player.tick()
 		enemy.tick()
 		_resolve_pushboxes()
@@ -221,6 +235,8 @@ func _physics_process(_delta: float) -> void:
 		elif _round_state == RoundState.KO:
 			_tick_round_over()
 	_tick_slowmo()
+	if training != null and _round_state == RoundState.FIGHTING:
+		training.after_tick()
 	_trail_rolling_dust()
 	for c in _contacts:
 		c["age"] += 1
@@ -233,6 +249,158 @@ func _physics_process(_delta: float) -> void:
 	for f: Fighter in [player, enemy]:
 		f.z_index = 1 if f.state == Fighter.State.ATTACK or f.state == Fighter.State.FINISHER else 0
 	_refresh_presentation()
+
+
+# --- Training ground --------------------------------------------------------------
+
+## TRAINING (or T) from the pre-match screen: the fight starts at once against
+## a dummy that never goes down. See TrainingMode for what it offers.
+func start_training() -> void:
+	if _round_state == RoundState.STYLE_SELECT:
+		confirm_style()
+	if _round_state != RoundState.PRE_MATCH or training != null:
+		return
+	training = TrainingMode.new()
+	training.name = "Training"
+	add_child(training)
+	training.setup(player, enemy)
+	# Keep reading input and drawing while the tree is paused.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	hud.process_mode = Node.PROCESS_MODE_ALWAYS
+	hud.show_button(&"")
+	hud.show_training(true)
+	hud.set_move_list(_move_list_text())
+	start_match(true)
+	hud.set_countdown("TRAINING")
+
+
+func _move_list_text() -> String:
+	var lines := PackedStringArray(["[b]%s MOVES[/b]" % player.style.display_name.to_upper()])
+	for row in player.style.move_list():
+		lines.append("[color=#f2c14e]%s[/color]  %s" % [row[0], row[1]])
+	if player.style.signature != &"":
+		lines.append("[color=#f2c14e]F[/color]  %s (full Focus)" % CombatData.get_attack(
+			CombatData.type_for_id(player.style.signature)).display_name)
+	return "\n".join(lines)
+
+
+func training_action(action: StringName) -> void:
+	if training == null:
+		return
+	var fighting := _round_state == RoundState.FIGHTING and _finisher == null
+	match action:
+		&"dummy":
+			training.cycle_dummy()
+			enemy.stop_combat()
+			enemy_ai.setup(enemy, player)
+		&"dummy_style":
+			var styles := StyleRegistry.all()
+			var i := styles.find(enemy.style)
+			enemy.set_style(styles[(i + 1) % styles.size()])
+			enemy_ai.setup(enemy, player)
+		&"speed":
+			training.cycle_speed()
+			if _slowmo_ticks <= 0:
+				Engine.time_scale = training.speed()
+		&"focus":
+			training.infinite_focus = not training.infinite_focus
+		&"next_finisher":
+			training.cycle_finisher()
+		&"play_finisher":
+			if fighting and not get_tree().paused:
+				_training_finisher(training.current_finisher())
+		&"pause":
+			training.toggle_pause()
+		&"step":
+			training.step()
+		&"hitboxes":
+			_debug_visible = not _debug_visible
+		&"reset":
+			if not get_tree().paused:
+				_reset_training()
+		&"panels":
+			hud.toggle_training_panels()
+		&"exit":
+			_exit_training()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return
+	if training == null:
+		if key.physical_keycode == KEY_T and _round_state == RoundState.PRE_MATCH:
+			start_training()
+		return
+	var action: StringName = {
+		KEY_1: &"dummy", KEY_2: &"dummy_style", KEY_3: &"speed", KEY_4: &"focus", KEY_5: &"next_finisher",
+		KEY_6: &"play_finisher", KEY_P: &"pause", KEY_PERIOD: &"step", KEY_H: &"panels", KEY_ESCAPE: &"exit",
+	}.get(key.physical_keycode, &"")
+	if action != &"":
+		training_action(action)
+		get_viewport().set_input_as_handled()
+
+
+## Plays a finisher on the dummy right away (Wall Crush at the wall, Air Smash
+## in the air); training then puts both back on their marks.
+func _training_finisher(kind: FinisherDirector.Kind) -> void:
+	for f: Fighter in [player, enemy]:
+		f.stop_combat()
+		f.velocity_x = 0.0
+	if kind == FinisherDirector.Kind.WALL_CRUSH:
+		enemy.position.x = Fighter.ARENA_MAX_X - 110.0
+	else:
+		enemy.position.x = clampf(enemy.position.x, Fighter.ARENA_MIN_X + 200.0, Fighter.ARENA_MAX_X - 200.0)
+	player.position.x = enemy.position.x - 90.0
+	for f: Fighter in [player, enemy]:
+		f.face_opponent()
+		f.reset_physics_interpolation()
+	if kind == FinisherDirector.Kind.AIR_SMASH:
+		enemy.scripted_launch(-6.0)
+	enemy.health = 0
+	_start_finisher(player, enemy, kind)
+
+
+## Both fighters back on their marks, fresh, ready to go again.
+func _reset_training() -> void:
+	_finisher = null
+	_follow_victim = false
+	_hitstop = 0
+	_slowmo_ticks = 0
+	Engine.time_scale = _base_time_scale()
+	hud.set_banner("", Color.WHITE)
+	hud.set_letterbox(false)
+	hud.set_message("", "")
+	audio.duck_bgm(0.0)
+	for f: Fighter in [player, enemy]:
+		f.stop_combat()
+		f.end_scripted()
+		f.airborne = false
+		f.rolling = false
+		f.spiked = false
+		f.jump_vx = 0.0
+		f.velocity_x = 0.0
+		f.velocity_y = 0.0
+		f.position.y = FLOOR_Y
+		f.health = 100
+		f.posture = 0.0
+		f.min_health = 1
+		f.call("_enter_state", Fighter.State.IDLE)
+	player.position.x = PLAYER_START_X
+	enemy.position.x = ENEMY_START_X
+	for f: Fighter in [player, enemy]:
+		f.face_opponent()
+		f.reset_physics_interpolation()
+	_set_round_state(RoundState.FIGHTING)
+	enemy_ai.setup(enemy, player)
+
+
+## Back to the pre-match screen with the same style (START, TRAINING, CHANGE STYLE).
+func _exit_training() -> void:
+	training.unpause()
+	StyleRegistry.skip_selection = true
+	Engine.time_scale = 1.0
+	get_tree().reload_current_scene()
 
 
 # --- Match flow -----------------------------------------------------------------
@@ -573,6 +741,8 @@ func _resolve_hits() -> void:
 		if result == CombatData.HitResult.KO:
 			killing_attack = attack
 		attacker.confirm_hit(result)
+		if training != null:
+			training.on_hit(result, attacker, defender, attack)
 		_hit_feedback(result, attack, step, hit["contact"], defender)
 		_record_contact(attacker, hit["contact"])
 		_last_event = "%s %s #%d -> %s %s" % [attacker.fighter_name, attack.display_name, step,
@@ -796,10 +966,19 @@ func _tick_slowmo() -> void:
 		return
 	_slowmo_ticks -= 1
 	if _slowmo_ticks == 0:
-		Engine.time_scale = 1.0
+		Engine.time_scale = _base_time_scale()
+
+
+## Normal speed, or the training speed setting.
+func _base_time_scale() -> float:
+	return training.speed() if training != null else 1.0
 
 
 func _end_round() -> void:
+	if training != null:
+		# Training never ends: a finished finisher puts both back on their marks.
+		_reset_training()
+		return
 	_set_round_state(RoundState.KO)
 	Engine.time_scale = 1.0
 	_slowmo_ticks = 0
@@ -840,8 +1019,10 @@ func _bodies_at_rest() -> bool:
 
 # --- Fighter event feedback (presentation only) -------------------------------
 
-func _on_attack_started(_fighter: Fighter, attack: CombatData.Attack) -> void:
+func _on_attack_started(fighter: Fighter, attack: CombatData.Attack) -> void:
 	audio.play(&"whoosh_heavy" if attack.damage >= 10 else &"whoosh_light", -5.0, 0.1)
+	if training != null and fighter == player:
+		training.on_attack_started(attack)
 
 
 ## Debug log for cross-ups: which side the jump started on.
@@ -1102,7 +1283,9 @@ func _refresh_presentation() -> void:
 		if not _contacts.is_empty() and _contacts[-1]["gap"] >= 0.0:
 			lines.append("contact: drawn limb %.0f px from contact point" % _contacts[-1]["gap"])
 		lines.append("overlay: green hurtbox · yellow pushbox · red hitbox · cyan + drawn limb · yellow o contact")
-	hud.set_debug(_debug_visible, lines)
+	hud.set_debug(_debug_visible and training == null, lines)
+	if training != null:
+		hud.set_training_info(training.info_text())
 
 
 # --- Drawing ------------------------------------------------------------------

@@ -11,6 +11,9 @@ signal change_style_pressed
 ## Style selection: a card was picked (preview) / the choice was confirmed.
 signal style_chosen(style_id: StringName)
 signal style_confirmed
+signal training_pressed
+## A training panel button (same names as main.gd's training actions).
+signal training_action(action: StringName)
 
 const SCREEN_W: float = 1280.0
 const BAR_WIDTH: float = 480.0
@@ -68,6 +71,13 @@ var _button: Button = null
 var _button_mode: StringName = &""
 ## Secondary button under the main one: CHANGE STYLE.
 var _button2: Button = null
+## TRAINING, beside START MATCH.
+var _button3: Button = null
+var _train_panel: PanelContainer = null
+var _train_info: RichTextLabel = null
+var _move_panel: PanelContainer = null
+var _move_info: RichTextLabel = null
+var _train_buttons: VBoxContainer = null
 # Style selection panel: card row (scrolls for big rosters), details, confirm.
 var _select_panel: PanelContainer = null
 var _cards: HBoxContainer = null
@@ -93,9 +103,21 @@ func _ready() -> void:
 	_button2.pressed.disconnect(_on_button_pressed)
 	_button2.pressed.connect(func() -> void:
 		_button2.visible = false
+		_button3.visible = false
 		change_style_pressed.emit())
 	add_child(_button2)
+	_button3 = _make_button()
+	_button3.size = Vector2(200.0, 52.0)
+	_button3.position = Vector2(SCREEN_W * 0.5 + 180.0, 570.0)
+	_button3.add_theme_font_size_override("font_size", 22)
+	_button3.text = "TRAINING"
+	_button3.pressed.disconnect(_on_button_pressed)
+	_button3.pressed.connect(func() -> void:
+		show_button(&"")
+		training_pressed.emit())
+	add_child(_button3)
 	_build_style_panel()
+	_build_training_panels()
 
 
 ## A large flat button, centred; works with mouse, touch and keyboard focus.
@@ -139,12 +161,129 @@ func show_button(mode: StringName) -> void:
 	_button.visible = mode != &""
 	_button.disabled = mode == &""
 	_button2.visible = mode == &"start" or mode == &"rematch"
+	_button3.visible = mode == &"start"
 	if mode == &"start":
 		_button.text = "START MATCH"
 	elif mode == &"rematch":
 		_button.text = "REMATCH"
 	elif mode == &"restart":
 		_button.text = "RESTART MATCH"
+
+
+func is_training_button_visible() -> bool:
+	return _button3.visible
+
+
+func press_training() -> void:
+	if _button3.visible:
+		_button3.pressed.emit()
+
+
+# --- Training -------------------------------------------------------------------
+
+const TRAINING_BUTTONS: Array = [
+	[&"dummy", "DUMMY MODE  [1]"], [&"dummy_style", "DUMMY STYLE  [2]"], [&"speed", "SPEED  [3]"],
+	[&"focus", "FOCUS  [4]"], [&"next_finisher", "NEXT FINISHER  [5]"], [&"play_finisher", "PLAY FINISHER  [6]"],
+	[&"pause", "PAUSE  [P]"], [&"step", "STEP FRAME  [.]"], [&"hitboxes", "HITBOXES  [F1]"],
+	[&"reset", "RESET  [R]"], [&"panels", "HIDE PANELS  [H]"], [&"exit", "EXIT  [Esc]"],
+]
+
+
+func _panel_box() -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.05, 0.04, 0.04, 0.8)
+	box.border_color = Color(0.95, 0.76, 0.3, 0.6)
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(4)
+	box.content_margin_left = 10.0
+	box.content_margin_right = 10.0
+	box.content_margin_top = 6.0
+	box.content_margin_bottom = 6.0
+	return box
+
+
+func _text_label(size: Vector2) -> RichTextLabel:
+	var label := RichTextLabel.new()
+	label.bbcode_enabled = true
+	label.fit_content = true
+	label.scroll_active = false
+	label.custom_minimum_size = size
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_size_override("normal_font_size", 14)
+	label.add_theme_font_size_override("bold_font_size", 14)
+	label.add_theme_color_override("default_color", COLOR_TEXT)
+	return label
+
+
+func _build_training_panels() -> void:
+	_train_panel = PanelContainer.new()
+	_train_panel.add_theme_stylebox_override("panel", _panel_box())
+	_train_panel.position = Vector2(12.0, 132.0)
+	_train_info = _text_label(Vector2(560.0, 0.0))
+	_train_panel.add_child(_train_info)
+	_train_panel.visible = false
+	add_child(_train_panel)
+
+	_move_panel = PanelContainer.new()
+	_move_panel.add_theme_stylebox_override("panel", _panel_box())
+	_move_panel.position = Vector2(12.0, 298.0)
+	_move_info = _text_label(Vector2(250.0, 0.0))
+	_move_info.add_theme_font_size_override("normal_font_size", 13)
+	_move_panel.add_child(_move_info)
+	_move_panel.visible = false
+	add_child(_move_panel)
+
+	_train_buttons = VBoxContainer.new()
+	_train_buttons.position = Vector2(SCREEN_W - 212.0, 132.0)
+	_train_buttons.add_theme_constant_override("separation", 3)
+	for entry in TRAINING_BUTTONS:
+		var b := Button.new()
+		b.text = entry[1]
+		b.custom_minimum_size = Vector2(200.0, 28.0)
+		b.focus_mode = Control.FOCUS_NONE  # Space must stay jump
+		b.add_theme_font_size_override("font_size", 13)
+		for state in ["normal", "hover", "pressed"]:
+			var box := _panel_box()
+			box.content_margin_top = 2.0
+			box.content_margin_bottom = 2.0
+			if state != "normal":
+				box.bg_color = Color(0.42, 0.13, 0.11, 0.95)
+			b.add_theme_stylebox_override(state, box)
+		b.add_theme_color_override("font_color", COLOR_TEXT)
+		var action: StringName = entry[0]
+		b.pressed.connect(func() -> void: training_action.emit(action))
+		_train_buttons.add_child(b)
+	_train_buttons.visible = false
+	add_child(_train_buttons)
+
+
+func show_training(on: bool) -> void:
+	# The panels list the keys; the match hint line would only repeat them.
+	_show_hints = not on
+	_train_panel.visible = on
+	_move_panel.visible = on
+	_train_buttons.visible = on
+
+
+func toggle_training_panels() -> void:
+	var on := not _train_panel.visible
+	_train_panel.visible = on
+	_move_panel.visible = on
+	# The buttons stay so the panels can be brought back with the mouse.
+	(_train_buttons.get_child(10) as Button).text = "HIDE PANELS  [H]" if on else "SHOW PANELS  [H]"
+
+
+func is_training_visible() -> bool:
+	return _train_buttons.visible
+
+
+func set_training_info(text: String) -> void:
+	if _train_info.text != text:
+		_train_info.text = text
+
+
+func set_move_list(text: String) -> void:
+	_move_info.text = text
 
 
 func is_change_style_visible() -> bool:
@@ -293,6 +432,7 @@ func _on_button_pressed() -> void:
 	# One press per showing: further clicks before main.gd reacts do nothing.
 	show_button(&"")
 	_button2.visible = false
+	_button3.visible = false
 	if mode == &"start":
 		start_pressed.emit()
 	else:

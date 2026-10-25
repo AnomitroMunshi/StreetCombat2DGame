@@ -115,6 +115,8 @@ var state: State = State.IDLE
 var state_frame: int = 0
 var stun_frames: int = 0
 var health: int = 100
+## Health never drops below this from a hit (training keeps both at 1 HP min).
+var min_health: int = 0
 var facing: int = 1
 var velocity_x: float = 0.0
 
@@ -974,7 +976,7 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 
 	received_combo = received_combo + 1 if state == State.HITSTUN else 1
 	combo_display_frames = COMBO_DISPLAY_FRAMES
-	health = maxi(health - attack.damage, 0)
+	health = maxi(health - attack.damage, min_health)
 	flash_frames = HIT_FLASH_FRAMES
 	hit_counter += 1
 	var hit_y := attacker.position.y + attack.hitbox.get_center().y
