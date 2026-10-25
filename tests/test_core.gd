@@ -843,6 +843,41 @@ func _initialize() -> void:
 	_check(ch == CombatData.HitResult.HIT and a.last_hit_counter, "hit on a staggered fighter is a counter hit")
 	_check(is_equal_approx(a.posture, CombatData.POSTURE_MAX - 1.0) and a.state == Fighter.State.HITSTUN, "a counter hit stops one point short of a break (%.0f)" % a.posture)
 
+	print("[contact-aware reach (visual)]")
+	var fs: PackedScene = load("res://scenes/fighter.tscn")
+	var va: Fighter = fs.instantiate()
+	var vb: Fighter = fs.instantiate()
+	root.add_child(va)
+	root.add_child(vb)
+	await process_frame
+	va.position = Vector2(500, 560)
+	vb.position = Vector2(565, 560)
+	va.opponent = vb
+	vb.opponent = va
+	va.face_opponent()
+	vb.face_opponent()
+	va.ground_y = 560
+	vb.ground_y = 560
+	var vis: FighterVisual = va.get_node("Visual")
+	va.current_attack = CombatData.get_attack(CombatData.AttackType.HEAVY)
+	va.state = Fighter.State.ATTACK
+	var strike: PackedFloat32Array = vis.get("_heavy_strike")
+	var free_x: float = vis._solve_joints(strike)[FighterVisual.J_HAND_B].x
+	var held_x: float = vis._solve_joints(vis._limit_reach(strike))[FighterVisual.J_HAND_B].x
+	var limit_x := 65.0 - FighterVisual.BODY_HALF + FighterVisual.CONTACT_DEPTH
+	_check(free_x > limit_x and held_x <= limit_x + 0.5,
+		"point-blank cross stops at the body (free %.0f px -> %.0f px, limit %.0f)" % [free_x, held_x, limit_x])
+	vb.position.x = 700.0
+	_check(is_equal_approx(vis._solve_joints(vis._limit_reach(strike))[FighterVisual.J_HAND_B].x, free_x),
+		"a strike with nothing in reach keeps its full extension")
+	vb.position.x = 565.0
+	vb.state = Fighter.State.DODGE
+	vb.state_frame = CombatData.DODGE_INVULN_START + 1
+	_check(is_equal_approx(vis._solve_joints(vis._limit_reach(strike))[FighterVisual.J_HAND_B].x, free_x),
+		"a strike through a dodge passes freely")
+	va.queue_free()
+	vb.queue_free()
+
 	print("[perfect dodge]")
 	p = _make_pair()
 	a = p[0]

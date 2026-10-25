@@ -175,6 +175,8 @@ var hit_counter: int = 0
 var last_hit_high: bool = true
 ## The last clean hit was at the legs (sweeps): the body falls feet-first.
 var last_hit_low: bool = false
+## The last clean hit was a heavy strike (10+ damage): a bigger reaction.
+var last_hit_heavy: bool = false
 ## Scripted (finisher) presentation: named pose for the visual, optional turn-around.
 var script_pose: StringName = &"guard"
 var script_flip: bool = false
@@ -699,6 +701,7 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	var hit_y := attacker.position.y + attack.hitbox.get_center().y
 	last_hit_high = hit_y < position.y - 125.0
 	last_hit_low = hit_y > position.y - 45.0
+	last_hit_heavy = attack.damage >= 10
 	current_attack = null
 	combo_step = 0
 	velocity_x = push_dir * knockback

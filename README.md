@@ -330,6 +330,23 @@ drives animation and the ragdoll:
   and legs reaching down to land. Air steering works in both directions.
 - **Feet stay planted:** crouches come from bending the knees, and the hips are
   placed from leg geometry, so feet never float above the floor.
+- **Strikes stop on the target:** a fist or foot never passes through the
+  opponent. If it would reach more than a few pixels into the body, the strike
+  pulls back along its own windup until it just lands. Up close, punches
+  become short hooks and kicks become knee-like jabs. This is presentation
+  only: hitboxes are unchanged. Whiffs, high kicks over a crouch, and
+  strikes through a dodge keep their full extension.
+- **Hit reactions** depend on where and how hard you are hit:
+  - light head hits (jab, backhand) are a short flinch with the guard half up;
+  - heavy head hits (cross, high kick) whip the head and shoulders back with
+    the arms flung;
+  - body hits fold the body, lightly or deeply;
+  - uppercuts and air hits arch the body back with the arms thrown up;
+  - sweeps take the feet away.
+
+  The joint impulses scale with the weight of the hit.
+- **Body mechanics:** the cross and uppercut turn the rear heel out as the
+  hips drive through. The sweep keeps the body back and lets the leg reach.
 - **Draw order:** the fighter who is attacking is drawn in front, so strikes
   read clearly at impact.
 - **Ragdoll:** knocked-down and KO'd bodies become a Verlet ragdoll with
@@ -400,7 +417,7 @@ The V0.3 plan and audit are in `docs/V0.3_PLAN.md`.
 - Single round. No round timer, no best-of-3.
 - Hurtboxes are fixed rectangles; they don't follow extended limbs.
 - No throws yet (see the grappling note in `docs/V0.3_PLAN.md`).
-- At point-blank range, strike poses (crosses, the bladed lead arm) visually overlap the opponent even though the bodies stay 60 px apart. Close-range variants are planned (M4/M5).
+- At the 60 px minimum distance, forward-leaning torsos can still overlap slightly. Strikes no longer pass through bodies.
 - Godot prints a harmless "2 ObjectDB instances leaked" warning on exit,
   because the audio server is still holding the looping music when the engine
   shuts down.

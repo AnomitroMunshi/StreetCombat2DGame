@@ -102,6 +102,13 @@ const POSE_SPREAD: Dictionary = {
 	"_dodge_back": 9.0, "_dodge_slip": 4.0, "_jump_punch_strike": 14.0, "_tornado_kick": 10.0,
 }
 ## Swoosh arc traced by the striking fist or foot.
+## Contact-aware reach: a strike's fist or foot may sink this far into the
+## opponent's body outline, never further (it stops on the target instead of
+## passing through). Presentation only; hitboxes are unchanged.
+const CONTACT_DEPTH: float = 9.0
+## Half the visible body thickness used for the target's near surface.
+const BODY_HALF: float = 18.0
+const REACH_SEARCH_STEPS: int = 6
 const SWOOSH_POINTS: int = 10
 const SWOOSH_FADE: float = 0.12
 
@@ -121,11 +128,12 @@ var _jab_windup := PackedFloat32Array([0.18, 0.15, 1.0, 2.4, 0.55, 2.95, 0.6, -0
 var _jab_strike := PackedFloat32Array([0.3, 0.1, 1.57, 1.6, 0.55, 2.95, 0.66, 0.0, -0.66, -0.32, 6.0, 0.0])
 # Cross: hips and shoulders rotate in, rear leg drives straight, front knee bends into a lunge.
 var _heavy_windup := PackedFloat32Array([0.05, 0.15, 0.95, 2.7, 0.25, 2.5, 0.55, -0.1, -0.6, -0.35, -6.0, 0.0])
-var _heavy_strike := PackedFloat32Array([0.5, 0.05, 0.75, 2.8, 1.57, 1.6, 0.85, 0.25, -0.8, -0.65, 16.0, 0.0])
+# The rear heel turns out (pivot) as the hips drive the cross through.
+var _heavy_strike := PackedFloat32Array([0.5, 0.05, 0.75, 2.8, 1.57, 1.6, 0.85, 0.25, -0.8, -0.65, 16.0, 0.0, 0.5])
 var _backhand_windup := PackedFloat32Array([0.1, 0.15, 1.3, 4.08, 0.55, 2.95, 0.6, -0.05, -0.62, -0.3, -3.0, 0.0])
 var _backhand_strike := PackedFloat32Array([0.25, 0.05, 1.8, 2.05, 0.55, 2.95, 0.68, 0.05, -0.66, -0.32, 6.0, 0.0])
 var _uppercut_windup := PackedFloat32Array([0.45, 0.15, 0.9, 2.6, 0.15, 0.9, 1.0, -0.4, -0.75, -1.1, -4.0, 0.0])
-var _uppercut_strike := PackedFloat32Array([-0.1, -0.1, 0.7, 2.8, 1.3, 2.95, 0.5, 0.05, -0.45, -0.15, 8.0, 0.0])
+var _uppercut_strike := PackedFloat32Array([-0.1, -0.1, 0.7, 2.8, 1.3, 2.95, 0.5, 0.05, -0.45, -0.15, 8.0, 0.0, 0.4])
 
 # Side kick (lead leg): pivot and chamber the knee across the body (heel to the
 # hip), thrust the heel out with the hips while the torso counter-leans and the
@@ -150,8 +158,8 @@ var _jump_punch_windup := PackedFloat32Array([0.15, 0.05, 0.4, 2.9, 0.5, 2.9, 1.
 var _jump_punch_strike := PackedFloat32Array([0.4, 0.05, 1.6, 1.55, 0.4, 2.9, 1.3, -0.5, -0.45, -0.9, 8.0, 0.0])
 # Sweep: drop into a deep squat on the rear leg, then the lead leg scythes along
 # the floor with the rear hand planted for support.
-var _sweep_load := PackedFloat32Array([0.45, 0.2, 1.0, 2.5, 0.2, 1.2, 1.2, -1.0, 1.25, -1.4, -6.0, 0.0])
-var _sweep_extend := PackedFloat32Array([0.6, 0.25, 0.9, 2.4, 0.3, 0.05, 1.52, 1.56, 1.3, -1.5, 10.0, 0.0, 0.6])
+var _sweep_load := PackedFloat32Array([0.25, 0.25, 1.0, 2.5, 0.2, 1.2, 1.2, -1.0, 1.25, -1.4, -16.0, 0.0])
+var _sweep_extend := PackedFloat32Array([0.3, 0.3, 0.9, 2.4, 0.3, 0.05, 1.52, 1.56, 1.3, -1.5, -4.0, 0.0, 0.6])
 
 # Jump: deep crouch, toes pointed on the way up, knees tucked at the apex, legs
 # reaching for the floor coming down, absorb on landing.
@@ -170,6 +178,13 @@ var _dodge_slip := PackedFloat32Array([0.65, 0.35, 1.0, 2.9, 0.8, 3.0, 0.9, -0.3
 # Hit reactions: head hits snap the head back, body hits fold the fighter forward.
 var _hitstun := PackedFloat32Array([-0.45, -0.4, 0.2, 0.9, -0.3, 0.4, 0.3, 0.0, -0.5, -0.3, -6.0, 6.0])
 var _hitstun_body := PackedFloat32Array([0.5, 0.35, 0.35, 1.9, 0.25, 1.7, 0.55, -0.2, -0.45, -0.5, -8.0, 14.0])
+# Heavy head hit: head and shoulders whipped back and twisted, arms flung.
+var _hitstun_heavy := PackedFloat32Array([-0.62, -0.6, -0.35, 0.4, -0.55, 0.1, 0.25, 0.05, -0.55, -0.25, -10.0, 8.0, 0.0, -4.0])
+# Launched (uppercut / air hit): arched back, arms thrown up, legs trailing.
+var _launched := PackedFloat32Array([-0.75, -0.55, 2.3, 2.9, 1.9, 2.5, 0.5, 0.35, -0.1, -0.4, 0.0, 0.0])
+# Light hits are half-way between the stance and the full reaction (built in _ready).
+var _hitstun_light := PackedFloat32Array()
+var _hitstun_body_light := PackedFloat32Array()
 # Knockdown / get-up.
 var _knock_fly := PackedFloat32Array([-0.3, -0.5, 2.2, 2.6, 1.8, 2.4, 0.6, 0.3, 0.1, -0.2, 0.0, 0.0])
 var _ko := PackedFloat32Array([-1.5, 0.15, -1.3, -1.6, 1.3, 1.5, 1.48, 1.55, 1.42, 1.5, 0.0, 6.0])
@@ -332,6 +347,7 @@ func _ready() -> void:
 			[A, 1.0, _over(_sweep_extend, _sweep_load), EASE_LINEAR], [R, 0.35, _sweep_extend, EASE_LINEAR],
 			[R, 0.7, _sweep_load, EASE_SMOOTH]],
 	}
+	_build_light_reactions()
 	_pose = _guard.duplicate()
 	_swing_from = _guard.duplicate()
 	_pose_vel.resize(CHANNELS)
@@ -340,6 +356,13 @@ func _ready() -> void:
 		_seen_swing = fighter.swing_id
 		_seen_hits = fighter.hit_counter
 		_seen_blocks = fighter.block_counter
+
+
+## Light reactions sit between the stance guard and the full reaction: a
+## flinch that keeps the guard partly up.
+func _build_light_reactions() -> void:
+	_hitstun_light = _blend(_guard, _hitstun, 0.5)
+	_hitstun_body_light = _blend(_guard, _hitstun_body, 0.5)
 
 
 ## The guard is the fighter's stance: every move starts from it and returns to it.
@@ -351,6 +374,7 @@ func _sync_stance() -> void:
 	while _guard.size() < CHANNELS:
 		_guard.append(DEFAULT_SPREAD if _guard.size() == SPREAD else 0.0)
 	_pose_library[&"guard"] = _guard
+	_build_light_reactions()
 
 
 ## Strike pose pushed slightly past its line of travel (follow-through).
@@ -402,6 +426,7 @@ func _process(delta: float) -> void:
 		_pose_ready = true
 		_pose = target.duplicate()
 	elif fighter.state == Fighter.State.ATTACK:
+		target = _limit_reach(target)
 		# Attack timelines are continuous (they start from _swing_from), so follow
 		# them exactly, but record joint velocity: if the attack is interrupted,
 		# that momentum carries into the reaction.
@@ -624,16 +649,18 @@ func _clamp_speed(channel: int, speed: float) -> float:
 func _apply_impulses() -> void:
 	if fighter.hit_counter != _seen_hits:
 		_seen_hits = fighter.hit_counter
+		# Heavier hits whip harder; light ones are a short flinch.
+		var k := 1.25 if fighter.last_hit_heavy else 0.6
 		if fighter.last_hit_high:
-			_pose_vel[TORSO] -= 9.0
-			_pose_vel[HEAD] -= 14.0
-			_pose_vel[HIP_X] -= 120.0
+			_pose_vel[TORSO] -= 9.0 * k
+			_pose_vel[HEAD] -= 14.0 * k
+			_pose_vel[HIP_X] -= 120.0 * k
 		else:
-			_pose_vel[TORSO] += 7.0
-			_pose_vel[HEAD] += 6.0
-			_pose_vel[DROP] += 90.0
-		_pose_vel[UA_F] -= 6.0
-		_pose_vel[UA_B] -= 5.0
+			_pose_vel[TORSO] += 7.0 * k
+			_pose_vel[HEAD] += 6.0 * k
+			_pose_vel[DROP] += 90.0 * k
+		_pose_vel[UA_F] -= 6.0 * k
+		_pose_vel[UA_B] -= 5.0 * k
 	if fighter.block_counter != _seen_blocks:
 		_seen_blocks = fighter.block_counter
 		_pose_vel[TORSO] -= 5.0
@@ -701,8 +728,7 @@ func _target_pose(t: float) -> PackedFloat32Array:
 		Fighter.State.GUARD_RELEASE:
 			return _blend(_block, _guard, smoothstep(0.0, 1.0, t / maxf(float(fighter.stun_frames), 1.0)))
 		Fighter.State.HITSTUN:
-			var reaction := _hitstun if fighter.last_hit_high or fighter.airborne else _hitstun_body
-			return _recover(reaction, _guard, t, fighter.stun_frames)
+			return _recover(_reaction_pose(), _guard, t, fighter.stun_frames)
 		Fighter.State.KNOCKDOWN:
 			if _is_balled():
 				return _tuck
@@ -746,6 +772,16 @@ func _target_pose(t: float) -> PackedFloat32Array:
 	idle[LA_F] += sin(_time * TAU * 0.6 + 1.0) * 0.04
 	idle[UA_B] += sin(_time * TAU * 0.5 + 2.0) * 0.03
 	return idle
+
+
+## Hit reaction by where and how hard the hit landed: launched (in the air),
+## head (light flinch / heavy whip) or body (light / heavy fold).
+func _reaction_pose() -> PackedFloat32Array:
+	if fighter.airborne:
+		return _launched
+	if fighter.last_hit_high:
+		return _hitstun_heavy if fighter.last_hit_heavy else _hitstun_light
+	return _hitstun_body if fighter.last_hit_heavy else _hitstun_body_light
 
 
 ## Holds a reaction pose, then eases back over the last part of the stun.
@@ -1193,19 +1229,56 @@ static func _ik_leg(hip: Vector2, foot: Vector2, forward: Vector2) -> Array:
 
 
 ## Which joint is doing the striking right now (-1 = none).
+## Which joint leads an attack (the one that lands).
+static func _attack_joint(type: CombatData.AttackType) -> int:
+	match type:
+		CombatData.AttackType.KICK, CombatData.AttackType.FRONT_KICK, CombatData.AttackType.JUMP_KICK, \
+				CombatData.AttackType.SWEEP, CombatData.AttackType.HIGH_KICK:
+			return J_FOOT_F
+		CombatData.AttackType.HEAVY, CombatData.AttackType.UPPERCUT:
+			return J_HAND_B
+	return J_HAND_F
+
+
+## Pulls a strike pose back toward the stance just enough that its striking
+## joint stops at the opponent's body instead of passing through it. Only when
+## the limb is at the height of the opponent's body (a high kick over a crouch,
+## or a strike through a dodge, still passes freely).
+func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
+	var opp := fighter.opponent
+	if opp == null or fighter.current_attack == null or opp.is_down() or opp.is_evading():
+		return pose
+	var gap := (opp.position.x - fighter.position.x) * fighter.facing
+	if gap <= 0.0:
+		return pose
+	var idx := _attack_joint(fighter.current_attack.type)
+	var limit := gap - BODY_HALF + CONTACT_DEPTH
+	var box := opp.get_hurtbox_world()
+	var top := box.position.y - fighter.position.y - 8.0
+	var bottom := box.end.y - fighter.position.y + 8.0
+	var j := _solve_joints(pose)[idx]
+	if j.x <= limit or j.y < top or j.y > bottom:
+		return pose
+	# Bisect the blend toward the stance: the largest extension that still fits.
+	var base := _air_pose() if fighter.airborne else _guard
+	var lo := 0.0  # 0 = full strike
+	var hi := 1.0  # 1 = stance
+	for i in REACH_SEARCH_STEPS:
+		var mid := (lo + hi) * 0.5
+		if _solve_joints(_blend(pose, base, mid))[idx].x > limit:
+			lo = mid
+		else:
+			hi = mid
+	return _blend(pose, base, hi)
+
+
 func _striking_joint() -> int:
 	if fighter.state == Fighter.State.ATTACK and fighter.current_attack != null:
 		var f := fighter.state_frame
 		var attack := fighter.current_attack
 		if f < int(attack.startup * 0.5) or f >= attack.startup + attack.active + 2:
 			return -1
-		match attack.type:
-			CombatData.AttackType.KICK, CombatData.AttackType.FRONT_KICK, CombatData.AttackType.JUMP_KICK, \
-					CombatData.AttackType.SWEEP, CombatData.AttackType.HIGH_KICK:
-				return J_FOOT_F
-			CombatData.AttackType.HEAVY, CombatData.AttackType.UPPERCUT:
-				return J_HAND_B
-		return J_HAND_F
+		return _attack_joint(attack.type)
 	if fighter.state == Fighter.State.FINISHER:
 		var pose_name := String(fighter.script_pose)
 		if pose_name.contains("kick") or pose_name == "knee":
