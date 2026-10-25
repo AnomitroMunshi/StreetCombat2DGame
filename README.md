@@ -155,9 +155,25 @@ The full table, including hitboxes, knockback and lunge, is in
 - **Perfect dodge:** if a strike passes through you during the dodge's
   invulnerable frames, the dodge skips its recovery and your counter comes out
   sooner. You hear a whoosh and see a ring.
-- **AI defence:** the rival mostly blocks. Sometimes (15%) it times a parry
+- **AI defence:** the rival dodges instead of blocking when its posture is
+  above 70%, and always punishes a broken guard. Otherwise it mostly blocks. Sometimes (15%) it times a parry
   against slow attacks it can read (startup of 8 or more ticks). It punishes
   a staggered player.
+- **Posture (thin bar under health):** a guard meter separate from HP. It fills
+  from the centre outward when you:
+  - block a strike, by that attack's own posture value: jab 6, cross 14,
+    kicks 14–16, sweep 10;
+  - have your attack parried: 1.5× its posture value plus 8;
+  - get hit while staggered or during an attack's startup (a **counter hit**).
+
+  Ordinary hits do not fill it. After 1.5 s without new posture damage it drains
+  quickly in neutral and slowly while guarding.
+
+  Full posture **breaks the guard**: a shatter effect, a GUARD BREAK callout, and
+  about 0.9 s of BROKEN, with no blocking or acting. That is a guaranteed punish.
+  The first hit ends the break, so it never becomes a stun loop. Afterwards
+  posture is empty and locked for 2 seconds (a grey bar). A counter hit never
+  breaks the guard by itself: it stops one point short.
 - **Directional guard:** a raised guard does not turn around. If the opponent
   jumps over you while you hold block, their attack hits your back. Let go of
   Shift and block again to face them.
@@ -383,7 +399,8 @@ The V0.3 plan and audit are in `docs/V0.3_PLAN.md`.
 
 - Single round. No round timer, no best-of-3.
 - Hurtboxes are fixed rectangles; they don't follow extended limbs.
-- No crouching, throws, anti-air-specific moves or guard break. Blocking is unlimited.
+- No throws yet (see the grappling note in `docs/V0.3_PLAN.md`).
+- At point-blank range, strike poses (crosses, the bladed lead arm) visually overlap the opponent even though the bodies stay 60 px apart. Close-range variants are planned (M4/M5).
 - Godot prints a harmless "2 ObjectDB instances leaked" warning on exit,
   because the audio server is still holding the looping music when the engine
   shuts down.

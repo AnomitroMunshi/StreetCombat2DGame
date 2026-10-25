@@ -35,6 +35,12 @@ extends Node2D
 ## Perfect dodge: an active hitbox passing through a fighter during the dodge's
 ## invulnerable frames ends the dodge early (sooner counter).
 ##
+## Posture (CombatData.POSTURE_*): filled by blocking, being parried and
+## counter hits; recovers when not pressured. Full posture breaks the guard
+## (BROKEN: a guaranteed punish). Counter hits never break by themselves (they
+## stop one point short); the next blocked or parried strike does. After a
+## break, posture stays empty for a while so breaks cannot loop.
+##
 ## Finishers: a lethal hit puts the defender in FINISHED instead of KO. main.gd
 ## then hands both fighters to a FinisherDirector (attacker -> FINISHER), which
 ## drives poses/movement through the scripted_* API and ends with finish_ko().
@@ -50,15 +56,19 @@ signal dodged(fighter: Fighter)
 signal parried(fighter: Fighter, attacker: Fighter)
 ## An attack passed through the fighter's dodge i-frames.
 signal perfect_evaded(fighter: Fighter)
+## Posture filled up: the guard is broken.
+signal posture_broken(fighter: Fighter)
 
-enum State { IDLE, WALK, CROUCH, ATTACK, BLOCK, BLOCKSTUN, GUARD_RELEASE, HITSTUN, JUMP, LAND, DODGE, KNOCKDOWN, GETUP, FINISHER, FINISHED, KO, PARRY, STAGGER }
+enum State { IDLE, WALK, CROUCH, ATTACK, BLOCK, BLOCKSTUN, GUARD_RELEASE, HITSTUN, JUMP, LAND, DODGE, KNOCKDOWN, GETUP, FINISHER, FINISHED, KO, PARRY, STAGGER, BROKEN }
 enum Phase { NONE, STARTUP, ACTIVE, RECOVERY }
 
 ## Hurtbox relative to the feet. Symmetric, so facing does not change it.
 const HURTBOX: Rect2 = Rect2(-20.0, -172.0, 40.0, 172.0)
 ## Crouching (and low blocking): head-level strikes pass over this.
 const HURTBOX_CROUCH: Rect2 = Rect2(-22.0, -128.0, 44.0, 128.0)
-const PUSH_HALF_WIDTH: float = 22.0
+## Bodies keep their centres at least 2 * PUSH_HALF_WIDTH apart, about the width
+## of a silhouette, so fighters never stand inside each other.
+const PUSH_HALF_WIDTH: float = 30.0
 const KNOCKBACK_FRICTION: float = 0.84
 const ARENA_MIN_X: float = 90.0
 const ARENA_MAX_X: float = 1190.0
@@ -143,6 +153,14 @@ var parry_window: int = 0
 var parry_cooldown: int = 0
 ## Last guard drop was a whiffed parry (presentation / debug).
 var parry_whiffed: bool = false
+# Posture.
+var posture: float = 0.0
+## Ticks since posture last went up (recovery starts after POSTURE_RECOVER_DELAY).
+var posture_idle: int = 0
+## While > 0, posture cannot fill (after a break).
+var posture_lock: int = 0
+## The last clean hit landed on a staggered or starting-up fighter.
+var last_hit_counter: bool = false
 ## Stance (presentation only; see Stances).
 var stance: int = Stances.Kind.BLADED
 
@@ -229,7 +247,7 @@ func tick() -> void:
 			_tick_jump()
 		State.PARRY:
 			_tick_parry()
-		State.HITSTUN, State.BLOCKSTUN, State.LAND, State.GUARD_RELEASE, State.STAGGER:
+		State.HITSTUN, State.BLOCKSTUN, State.LAND, State.GUARD_RELEASE, State.STAGGER, State.BROKEN:
 			if state_frame >= stun_frames:
 				if airborne:
 					# Stun ran out mid-air: drift down with no air attack left.
@@ -259,6 +277,7 @@ func tick() -> void:
 				_tick_roll()
 	_apply_motion()
 	_tick_buffers()
+	_tick_posture()
 
 
 func _tick_neutral() -> void:
@@ -429,6 +448,56 @@ func _land() -> void:
 		_enter_state(State.LAND)
 		stun_frames = lag
 	air_attack_used = false
+
+
+func _tick_posture() -> void:
+	if posture_lock > 0:
+		posture_lock -= 1
+	posture_idle += 1
+	if posture <= 0.0 or posture_idle <= CombatData.POSTURE_RECOVER_DELAY:
+		return
+	var rate := 0.0
+	match state:
+		State.IDLE, State.WALK, State.CROUCH, State.JUMP, State.LAND, State.DODGE:
+			rate = CombatData.POSTURE_RECOVER_RATE
+		State.BLOCK, State.GUARD_RELEASE, State.PARRY:
+			rate = CombatData.POSTURE_RECOVER_RATE_GUARD
+	posture = maxf(posture - rate, 0.0)
+
+
+## Adds posture damage. Returns true when the meter is full (the guard breaks),
+## unless `can_break` is false, in which case it stops one point short.
+func add_posture(amount: float, can_break: bool = true) -> bool:
+	if posture_lock > 0 or amount <= 0.0:
+		return false
+	posture_idle = 0
+	posture += amount
+	if posture >= CombatData.POSTURE_MAX:
+		if can_break:
+			posture = CombatData.POSTURE_MAX
+			return true
+		posture = CombatData.POSTURE_MAX - 1.0
+	return false
+
+
+## Guard broken: defenceless for POSTURE_BREAK_FRAMES, then posture is empty and
+## locked for POSTURE_LOCK_FRAMES.
+func _break_posture(push_dir: int) -> void:
+	current_attack = null
+	combo_step = 0
+	parry_window = 0
+	_enter_state(State.BROKEN)
+	stun_frames = CombatData.POSTURE_BREAK_FRAMES
+	velocity_x = push_dir * 2.0
+	posture = 0.0
+	posture_lock = CombatData.POSTURE_BREAK_FRAMES + CombatData.POSTURE_LOCK_FRAMES
+	if airborne:
+		jump_vx = 0.0
+	posture_broken.emit(self)
+
+
+func is_posture_broken() -> bool:
+	return state == State.BROKEN
 
 
 func _tick_buffers() -> void:
@@ -602,18 +671,25 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	# Low attacks (sweeps) must be blocked (or parried) low: S + Shift.
 	var right_height := not attack.low or crouch_held
 	if is_parry_active() and facing_attacker and right_height:
-		_parry(attacker, push_dir)
-		return CombatData.HitResult.PARRIED
+		return _parry(attacker, push_dir, attack)
 	var guarding := (state == State.BLOCK and state_frame >= CombatData.BLOCK_STARTUP_FRAMES) \
 		or (state == State.BLOCKSTUN and block_held) or state == State.PARRY
 	if not right_height:
 		guarding = false
 	if guarding and facing_attacker:
-		_enter_state(State.BLOCKSTUN)
 		block_counter += 1
-		stun_frames = attack.blockstun
 		velocity_x = push_dir * knockback * CombatData.BLOCK_KNOCKBACK_MULT
+		if add_posture(attack.posture * CombatData.POSTURE_BLOCK_MULT):
+			_break_posture(push_dir)
+			return CombatData.HitResult.GUARD_BREAK
+		_enter_state(State.BLOCKSTUN)
+		stun_frames = attack.blockstun
 		return CombatData.HitResult.BLOCKED
+
+	# Counter hit: caught reeling from a parry or in the startup of an attack.
+	last_hit_counter = state == State.STAGGER or (state == State.ATTACK and get_phase() == Phase.STARTUP)
+	if last_hit_counter:
+		add_posture(attack.posture * CombatData.POSTURE_COUNTER_MULT, false)
 
 	received_combo = received_combo + 1 if state == State.HITSTUN else 1
 	combo_display_frames = COMBO_DISPLAY_FRAMES
@@ -655,14 +731,19 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	return CombatData.HitResult.HIT
 
 
-func _parry(attacker: Fighter, push_dir: int) -> void:
+func _parry(attacker: Fighter, push_dir: int, attack: CombatData.Attack) -> CombatData.HitResult:
 	_enter_state(State.PARRY)
 	parry_window = 0
 	parry_cooldown = 0  # a successful parry can be chained into the next one
 	block_counter += 1
 	velocity_x = push_dir * 1.0
-	attacker.stagger(-push_dir)
 	parried.emit(self, attacker)
+	var gain := attack.posture * CombatData.POSTURE_PARRIED_MULT + CombatData.POSTURE_PARRIED_FLAT
+	if attacker.add_posture(gain):
+		attacker._break_posture(-push_dir)
+		return CombatData.HitResult.GUARD_BREAK
+	attacker.stagger(-push_dir)
+	return CombatData.HitResult.PARRIED
 
 
 ## Thrown off balance by a parry: the swing is lost and the fighter reels.
@@ -817,7 +898,7 @@ func get_debug_label() -> String:
 			current_attack.display_name, combo_step, Phase.keys()[get_phase()],
 			state_frame, current_attack.total_frames()]
 	elif state == State.HITSTUN or state == State.BLOCKSTUN or state == State.LAND or state == State.GUARD_RELEASE \
-			or state == State.STAGGER:
+			or state == State.STAGGER or state == State.BROKEN:
 		text = "%s %d/%d%s" % [get_state_name(), state_frame, stun_frames,
 			" (parry whiff)" if state == State.GUARD_RELEASE and parry_whiffed else ""]
 	elif is_parry_active():
@@ -837,4 +918,6 @@ func get_debug_label() -> String:
 		text += "  buf:%s(%d)" % [CombatData.attack_name(buffered_attack), buffer_frames]
 	if parry_cooldown > 0:
 		text += "  pcd %d" % parry_cooldown
+	if posture > 0.0 or posture_lock > 0:
+		text += "  pos %d%s" % [roundi(posture), " lock %d" % posture_lock if posture_lock > 0 else ""]
 	return text

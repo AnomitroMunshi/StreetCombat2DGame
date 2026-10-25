@@ -119,6 +119,7 @@ class Driver extends Node:
 					check(locked_ok, "restart mid-countdown: stays in PRE_MATCH, the old countdown never fires")
 					check(hud.is_button_visible(), "START MATCH is offered again")
 					check(p.state == Fighter.State.IDLE and e.state == Fighter.State.IDLE, "both fighters idle")
+					check(p.posture == 0.0 and e.posture == 0.0 and p.posture_lock == 0, "posture reset on restart")
 					print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 					tree.quit(fails)
 

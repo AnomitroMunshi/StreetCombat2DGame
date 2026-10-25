@@ -110,6 +110,8 @@ const SWOOSH_FADE: float = 0.12
 var _guard := PackedFloat32Array([0.22, 0.15, 0.95, 2.6, 0.55, 2.95, 0.6, -0.05, -0.62, -0.3, 0.0, 0.0])
 # High guard: elbows tucked in front of the ribs, forearms vertical over the face, chin down.
 var _block := PackedFloat32Array([0.25, 0.3, 1.25, 3.1, 1.05, 3.05, 0.7, -0.15, -0.62, -0.4, -2.0, 0.0])
+# Guard broken: arms dropped, hunched, knees buckling (wobbles in _target_pose).
+var _broken := PackedFloat32Array([0.55, 0.5, 0.25, 0.55, 0.15, 0.45, 0.8, -0.35, -0.5, -0.65, -4.0, 12.0])
 # Parry deflect: the lead forearm sweeps the strike up and out, weight forward.
 var _deflect := PackedFloat32Array([0.3, 0.2, 2.0, 3.5, 1.0, 3.05, 0.72, -0.2, -0.62, -0.4, 4.0, 0.0])
 var _blockstun := PackedFloat32Array([0.05, 0.22, 1.1, 3.25, 0.9, 3.2, 0.62, -0.1, -0.7, -0.45, -6.0, 0.0])
@@ -593,7 +595,7 @@ func _spring_params() -> Vector2:
 	if _is_balled():
 		return SPRING_FAST
 	match fighter.state:
-		Fighter.State.HITSTUN, Fighter.State.FINISHED, Fighter.State.STAGGER:
+		Fighter.State.HITSTUN, Fighter.State.FINISHED, Fighter.State.STAGGER, Fighter.State.BROKEN:
 			return SPRING_HITSTUN
 		Fighter.State.KNOCKDOWN, Fighter.State.KO:
 			return SPRING_LIMP
@@ -686,6 +688,13 @@ func _target_pose(t: float) -> PackedFloat32Array:
 		Fighter.State.PARRY:
 			return _blend(_deflect, _block if fighter.block_held else _guard,
 				smoothstep(0.3, 1.0, t / float(CombatData.PARRY_DEFLECT_FRAMES)))
+		Fighter.State.BROKEN:
+			var wob := _broken.duplicate()
+			var w := sin(_time * TAU * 1.6)
+			wob[TORSO] += w * 0.08
+			wob[HEAD] += w * 0.12
+			wob[HIP_X] += w * 3.0
+			return _recover(wob, _guard, t, fighter.stun_frames)
 		Fighter.State.STAGGER:
 			# Thrown off balance by the parry: reel back, then regain the stance.
 			return _recover(_stagger, _guard, t, fighter.stun_frames)
@@ -1062,7 +1071,7 @@ func _wants_plant() -> bool:
 		return false
 	return fighter.state in [Fighter.State.IDLE, Fighter.State.WALK, Fighter.State.CROUCH, Fighter.State.BLOCK,
 		Fighter.State.BLOCKSTUN, Fighter.State.GUARD_RELEASE, Fighter.State.HITSTUN, Fighter.State.LAND,
-		Fighter.State.PARRY, Fighter.State.STAGGER]
+		Fighter.State.PARRY, Fighter.State.STAGGER, Fighter.State.BROKEN]
 
 
 ## Replaces the legs of a world-space skeleton with IK legs reaching planted

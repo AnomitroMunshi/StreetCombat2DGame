@@ -98,7 +98,7 @@ func compute_intent() -> CombatData.Intent:
 
 	if _me.state == Fighter.State.HITSTUN or _me.state == Fighter.State.BLOCKSTUN \
 			or _me.state == Fighter.State.KNOCKDOWN or _me.state == Fighter.State.GETUP \
-			or _me.state == Fighter.State.STAGGER:
+			or _me.state == Fighter.State.STAGGER or _me.state == Fighter.State.BROKEN:
 		if not _was_stunned:
 			_was_stunned = true
 			_plan.clear()
@@ -118,7 +118,17 @@ func compute_intent() -> CombatData.Intent:
 			intent.attack = CombatData.AttackType.UPPERCUT
 			return intent
 
-	# Punish: the opponent was parried (staggering). One roll per stagger.
+	# Punish: the opponent was parried (staggering) or guard-broken. A broken
+	# guard is always punished; a stagger is one roll per parried swing.
+	if _target.state == Fighter.State.BROKEN and _state != AIState.ATTACK and dist < 140.0 and _me.can_act():
+		_plan = [CombatData.AttackType.LIGHT, CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY] if dist < 100.0 \
+			else [CombatData.AttackType.FRONT_KICK]
+		_plan_index = 0
+		_last_pressed_swing = _me.swing_id
+		_parry_at = -1
+		_enter(AIState.ATTACK, 60)
+	elif _target.state == Fighter.State.BROKEN and _state != AIState.ATTACK and _me.can_act():
+		_enter(AIState.APPROACH, 30)
 	if _target.state == Fighter.State.STAGGER and _punish_checked_swing != _target.swing_id \
 			and dist < 130.0 and (_me.can_act() or _me.state == Fighter.State.PARRY):
 		_punish_checked_swing = _target.swing_id
@@ -151,7 +161,12 @@ func compute_intent() -> CombatData.Intent:
 			_parry_at = startup - 2
 			return intent
 		roll = _rng.randf()
-		if roll < block_chance:
+		# Guard nearly broken: prefer getting out of the way over blocking.
+		var fragile := _me.posture > CombatData.POSTURE_MAX * 0.7
+		if fragile and roll < 0.6:
+			_dodge_now = true
+			_enter(AIState.SPACING, _rng.randi_range(10, 20))
+		elif roll < block_chance:
 			# Sweeps must be blocked low.
 			_block_low = _target.current_attack != null and _target.current_attack.low
 			_enter(AIState.BLOCK, _rng.randi_range(18, 30))

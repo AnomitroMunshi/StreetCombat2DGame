@@ -184,6 +184,15 @@ func _build_sfx() -> void:
 	_thump(b, 0.0, 0.08, 900.0, 600.0, 0.02, 0.4)
 	_sfx[&"parry"] = _finish(b, 0.75)
 
+	# Guard break: low crunch, a cracking noise burst and a falling metallic ring.
+	b = _buffer(0.9)
+	_thump(b, 0.0, 0.5, 160.0, 40.0, 0.14, 1.0)
+	_noise(b, 0.0, 0.25, 0.06, 0.8, 0.9, rng)
+	_noise(b, 0.04, 0.2, 0.05, 0.95, 0.5, rng)
+	_gong(b, 0.0, 0.8, 520.0, 0.3)
+	_soft_clip(b, 1.8)
+	_sfx[&"guard_break"] = _finish(b)
+
 	# Countdown: a dry taiko beat with a short high ping (3, 2, 1).
 	b = _buffer(0.6)
 	_thump(b, 0.0, 0.4, 120.0, 62.0, 0.09, 1.0)

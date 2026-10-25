@@ -114,6 +114,8 @@ func _ready() -> void:
 		f.rolled.connect(_on_fighter_rolled)
 		f.dodged.connect(_on_fighter_dodged)
 		f.perfect_evaded.connect(_on_fighter_perfect_evaded)
+		f.posture_broken.connect(_on_fighter_posture_broken)
+		f.parried.connect(_on_fighter_parried)
 	fx.decals_changed.connect(queue_redraw)
 	# Stances: the player's choice persists across restarts; the AI always picks
 	# a different one.
@@ -410,6 +412,10 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 			fx.impact(contact, 2 if heavy else 1, HIT_COLOR)
 			audio.play(&"hit_heavy" if heavy else &"hit_light")
 			_camera_punch += 0.02 if heavy else 0.008
+		CombatData.HitResult.GUARD_BREAK:
+			# Blocked into a broken guard, or parried while out of posture.
+			_hitstop = maxi(_hitstop, CombatData.GUARD_BREAK_HITSTOP_FRAMES)
+			fx.guard_flash(contact, defender.facing)
 		CombatData.HitResult.PARRIED:
 			_hitstop = maxi(_hitstop, CombatData.PARRY_HITSTOP_FRAMES)
 			_shake(6, 3.0)
@@ -430,6 +436,9 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 			audio.play(&"hit_heavy", 2.0)
 			hud.flash(0.5)
 			_camera_punch += 0.05
+	if result == CombatData.HitResult.HIT and defender.last_hit_counter:
+		hud.popup(attacker_of(defender), "COUNTER", Color(1.0, 0.8, 0.35))
+		fx.ring(contact, Color(1.0, 0.8, 0.35), 34.0, 10)
 	if result == CombatData.HitResult.HIT and defender.state == Fighter.State.KNOCKDOWN:
 		_hitstop = maxi(_hitstop, attack.hitstop + 4)
 		_shake(14, 7.0)
@@ -567,6 +576,25 @@ func _on_fighter_dodged(fighter: Fighter) -> void:
 	fx.dust(Vector2(fighter.position.x, FLOOR_Y), 0.8)
 
 
+func attacker_of(defender: Fighter) -> Fighter:
+	return enemy if defender == player else player
+
+
+func _on_fighter_parried(fighter: Fighter, _attacker: Fighter) -> void:
+	hud.popup(fighter, "PARRY", PARRY_COLOR)
+
+
+## Posture full: shattered guard, big stop, a short callout over the bar.
+func _on_fighter_posture_broken(fighter: Fighter) -> void:
+	var chest := fighter.position + Vector2(0.0, -120.0)
+	fx.shatter(chest)
+	audio.play(&"guard_break")
+	_shake(14, 6.0)
+	hud.flash(0.3)
+	hud.popup(fighter, "GUARD BREAK", Color(1.0, 0.35, 0.25))
+	_camera_punch += 0.04
+
+
 func _on_fighter_perfect_evaded(fighter: Fighter) -> void:
 	audio.play(&"whoosh_heavy", -2.0, 0.05)
 	fx.ring(fighter.position + Vector2(0.0, -100.0), PARRY_COLOR, 46.0, 14)
@@ -661,6 +689,7 @@ func _refresh_presentation() -> void:
 		lines.append("tick %d   hitstop %d   round %s" % [_tick, _hitstop, RoundState.keys()[_round_state]])
 		lines.append("%s  hp %d  %s" % [player.fighter_name, player.health, player.get_debug_label()])
 		lines.append("%s  hp %d  %s" % [enemy.fighter_name, enemy.health, enemy.get_debug_label()])
+		lines.append("posture  %s %d   %s %d" % [player.fighter_name, roundi(player.posture), enemy.fighter_name, roundi(enemy.posture)])
 		lines.append("AI  %s" % enemy_ai.get_state_name())
 		lines.append("last  %s" % _last_event)
 	hud.set_debug(_debug_visible, lines)

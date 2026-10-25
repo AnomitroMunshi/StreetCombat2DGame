@@ -8,7 +8,7 @@ extends RefCounted
 ## JUMP_KICK / JUMP_PUNCH are never pressed directly: any kick or punch button
 ## while airborne becomes one of them.
 enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP_KICK, JUMP_PUNCH, SWEEP, HIGH_KICK }
-enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED }
+enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 
 const TICK_RATE: int = 60
 
@@ -52,6 +52,27 @@ const PARRY_STAGGER_FRAMES: int = 24
 ## Defender's deflect motion; any buffered attack cancels it (the counter).
 const PARRY_DEFLECT_FRAMES: int = 8
 const PARRY_PUSHBACK: float = 3.5
+
+## Posture (structure): a meter separate from health. It fills when you block
+## (by each attack's own "posture" value, not its damage), when your attack is
+## parried, and when you are hit while staggered or mid-startup (counter hit).
+## Ordinary clean hits do not fill it: combos already have their own limits.
+## It recovers after POSTURE_RECOVER_DELAY ticks without pressure (faster in
+## neutral than while guarding). At POSTURE_MAX the guard breaks: BROKEN for
+## POSTURE_BREAK_FRAMES (no blocking, no acting, a guaranteed punish). Any hit
+## ends the break into normal hitstun. Afterwards posture is empty and cannot
+## fill for POSTURE_LOCK_FRAMES, so breaks never loop.
+const POSTURE_MAX: float = 100.0
+const POSTURE_BLOCK_MULT: float = 1.0
+const POSTURE_PARRIED_MULT: float = 1.5
+const POSTURE_PARRIED_FLAT: float = 8.0
+const POSTURE_COUNTER_MULT: float = 1.0
+const POSTURE_RECOVER_DELAY: int = 90
+const POSTURE_RECOVER_RATE: float = 0.4
+const POSTURE_RECOVER_RATE_GUARD: float = 0.15
+const POSTURE_BREAK_FRAMES: int = 54
+const POSTURE_LOCK_FRAMES: int = 120
+const GUARD_BREAK_HITSTOP_FRAMES: int = 12
 
 ## Jumping. Velocities in pixels per tick; gravity in pixels per tick².
 ## Falling uses stronger gravity than rising for a snappy, less floaty arc.
@@ -112,6 +133,8 @@ const AIR_HIT_POP_VELOCITY: float = -3.5
 ##                  attack chains into the next combo step.
 ##   hitbox: rect relative to the fighter's feet while facing right.
 ##   knockback, lunge: pixels per tick (knockback decays with friction).
+##   posture: posture damage dealt to a blocker (see POSTURE_*); it reflects how
+##            hard the strike is to absorb, not its health damage.
 ##   launch (optional): upward velocity given to a grounded opponent on hit.
 ##   knockdown (optional): a clean hit always knocks down (sweeps).
 ##   blowback_* (optional): chance that a clean hit sends the opponent flying
@@ -119,14 +142,14 @@ const AIR_HIT_POP_VELOCITY: float = -3.5
 ##     The 3rd-hit combo knockdown also uses these values when present.
 const ATTACK_TABLE: Dictionary = {
 	AttackType.LIGHT: {
-		"name": "Jab",
+		"name": "Jab", "posture": 6.0,
 		"startup": 5, "active": 3, "recovery": 11, "cancel_window": 9,
 		"damage": 6, "hitstun": 16, "blockstun": 10,
 		"knockback": 2.5, "lunge": 0.8, "hitstop": 4,
 		"hitbox": Rect2(28.0, -150.0, 52.0, 26.0),
 	},
 	AttackType.HEAVY: {
-		"name": "Cross",
+		"name": "Cross", "posture": 14.0,
 		"startup": 11, "active": 3, "recovery": 20, "cancel_window": 8,
 		"damage": 13, "hitstun": 22, "blockstun": 14,
 		"knockback": 6.0, "lunge": 2.0, "hitstop": 7,
@@ -134,7 +157,7 @@ const ATTACK_TABLE: Dictionary = {
 		"hitbox": Rect2(36.0, -154.0, 62.0, 30.0),
 	},
 	AttackType.KICK: {
-		"name": "Side Kick",
+		"name": "Side Kick", "posture": 14.0,
 		"startup": 9, "active": 4, "recovery": 17, "cancel_window": 8,
 		"damage": 10, "hitstun": 18, "blockstun": 12,
 		"knockback": 6.5, "lunge": 0.6, "hitstop": 6,
@@ -143,7 +166,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Push kick: quick, low damage, big push. Keeps the opponent out; fairly safe on block.
 	AttackType.FRONT_KICK: {
-		"name": "Front Kick",
+		"name": "Front Kick", "posture": 16.0,
 		"startup": 7, "active": 3, "recovery": 15, "cancel_window": 6,
 		"damage": 8, "hitstun": 17, "blockstun": 13,
 		"knockback": 9.0, "lunge": 1.2, "hitstop": 5,
@@ -152,7 +175,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Lead-hand backfist: quick snap to the head, slightly longer reach than the jab.
 	AttackType.BACKHAND: {
-		"name": "Backhand",
+		"name": "Backhand", "posture": 7.0,
 		"startup": 6, "active": 2, "recovery": 12, "cancel_window": 8,
 		"damage": 7, "hitstun": 16, "blockstun": 11,
 		"knockback": 3.0, "lunge": 1.0, "hitstop": 4,
@@ -160,7 +183,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Rear-hand rising punch: short reach, tall hitbox (anti-air), launches on hit.
 	AttackType.UPPERCUT: {
-		"name": "Uppercut",
+		"name": "Uppercut", "posture": 12.0,
 		"startup": 9, "active": 3, "recovery": 18, "cancel_window": 6,
 		"damage": 12, "hitstun": 24, "blockstun": 14,
 		"knockback": 2.0, "lunge": 2.0, "hitstop": 7, "launch": 8.0,
@@ -168,7 +191,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Airborne only. Ends early on landing; never chains.
 	AttackType.JUMP_KICK: {
-		"name": "Jump Kick",
+		"name": "Jump Kick", "posture": 14.0,
 		"startup": 4, "active": 8, "recovery": 12, "cancel_window": 0,
 		"damage": 11, "hitstun": 20, "blockstun": 12,
 		"knockback": 5.0, "lunge": 0.0, "hitstop": 6,
@@ -176,7 +199,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Airborne only. Flying straight punch that carries forward momentum.
 	AttackType.JUMP_PUNCH: {
-		"name": "Jump Punch",
+		"name": "Jump Punch", "posture": 9.0,
 		"startup": 3, "active": 6, "recovery": 10, "cancel_window": 0,
 		"damage": 8, "hitstun": 18, "blockstun": 10,
 		"knockback": 3.5, "lunge": 2.0, "hitstop": 5,
@@ -184,7 +207,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Face-level kick (W + L): fast for a kick, high damage, unsafe on block.
 	AttackType.HIGH_KICK: {
-		"name": "High Kick",
+		"name": "High Kick", "posture": 16.0,
 		"startup": 7, "active": 3, "recovery": 18, "cancel_window": 6,
 		"damage": 12, "hitstun": 20, "blockstun": 14,
 		"knockback": 5.5, "lunge": 0.8, "hitstop": 7,
@@ -193,7 +216,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Low rotational leg sweep (S + L): takes the legs out, always knocks down.
 	AttackType.SWEEP: {
-		"name": "Sweep",
+		"name": "Sweep", "posture": 10.0,
 		"startup": 10, "active": 3, "recovery": 19, "cancel_window": 0,
 		"damage": 9, "hitstun": 24, "blockstun": 12,
 		"knockback": 2.0, "lunge": 1.0, "hitstop": 6, "knockdown": true, "low": true,
@@ -216,6 +239,7 @@ class Attack extends RefCounted:
 	var knockback: float = 0.0
 	var lunge: float = 0.0
 	var hitstop: int = 0
+	var posture: float = 0.0
 	var launch: float = 0.0
 	var knockdown: bool = false
 	## Low attacks can only be blocked crouching (low block).
@@ -264,6 +288,7 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.knockback = row["knockback"]
 	attack.lunge = row["lunge"]
 	attack.hitstop = row["hitstop"]
+	attack.posture = row["posture"]
 	attack.launch = row.get("launch", 0.0)
 	attack.knockdown = row.get("knockdown", false)
 	attack.low = row.get("low", false)

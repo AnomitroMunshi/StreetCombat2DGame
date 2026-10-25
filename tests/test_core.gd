@@ -768,6 +768,81 @@ func _initialize() -> void:
 		else:
 			_check(pr == CombatData.HitResult.HIT, "standing parry does not stop a sweep (%s)" % CombatData.HitResult.keys()[pr])
 
+	print("[posture]")
+	var cross := CombatData.get_attack(CombatData.AttackType.HEAVY)
+	var jab := CombatData.get_attack(CombatData.AttackType.LIGHT)
+	_check(jab.posture < cross.posture and cross.posture != float(cross.damage), "posture values are per attack, not copied from damage (jab %d, cross %d)" % [jab.posture, cross.posture])
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	for t in 4:
+		_step(a, b, none, hold)
+	var blocks_to_break := 0
+	var res := CombatData.HitResult.WHIFF
+	for i in 20:
+		res = b.receive_hit(cross, a, 1)
+		blocks_to_break += 1
+		if res != CombatData.HitResult.BLOCKED:
+			break
+		while b.state == Fighter.State.BLOCKSTUN:
+			_step(a, b, none, hold)
+	var expected_blocks := ceili(CombatData.POSTURE_MAX / cross.posture)
+	_check(res == CombatData.HitResult.GUARD_BREAK and blocks_to_break == expected_blocks,
+		"blocking crosses breaks the guard on block %d (expected %d)" % [blocks_to_break, expected_blocks])
+	_check(b.state == Fighter.State.BROKEN and b.health == 100, "guard broken: BROKEN state, still no damage")
+	_check(b.posture == 0.0 and b.posture_lock > 0, "posture emptied and locked after the break")
+	var acted := false
+	for t in 20:
+		_step(a, b, none, _intent(CombatData.AttackType.LIGHT, true))
+		if b.state != Fighter.State.BROKEN:
+			acted = true
+	_check(not acted, "a broken fighter can neither attack nor block")
+	var punish := b.receive_hit(jab, a, 1)
+	_check(punish == CombatData.HitResult.HIT and b.state == Fighter.State.HITSTUN, "punish lands; the hit ends the break (no stun loop)")
+	_check(not b.add_posture(200.0) and b.posture == 0.0, "no posture gain while locked (breaks cannot chain)")
+
+	# Recovery after a quiet spell.
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	b.add_posture(50.0)
+	for t in CombatData.POSTURE_RECOVER_DELAY:
+		_step(a, b, none, none)
+	_check(is_equal_approx(b.posture, 50.0), "no recovery during the first %d ticks" % CombatData.POSTURE_RECOVER_DELAY)
+	for t in 60:
+		_step(a, b, none, none)
+	_check(b.posture < 50.0 and b.posture > 0.0, "posture recovers when unpressured (%.1f)" % b.posture)
+	for t in 200:
+		_step(a, b, none, none)
+	_check(b.posture == 0.0, "posture fully recovered")
+
+	# Being parried costs the attacker posture; at high posture it breaks them.
+	for pre in [0.0, 90.0]:
+		p = _make_pair()
+		a = p[0]
+		b = p[1]
+		a.add_posture(pre)
+		pr = CombatData.HitResult.WHIFF
+		for t in 7:
+			var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, parry_i if t == 3 else (hold if t > 3 else none))
+			if r != CombatData.HitResult.WHIFF:
+				pr = r
+		var gain := jab.posture * CombatData.POSTURE_PARRIED_MULT + CombatData.POSTURE_PARRIED_FLAT
+		if pre == 0.0:
+			_check(pr == CombatData.HitResult.PARRIED and is_equal_approx(a.posture, gain), "being parried costs the attacker %.0f posture (%.0f)" % [gain, a.posture])
+		else:
+			_check(pr == CombatData.HitResult.GUARD_BREAK and a.state == Fighter.State.BROKEN, "parried at high posture: attacker's guard breaks (%s)" % CombatData.HitResult.keys()[pr])
+
+	# Counter hits build posture but never break by themselves.
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.stagger(-1)
+	a.add_posture(95.0)
+	var ch := a.receive_hit(jab, b, 1)
+	_check(ch == CombatData.HitResult.HIT and a.last_hit_counter, "hit on a staggered fighter is a counter hit")
+	_check(is_equal_approx(a.posture, CombatData.POSTURE_MAX - 1.0) and a.state == Fighter.State.HITSTUN, "a counter hit stops one point short of a break (%.0f)" % a.posture)
+
 	print("[perfect dodge]")
 	p = _make_pair()
 	a = p[0]

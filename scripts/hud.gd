@@ -23,10 +23,21 @@ const COLOR_BAR_LOW := Color(0.9, 0.28, 0.22)
 const COLOR_TRAIL := Color(1.0, 0.95, 0.88, 0.85)
 const COLOR_TEXT := Color(0.96, 0.93, 0.87)
 const COLOR_DIM := Color(0.96, 0.93, 0.87, 0.55)
+## Posture bar: thin, under the health bar, filling from its centre outward.
+const POSTURE_Y: float = BAR_Y + BAR_HEIGHT + 5.0
+const POSTURE_H: float = 6.0
+const COLOR_POSTURE := Color(0.98, 0.62, 0.2)
+const COLOR_POSTURE_HIGH := Color(1.0, 0.25, 0.15)
+const COLOR_POSTURE_LOCK := Color(0.6, 0.6, 0.65, 0.6)
+const POPUP_LIFE: float = 0.9
 
 var _player: Fighter = null
 var _enemy: Fighter = null
 var _trail: Array[float] = [1.0, 1.0]
+## Displayed posture (eases toward the real value so gains and decay read).
+var _posture_shown: Array[float] = [0.0, 0.0]
+## Short callouts under a fighter's bar: {text, side (0 player, 1 enemy), age, color}.
+var _popups: Array[Dictionary] = []
 var _headline: String = ""
 var _subline: String = ""
 var _banner: String = ""
@@ -122,6 +133,11 @@ func _on_button_pressed() -> void:
 		restart_pressed.emit()
 
 
+## Callout under a fighter's health bar ("GUARD BREAK", "COUNTER", "PARRY").
+func popup(fighter: Fighter, text: String, color: Color) -> void:
+	_popups.append({"text": text, "side": 0 if fighter == _player else 1, "age": 0.0, "color": color})
+
+
 ## Big centred countdown entry; a new text restarts the pop animation.
 func set_countdown(text: String) -> void:
 	if text != _count_text:
@@ -181,6 +197,12 @@ func _process(delta: float) -> void:
 			continue
 		var ratio := float(f.health) / float(f.max_health)
 		_trail[i] = ratio if _trail[i] < ratio else move_toward(_trail[i], ratio, TRAIL_DRAIN_PER_SEC * delta)
+		var pr := f.posture / CombatData.POSTURE_MAX
+		_posture_shown[i] = lerpf(_posture_shown[i], pr, 1.0 - exp(-14.0 * real_delta))
+	for i in range(_popups.size() - 1, -1, -1):
+		_popups[i]["age"] += real_delta
+		if _popups[i]["age"] > POPUP_LIFE:
+			_popups.remove_at(i)
 	_canvas.queue_redraw()
 
 
@@ -193,6 +215,9 @@ func _on_canvas_draw() -> void:
 		_canvas.draw_rect(Rect2(0.0, 720.0 - h, SCREEN_W, h), Color.BLACK)
 	_draw_bar(_player, BAR_MARGIN, false, _trail[0])
 	_draw_bar(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, true, _trail[1])
+	_draw_posture(_player, BAR_MARGIN, _posture_shown[0])
+	_draw_posture(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, _posture_shown[1])
+	_draw_popups()
 	_draw_combo(_enemy, BAR_MARGIN, HORIZONTAL_ALIGNMENT_LEFT)
 	_draw_combo(_player, SCREEN_W - BAR_MARGIN - BAR_WIDTH, HORIZONTAL_ALIGNMENT_RIGHT)
 
@@ -240,12 +265,42 @@ func _draw_bar(f: Fighter, x: float, mirrored: bool, trail: float) -> void:
 	var swatch_x := x + BAR_WIDTH - 12.0 if not mirrored else x
 	_canvas.draw_rect(Rect2(swatch_x, BAR_Y - 24.0, 12.0, 12.0), f.accent_color)
 	var hp_align := HORIZONTAL_ALIGNMENT_LEFT if mirrored else HORIZONTAL_ALIGNMENT_RIGHT
-	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 20.0), "%d / %d" % [f.health, f.max_health],
+	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 27.0), "%d / %d" % [f.health, f.max_health],
 		hp_align, BAR_WIDTH, 14, COLOR_DIM)
 	# Stance name on the opposite side of the HP readout.
 	var stance_align := HORIZONTAL_ALIGNMENT_RIGHT if mirrored else HORIZONTAL_ALIGNMENT_LEFT
-	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 20.0), Stances.stance_name(f.stance),
+	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 27.0), Stances.stance_name(f.stance),
 		stance_align, BAR_WIDTH, 14, f.accent_color.lerp(COLOR_TEXT, 0.4))
+
+
+## Posture: empty = invisible track; fills from the centre outward, turns red
+## near full, flashes white while broken, shows a grey track while locked.
+func _draw_posture(f: Fighter, x: float, shown: float) -> void:
+	var track := Rect2(x, POSTURE_Y, BAR_WIDTH, POSTURE_H)
+	_canvas.draw_rect(track.grow(1.0), Color(0.0, 0.0, 0.0, 0.5))
+	if f.posture_lock > 0 and not f.is_posture_broken():
+		_canvas.draw_rect(track, COLOR_POSTURE_LOCK)
+		return
+	var ratio := 1.0 if f.is_posture_broken() else clampf(shown, 0.0, 1.0)
+	if ratio <= 0.001:
+		return
+	var w := BAR_WIDTH * ratio
+	var fill := Rect2(x + (BAR_WIDTH - w) * 0.5, POSTURE_Y, w, POSTURE_H)
+	var color := COLOR_POSTURE.lerp(COLOR_POSTURE_HIGH, smoothstep(0.6, 0.95, ratio))
+	if f.is_posture_broken():
+		color = Color.WHITE if int(Time.get_ticks_msec() / 80) % 2 == 0 else COLOR_POSTURE_HIGH
+	_canvas.draw_rect(fill, color)
+
+
+func _draw_popups() -> void:
+	for pop in _popups:
+		var t: float = pop["age"] / POPUP_LIFE
+		var x := BAR_MARGIN if pop["side"] == 0 else SCREEN_W - BAR_MARGIN - BAR_WIDTH
+		var align := HORIZONTAL_ALIGNMENT_LEFT if pop["side"] == 0 else HORIZONTAL_ALIGNMENT_RIGHT
+		var c: Color = pop["color"]
+		c.a = 1.0 - smoothstep(0.6, 1.0, t)
+		var rise := -10.0 * t
+		_shadow_text(Vector2(x, BAR_Y + 100.0 + rise), pop["text"], 26, align, BAR_WIDTH, c)
 
 
 func _bar_rect(x: float, ratio: float, mirrored: bool) -> Rect2:

@@ -26,7 +26,7 @@ func _physics_process(_delta: float) -> void:
 	for i in range(_effects.size() - 1, -1, -1):
 		var e := _effects[i]
 		e["age"] += 1
-		if e["kind"] == "particle":
+		if e["kind"] == "particle" or e["kind"] == "shard":
 			var vel: Vector2 = e["vel"]
 			vel.y += e["gravity"]
 			vel *= 0.97
@@ -92,6 +92,19 @@ func parry_flash(pos: Vector2, facing: int) -> void:
 	ring(pos, c, 30.0, 10)
 	particles(pos, c, 10, 5.0, 12)
 	guard_flash(pos, facing)
+
+
+## Guard break: shards of the guard flying out, a wide ring and a burst.
+func shatter(pos: Vector2) -> void:
+	var c := Color(1.0, 0.45, 0.3)
+	ring(pos, c, 60.0, 18)
+	burst(pos, Color(1.0, 0.9, 0.8, 0.9), 18)
+	for i in 12:
+		var a := _rng.randf_range(-PI, 0.2)
+		var v := Vector2(cos(a), sin(a)) * _rng.randf_range(4.0, 8.0)
+		_effects.append({"kind": "shard", "pos": pos, "vel": v, "gravity": PARTICLE_GRAVITY, "age": 0,
+			"life": 22 + _rng.randi_range(-4, 4), "color": c, "size": _rng.randf_range(5.0, 9.0),
+			"angle": _rng.randf() * TAU})
 
 
 func dust(pos: Vector2, size: float) -> void:
@@ -169,6 +182,15 @@ func _draw() -> void:
 				var centre := pos - Vector2(face * 18.0, 0.0)
 				var from := -PI * 0.42 if face > 0 else PI - PI * 0.42
 				draw_arc(centre, 34.0 + t * 10.0, from, from + PI * 0.84, 20, color, 5.0 * (1.0 - t) + 1.5, true)
+			"shard":
+				# Tumbling triangle.
+				color.a = 1.0 - t
+				var sz: float = e["size"] * (1.0 - t * 0.5)
+				var ang: float = e["angle"] + t * 8.0
+				var pts := PackedVector2Array()
+				for k in 3:
+					pts.append(pos + Vector2.from_angle(ang + k * TAU / 3.0) * sz * (1.0 if k == 0 else 0.55))
+				draw_colored_polygon(pts, color)
 			"glint":
 				# Long thin cross that snaps out and shrinks: reads as a clean deflect.
 				var g := sin(PI * minf(t * 2.5, 1.0)) * (1.0 - t)

@@ -17,6 +17,7 @@ class Driver extends Node:
 	var prev_player_hp: int = 100
 	var prev_enemy_state: int = 0
 	var ai_states_seen: Dictionary = {}
+	var overlap_reported: bool = false
 
 	func fail(msg: String) -> void:
 		fails += 1
@@ -49,6 +50,10 @@ class Driver extends Node:
 				enemy_blocks += 1
 			prev_enemy_state = e.state
 			max_combo = maxi(max_combo, e.received_combo)
+			# Pushboxes: standing bodies never overlap (checked after the game's tick).
+			if not p.airborne and not e.airborne and not p.is_down() and not e.is_down() 					and absf(e.position.x - p.position.x) < Fighter.PUSH_HALF_WIDTH * 2.0 - 0.5 and not overlap_reported:
+				overlap_reported = true
+				fail("fighters overlapped: %.1f px apart" % absf(e.position.x - p.position.x))
 			if p.state == Fighter.State.KO or e.state == Fighter.State.KO:
 				phase = "ko"
 				ko_frame = frame
