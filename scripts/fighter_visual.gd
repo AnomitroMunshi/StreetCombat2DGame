@@ -141,6 +141,26 @@ const MECH_GAINS: Dictionary = {
 	MECH_KNEE: {HIP_X: 6.0, TORSO: -0.1, PIVOT: 0.5},
 }
 const MECH_FORWARD_ONLY: Array = [PIVOT, DROP, TH_B, SH_B, UA_B, LA_B]
+## Limb muscle profiles: (t along the bone 0..1, half-width) on the front
+## (kneecap / shin / inner-arm) side and the back (hamstring / calf / triceps)
+## side, so limbs read as legs and arms instead of tubes.
+const THIGH_FRONT: Array[Vector2] = [Vector2(0.0, 10.5), Vector2(0.3, 11.5), Vector2(0.7, 8.6), Vector2(1.0, 6.8)]
+const THIGH_BACK: Array[Vector2] = [Vector2(0.0, 10.5), Vector2(0.45, 9.8), Vector2(1.0, 6.4)]
+const SHIN_FRONT: Array[Vector2] = [Vector2(0.0, 6.4), Vector2(0.5, 5.0), Vector2(1.0, 3.9)]
+const SHIN_BACK: Array[Vector2] = [Vector2(0.0, 6.4), Vector2(0.28, 8.6), Vector2(0.62, 5.8), Vector2(1.0, 3.6)]
+const UPPER_ARM_FRONT: Array[Vector2] = [Vector2(0.0, 7.5), Vector2(0.45, 7.6), Vector2(1.0, 5.2)]
+const UPPER_ARM_BACK: Array[Vector2] = [Vector2(0.0, 7.5), Vector2(0.4, 6.8), Vector2(1.0, 5.2)]
+const FOREARM_FRONT: Array[Vector2] = [Vector2(0.0, 5.2), Vector2(0.3, 6.2), Vector2(1.0, 3.8)]
+const FOREARM_BACK: Array[Vector2] = [Vector2(0.0, 5.2), Vector2(0.3, 5.6), Vector2(1.0, 3.8)]
+const MUSCLE_SAMPLES: int = 8
+## A foot this far off the floor is a lifted (kicking / jumping) foot.
+const FOOT_LIFTED: float = 22.0
+## Toe point (0 = foot square to the shin, heel / blade leading; 1 = toes
+## pointed along the shin) for a lifted foot, by technique.
+const POINT_ROUNDHOUSE: float = 0.8
+const POINT_BALL: float = 0.3
+const POINT_RELAXED: float = 0.45
+const FOOT_POINT_RATE: float = 18.0
 const SWOOSH_POINTS: int = 10
 const SWOOSH_FADE: float = 0.12
 
@@ -419,6 +439,8 @@ var _heel := Vector2.ZERO
 var _heel_target := Vector2.ZERO
 ## Heel lifts for the legs as drawn (swapped for southpaw stances).
 var _heel_draw := Vector2.ZERO
+## Current toe point per leg (x lead, y rear), eased toward the technique's.
+var _foot_point := Vector2.ZERO
 
 @onready var fighter: Fighter = get_parent() as Fighter
 
@@ -1419,6 +1441,8 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 			j[pair[1]] = tmp
 	var pivot := _pose[PIVOT] if not _rag_on else 0.0
 	var back_toe := forward.rotated(PI * clampf(pivot, 0.0, 1.0) * signf(forward.x))
+	var target := Vector2(_toe_point_for(j[J_FOOT_F]), _toe_point_for(j[J_FOOT_B]))
+	_foot_point = _foot_point.lerp(target, 1.0 - exp(-FOOT_POINT_RATE * _last_delta))
 	var rim := fighter.outline_color
 	# 1) Rim glow (dark fighters), 2) one outline around the whole body so
 	# overlapping limbs merge into a single silhouette, 3) the filled body.
@@ -1446,11 +1470,11 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 ## The body as solid shapes. `pad` grows every shape (outline / glow passes).
 ## Far-side limbs use `far`, everything else `near`.
 func _silhouette(j: PackedVector2Array, forward: Vector2, back_toe: Vector2, pad: float, far: Color, near: Color) -> void:
-	_leg(j[J_HIP_B], j[J_KNEE_B], j[J_FOOT_B], back_toe, pad, far, _heel_draw.y * _plant)
+	_leg(j[J_HIP_B], j[J_KNEE_B], j[J_FOOT_B], back_toe, pad, far, _heel_draw.y * _plant, _foot_point.y)
 	_arm(j[J_SHOULDER_B], j[J_ELBOW_B], j[J_HAND_B], pad, far)
 	_torso(j, forward, pad, near)
 	_head(j, forward, pad, near)
-	_leg(j[J_HIP_F], j[J_KNEE_F], j[J_FOOT_F], forward, pad, near, _heel_draw.x * _plant)
+	_leg(j[J_HIP_F], j[J_KNEE_F], j[J_FOOT_F], forward, pad, near, _heel_draw.x * _plant, _foot_point.x)
 	_arm(j[J_SHOULDER_F], j[J_ELBOW_F], j[J_HAND_F], pad, near)
 
 
@@ -1466,14 +1490,91 @@ func _capsule(a: Vector2, b: Vector2, ra: float, rb: float, color: Color) -> voi
 	draw_circle(b, rb, color, true, -1.0, true)
 
 
-func _leg(hip: Vector2, knee: Vector2, ankle: Vector2, toe_dir: Vector2, pad: float, color: Color, heel_lift: float = 0.0) -> void:
-	_capsule(hip, knee, 10.5 + pad, 7.5 + pad, color)   # thigh
-	_capsule(knee, ankle, 7.5 + pad, 4.5 + pad, color)  # calf to ankle
-	# Shoe: perpendicular to the shin, toes toward toe_dir.
+## Piecewise-linear half-width of a muscle profile at t.
+static func _profile_width(profile: Array[Vector2], t: float) -> float:
+	for i in range(1, profile.size()):
+		if t <= profile[i].x:
+			var a := profile[i - 1]
+			var b := profile[i]
+			return lerpf(a.y, b.y, (t - a.x) / maxf(b.x - a.x, 0.001))
+	return profile[-1].y
+
+
+## A limb segment shaped by its muscle profiles; `front` picks which side of
+## the bone the front profile is drawn on. Rounded at both joints.
+func _muscle(a: Vector2, b: Vector2, front: Vector2, front_profile: Array[Vector2], back_profile: Array[Vector2],
+		pad: float, color: Color) -> void:
+	var d := b - a
+	if d.length_squared() < 0.01:
+		draw_circle(a, front_profile[0].y + pad, color)
+		return
+	var n := Vector2(-d.y, d.x).normalized()
+	if n.dot(front) < 0.0:
+		n = -n
+	var front_side := PackedVector2Array()
+	var back_side := PackedVector2Array()
+	for i in MUSCLE_SAMPLES + 1:
+		var t := float(i) / MUSCLE_SAMPLES
+		var c := a + d * t
+		front_side.append(c + n * (_profile_width(front_profile, t) + pad))
+		back_side.append(c - n * (_profile_width(back_profile, t) + pad))
+	back_side.reverse()
+	draw_colored_polygon(front_side + back_side, color)
+	draw_circle(a, (front_profile[0].y + back_profile[0].y) * 0.5 + pad, color, true, -1.0, true)
+	draw_circle(b, (front_profile[-1].y + back_profile[-1].y) * 0.5 + pad, color, true, -1.0, true)
+
+
+## Outside of a joint's bend (where the kneecap / elbow point is); `fallback`
+## when the limb is nearly straight.
+static func _bend_out(upper: Vector2, joint: Vector2, lower: Vector2, fallback: Vector2) -> Vector2:
+	var inner := (upper - joint).normalized() + (lower - joint).normalized()
+	if inner.length() < 0.25:
+		return fallback
+	return -inner.normalized()
+
+
+## How far a lifted foot points its toes for the current technique (0 on the floor).
+func _toe_point_for(foot: Vector2) -> float:
+	if _rag_on or fighter.ground_y - foot.y < FOOT_LIFTED:
+		return 0.0
+	if fighter.state == Fighter.State.ATTACK and fighter.current_attack != null:
+		match fighter.current_attack.type:
+			CombatData.AttackType.HIGH_KICK, CombatData.AttackType.BODY_ROUNDHOUSE, CombatData.AttackType.LOW_ROUNDHOUSE, \
+					CombatData.AttackType.JUMP_ROUNDHOUSE, CombatData.AttackType.TORNADO_540, CombatData.AttackType.KNEE, \
+					CombatData.AttackType.FLYING_KNEE, CombatData.AttackType.JUMP_KICK:
+				return POINT_ROUNDHOUSE
+			CombatData.AttackType.FRONT_KICK:
+				return POINT_BALL
+			CombatData.AttackType.KICK, CombatData.AttackType.BACK_KICK, CombatData.AttackType.AXE_KICK, \
+					CombatData.AttackType.SPIN_HOOK_KICK, CombatData.AttackType.LOW_SIDE_KICK, CombatData.AttackType.SWEEP, \
+					CombatData.AttackType.SPIN_COUNTER_KICK, CombatData.AttackType.JUMP_SPIN_KICK:
+				return 0.0
+	if fighter.state == Fighter.State.FINISHER:
+		var pose := String(fighter.script_pose)
+		if pose in ["front_extend"]:
+			return POINT_BALL
+		if pose in ["kick_strike", "back_extend", "axe_chop", "axe_raise", "shook_hit", "lowside_hit", "sweep_extend"]:
+			return 0.0
+		return POINT_ROUNDHOUSE if pose.ends_with("extend") or pose.contains("rh") or pose.contains("knee") \
+			or pose.contains("tornado") or pose == "spin_kick" else POINT_RELAXED
+	return POINT_RELAXED
+
+
+func _leg(hip: Vector2, knee: Vector2, ankle: Vector2, toe_dir: Vector2, pad: float, color: Color, heel_lift: float = 0.0,
+		point: float = 0.0) -> void:
+	# The kneecap faces the outside of the bend (the toes' way when straight).
+	var out := _bend_out(hip, knee, ankle, toe_dir)
+	_muscle(hip, knee, out, THIGH_FRONT, THIGH_BACK, pad, color)
+	_muscle(knee, ankle, out, SHIN_FRONT, SHIN_BACK, pad, color)
+	draw_circle(knee + out * 2.5, 5.0 + pad, color, true, -1.0, true)  # kneecap
+	# Shoe: square to the shin, toes toward toe_dir, rolled toward pointing
+	# along the shin for a pointed (lifted) foot.
 	var shin := (ankle - knee).normalized()
 	var toe := Vector2(-shin.y, shin.x)
 	if toe.dot(toe_dir) < 0.0:
 		toe = -toe
+	if point > 0.01:
+		toe = toe.slerp(shin, clampf(point, 0.0, 1.0) * 0.85)
 	var sole := ankle + shin * 2.5
 	if heel_lift > 0.05:
 		# Heel raised: tilt the shoe so the toes stay down on the floor.
@@ -1483,8 +1584,11 @@ func _leg(hip: Vector2, knee: Vector2, ankle: Vector2, toe_dir: Vector2, pad: fl
 
 
 func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: Color) -> void:
-	_capsule(shoulder, elbow, 7.5 + pad, 5.5 + pad, color)  # upper arm
-	_capsule(elbow, hand, 5.5 + pad, 4.5 + pad, color)      # forearm
+	# Biceps on the inside of the bend, forearm swelling below the elbow and
+	# tapering to the wrist.
+	var inside := -_bend_out(shoulder, elbow, hand, Vector2.UP)
+	_muscle(shoulder, elbow, inside, UPPER_ARM_FRONT, UPPER_ARM_BACK, pad, color)
+	_muscle(elbow, hand, inside, FOREARM_FRONT, FOREARM_BACK, pad, color)
 	draw_circle(hand, 7.0 + pad, color, true, -1.0, true)    # fist
 
 
@@ -1540,9 +1644,18 @@ func _draw_kit(j: PackedVector2Array, accent: Color, forward: Vector2) -> void:
 	var wave := sin(_time * 9.0) * 3.0
 	draw_line(band_back, band_back - forward * 17.0 + Vector2(0.0, 4.0 + wave), accent, 3.0, true)
 	draw_line(band_back, band_back - forward * 13.0 + Vector2(0.0, 9.0 + wave), accent, 2.5, true)
+	# Wrist wraps: bands across the forearm (round dots read as joint markers).
 	for pair in [[J_ELBOW_F, J_HAND_F], [J_ELBOW_B, J_HAND_B]]:
-		var wrist: Vector2 = j[pair[0]].lerp(j[pair[1]], 0.78)
-		draw_circle(wrist, 4.8, accent.darkened(0.15), true, -1.0, true)
+		var e: Vector2 = j[pair[0]]
+		var h: Vector2 = j[pair[1]]
+		if e.distance_squared_to(h) < 1.0:
+			continue
+		var along := (h - e).normalized()
+		var across := Vector2(-along.y, along.x)
+		for k in 2:
+			var c := e.lerp(h, 0.7 + k * 0.1)
+			var half := _profile_width(FOREARM_FRONT, 0.7 + k * 0.1) + 0.6
+			draw_line(c - across * half, c + across * half, accent.darkened(0.15), 3.2, true)
 
 
 ## States where the feet are planted on the floor (legs solved by IK).
