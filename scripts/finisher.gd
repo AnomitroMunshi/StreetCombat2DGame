@@ -63,6 +63,17 @@ const WALL_CRUSH_CHANCE: float = 0.6
 const DEFAULT_WALL_ENTRY: Array[StringName] = [&"knee_windup", &"knee", &"heavy_strike", &"palm_windup", &"palm_strike"]
 ## The attacker never steps closer than this to the victim.
 const MIN_GAP: float = 88.0
+## Cinematic playback speed (shared by every finisher; a beat may set its own
+## "speed"): set-up beats, strikes, the knockout blow (first KO_SLOW_TICKS
+## ticks), the start of the fall, wall impacts, then a smooth return to 1x
+## over SETTLE_TICKS after the knockout.
+const SPEED_SETUP: float = 0.75
+const SPEED_STRIKE: float = 0.55
+const SPEED_KO: float = 0.22
+const SPEED_FALL: float = 0.38
+const SPEED_WALL: float = 0.3
+const KO_SLOW_TICKS: int = 8
+const SETTLE_TICKS: int = 30
 ## How each striking pose drives the victim (reaction pose and impact direction);
 ## anything not listed is a straight blow.
 const POSE_KIND: Dictionary = {
@@ -74,7 +85,7 @@ const POSE_KIND: Dictionary = {
 	&"uppercut_strike": CombatData.ImpactKind.RISING, &"knee": CombatData.ImpactKind.RISING,
 	&"fknee_hit": CombatData.ImpactKind.RISING, &"rpalm_hit": CombatData.ImpactKind.RISING,
 	&"axe_chop": CombatData.ImpactKind.DOWNWARD, &"overhand_hit": CombatData.ImpactKind.DOWNWARD,
-	&"hammer_strike": CombatData.ImpactKind.DOWNWARD,
+	&"hammer_strike": CombatData.ImpactKind.DOWNWARD, &"rbody_hit": CombatData.ImpactKind.HOOK,
 }
 ## Low strikes: the victim's lead knee buckles.
 const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_extend"]
@@ -160,6 +171,25 @@ func _init(finisher_kind: Kind, atk: Fighter, vic: Fighter) -> void:
 		atk.clamp_to_arena()
 
 
+## Playback speed for the current tick (1.0 when done).
+func playback_speed() -> float:
+	if done or _index < 0 or _index >= _beats.size():
+		return 1.0
+	var beat := _beats[_index]
+	if beat.has("speed"):
+		return beat["speed"]
+	if beat.get("final", false):
+		if _beat_tick < KO_SLOW_TICKS:
+			return SPEED_KO
+		var u := float(_beat_tick - KO_SLOW_TICKS) / maxf(float(beat["ticks"]) - KO_SLOW_TICKS, 1.0)
+		return lerpf(SPEED_KO, SPEED_FALL, smoothstep(0.0, 1.0, u))
+	if _index > 0 and _beats[_index - 1].get("final", false):
+		return lerpf(SPEED_FALL, 1.0, smoothstep(0.0, 1.0, float(_beat_tick) / SETTLE_TICKS))
+	if beat.get("hit", false):
+		return SPEED_WALL if beat.get("wall", false) else SPEED_STRIKE
+	return SPEED_SETUP
+
+
 func get_display_name() -> String:
 	return DISPLAY_NAMES[kind]
 
@@ -221,7 +251,7 @@ func _start_beat(beat: Dictionary) -> Dictionary:
 				_:
 					victim.script_pose = &"hitstun_heavy" if victim.hit_counter % 2 == 0 else &"hitstun"
 	return {"pos": contact, "power": beat.get("power", 1), "final": final, "wall": beat.get("wall", false),
-		"dir": _dir, "kind": strike_kind}
+		"dir": _dir, "kind": strike_kind, "high": high}
 
 
 func _move(fighter: Fighter, speed: float, is_attacker: bool) -> void:
@@ -342,33 +372,35 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
 			]
 		Kind.FINAL_BELL:
-			# Boxing: dig a body hook, a second body shot, then a rising uppercut
-			# that lifts them off their feet and drops them on their back.
+			# Boxing: a lead body hook folds them, a rear body hook (other arm,
+			# harder) doubles them over, then a deep crouch and a rising uppercut
+			# lifts them up and back onto their back.
 			return [
 				{"ticks": 8, "atk": &"bhook_load", "def": &"stagger"},
-				{"ticks": 8, "atk": &"bhook_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 1.5, "def_move": 1.2},
-				{"ticks": 6, "atk": &"bhook_load", "def": &"hitstun_body"},
-				{"ticks": 8, "atk": &"bhook_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 1.0, "def_move": 1.0},
-				{"ticks": 10, "atk": &"uppercut_windup", "def": &"hitstun_body"},
-				{"ticks": 18, "atk": &"uppercut_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
-					"ko_vy": -15.0, "ko_drift": 8.0, "ko_rolls": 0, "ko_tumble": false},
-				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+				{"ticks": 8, "atk": &"bhook_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 1.5, "def_move": 1.0},
+				{"ticks": 7, "atk": &"rbody_load", "def": &"hitstun_body"},
+				{"ticks": 9, "atk": &"rbody_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 1.0, "def_move": 1.8},
+				{"ticks": 12, "atk": &"upper_load_deep", "def": &"hitstun_body"},
+				{"ticks": 26, "atk": &"uppercut_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -14.0, "ko_drift": 5.0, "ko_rolls": 0, "ko_tumble": false},
+				{"ticks": 55, "atk": &"guard", "def": &"knock_fly"},
 			]
 		Kind.EIGHT_COUNT:
-			# Boxing: slip under, a six-punch flurry (hook, hook, jab, cross,
-			# hook, body), then a power cross that tumbles them away.
+			# Boxing: slip under, six punches alternating arms and heights (lead
+			# hook, rear hook, jab, lead body hook, rear body hook, uppercut),
+			# then a loaded power cross that sends them flying sideways, twisting.
 			return [
 				{"ticks": 8, "atk": &"slip_dip", "def": &"stagger"},
-				{"ticks": 4, "atk": &"lhook_hit", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
-				{"ticks": 4, "atk": &"rhook_hit", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
-				{"ticks": 4, "atk": &"jab_strike", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
-				{"ticks": 4, "atk": &"heavy_strike", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
-				{"ticks": 4, "atk": &"lhook_hit", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
-				{"ticks": 5, "atk": &"bhook_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 0.8, "def_move": 1.0},
-				{"ticks": 10, "atk": &"heavy_windup", "def": &"stagger"},
-				{"ticks": 18, "atk": &"heavy_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
-					"ko_vy": -10.0, "ko_drift": 15.0, "ko_rolls": 2, "ko_tumble": true},
-				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+				{"ticks": 5, "atk": &"lhook_hit", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 5, "atk": &"rhook_hit", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 5, "atk": &"jab_strike", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 5, "atk": &"bhook_hit", "def": &"hitstun_body", "hit": true, "high": false, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 5, "atk": &"rbody_hit", "def": &"hitstun_body", "hit": true, "high": false, "atk_move": 0.8, "def_move": 1.0},
+				{"ticks": 6, "atk": &"uppercut_strike", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 0.5, "def_move": 1.0},
+				{"ticks": 12, "atk": &"heavy_windup", "def": &"stagger"},
+				{"ticks": 26, "atk": &"heavy_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -6.0, "ko_drift": 17.0, "ko_rolls": 0, "ko_tumble": true},
+				{"ticks": 55, "atk": &"guard", "def": &"knock_fly"},
 			]
 		Kind.CYCLONE_360:
 			# Taekwondo: a double kick (front, then high), coil, jump into a full

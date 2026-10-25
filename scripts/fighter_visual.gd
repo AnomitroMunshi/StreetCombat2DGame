@@ -255,6 +255,11 @@ var _lhook_hit := PackedFloat32Array([0.3, 0.1, 1.62, 2.5, 0.85, 3.0, 0.6, -0.1,
 var _rhook_load := PackedFloat32Array([0.15, 0.15, 0.95, 2.95, 0.6, 2.9, 0.55, -0.15, -0.5, -0.45, -4.0, 0.0, 0.0, 16.0])
 var _rhook_hit := PackedFloat32Array([0.35, 0.05, 0.9, 2.9, 1.62, 2.5, 0.7, 0.1, -0.6, -0.65, 10.0, 0.0, 0.8, -18.0])
 # Body hook: dip at the knees and dig the lead fist in at rib height.
+# Rear-hand body hook (finishers): the other arm digging into the ribs.
+var _rbody_load := PackedFloat32Array([0.45, 0.3, 0.95, 2.95, 0.6, 2.6, 0.95, -0.65, -0.4, -1.0, -4.0, 0.0, 0.0, 14.0])
+var _rbody_hit := PackedFloat32Array([0.6, 0.35, 0.95, 2.95, 1.3, 1.6, 1.0, -0.7, -0.45, -1.05, 10.0, 0.0, 0.8, -14.0])
+# Deep uppercut load: sat down low on bent knees, rear glove dropped.
+var _upper_load_deep := PackedFloat32Array([0.5, 0.2, 0.9, 2.75, 0.1, 0.8, 1.3, -0.75, -0.55, -1.45, -6.0, 0.0, 0.3, 6.0])
 var _bhook_load := PackedFloat32Array([0.4, 0.3, 0.6, 2.4, 0.85, 3.0, 0.9, -0.6, -0.4, -1.0, -4.0, 0.0, 0.0, 12.0])
 var _bhook_hit := PackedFloat32Array([0.55, 0.35, 1.25, 1.55, 0.85, 3.0, 1.0, -0.7, -0.45, -1.05, 8.0, 0.0, 0.2, -4.0])
 # Overhand: rear fist cocked high and back, then looping over the top and down.
@@ -512,6 +517,7 @@ func _ready() -> void:
 		&"fknee_hit": _fknee_hit, &"gyaku_load": _gyaku_load, &"gyaku_hit": _gyaku_hit, &"knife_hit": _knife_hit,
 		&"rpalm_hit": _rpalm_hit, &"lowside_hit": _lowside_hit, &"sweep_load": _sweep_load, &"sweep_extend": _sweep_extend,
 		&"back_extend": _back_extend, &"jrh_hit": _jrh_hit, &"deflect": _deflect,
+		&"rbody_load": _rbody_load, &"rbody_hit": _rbody_hit, &"upper_load_deep": _upper_load_deep,
 		# Directional reactions for finisher victims.
 		&"hitstun_hook": _hitstun_hook, &"hitstun_up": _hitstun_up, &"hitstun_down": _hitstun_down,
 		&"hitstun_leg": _hitstun_leg, &"hitstun_heavy": _hitstun_heavy,
@@ -2201,7 +2207,7 @@ func _striking_joint() -> int:
 			return J_HAND_F
 		if pose_name.contains("kick") or pose_name == "knee" or pose_name.ends_with("_extend") or pose_name == "axe_chop":
 			return J_FOOT_F if pose_name != "knee" else J_KNEE_F
-		if pose_name in ["rhook_hit", "overhand_hit", "uppercut_strike"]:
+		if pose_name in ["rhook_hit", "overhand_hit", "uppercut_strike", "rbody_hit"]:
 			return J_HAND_B
 		if pose_name in ["lhook_hit", "bhook_hit"]:
 			return J_HAND_F

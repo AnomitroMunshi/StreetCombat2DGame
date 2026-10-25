@@ -63,10 +63,10 @@ const FIGHT_AIR_LIFT: float = 0.45
 const CAMERA_KICK_PER_DAMAGE: float = 0.7
 const CAMERA_KICK_DECAY: float = 12.0
 ## Short slow-motion beats on skill moments (ticks, time scale).
-const SLOWMO_PARRY := Vector2(10.0, 0.35)
-const SLOWMO_PERFECT_DODGE := Vector2(10.0, 0.4)
-const SLOWMO_COUNTER := Vector2(6.0, 0.45)
-const SLOWMO_GUARD_BREAK := Vector2(14.0, 0.3)
+const SLOWMO_PARRY := Vector2(6.0, 0.4)
+const SLOWMO_PERFECT_DODGE := Vector2(6.0, 0.45)
+const SLOWMO_COUNTER := Vector2(4.0, 0.5)
+const SLOWMO_GUARD_BREAK := Vector2(8.0, 0.35)
 const VIEW_MIN := Vector2(-200.0, -200.0)
 const VIEW_MAX := Vector2(1480.0, 920.0)
 const HIT_COLOR := Color(1.0, 0.9, 0.6)
@@ -141,7 +141,7 @@ func _ready() -> void:
 	_fx_rng.seed = 7
 	# Which finisher plays is presentation, not combat: vary it every match.
 	_finisher_rng.randomize()
-	Engine.time_scale = 1.0
+	set_game_speed(1.0)
 	# The camera is moved in _process, so it must not be physics-interpolated.
 	camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	player.position = Vector2(PLAYER_PRE_X, FLOOR_Y)
@@ -218,6 +218,8 @@ func _physics_process(_delta: float) -> void:
 		var event := _finisher.tick()
 		player.tick()
 		enemy.tick()
+		# Shared cinematic speed: every finisher plays at its beats' speeds.
+		set_game_speed(_finisher.playback_speed() * _base_time_scale())
 		_finisher_feedback(event)
 		_finisher_ambient()
 		if _finisher.done:
@@ -301,7 +303,7 @@ func training_action(action: StringName) -> void:
 		&"speed":
 			training.cycle_speed()
 			if _slowmo_ticks <= 0:
-				Engine.time_scale = training.speed()
+				set_game_speed(training.speed())
 		&"focus":
 			training.infinite_focus = not training.infinite_focus
 		&"next_finisher":
@@ -367,7 +369,7 @@ func _reset_training() -> void:
 	_follow_victim = false
 	_hitstop = 0
 	_slowmo_ticks = 0
-	Engine.time_scale = _base_time_scale()
+	set_game_speed(_base_time_scale())
 	hud.set_banner("", Color.WHITE)
 	hud.set_letterbox(false)
 	hud.set_message("", "")
@@ -399,7 +401,7 @@ func _reset_training() -> void:
 func _exit_training() -> void:
 	training.unpause()
 	StyleRegistry.skip_selection = true
-	Engine.time_scale = 1.0
+	set_game_speed(1.0)
 	get_tree().reload_current_scene()
 
 
@@ -477,7 +479,7 @@ func change_style() -> void:
 		hud.show_style_select(StyleRegistry.all(), player.style.id)
 	elif _round_state == RoundState.RESULT:
 		StyleRegistry.skip_selection = false
-		Engine.time_scale = 1.0
+		set_game_speed(1.0)
 		get_tree().reload_current_scene()
 
 
@@ -508,7 +510,7 @@ func start_match(skip_intro: bool = false) -> void:
 func restart_match() -> void:
 	StyleRegistry.player_choice = player.style.id if player.style != null else StyleRegistry.player_choice
 	StyleRegistry.skip_selection = true
-	Engine.time_scale = 1.0
+	set_game_speed(1.0)
 	get_tree().reload_current_scene()
 
 
@@ -782,6 +784,20 @@ func _hit_sound(tier: int, defender: Fighter, kind: int = CombatData.ImpactKind.
 		audio.play(&"hit_crack", -4.0, 0.08)
 
 
+## A finisher blow's sound, by how it travelled and where it landed.
+func _finisher_hit_sound(power: int, event: Dictionary) -> void:
+	if not event.get("high", true):
+		audio.play(&"hit_body", -1.0 if power >= 2 else -3.0)
+		return
+	match event.get("kind", CombatData.ImpactKind.STRAIGHT):
+		CombatData.ImpactKind.HOOK:
+			audio.play(&"hit_hook", -2.0)
+		CombatData.ImpactKind.RISING:
+			audio.play(&"hit_upper", -2.0)
+		_:
+			audio.play(&"hit_heavy" if power >= 2 else &"hit_snap", -2.0)
+
+
 ## Developer overlay bookkeeping: where a hit connected, and how far the drawn
 ## striking limb was from it (a large gap means the visual and hitbox disagree).
 func _record_contact(attacker: Fighter, contact: Vector2) -> void:
@@ -878,7 +894,7 @@ func _finisher_feedback(event: Dictionary) -> void:
 	_finisher_kind_fx(pos, fdir, power, event["final"])
 	var hit_dir := CombatData.dir_for_kind(event.get("kind", CombatData.ImpactKind.STRAIGHT), event["dir"])
 	if event["final"]:
-		_hitstop = maxi(_hitstop, 12)
+		_hitstop = maxi(_hitstop, 5)  # short: the slow motion carries the moment
 		_shake(30, 12.0)
 		fx.hit(pos, hit_dir, 3, KO_COLOR)
 		fx.ring(pos, Color.WHITE, 56.0, 20)
@@ -887,14 +903,12 @@ func _finisher_feedback(event: Dictionary) -> void:
 		audio.play(&"ko_boom")
 		_camera_punch += 0.12
 		_follow_victim = true
-		_slowmo_ticks = SLOWMO_TICKS
-		Engine.time_scale = SLOWMO_SCALE
 	else:
-		_hitstop = maxi(_hitstop, 2 + power * 2)
+		_hitstop = maxi(_hitstop, 1 + power)
 		_shake(4 + power * 3, 2.0 + power * 2.0)
-		fx.hit(pos, hit_dir, clampi(power, 1, 3), HIT_COLOR)
+		fx.hit(pos, hit_dir, clampi(power, 1, 3), HIT_COLOR, event.get("kind", CombatData.ImpactKind.STRAIGHT), not event.get("high", true))
 		_kick_camera(hit_dir, 3.0 + power * 3.0)
-		audio.play(&"hit_heavy" if power >= 2 else &"hit_light")
+		_finisher_hit_sound(power, event)
 		_camera_punch += 0.015 * power
 
 
@@ -974,7 +988,17 @@ func _tick_slowmo() -> void:
 		return
 	_slowmo_ticks -= 1
 	if _slowmo_ticks == 0:
-		Engine.time_scale = _base_time_scale()
+		set_game_speed(_base_time_scale())
+
+
+## Game speed for slow motion. Engine.time_scale alone does not slow the
+## simulation (it runs on fixed 60 Hz ticks), so the tick rate itself is
+## scaled; time_scale is set too so delta-driven presentation follows.
+## Physics interpolation keeps motion smooth between the slower ticks.
+static func set_game_speed(speed: float) -> void:
+	speed = clampf(speed, 0.1, 1.0)
+	Engine.time_scale = speed
+	Engine.physics_ticks_per_second = maxi(roundi(CombatData.TICK_RATE * speed), 6)
 
 
 ## Normal speed, or the training speed setting.
@@ -988,7 +1012,7 @@ func _end_round() -> void:
 		_reset_training()
 		return
 	_set_round_state(RoundState.KO)
-	Engine.time_scale = 1.0
+	set_game_speed(1.0)
 	_slowmo_ticks = 0
 	player.stop_combat()
 	enemy.stop_combat()
@@ -1222,7 +1246,7 @@ func _slowmo(beat: Vector2) -> void:
 		_slowmo_ticks = maxi(_slowmo_ticks, int(beat.x))
 		return
 	_slowmo_ticks = int(beat.x)
-	Engine.time_scale = beat.y
+	set_game_speed(beat.y)
 
 
 func _process(delta: float) -> void:

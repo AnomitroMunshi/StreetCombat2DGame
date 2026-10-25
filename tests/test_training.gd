@@ -11,6 +11,7 @@ class Driver extends Node:
 	var phase: String = "start"
 	var phase_frame: int = 0
 	var tick_mark: int = 0
+	var saw_slow: bool = false
 
 	func check(cond: bool, msg: String) -> void:
 		print(("  ok   " if cond else "  FAIL ") + msg)
@@ -122,11 +123,16 @@ class Driver extends Node:
 					main.call("training_action", &"play_finisher")
 				if phase_frame == 22:
 					check(state == "FINISHER", "PLAY FINISHER starts the selected finisher")
+				if state == "FINISHER" and Engine.physics_ticks_per_second < 60:
+					saw_slow = true
+				if phase_frame > 30 and state == "FIGHTING" and phase == "finisher":
+					check(saw_slow, "the finisher actually slows the simulation (cinematic speed)")
 				if phase_frame > 30 and state == "FIGHTING":
 					check(main.get("last_finisher_name") != "", "a finisher played (%s)" % main.get("last_finisher_name"))
 					check(e.health == 100 and e.state == Fighter.State.IDLE and p.state == Fighter.State.IDLE,
 						"after the finisher both are back, fresh, in training")
-					check(is_equal_approx(Engine.time_scale, 1.0), "time scale restored after the finisher")
+					check(is_equal_approx(Engine.time_scale, 1.0) and Engine.physics_ticks_per_second == 60,
+						"game speed restored after the finisher (ticks %d)" % Engine.physics_ticks_per_second)
 					go("exit")
 				elif phase_frame == 900:
 					check(false, "finisher returned to training")
@@ -136,7 +142,8 @@ class Driver extends Node:
 					main.call("training_action", &"exit")
 				if phase_frame == 20:
 					check(state == "PRE_MATCH" and tr == null, "EXIT returns to the pre-match screen (%s)" % state)
-					check(not tree.paused and is_equal_approx(Engine.time_scale, 1.0), "nothing left paused or slowed")
+					check(not tree.paused and is_equal_approx(Engine.time_scale, 1.0) and Engine.physics_ticks_per_second == 60,
+						"nothing left paused or slowed")
 					print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 					tree.quit(fails)
 
