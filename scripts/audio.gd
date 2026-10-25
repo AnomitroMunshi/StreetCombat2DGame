@@ -177,6 +177,13 @@ func _build_sfx() -> void:
 	_echo(b, 0.18, 0.3)
 	_sfx[&"finisher_sting"] = _finish(b)
 
+	# Parry: bright metallic ting (inharmonic ring) over a sharp click.
+	b = _buffer(0.7)
+	_noise(b, 0.0, 0.02, 0.004, 0.95, 0.8, rng)
+	_gong(b, 0.0, 0.65, 1180.0, 0.55)
+	_thump(b, 0.0, 0.08, 900.0, 600.0, 0.02, 0.4)
+	_sfx[&"parry"] = _finish(b, 0.75)
+
 	# Countdown: a dry taiko beat with a short high ping (3, 2, 1).
 	b = _buffer(0.6)
 	_thump(b, 0.0, 0.4, 120.0, 62.0, 0.09, 1.0)

@@ -26,6 +26,15 @@ extends Node2D
 ## the air, bounce once off the wall and once off the floor, then roll backward
 ## `pending_rolls` times along the floor. A rolled knockdown gets up from a crouch.
 ##
+## Parry: a fresh block press opens a short parry window (CombatData.PARRY_*).
+## A hit inside it is deflected: the defender enters PARRY (a short deflect that
+## any buffered attack cancels, the counter) and the attacker enters STAGGER.
+## Unused attempts cost recovery and start a cooldown, so tapping Shift is not
+## a free defence.
+##
+## Perfect dodge: an active hitbox passing through a fighter during the dodge's
+## invulnerable frames ends the dodge early (sooner counter).
+##
 ## Finishers: a lethal hit puts the defender in FINISHED instead of KO. main.gd
 ## then hands both fighters to a FinisherDirector (attacker -> FINISHER), which
 ## drives poses/movement through the scripted_* API and ends with finish_ko().
@@ -37,8 +46,12 @@ signal attack_started(fighter: Fighter, attack: CombatData.Attack)
 signal wall_hit(fighter: Fighter)
 signal rolled(fighter: Fighter)
 signal dodged(fighter: Fighter)
+## The fighter deflected an attack (defender side).
+signal parried(fighter: Fighter, attacker: Fighter)
+## An attack passed through the fighter's dodge i-frames.
+signal perfect_evaded(fighter: Fighter)
 
-enum State { IDLE, WALK, CROUCH, ATTACK, BLOCK, BLOCKSTUN, GUARD_RELEASE, HITSTUN, JUMP, LAND, DODGE, KNOCKDOWN, GETUP, FINISHER, FINISHED, KO }
+enum State { IDLE, WALK, CROUCH, ATTACK, BLOCK, BLOCKSTUN, GUARD_RELEASE, HITSTUN, JUMP, LAND, DODGE, KNOCKDOWN, GETUP, FINISHER, FINISHED, KO, PARRY, STAGGER }
 enum Phase { NONE, STARTUP, ACTIVE, RECOVERY }
 
 ## Hurtbox relative to the feet. Symmetric, so facing does not change it.
@@ -121,6 +134,15 @@ var dodge_request: int = 0
 ## Current dodge: world direction, and +1 (slip in) / -1 (backstep) relative to facing.
 var dodge_world_dir: int = 0
 var dodge_relative: int = -1
+var dodge_perfect: bool = false
+# Parry bookkeeping (see CombatData.PARRY_*).
+var parry_buffer_frames: int = 0
+## Parry window of the current guard: hits while state_frame < this are parried
+## (0 = this guard is not a parry attempt).
+var parry_window: int = 0
+var parry_cooldown: int = 0
+## Last guard drop was a whiffed parry (presentation / debug).
+var parry_whiffed: bool = false
 ## Stance (presentation only; see Stances).
 var stance: int = Stances.Kind.BLADED
 
@@ -167,6 +189,8 @@ func push_intent(intent: CombatData.Intent) -> void:
 	if intent.dodge != 0:
 		dodge_request = intent.dodge
 		dodge_buffer_frames = CombatData.DODGE_BUFFER_FRAMES
+	if intent.parry:
+		parry_buffer_frames = CombatData.PARRY_BUFFER_FRAMES
 
 
 ## Drops any queued input. Used when the round ends.
@@ -176,6 +200,7 @@ func stop_combat() -> void:
 	jump_buffer_frames = 0
 	dodge_buffer_frames = 0
 	dodge_request = 0
+	parry_buffer_frames = 0
 	move_input = 0
 	block_held = false
 	crouch_held = false
@@ -202,16 +227,19 @@ func tick() -> void:
 			_tick_dodge()
 		State.JUMP:
 			_tick_jump()
-		State.HITSTUN, State.BLOCKSTUN, State.LAND, State.GUARD_RELEASE:
+		State.PARRY:
+			_tick_parry()
+		State.HITSTUN, State.BLOCKSTUN, State.LAND, State.GUARD_RELEASE, State.STAGGER:
 			if state_frame >= stun_frames:
 				if airborne:
 					# Stun ran out mid-air: drift down with no air attack left.
 					air_attack_used = true
 					_enter_state(State.JUMP)
 				elif state == State.BLOCKSTUN and block_held:
-					# Still holding the guard: it is already up.
+					# Still holding the guard: it is already up (no new parry attempt).
 					_enter_state(State.BLOCK)
 					state_frame = CombatData.BLOCK_STARTUP_FRAMES
+					parry_window = 0
 				else:
 					_enter_state(State.IDLE)
 		State.KNOCKDOWN:
@@ -242,7 +270,7 @@ func _tick_neutral() -> void:
 	if _consume_jump():
 		return
 	if block_held:
-		_enter_state(State.BLOCK)
+		_enter_block()
 		return
 	if crouch_held:
 		_enter_state(State.CROUCH)
@@ -267,8 +295,40 @@ func _tick_neutral() -> void:
 func _tick_block() -> void:
 	var wants_out := not block_held or buffered_attack != CombatData.AttackType.NONE or jump_buffer_frames > 0
 	if wants_out:
+		# Dropping an unused parry attempt early is a whiffed parry: slower recovery.
+		parry_whiffed = parry_window > 0 and state_frame < CombatData.PARRY_WHIFF_FRAMES
 		_enter_state(State.GUARD_RELEASE)
-		stun_frames = CombatData.BLOCK_RELEASE_FRAMES
+		stun_frames = CombatData.PARRY_WHIFF_RECOVERY if parry_whiffed else CombatData.BLOCK_RELEASE_FRAMES
+		parry_window = 0
+
+
+## Raises the guard. A recent block press (and no cooldown) makes it a parry attempt.
+func _enter_block() -> void:
+	_enter_state(State.BLOCK)
+	parry_window = 0
+	if parry_buffer_frames > 0 and parry_cooldown == 0:
+		parry_window = CombatData.PARRY_WINDOW_FRAMES
+		parry_cooldown = CombatData.PARRY_COOLDOWN_FRAMES
+	parry_buffer_frames = 0
+
+
+## Deflect after a successful parry. Any buffered attack (the counter), dodge or
+## jump cancels it immediately.
+func _tick_parry() -> void:
+	if _consume_buffered_attack(1) or _consume_dodge() or _consume_jump():
+		return
+	if state_frame >= CombatData.PARRY_DEFLECT_FRAMES:
+		if block_held:
+			_enter_state(State.BLOCK)
+			state_frame = CombatData.BLOCK_STARTUP_FRAMES
+			parry_window = 0
+		else:
+			_enter_state(State.IDLE)
+
+
+## True while a hit would be parried.
+func is_parry_active() -> bool:
+	return state == State.BLOCK and state_frame < parry_window
 
 
 func _tick_jump() -> void:
@@ -381,6 +441,10 @@ func _tick_buffers() -> void:
 		jump_buffer_frames -= 1
 	if dodge_buffer_frames > 0:
 		dodge_buffer_frames -= 1
+	if parry_buffer_frames > 0:
+		parry_buffer_frames -= 1
+	if parry_cooldown > 0:
+		parry_cooldown -= 1
 
 
 func _consume_buffered_attack(step: int) -> bool:
@@ -400,6 +464,7 @@ func _consume_dodge() -> bool:
 	dodge_world_dir = dodge_request
 	dodge_relative = 1 if dodge_world_dir == facing else -1
 	dodge_request = 0
+	dodge_perfect = false
 	_enter_state(State.DODGE)
 	dodged.emit(self)
 	return true
@@ -412,7 +477,8 @@ func _tick_dodge() -> void:
 		var u := float(f - CombatData.DODGE_INVULN_START) / CombatData.DODGE_MOVE_FRAMES
 		var speed := CombatData.DODGE_FORWARD_SPEED if dodge_relative > 0 else CombatData.DODGE_BACK_SPEED
 		position.x += dodge_world_dir * speed * 2.0 * (1.0 - u)
-	if f >= CombatData.DODGE_FRAMES:
+	# A perfect dodge skips the recovery once the i-frames end.
+	if f >= CombatData.DODGE_FRAMES or (dodge_perfect and f >= CombatData.DODGE_INVULN_END):
 		_enter_state(State.IDLE)
 		# Counter opportunity: an attack buffered during the dodge fires now.
 		_tick_neutral()
@@ -424,7 +490,7 @@ func _tick_crouch() -> void:
 	if _consume_buffered_attack(1) or _consume_dodge() or _consume_jump():
 		return
 	if block_held:
-		_enter_state(State.BLOCK)
+		_enter_block()
 	elif not crouch_held:
 		_enter_state(State.IDLE)
 
@@ -434,6 +500,13 @@ func is_crouched() -> bool:
 	if state == State.CROUCH:
 		return true
 	return crouch_held and (state == State.BLOCK or state == State.BLOCKSTUN or state == State.GUARD_RELEASE)
+
+
+## Called by main.gd when an active hitbox passes through this fighter's i-frames.
+func perfect_evade() -> void:
+	if state == State.DODGE and not dodge_perfect:
+		dodge_perfect = true
+		perfect_evaded.emit(self)
 
 
 ## True during the dodge's invulnerable window.
@@ -525,12 +598,17 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	var finisher := step >= CombatData.MAX_COMBO_CHAIN
 	var knockback := attack.knockback * (CombatData.FINISHER_KNOCKBACK_MULT if finisher else 1.0)
 
+	var facing_attacker := facing == -push_dir
+	# Low attacks (sweeps) must be blocked (or parried) low: S + Shift.
+	var right_height := not attack.low or crouch_held
+	if is_parry_active() and facing_attacker and right_height:
+		_parry(attacker, push_dir)
+		return CombatData.HitResult.PARRIED
 	var guarding := (state == State.BLOCK and state_frame >= CombatData.BLOCK_STARTUP_FRAMES) \
-		or (state == State.BLOCKSTUN and block_held)
-	# Low attacks (sweeps) must be blocked low (S + Shift).
-	if attack.low and not crouch_held:
+		or (state == State.BLOCKSTUN and block_held) or state == State.PARRY
+	if not right_height:
 		guarding = false
-	if guarding and facing == -push_dir:
+	if guarding and facing_attacker:
 		_enter_state(State.BLOCKSTUN)
 		block_counter += 1
 		stun_frames = attack.blockstun
@@ -575,6 +653,28 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	var base_stun := attack.hitstun + (CombatData.FINISHER_HITSTUN_BONUS if finisher else 0)
 	stun_frames = maxi(base_stun - CombatData.COMBO_HITSTUN_DECAY * maxi(received_combo - CombatData.MAX_COMBO_CHAIN, 0), CombatData.MIN_COMBO_HITSTUN)
 	return CombatData.HitResult.HIT
+
+
+func _parry(attacker: Fighter, push_dir: int) -> void:
+	_enter_state(State.PARRY)
+	parry_window = 0
+	parry_cooldown = 0  # a successful parry can be chained into the next one
+	block_counter += 1
+	velocity_x = push_dir * 1.0
+	attacker.stagger(-push_dir)
+	parried.emit(self, attacker)
+
+
+## Thrown off balance by a parry: the swing is lost and the fighter reels.
+func stagger(push_dir: int) -> void:
+	current_attack = null
+	combo_step = 0
+	_enter_state(State.STAGGER)
+	stun_frames = CombatData.PARRY_STAGGER_FRAMES
+	velocity_x = push_dir * CombatData.PARRY_PUSHBACK
+	if airborne:
+		jump_vx = 0.0
+		velocity_y = minf(velocity_y, CombatData.AIR_HIT_POP_VELOCITY)
 
 
 ## Sends the fighter flying backward off their feet (knockdown or KO).
@@ -716,8 +816,12 @@ func get_debug_label() -> String:
 		text = "%s #%d %s %d/%d" % [
 			current_attack.display_name, combo_step, Phase.keys()[get_phase()],
 			state_frame, current_attack.total_frames()]
-	elif state == State.HITSTUN or state == State.BLOCKSTUN or state == State.LAND or state == State.GUARD_RELEASE:
-		text = "%s %d/%d" % [get_state_name(), state_frame, stun_frames]
+	elif state == State.HITSTUN or state == State.BLOCKSTUN or state == State.LAND or state == State.GUARD_RELEASE \
+			or state == State.STAGGER:
+		text = "%s %d/%d%s" % [get_state_name(), state_frame, stun_frames,
+			" (parry whiff)" if state == State.GUARD_RELEASE and parry_whiffed else ""]
+	elif is_parry_active():
+		text = "BLOCK f%d  PARRY %d" % [state_frame, parry_window - state_frame]
 	elif state == State.KNOCKDOWN:
 		if rolling:
 			text = "KNOCKDOWN rolling %d/%d" % [roll_distance, roll_target]
@@ -731,4 +835,6 @@ func get_debug_label() -> String:
 		text += "  air h%d" % roundi(ground_y - position.y)
 	if buffered_attack != CombatData.AttackType.NONE:
 		text += "  buf:%s(%d)" % [CombatData.attack_name(buffered_attack), buffer_frames]
+	if parry_cooldown > 0:
+		text += "  pcd %d" % parry_cooldown
 	return text

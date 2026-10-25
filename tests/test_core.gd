@@ -41,6 +41,9 @@ func _step(a: Fighter, b: Fighter, ia: CombatData.Intent, ib: CombatData.Intent)
 	a.tick()
 	b.tick()
 	if a.is_hitbox_active() and a.get_hitbox_world().intersects(b.get_hurtbox_world()):
+		if b.is_evading():
+			b.perfect_evade()
+			return CombatData.HitResult.WHIFF
 		var r := b.receive_hit(a.current_attack, a, a.combo_step)
 		a.confirm_hit(r)
 		return r
@@ -686,17 +689,111 @@ func _initialize() -> void:
 			front_result = r
 	_check(front_result == CombatData.HitResult.BLOCKED, "after turning and re-raising the guard, the same attack is blocked")
 
+	print("[perfect parry]")
+	var parry_i := _intent(CombatData.AttackType.NONE, true)
+	parry_i.parry = true
+	var hold := _intent(CombatData.AttackType.NONE, true)
+	# Jab connects on tick 5; Shift pressed on tick 3 -> hit on guard frame 2 (window 0..3).
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var pr := CombatData.HitResult.WHIFF
+	for t in 7:
+		var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, parry_i if t == 3 else (hold if t > 3 else none))
+		if r != CombatData.HitResult.WHIFF:
+			pr = r
+	_check(pr == CombatData.HitResult.PARRIED, "Shift pressed 2 ticks before impact parries (%s)" % CombatData.HitResult.keys()[pr])
+	_check(b.health == 100, "parry: no damage")
+	_check(a.state == Fighter.State.STAGGER and b.state == Fighter.State.PARRY, "attacker staggers, defender deflects")
+	# Counter straight out of the deflect.
+	var counter_hit := false
+	var counter_start := -1
+	for t in 30:
+		var r := _step(b, a, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, none)
+		if b.state == Fighter.State.ATTACK and counter_start < 0:
+			counter_start = t
+		if r == CombatData.HitResult.HIT:
+			counter_hit = true
+	_check(counter_start == 0, "counter attack cancels the deflect immediately (tick %d)" % counter_start)
+	_check(counter_hit and a.health == 94, "counter jab lands on the staggered attacker (hp %d)" % a.health)
+
+	# Pressed too early: the window is over, it is an ordinary block.
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	pr = CombatData.HitResult.WHIFF
+	for t in 7:
+		var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, parry_i if t == 0 else hold)
+		if r != CombatData.HitResult.WHIFF:
+			pr = r
+	_check(pr == CombatData.HitResult.BLOCKED, "Shift pressed 5 ticks early: normal block, not a parry (%s)" % CombatData.HitResult.keys()[pr])
+
+	# Tapping Shift with nothing to parry: slower recovery, then a cooldown.
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	_step(a, b, none, parry_i)
+	_step(a, b, none, hold)
+	_step(a, b, none, none)
+	_check(b.state == Fighter.State.GUARD_RELEASE and b.parry_whiffed and b.stun_frames == CombatData.PARRY_WHIFF_RECOVERY,
+		"releasing an unused parry early: whiff recovery %d ticks" % b.stun_frames)
+	for t in 15:
+		_step(a, b, none, none)
+	# Second press inside the cooldown: no parry window, hit lands on guard frame 2 -> plain block.
+	pr = CombatData.HitResult.WHIFF
+	for t in 7:
+		var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, parry_i if t == 3 else (hold if t > 3 else none))
+		if r != CombatData.HitResult.WHIFF:
+			pr = r
+	_check(pr == CombatData.HitResult.BLOCKED, "parry spam: a press inside the cooldown cannot parry (%s)" % CombatData.HitResult.keys()[pr])
+
+	# Sweeps must be parried low.
+	for low in [false, true]:
+		p = _make_pair()
+		a = p[0]
+		b = p[1]
+		var lp := _intent(CombatData.AttackType.NONE, true)
+		lp.parry = true
+		lp.crouch = low
+		var lh := _intent(CombatData.AttackType.NONE, true)
+		lh.crouch = low
+		pr = CombatData.HitResult.WHIFF
+		for t in 12:
+			# Sweep connects on tick 10.
+			var r := _step(a, b, _intent(CombatData.AttackType.SWEEP) if t == 0 else none, lp if t == 8 else (lh if t > 8 else none))
+			if r != CombatData.HitResult.WHIFF:
+				pr = r
+		if low:
+			_check(pr == CombatData.HitResult.PARRIED, "S + Shift timed: sweep parried low (%s)" % CombatData.HitResult.keys()[pr])
+		else:
+			_check(pr == CombatData.HitResult.HIT, "standing parry does not stop a sweep (%s)" % CombatData.HitResult.keys()[pr])
+
+	print("[perfect dodge]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	# Slip in toward the jab so it passes through the body during the i-frames.
+	var slip_i := _intent()
+	slip_i.dodge = -1
+	var idle_at := -1
+	for t in 20:
+		_step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, slip_i if t == 1 else none)
+		if idle_at < 0 and t > 0 and b.state != Fighter.State.DODGE:
+			idle_at = t
+	_check(b.dodge_perfect, "a strike passing through the i-frames counts as a perfect dodge")
+	_check(idle_at > 0 and idle_at < CombatData.DODGE_FRAMES, "perfect dodge skips the recovery (free at tick %d < %d)" % [idle_at, CombatData.DODGE_FRAMES])
+
 	print("[procedural audio]")
 	var audio := GameAudio.new()
 	root.add_child(audio)
 	await process_frame  # _ready runs once the tree processes
 	var all_sfx := true
 	for snd in [&"whoosh_light", &"whoosh_heavy", &"jump", &"hit_light", &"hit_heavy", &"block", &"land",
-			&"body_fall", &"wall_hit", &"roll", &"ko_boom", &"finisher_sting", &"count_tick", &"fight_call"]:
+			&"body_fall", &"wall_hit", &"roll", &"ko_boom", &"finisher_sting", &"count_tick", &"fight_call", &"parry"]:
 		if not audio.has_sound(snd):
 			all_sfx = false
 			printerr("missing sound ", snd)
-	_check(all_sfx, "all 14 sound effects synthesized")
+	_check(all_sfx, "all 15 sound effects synthesized")
 	var t0 := Time.get_ticks_msec()
 	while not audio.is_bgm_playing() and Time.get_ticks_msec() - t0 < 20000:
 		await process_frame

@@ -110,6 +110,8 @@ const SWOOSH_FADE: float = 0.12
 var _guard := PackedFloat32Array([0.22, 0.15, 0.95, 2.6, 0.55, 2.95, 0.6, -0.05, -0.62, -0.3, 0.0, 0.0])
 # High guard: elbows tucked in front of the ribs, forearms vertical over the face, chin down.
 var _block := PackedFloat32Array([0.25, 0.3, 1.25, 3.1, 1.05, 3.05, 0.7, -0.15, -0.62, -0.4, -2.0, 0.0])
+# Parry deflect: the lead forearm sweeps the strike up and out, weight forward.
+var _deflect := PackedFloat32Array([0.3, 0.2, 2.0, 3.5, 1.0, 3.05, 0.72, -0.2, -0.62, -0.4, 4.0, 0.0])
 var _blockstun := PackedFloat32Array([0.05, 0.22, 1.1, 3.25, 0.9, 3.2, 0.62, -0.1, -0.7, -0.45, -6.0, 0.0])
 
 # Punches.
@@ -418,6 +420,7 @@ func _process(delta: float) -> void:
 	# Hitstop shake on the fighter taking the hit (presentation only).
 	_shake_x = 0.0
 	var stunned := fighter.state == Fighter.State.HITSTUN or fighter.state == Fighter.State.BLOCKSTUN \
+		or fighter.state == Fighter.State.STAGGER \
 		or fighter.state == Fighter.State.FINISHED or fighter.is_down()
 	if frozen and stunned:
 		_shake_x = 3.0 if fighter.hitstop_frames % 2 == 0 else -3.0
@@ -590,11 +593,11 @@ func _spring_params() -> Vector2:
 	if _is_balled():
 		return SPRING_FAST
 	match fighter.state:
-		Fighter.State.HITSTUN, Fighter.State.FINISHED:
+		Fighter.State.HITSTUN, Fighter.State.FINISHED, Fighter.State.STAGGER:
 			return SPRING_HITSTUN
 		Fighter.State.KNOCKDOWN, Fighter.State.KO:
 			return SPRING_LIMP
-		Fighter.State.FINISHER, Fighter.State.JUMP, Fighter.State.BLOCK, Fighter.State.DODGE, Fighter.State.CROUCH:
+		Fighter.State.FINISHER, Fighter.State.JUMP, Fighter.State.BLOCK, Fighter.State.DODGE, Fighter.State.CROUCH, Fighter.State.PARRY:
 			return SPRING_FAST
 	return SPRING_DEFAULT
 
@@ -680,6 +683,12 @@ func _target_pose(t: float) -> PackedFloat32Array:
 			if f < CombatData.DODGE_INVULN_END:
 				return d
 			return _blend(d, _guard, smoothstep(0.0, 1.0, (f - CombatData.DODGE_INVULN_END) / float(CombatData.DODGE_FRAMES - CombatData.DODGE_INVULN_END)))
+		Fighter.State.PARRY:
+			return _blend(_deflect, _block if fighter.block_held else _guard,
+				smoothstep(0.3, 1.0, t / float(CombatData.PARRY_DEFLECT_FRAMES)))
+		Fighter.State.STAGGER:
+			# Thrown off balance by the parry: reel back, then regain the stance.
+			return _recover(_stagger, _guard, t, fighter.stun_frames)
 		Fighter.State.GUARD_RELEASE:
 			return _blend(_block, _guard, smoothstep(0.0, 1.0, t / maxf(float(fighter.stun_frames), 1.0)))
 		Fighter.State.HITSTUN:
@@ -1052,7 +1061,8 @@ func _wants_plant() -> bool:
 	if absf(_spin_angle) > 0.01 or fighter.script_flip:
 		return false
 	return fighter.state in [Fighter.State.IDLE, Fighter.State.WALK, Fighter.State.CROUCH, Fighter.State.BLOCK,
-		Fighter.State.BLOCKSTUN, Fighter.State.GUARD_RELEASE, Fighter.State.HITSTUN, Fighter.State.LAND]
+		Fighter.State.BLOCKSTUN, Fighter.State.GUARD_RELEASE, Fighter.State.HITSTUN, Fighter.State.LAND,
+		Fighter.State.PARRY, Fighter.State.STAGGER]
 
 
 ## Replaces the legs of a world-space skeleton with IK legs reaching planted

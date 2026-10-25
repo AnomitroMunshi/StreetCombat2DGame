@@ -85,6 +85,15 @@ func guard_flash(pos: Vector2, facing: int) -> void:
 		"color": Color(0.65, 0.85, 1.0), "facing": facing})
 
 
+## Perfect parry: a sharp four-point glint, a fast ring and bright sparks.
+func parry_flash(pos: Vector2, facing: int) -> void:
+	var c := Color(0.75, 0.95, 1.0)
+	_effects.append({"kind": "glint", "pos": pos, "age": 0, "life": 16, "color": c})
+	ring(pos, c, 30.0, 10)
+	particles(pos, c, 10, 5.0, 12)
+	guard_flash(pos, facing)
+
+
 func dust(pos: Vector2, size: float) -> void:
 	_effects.append({"kind": "dust", "pos": pos, "age": 0, "life": DEFAULT_LIFE + int(size * 4.0),
 		"color": Color(0.78, 0.68, 0.56), "size": size})
@@ -160,6 +169,15 @@ func _draw() -> void:
 				var centre := pos - Vector2(face * 18.0, 0.0)
 				var from := -PI * 0.42 if face > 0 else PI - PI * 0.42
 				draw_arc(centre, 34.0 + t * 10.0, from, from + PI * 0.84, 20, color, 5.0 * (1.0 - t) + 1.5, true)
+			"glint":
+				# Long thin cross that snaps out and shrinks: reads as a clean deflect.
+				var g := sin(PI * minf(t * 2.5, 1.0)) * (1.0 - t)
+				color.a = 1.0 - t
+				draw_circle(pos, 9.0 * g + 2.0, Color(1.0, 1.0, 1.0, color.a))
+				for k in 4:
+					var dir := Vector2.from_angle(PI * 0.25 + k * PI * 0.5)
+					var reach := 75.0 if k % 2 == 0 else 45.0
+					draw_line(pos - dir * 4.0, pos + dir * reach * g, color, 4.0 * (1.0 - t) + 1.0, true)
 			"dust":
 				color.a = 0.5 * (1.0 - t)
 				var ds: float = e["size"]

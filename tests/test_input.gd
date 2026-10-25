@@ -5,6 +5,7 @@ class Driver extends Node:
 	var tree: SceneTree
 	var frame: int = 0
 	var fails: int = 0
+	var parry_seen: bool = false
 
 	func check(cond: bool, msg: String) -> void:
 		print(("  ok   " if cond else "  FAIL ") + msg)
@@ -91,6 +92,18 @@ class Driver extends Node:
 						w_bound = true
 				check(not w_bound and InputMap.action_get_events("jump").size() == 1, "jump is bound to Space only")
 				check(e.stance != p.stance, "stances never match at the end of the test")
+			225:
+				# Quiet the AI and move it away so the player can stand and guard.
+				(main.get_node("EnemyAI") as EnemyAI).setup(null, null)
+				e.position.x = p.position.x + 400.0 if p.position.x < 640.0 else p.position.x - 400.0
+			340, 341, 342:
+				Input.action_press("block")
+				if p.state == Fighter.State.BLOCK:
+					parry_seen = parry_seen or p.is_parry_active()
+			343:
+				check(parry_seen, "pressing Shift opens a parry window (%s)" % p.get_debug_label())
+				Input.action_release("block")
+			350:
 				print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 				tree.quit(fails)
 

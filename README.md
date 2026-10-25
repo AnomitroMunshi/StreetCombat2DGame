@@ -55,7 +55,7 @@ old countdown can never fire into a new match.
 | L or I in the air | Jump kick (one per jump) |
 | J / K / U / O in the air | Jump punch: flying forward punch (one air attack per jump) |
 | S (hold)   | Crouch: head-level strikes pass over you |
-| Shift      | Hold to block               |
+| Shift      | Tap just before a hit to **parry**; hold to block |
 | S + Shift  | Low block (needed against sweeps) |
 | Q          | Cycle your fighting stance  |
 | Enter / click | START MATCH / RESTART MATCH button |
@@ -142,6 +142,22 @@ The full table, including hitboxes, knockback and lunge, is in
   swept fighter's feet are kicked out from under them.
 - **Blocking:** hold Shift while idle or walking. A blocked hit does no damage,
   causes blockstun and has reduced pushback. Heavy attacks are unsafe on block.
+- **Perfect parry:** pressing Shift opens a 4-tick parry window (2 of them
+  before the guard is even up). A hit inside the window is deflected: no
+  damage, a bright glint and metallic ring, and the attacker staggers for
+  24 ticks, long enough for any counter. Attacking, dodging or jumping
+  cancels the deflect at once. Keep holding Shift and you are simply blocking.
+  Sweeps must be parried low (S + Shift).
+- **No parry spam:** after an attempt, no new window opens for 30 ticks
+  (pressing again just blocks). Letting go of an unused attempt within 14
+  ticks, or attacking out of it, costs 14 ticks of recovery instead of 6. A
+  successful parry resets the cooldown, so parries can be chained.
+- **Perfect dodge:** if a strike passes through you during the dodge's
+  invulnerable frames, the dodge skips its recovery and your counter comes out
+  sooner. You hear a whoosh and see a ring.
+- **AI defence:** the rival mostly blocks. Sometimes (15%) it times a parry
+  against slow attacks it can read (startup of 8 or more ticks). It punishes
+  a staggered player.
 - **Directional guard:** a raised guard does not turn around. If the opponent
   jumps over you while you hold block, their attack hits your back. Let go of
   Shift and block again to face them.
@@ -354,11 +370,12 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 
 | Test | Covers |
 |---|---|
-| `test_core.gd` | Frame data, combos, block / low block, cross-up guard, both facing directions, knockdown, dodge, finisher selection and choreography, audio |
+| `test_core.gd` | Frame data, combos, block / low block, parry (window, whiff, cooldown, low), perfect dodge, cross-up guard, both facing directions, knockdown, dodge, finisher selection and choreography, audio |
 | `test_input.gd` | Real key mapping (W+L, S+L, S crouch, double-tap dodge, stance cycling) |
 | `test_flow.gd` | Start button, input lock, countdown order and timing, simultaneous unlock, button mashing, restart mid-countdown |
 | `test_match.gd` | A full scripted match against the real AI, KO, then restart |
 | `test_ai_finisher.gd` | AI finisher on a passive player; result only after the body is at rest |
+| `test_ai_defense.gd` | AI blocks most, parries some, punishes a stagger (seeded) |
 
 The V0.3 plan and audit are in `docs/V0.3_PLAN.md`.
 

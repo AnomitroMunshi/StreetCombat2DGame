@@ -51,6 +51,7 @@ const VIEW_MIN := Vector2(-200.0, -200.0)
 const VIEW_MAX := Vector2(1480.0, 920.0)
 const HIT_COLOR := Color(1.0, 0.9, 0.6)
 const BLOCK_COLOR := Color(0.6, 0.8, 1.0)
+const PARRY_COLOR := Color(0.75, 0.95, 1.0)
 const KO_COLOR := Color(1.0, 0.55, 0.4)
 
 @onready var player: Fighter = $Player
@@ -81,6 +82,7 @@ var _follow_victim: bool = false
 var _slowmo_ticks: int = 0
 # Double-tap detection for dodges: tick of the last A / D tap.
 var _last_tap := {-1: -1000, 1: -1000}
+var _block_was_held: bool = false
 var _stance_rng := RandomNumberGenerator.new()
 ## Name of the finisher played this round ("" if none). Read by tests/HUD.
 var last_finisher_name: String = ""
@@ -111,6 +113,7 @@ func _ready() -> void:
 		f.wall_hit.connect(_on_fighter_wall_hit)
 		f.rolled.connect(_on_fighter_rolled)
 		f.dodged.connect(_on_fighter_dodged)
+		f.perfect_evaded.connect(_on_fighter_perfect_evaded)
 	fx.decals_changed.connect(queue_redraw)
 	# Stances: the player's choice persists across restarts; the AI always picks
 	# a different one.
@@ -281,6 +284,10 @@ func _read_player_intent() -> CombatData.Intent:
 	var axis := Input.get_axis("move_left", "move_right")
 	intent.move = 0 if is_zero_approx(axis) else (1 if axis > 0.0 else -1)
 	intent.block = Input.is_action_pressed("block")
+	# A fresh Shift press is a parry attempt; holding it is a normal block. The
+	# press is the held-state edge, so it always lands on the tick the guard rises.
+	intent.parry = intent.block and not _block_was_held
+	_block_was_held = intent.block
 	# S: crouch (S + Shift = low block). S + L is read below as the sweep.
 	intent.crouch = Input.is_action_pressed("mod_down")
 	intent.jump = Input.is_action_just_pressed("jump")
@@ -348,11 +355,17 @@ func _resolve_hits() -> void:
 	for i in fighters.size():
 		var attacker := fighters[i]
 		var defender := fighters[1 - i]
-		if not attacker.is_hitbox_active() or not defender.can_be_hit():
+		if not attacker.is_hitbox_active():
 			continue
 		var hitbox := attacker.get_hitbox_world()
 		var hurtbox := defender.get_hurtbox_world()
 		if not hitbox.intersects(hurtbox):
+			continue
+		if defender.is_evading():
+			# The strike passed through the dodge's i-frames.
+			defender.perfect_evade()
+			continue
+		if not defender.can_be_hit():
 			continue
 		pending.append({
 			"attacker": attacker, "defender": defender,
@@ -397,6 +410,13 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 			fx.impact(contact, 2 if heavy else 1, HIT_COLOR)
 			audio.play(&"hit_heavy" if heavy else &"hit_light")
 			_camera_punch += 0.02 if heavy else 0.008
+		CombatData.HitResult.PARRIED:
+			_hitstop = maxi(_hitstop, CombatData.PARRY_HITSTOP_FRAMES)
+			_shake(6, 3.0)
+			fx.parry_flash(contact, defender.facing)
+			audio.play(&"parry", 0.0, 0.03)
+			hud.flash(0.12)
+			_camera_punch += 0.02
 		CombatData.HitResult.BLOCKED:
 			_hitstop = maxi(_hitstop, CombatData.BLOCK_HITSTOP_FRAMES)
 			_shake(4, 1.5)
@@ -545,6 +565,11 @@ func _on_fighter_wall_hit(fighter: Fighter) -> void:
 func _on_fighter_dodged(fighter: Fighter) -> void:
 	audio.play(&"whoosh_light", -3.0, 0.12)
 	fx.dust(Vector2(fighter.position.x, FLOOR_Y), 0.8)
+
+
+func _on_fighter_perfect_evaded(fighter: Fighter) -> void:
+	audio.play(&"whoosh_heavy", -2.0, 0.05)
+	fx.ring(fighter.position + Vector2(0.0, -100.0), PARRY_COLOR, 46.0, 14)
 
 
 ## Q: next stance. The AI never shares the player's stance, so it moves off it.
@@ -701,7 +726,10 @@ func _draw_overlay() -> void:
 	var font := ThemeDB.fallback_font
 	for f: Fighter in [player, enemy]:
 		var hurt := f.get_hurtbox_world()
-		if f.can_be_hit():
+		if f.is_parry_active():
+			overlay.draw_rect(hurt, Color(0.4, 0.9, 1.0, 0.25))
+			overlay.draw_rect(hurt, Color(0.4, 0.9, 1.0, 1.0), false, 2.5)
+		elif f.can_be_hit():
 			overlay.draw_rect(hurt, Color(0.3, 1.0, 0.4, 0.12))
 			overlay.draw_rect(hurt, Color(0.3, 1.0, 0.4, 0.8), false, 1.5)
 		else:

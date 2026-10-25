@@ -8,7 +8,7 @@ extends RefCounted
 ## JUMP_KICK / JUMP_PUNCH are never pressed directly: any kick or punch button
 ## while airborne becomes one of them.
 enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP_KICK, JUMP_PUNCH, SWEEP, HIGH_KICK }
-enum HitResult { WHIFF, HIT, BLOCKED, KO }
+enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED }
 
 const TICK_RATE: int = 60
 
@@ -30,6 +30,28 @@ const BLOCK_STARTUP_FRAMES: int = 2
 const BLOCK_RELEASE_FRAMES: int = 6
 const BLOCK_HITSTOP_FRAMES: int = 3
 const KO_HITSTOP_FRAMES: int = 20
+
+## Perfect parry. A fresh Shift press opens a parry window for the first
+## PARRY_WINDOW_FRAMES ticks of the guard (including its startup). A hit that
+## lands inside it is deflected: no damage, the attacker staggers and the
+## defender can counter at once. Holding Shift after the window is a normal block.
+## Anti-spam:
+##   - after a parry attempt, no new window opens for PARRY_COOLDOWN_FRAMES
+##     (pressing again just blocks, with the normal startup);
+##   - letting go (or attacking) within PARRY_WHIFF_FRAMES of an unused
+##     attempt costs PARRY_WHIFF_RECOVERY ticks instead of BLOCK_RELEASE_FRAMES.
+const PARRY_WINDOW_FRAMES: int = 4
+## A Shift press stays valid this long while the fighter can't raise the guard yet.
+const PARRY_BUFFER_FRAMES: int = 4
+const PARRY_COOLDOWN_FRAMES: int = 30
+const PARRY_WHIFF_FRAMES: int = 14
+const PARRY_WHIFF_RECOVERY: int = 14
+const PARRY_HITSTOP_FRAMES: int = 9
+## Attacker reels this long after being parried: enough for any counter to land.
+const PARRY_STAGGER_FRAMES: int = 24
+## Defender's deflect motion; any buffered attack cancels it (the counter).
+const PARRY_DEFLECT_FRAMES: int = 8
+const PARRY_PUSHBACK: float = 3.5
 
 ## Jumping. Velocities in pixels per tick; gravity in pixels per tick².
 ## Falling uses stronger gravity than rising for a snappy, less floaty arc.
@@ -217,6 +239,8 @@ class Intent extends RefCounted:
 	var dodge: int = 0
 	## Crouch held (S): crouch, or low block together with block.
 	var crouch: bool = false
+	## Block was freshly pressed this tick: a parry attempt (see PARRY_*).
+	var parry: bool = false
 	var attack: CombatData.AttackType = CombatData.AttackType.NONE
 
 
