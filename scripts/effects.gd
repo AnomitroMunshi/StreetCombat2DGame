@@ -26,7 +26,11 @@ signal decals_changed
 const DEFAULT_LIFE: int = 14
 const PARTICLE_GRAVITY: float = 0.45
 ## Caps (oldest removed first) so long matches never pile up effects.
-const MAX_DEBRIS: int = 90
+const MAX_DEBRIS: int = 120
+## Cinematic light colours (additive glow layer).
+const GLOW_WARM := Color(1.0, 0.62, 0.22)
+const GLOW_HOT := Color(1.0, 0.95, 0.8)
+const GLOW_BLUE := Color(0.35, 0.65, 1.0)
 const MAX_EFFECTS: int = 260
 const MAX_DECALS: int = 140
 const DEBRIS_LIFE: int = 150
@@ -48,8 +52,19 @@ var _debris: Array[Dictionary] = []
 var _rng := RandomNumberGenerator.new()
 
 
+## Additive layer for light: flares, energy waves, spin arcs, speed lines.
+## Overlapping light adds up and glows instead of covering what is behind.
+var _glow: Node2D = null
+
+
 func _ready() -> void:
 	_rng.seed = 4242
+	_glow = Node2D.new()
+	var mat := CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	_glow.material = mat
+	add_child(_glow)
+	_glow.draw.connect(_draw_glow)
 
 
 ## Reproducible effects for tests and captures.
@@ -75,9 +90,13 @@ func get_newest_decal_growth() -> float:
 
 func _physics_process(_delta: float) -> void:
 	_tick_destruction()
+	if _glow != null:
+		_glow.queue_redraw()
 	for i in range(_effects.size() - 1, -1, -1):
 		var e := _effects[i]
 		e["age"] += 1
+		if e.has("move"):
+			e["pos"] = (e["pos"] as Vector2) + (e["move"] as Vector2)
 		if e["kind"] == "cloud":
 			e["pos"] = (e["pos"] as Vector2) + (e["vel"] as Vector2)
 			e["vel"] = (e["vel"] as Vector2) * 0.96
@@ -331,6 +350,58 @@ func debris(pos: Vector2, count: int, color: Color, speed: float = 6.0, bias: fl
 		_debris.pop_front()
 
 
+## Impact flare (glow layer): a hot core, a warm halo and long tapered rays
+## that snap out and fade. `power` 1..3 scales size and ray count.
+func flare(pos: Vector2, power: int, warm: Color = GLOW_WARM, rays_dir: float = INF) -> void:
+	var rays := PackedVector3Array()  # angle, length factor, width factor
+	for i in 8 + power * 3:
+		var a := _rng.randf() * TAU if rays_dir == INF else rays_dir + _rng.randf_range(-1.2, 1.2)
+		rays.append(Vector3(a, _rng.randf_range(0.45, 1.0), _rng.randf_range(0.6, 1.2)))
+	_spawn({"kind": "flare", "glow": true, "pos": pos, "age": 0, "life": 12 + power * 3,
+		"color": warm, "size": 40.0 + power * 28.0, "lines": rays})
+
+
+## Energy crescent (glow layer) travelling along `dir`: stacked bright arcs,
+## like a palm blast or the arc of a spinning kick.
+func energy_wave(pos: Vector2, dir: Vector2, size: float, color: Color = GLOW_BLUE, life: int = 18, speed: float = 4.0) -> void:
+	_spawn({"kind": "ewave", "glow": true, "pos": pos, "move": dir.normalized() * speed, "dir": dir.angle(),
+		"age": 0, "life": life, "color": color, "size": size})
+
+
+## Spin arcs (glow layer) circling a spinning body.
+func spin_arcs(pos: Vector2, radius: float, color: Color = GLOW_BLUE) -> void:
+	_spawn({"kind": "garcs", "glow": true, "pos": pos, "age": 0, "life": 10, "color": color,
+		"size": radius, "angle": _rng.randf() * TAU})
+
+
+## Speed lines (glow layer) streaming behind something moving along `dir`.
+func speed_lines(pos: Vector2, dir: Vector2, color: Color = GLOW_BLUE, count: int = 4, spread: float = 30.0) -> void:
+	var n := Vector2(-dir.y, dir.x)
+	for i in count:
+		var start := pos + n * _rng.randf_range(-spread, spread) - dir * _rng.randf_range(0.0, 20.0)
+		_spawn({"kind": "speed", "glow": true, "pos": start, "dir": dir, "age": 0, "life": 9,
+			"color": color, "size": _rng.randf_range(40.0, 90.0)})
+
+
+## Big angular chunks of stone / wood: two-tone (lit face, shaded body) with a
+## dark edge, tumbling, bouncing and settling with the other debris.
+func chunks(pos: Vector2, count: int, color: Color, speed: float = 8.0, bias: float = 0.0, spread: float = 1.0,
+		min_size: float = 6.0, max_size: float = 14.0) -> void:
+	for i in count:
+		var a := -PI * 0.5 + bias + _rng.randf_range(-spread, spread)
+		var v := Vector2(cos(a), sin(a)) * speed * _rng.randf_range(0.45, 1.15)
+		var shape := PackedVector2Array()
+		var verts := _rng.randi_range(5, 6)
+		var sz := _rng.randf_range(min_size, max_size)
+		for k in verts:
+			shape.append(Vector2.from_angle(TAU * k / verts + _rng.randf_range(-0.3, 0.3)) * sz * _rng.randf_range(0.6, 1.0))
+		_debris.append({"pos": pos + Vector2(_rng.randf_range(-8.0, 8.0), _rng.randf_range(-6.0, 6.0)),
+			"vel": v, "age": 0, "size": sz, "angle": _rng.randf() * TAU, "spin": _rng.randf_range(-0.3, 0.3),
+			"color": color.darkened(_rng.randf_range(0.0, 0.25)), "shape": shape})
+	while _debris.size() > MAX_DEBRIS:
+		_debris.pop_front()
+
+
 ## Long thin wood splinters (pooled with the debris): they tumble fast, bounce
 ## on the floor and settle like the chips.
 func splinters(pos: Vector2, count: int, color: Color, speed: float = 8.0, bias: float = 0.0, spread: float = 1.1) -> void:
@@ -364,12 +435,12 @@ func scuff(from: Vector2, to: Vector2) -> void:
 
 
 ## Billowing dust: several puffs that rise, spread and fade.
-func dust_cloud(pos: Vector2, size: float, life: int = 40) -> void:
-	for i in 7:
-		var off := Vector2(_rng.randf_range(-1.0, 1.0) * 30.0 * size, _rng.randf_range(-8.0, 0.0))
-		var drift := Vector2(signf(off.x) * _rng.randf_range(0.6, 1.6), -_rng.randf_range(0.3, 0.9))
-		_spawn({"kind": "cloud", "pos": pos + off, "vel": drift, "age": 0, "life": life + _rng.randi_range(-8, 8),
-			"color": Color(0.74, 0.65, 0.54), "size": size * _rng.randf_range(14.0, 24.0)})
+func dust_cloud(pos: Vector2, size: float, life: int = 40, puffs: int = 7) -> void:
+	for i in puffs:
+		var off := Vector2(_rng.randf_range(-1.0, 1.0) * 34.0 * size, _rng.randf_range(-10.0, 0.0) * size)
+		var drift := Vector2(signf(off.x) * _rng.randf_range(0.5, 1.8) * (0.6 + size * 0.4), -_rng.randf_range(0.2, 0.9))
+		_spawn({"kind": "cloud", "pos": pos + off, "vel": drift, "age": 0, "life": life + _rng.randi_range(-8, 12),
+			"color": Color(0.74, 0.64, 0.52), "size": size * _rng.randf_range(15.0, 26.0)})
 
 
 ## Pillar shake on side -1 (left) or +1 (right).
@@ -498,6 +569,19 @@ static func _draw_chip(canvas: CanvasItem, c: Dictionary) -> void:
 	var col: Color = c["color"]
 	col.a *= a
 	var s: float = c["size"]
+	if c.has("shape"):
+		var shp: PackedVector2Array = c["shape"]
+		var xf := Transform2D(c["angle"], c["pos"])
+		var poly := xf * shp
+		var lit := PackedVector2Array()
+		for q in shp:
+			lit.append(xf * (q * 0.6 + Vector2(-1.5, -1.5)))
+		canvas.draw_colored_polygon(poly, col)
+		canvas.draw_colored_polygon(lit, Color(col.lightened(0.3), col.a))
+		var edge := poly.duplicate()
+		edge.append(poly[0])
+		canvas.draw_polyline(edge, Color(0.06, 0.04, 0.03, 0.7 * col.a), 1.2, true)
+		return
 	if c.get("stick", false):
 		# Splinter: a thin tapered sliver.
 		var ax := Vector2.from_angle(c["angle"]) * s * 0.5
@@ -508,6 +592,64 @@ static func _draw_chip(canvas: CanvasItem, c: Dictionary) -> void:
 	for k in 4:
 		pts2.append(c["pos"] + Vector2.from_angle(c["angle"] + k * TAU / 4.0) * s * (1.0 if k % 2 == 0 else 0.6))
 	canvas.draw_colored_polygon(pts2, col)
+
+
+## The additive light layer.
+func _draw_glow() -> void:
+	for e in _effects:
+		if not e.has("glow"):
+			continue
+		var t := float(e["age"]) / float(e["life"])
+		var color: Color = e["color"]
+		var pos: Vector2 = e["pos"]
+		match e["kind"]:
+			"flare":
+				var size: float = e["size"]
+				var pop := minf(t * 5.0, 1.0)
+				var fade := pow(1.0 - t, 1.3)
+				_soft_disc(_glow, pos, size * (0.55 + 0.3 * pop) * (1.0 - t * 0.5), Color(color, 0.35 * fade))
+				_soft_disc(_glow, pos, size * 0.28 * (1.0 - t * 0.6), Color(GLOW_HOT, 0.9 * fade))
+				var rays: PackedVector3Array = e["lines"]
+				for r in rays:
+					var d := Vector2.from_angle(r.x)
+					var n := Vector2(-d.y, d.x)
+					var ln := size * 1.5 * r.y * (0.35 + 0.65 * pop)
+					var w := 5.0 * r.z * fade + 0.5
+					_glow.draw_colored_polygon(PackedVector2Array([pos + n * w, pos + d * ln, pos - n * w]), Color(color, 0.75 * fade))
+					_glow.draw_colored_polygon(PackedVector2Array([pos + n * w * 0.4, pos + d * ln * 0.7, pos - n * w * 0.4]), Color(GLOW_HOT, 0.8 * fade))
+			"ewave":
+				# Stacked crescents: a wide soft one, a bright one and a thin
+				# leading edge; they open up as they travel.
+				var fade2 := pow(1.0 - t, 0.9)
+				var r0: float = e["size"] * (0.45 + t * 0.9)
+				var wd: float = e["dir"]
+				var open := 0.85 + t * 0.35
+				for k in 4:
+					var rr := r0 * (1.0 - k * 0.1)
+					var col := Color(color, (0.3 + k * 0.2) * fade2)
+					_glow.draw_arc(pos - Vector2.from_angle(wd) * r0 * 0.6, rr, wd - open, wd + open, 32, col, (22.0 - k * 5.0) * fade2 + 1.5, true)
+				_glow.draw_arc(pos - Vector2.from_angle(wd) * r0 * 0.6, r0 * 1.04, wd - open * 0.9, wd + open * 0.9, 28, Color(GLOW_HOT, 0.7 * fade2), 2.5, true)
+			"garcs":
+				var a0: float = e["angle"] + t * 7.0
+				var sr: float = e["size"]
+				var ga := 0.7 * (1.0 - t)
+				_glow.draw_set_transform(pos, 0.0, Vector2(1.0, 0.38))
+				_glow.draw_arc(Vector2.ZERO, sr * (1.0 + t * 0.25), a0, a0 + 2.6, 24, Color(color, ga), 7.0 * (1.0 - t) + 1.0, true)
+				_glow.draw_arc(Vector2.ZERO, sr * 0.8, a0 + PI, a0 + PI + 2.0, 20, Color(GLOW_HOT, ga * 0.7), 3.0, true)
+				_glow.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"speed":
+				var sd: Vector2 = e["dir"]
+				var sl: float = e["size"]
+				_glow.draw_line(pos, pos - sd * sl * (1.0 - t * 0.4), Color(color, 0.6 * (1.0 - t)), 3.0 * (1.0 - t) + 0.8, true)
+			"streaks":
+				pass
+
+
+## Soft round light: a few concentric discs, brighter at the centre.
+static func _soft_disc(canvas: CanvasItem, pos: Vector2, r: float, color: Color) -> void:
+	for i in 4:
+		var k := 1.0 - i * 0.22
+		canvas.draw_circle(pos, r * k, Color(color, color.a * 0.3))
 
 
 ## Floorboard hole: splintered raw-wood ring, dark broken hole, deeper core,
@@ -589,6 +731,8 @@ func _draw() -> void:
 		if c["vel"] != Vector2.ZERO:
 			_draw_chip(self, c)
 	for e in _effects:
+		if e.has("glow"):
+			continue
 		var t := float(e["age"]) / float(e["life"])
 		var color: Color = e["color"]
 		var pos: Vector2 = e["pos"]
@@ -673,8 +817,16 @@ func _draw() -> void:
 					var s0 := l.y + t * ln * 1.4
 					draw_line(pos + d * s0, pos + d * (s0 + ln * l.z * (1.0 - t * 0.6)), color, 2.5 * (1.0 - t) + 0.8, true)
 			"cloud":
-				color.a = 0.32 * sin(PI * minf(t * 1.6, 1.0)) * (1.0 - t * 0.6)
-				draw_circle(pos, e["size"] * (0.5 + t * 0.9), color)
+				# Billowing puff: shaded underside, body, lit top; swells and
+				# lingers, then thins out.
+				var ca := 0.5 * minf(t * 6.0, 1.0) * pow(1.0 - t, 0.8)
+				var cr: float = e["size"] * (0.55 + t * 1.1)
+				# Soft edges: each layer is a few concentric discs, denser inside.
+				for k in 3:
+					var f := 1.0 - k * 0.18
+					draw_circle(pos + Vector2(0.0, cr * 0.18), cr * f, Color(0.42, 0.35, 0.28, ca * 0.3))
+					draw_circle(pos, cr * 0.9 * f, Color(color, ca * 0.38))
+				draw_circle(pos + Vector2(-cr * 0.2, -cr * 0.25), cr * 0.5, Color(0.9, 0.82, 0.7, ca * 0.35))
 			"dust":
 				color.a = 0.5 * (1.0 - t)
 				var ds: float = e["size"]

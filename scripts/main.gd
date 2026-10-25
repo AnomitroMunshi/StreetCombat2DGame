@@ -573,7 +573,7 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_shake(30, 12.0)
 		fx.impact(pos, 3, KO_COLOR)
 		fx.ring(pos, Color.WHITE, 90.0, 26)
-		hud.flash(1.0)
+		hud.flash(0.45)  # bright, but not a white-out that hides the finisher VFX
 		audio.play(&"hit_heavy", 3.0)
 		audio.play(&"ko_boom")
 		_camera_punch += 0.12
@@ -588,45 +588,68 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_camera_punch += 0.015 * power
 
 
-## Each finisher's own particle signature, at the moment of each hit.
+## Each finisher's own effects at the moment of each hit (after the finisher
+## VFX reference sheet): warm impact flares on every contact, blue energy for
+## the attacker's power, a huge flare and signature effect on the final blow.
 func _finisher_kind_fx(pos: Vector2, dir: Vector2, power: int, final: bool) -> void:
+	fx.flare(pos, 3 if final else mini(power, 2))
 	match _finisher.kind:
 		FinisherDirector.Kind.PALM_FLURRY:
-			# Every palm pushes a crescent of air; the final blast is huge.
-			fx.air_wave(pos + dir * 10.0, dir, 30.0 + power * 12.0, 12 + power * 2)
+			# Each palm: a burst at the palms. Final double palm: a huge blue
+			# shockwave fan that launches the body, with streaks and blown dust.
+			fx.energy_wave(pos, dir, 34.0 + power * 10.0, fx.GLOW_BLUE, 10, 2.5)
 			if final:
-				fx.air_wave(pos + dir * 20.0, dir, 90.0, 20)
-				fx.streaks(pos, dir, 22, Color(1.0, 0.95, 0.85), 0.35, 110.0)
-				fx.dust_cloud(Vector2(pos.x + dir.x * 40.0, FLOOR_Y), 1.3, 40)
+				fx.energy_wave(pos, dir, 170.0, fx.GLOW_BLUE, 34, 4.0)
+				fx.energy_wave(pos + dir * 20.0, dir, 120.0, fx.GLOW_BLUE, 28, 5.0)
+				fx.energy_wave(pos, dir, 90.0, fx.GLOW_HOT, 16, 6.0)
+				fx.streaks(pos, dir, 24, Color(1.0, 0.95, 0.85), 0.35, 130.0)
+				fx.dust_cloud(Vector2(pos.x + dir.x * 50.0, FLOOR_Y), 1.6, 55, 10)
 		FinisherDirector.Kind.SPINNING_HEEL, FinisherDirector.Kind.TORNADO_KICK:
 			if final:
-				# The heel's arc flashes through the head, streaks fly with it.
-				fx.air_wave(pos - dir * 20.0, dir, 70.0, 16, Color(1.0, 0.9, 0.7))
-				fx.streaks(pos, dir + Vector2(0.0, -0.25), 20, Color(1.0, 0.92, 0.75), 0.45, 100.0)
-				fx.particles(pos, Color(1.0, 0.85, 0.6), 14, 7.0, 16)
+				# The heel's arc sweeps through the head as a blue crescent.
+				fx.energy_wave(pos - dir * 30.0, (dir + Vector2(0.0, -0.4)).normalized(), 110.0, fx.GLOW_BLUE, 16, 4.0)
+				fx.streaks(pos, dir + Vector2(0.0, -0.25), 22, Color(1.0, 0.92, 0.75), 0.45, 120.0)
+				fx.particles(pos, Color(1.0, 0.75, 0.4), 16, 8.0, 16)
 		FinisherDirector.Kind.AIR_SMASH:
 			if final:
 				# Hammer-fist: everything is driven straight down.
-				fx.streaks(pos, Vector2.DOWN, 18, Color(1.0, 0.9, 0.75), 0.3, 120.0)
-				fx.air_wave(pos, Vector2.DOWN, 60.0, 14)
+				fx.flare(pos, 3, fx.GLOW_WARM, PI * 0.5)
+				fx.energy_wave(pos, Vector2.DOWN, 90.0, fx.GLOW_BLUE, 14, 6.0)
+				fx.streaks(pos, Vector2.DOWN, 20, Color(1.0, 0.9, 0.75), 0.3, 140.0)
 		FinisherDirector.Kind.WALL_CRUSH:
 			if final:
-				fx.streaks(pos, -dir, 16, Color(1.0, 0.92, 0.8), 0.6, 90.0)
+				# Double-palm burst into the wall, chunks blasted out of it.
+				fx.energy_wave(pos, dir, 120.0, fx.GLOW_BLUE, 16, 3.0)
+				fx.streaks(pos, -dir, 18, Color(1.0, 0.92, 0.8), 0.6, 110.0)
 
 
-## Continuous finisher effects between hits.
+## Continuous finisher effects between hits: the attacker's blue speed lines,
+## spin arcs, takeoff dust, the launched victim's flight trail.
+var _fin_prev_pos := {}
+
+
 func _finisher_ambient() -> void:
-	if _finisher == null or _finisher.done:
+	if _finisher == null:
 		return
 	var atk := _finisher.attacker
+	var vic := _finisher.victim
+	for f: Fighter in [atk, vic]:
+		var prev: Vector2 = _fin_prev_pos.get(f, f.position)
+		var v := f.position - prev
+		_fin_prev_pos[f] = f.position
+		if v.length() > 2.5 and _tick % 2 == 0:
+			var chest := f.position + Vector2(0.0, -100.0 if not f.is_down() else -40.0)
+			fx.speed_lines(chest, v.normalized(), fx.GLOW_BLUE if f == atk else Color(1.0, 0.85, 0.7), 3, 32.0)
+	if _finisher.done:
+		return
 	match _finisher.kind:
 		FinisherDirector.Kind.TORNADO_KICK, FinisherDirector.Kind.SPINNING_HEEL:
-			# Wind around the spinning body; dust kicked up on takeoff.
-			if atk.script_spin_rate != 0.0 and _tick % 3 == 0:
-				fx.swirl(atk.position + Vector2(0.0, -95.0), 46.0, WIND_COLOR)
+			# Glowing spin arcs around the turning body; dust kicked up on takeoff.
+			if atk.script_spin_rate != 0.0 and _tick % 2 == 0:
+				fx.spin_arcs(atk.position + Vector2(0.0, -95.0), 58.0)
 			if atk.airborne and not _fin_attacker_air:
-				fx.ground_ring(Vector2(atk.position.x, FLOOR_Y), 70.0, 16)
-				fx.dust_cloud(Vector2(atk.position.x, FLOOR_Y), 0.9, 30)
+				fx.ground_ring(Vector2(atk.position.x, FLOOR_Y), 80.0, 18)
+				fx.dust_cloud(Vector2(atk.position.x, FLOOR_Y), 1.1, 40, 8)
 		FinisherDirector.Kind.WALL_CRUSH:
 			# Grit keeps trickling out of the cracked pillar.
 			if _wall_dent != Vector2.INF and _tick % 5 == 0:
@@ -714,16 +737,25 @@ func _on_fighter_landed(fighter: Fighter) -> void:
 	fx.particles(floor_pos + Vector2(0.0, -6.0), Color(0.78, 0.68, 0.56), 6, 2.5 + speed * 0.2, 14)
 	audio.play(&"body_fall", minf(-4.0 + speed * 0.4, 2.0))
 	_shake(8, 3.0 + speed * 0.3)
+	if speed > 6.0:
+		# Heavy landing: a dust burst and a few bits of floor kicked up.
+		fx.dust_cloud(floor_pos, 1.0 + speed * 0.05, 50, 8)
+		fx.chunks(floor_pos + Vector2(0.0, -4.0), 3, FLOOR_WOOD, 4.0 + speed * 0.2, 0.0, 1.0, 3.0, 6.0)
 	if speed > 12.0:
 		# Spiked into the floor: crater, radial cracks growing out of it,
 		# splintered floorboards, a dust burst and a floor shockwave.
 		# Just in front of the floor's back edge, so the hole lies on the boards.
 		var centre := floor_pos + Vector2(0.0, 20.0)
 		fx.floor_break(centre, 3)
-		fx.debris(centre + Vector2(0.0, -4.0), 24, WOOD_COLOR, 8.0)
-		fx.splinters(centre + Vector2(0.0, -4.0), 18, FLOOR_WOOD, 11.0, 0.0, 0.9)
-		fx.dust_cloud(floor_pos, 1.7, 50)
-		fx.ground_ring(floor_pos, 160.0, 24)
+		# Impact burst: light rays up out of the floor, big chunks of board
+		# thrown high, splinters, a billowing dust cloud and a shockwave.
+		fx.flare(centre + Vector2(0.0, -10.0), 3, fx.GLOW_WARM, -PI * 0.5)
+		fx.chunks(centre + Vector2(0.0, -6.0), 14, FLOOR_WOOD, 12.0, 0.0, 0.85, 7.0, 15.0)
+		fx.chunks(centre + Vector2(0.0, -6.0), 10, WOOD_COLOR, 8.0, 0.0, 1.1, 4.0, 8.0)
+		fx.splinters(centre + Vector2(0.0, -4.0), 16, FLOOR_WOOD, 11.0, 0.0, 0.9)
+		fx.dust_cloud(floor_pos, 2.4, 80, 14)
+		fx.ground_ring(floor_pos, 220.0, 30)
+		fx.ground_ring(floor_pos, 140.0, 22)
 		audio.play(&"ko_boom", -4.0)
 		hud.flash(0.4)
 		_shake(18, 9.0)
@@ -799,8 +831,10 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 	fx.particles(hit, PILLAR_LIGHT, 6 + power * 3, 4.0, 18)
 	# Chunks of the pillar break off and fall: big pieces in the pillar's wood
 	# colours, flung inward off the face.
-	fx.debris(hit, 3 + power * 3, PILLAR_LIGHT, 3.0 + power * 1.2, -side * 0.9)
-	fx.debris(hit, 2 + power * 2, PILLAR_DARK, 2.0 + power, -side * 0.6)
+	fx.chunks(hit, 2 + power * 3, PILLAR_LIGHT, 3.0 + power * 1.4, -side * 0.9, 0.9, 4.0 + power, 8.0 + power * 2.0)
+	fx.chunks(hit, 1 + power * 2, PILLAR_DARK, 2.0 + power, -side * 0.6, 0.8, 4.0, 9.0)
+	fx.flare(hit, mini(power, 3), fx.GLOW_WARM)
+	fx.dust_cloud(hit + Vector2(-side * 14.0, 10.0), 0.6 + power * 0.3, 45, 4 + power * 2)
 	# Splinters of raw wood burst out of the dent, flung inward (more each hit).
 	fx.splinters(hit, 4 + power * 5, RAW_WOOD, 5.0 + power * 1.5, -side * 1.1, 0.9)
 	fx.dust_cloud(pos + Vector2(-side * 10.0, 0.0), 0.5 + power * 0.25, 30)

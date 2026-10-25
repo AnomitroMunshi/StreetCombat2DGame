@@ -263,6 +263,20 @@ A simultaneous lethal trade skips the finisher and shows "DOUBLE K.O.".
 
 ### Finisher presentation and stage damage
 
+Finishers follow the finisher VFX reference sheet. An **additive light layer**
+supplies:
+- warm impact **flares** with long rays on every contact, and a huge one on
+  the final blow;
+- blue **energy crescents**: the palm-blast shockwave fan, and the arc of
+  spinning kicks;
+- **glowing spin arcs**;
+- blue **speed lines** behind the attacker, and warm ones behind a launched
+  victim.
+
+The attacker also wears a **blue aura** for the whole finisher. Impacts throw
+**angular, lit debris chunks** and **billowing, soft-edged dust clouds**. The
+final-blow screen flash is kept moderate, so it never washes out the effects.
+
 Every finisher runs the same sequence:
 
 1. Setup and anticipation.
