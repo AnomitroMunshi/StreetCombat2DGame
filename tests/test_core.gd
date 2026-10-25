@@ -136,7 +136,9 @@ func _initialize() -> void:
 			hits.append(t)
 	_check(hits == [7], "front kick hits once on tick 7 (%s)" % [hits])
 	_check(b.health == 92, "front kick dealt 8 (hp %d)" % b.health)
-	_check(b.position.x - a.position.x > 120.0, "front kick pushed defender away (gap %.0f)" % (b.position.x - a.position.x))
+	# The attacker steps in (STEP_IN), so the push is measured net of the step.
+	var fk_gap: float = b.position.x - a.position.x + CombatData.STEP_IN.get(&"front_kick", 0.0)
+	_check(fk_gap > 120.0, "front kick pushed defender away (gap %.0f net of step)" % fk_gap)
 
 	print("[jump arc + landing]")
 	p = _make_pair()

@@ -698,12 +698,13 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_wall_impact(Vector2(_wall_face_x(event["dir"]), pos.y), power)
 		_wall_dent = Vector2(_wall_face_x(event["dir"]) + event["dir"] * 10.0, pos.y)
 	_finisher_kind_fx(pos, fdir, power, event["final"])
+	var hit_dir := CombatData.dir_for_kind(event.get("kind", CombatData.ImpactKind.STRAIGHT), event["dir"])
 	if event["final"]:
 		_hitstop = maxi(_hitstop, 12)
 		_shake(30, 12.0)
-		fx.impact(pos, 3, KO_COLOR)
-		fx.ring(pos, Color.WHITE, 90.0, 26)
-		hud.flash(0.45)  # bright, but not a white-out that hides the finisher VFX
+		fx.hit(pos, hit_dir, 3, KO_COLOR)
+		fx.ring(pos, Color.WHITE, 56.0, 20)
+		hud.flash(0.22)  # a beat of light, never a white-out over the blow
 		audio.play(&"hit_heavy", 3.0)
 		audio.play(&"ko_boom")
 		_camera_punch += 0.12
@@ -713,7 +714,8 @@ func _finisher_feedback(event: Dictionary) -> void:
 	else:
 		_hitstop = maxi(_hitstop, 2 + power * 2)
 		_shake(4 + power * 3, 2.0 + power * 2.0)
-		fx.impact(pos, power, HIT_COLOR)
+		fx.hit(pos, hit_dir, clampi(power, 1, 3), HIT_COLOR)
+		_kick_camera(hit_dir, 3.0 + power * 3.0)
 		audio.play(&"hit_heavy" if power >= 2 else &"hit_light")
 		_camera_punch += 0.015 * power
 
@@ -722,7 +724,9 @@ func _finisher_feedback(event: Dictionary) -> void:
 ## VFX reference sheet): warm impact flares on every contact, blue energy for
 ## the attacker's power, a huge flare and signature effect on the final blow.
 func _finisher_kind_fx(pos: Vector2, dir: Vector2, power: int, final: bool) -> void:
-	fx.flare(pos, 3 if final else mini(power, 2))
+	# Only the final blow flares; the build-up hits stay clean and readable.
+	if final:
+		fx.flare(pos, 1)
 	match _finisher.kind:
 		FinisherDirector.Kind.PALM_FLURRY:
 			# Each palm: a burst at the palms. Final double palm: a huge blue
@@ -879,15 +883,16 @@ func _on_fighter_landed(fighter: Fighter) -> void:
 		fx.floor_break(centre, 3)
 		# Impact burst: light rays up out of the floor, big chunks of board
 		# thrown high, splinters, a billowing dust cloud and a shockwave.
-		fx.flare(centre + Vector2(0.0, -10.0), 3, fx.GLOW_WARM, -PI * 0.5)
+		fx.flare(centre + Vector2(0.0, -10.0), 2, fx.GLOW_WARM, -PI * 0.5)
 		fx.chunks(centre + Vector2(0.0, -6.0), 14, FLOOR_WOOD, 12.0, 0.0, 0.85, 7.0, 15.0)
 		fx.chunks(centre + Vector2(0.0, -6.0), 10, WOOD_COLOR, 8.0, 0.0, 1.1, 4.0, 8.0)
 		fx.splinters(centre + Vector2(0.0, -4.0), 16, FLOOR_WOOD, 11.0, 0.0, 0.9)
-		fx.dust_cloud(floor_pos, 2.4, 80, 14)
-		fx.ground_ring(floor_pos, 220.0, 30)
-		fx.ground_ring(floor_pos, 140.0, 22)
+		# Dust kept low and short so the body in the crater stays readable.
+		fx.dust_cloud(floor_pos, 1.4, 45, 8)
+		fx.ground_ring(floor_pos, 150.0, 24)
+		fx.ground_ring(floor_pos, 90.0, 18)
 		audio.play(&"ko_boom", -4.0)
-		hud.flash(0.4)
+		hud.flash(0.2)
 		_shake(18, 9.0)
 		_camera_punch += 0.05
 
@@ -970,7 +975,7 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 	# colours, flung inward off the face.
 	fx.chunks(hit, 2 + power * 3, PILLAR_LIGHT, 3.0 + power * 1.4, -side * 0.9, 0.9, 4.0 + power, 8.0 + power * 2.0)
 	fx.chunks(hit, 1 + power * 2, PILLAR_DARK, 2.0 + power, -side * 0.6, 0.8, 4.0, 9.0)
-	fx.flare(hit, mini(power, 3), fx.GLOW_WARM)
+	fx.flare(hit, mini(power, 2) - 1, fx.GLOW_WARM)  # small: the cracks and chunks carry the hit
 	fx.dust_cloud(hit + Vector2(-side * 14.0, 10.0), 0.6 + power * 0.3, 45, 4 + power * 2)
 	# Splinters of raw wood burst out of the dent, flung inward (more each hit).
 	fx.splinters(hit, 4 + power * 5, RAW_WOOD, 5.0 + power * 1.5, -side * 1.1, 0.9)
@@ -978,7 +983,7 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 	fx.jolt_wall(side, 2.0 + power * 2.0)
 	audio.play(&"wall_hit")
 	_shake(12, 6.0 + power)
-	hud.flash(0.25)
+	hud.flash(0.12)
 	_camera_punch += 0.03
 
 

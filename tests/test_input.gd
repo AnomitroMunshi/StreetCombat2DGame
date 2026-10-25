@@ -97,6 +97,11 @@ class Driver extends Node:
 				# Quiet the AI and move it away so the player can crouch, stand and guard.
 				(main.get_node("EnemyAI") as EnemyAI).setup(null, null)
 				e.position.x = p.position.x + 400.0 if p.position.x < 640.0 else p.position.x - 400.0
+				# A hit landed just before this (knockdown / get-up) must not
+				# still be playing when the crouch checks run.
+				p.airborne = false
+				p.position.y = p.ground_y
+				p.call("_enter_state", Fighter.State.IDLE)
 			260:
 				# Standing still, then away (A) + L together: back kick.
 				Input.action_press("move_left")

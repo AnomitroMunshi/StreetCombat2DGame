@@ -772,7 +772,11 @@ static func impact_kind(type: AttackType) -> ImpactKind:
 
 ## World direction a strike drives the target (facing: the attacker's).
 static func impact_dir(type: AttackType, facing: int) -> Vector2:
-	match impact_kind(type):
+	return dir_for_kind(impact_kind(type), facing)
+
+
+static func dir_for_kind(kind: ImpactKind, facing: int) -> Vector2:
+	match kind:
 		ImpactKind.HOOK:
 			return Vector2(facing, -0.18).normalized()
 		ImpactKind.RISING:

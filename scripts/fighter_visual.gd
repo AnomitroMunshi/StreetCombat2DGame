@@ -109,6 +109,8 @@ const CONTACT_DEPTH: float = 9.0
 ## Half the visible body thickness used for the target's near surface.
 const BODY_HALF: float = 18.0
 const REACH_SEARCH_STEPS: int = 6
+## Body width kept when turned edge-on in a spin (fraction of facing width).
+const SPIN_MIN_WIDTH: float = 0.4
 ## Close-range kicks: how far the hips shift back and the torso leans away to
 ## keep the leg extended before the knee has to fold.
 const KICK_ROOM_HIP: float = 18.0
@@ -333,7 +335,7 @@ var _knee := PackedFloat32Array([0.25, -0.1, 1.4, 0.8, 1.2, 0.9, 1.9, -0.3, -0.3
 # Slumped against the wall: back resting on it, head dropped, one knee up,
 # the other leg out, arms limp on the floor.
 var _slumped := PackedFloat32Array([-0.7, 1.35, 0.35, 0.7, -0.15, 0.1, 2.1, 0.9, 1.45, 1.55, -24.0, 6.0, 0.0, 2.0])
-var _stagger := PackedFloat32Array([-0.15, -0.3, 0.1, 0.4, -0.1, 0.2, 0.25, 0.05, -0.35, -0.15, -2.0, 8.0])
+var _stagger := PackedFloat32Array([0.3, 0.45, 0.35, 1.1, 0.25, 0.9, 0.55, -0.25, -0.55, -0.6, -4.0, 12.0])
 # Tornado (360) kick: coil low, spring up with knees tucked, lash out a high
 # roundhouse while the arms fling out for balance.
 var _tornado_windup := PackedFloat32Array([0.3, 0.2, -0.5, 1.0, 1.2, 2.0, 0.8, -0.4, -0.5, -0.9, -4.0, 18.0])
@@ -456,6 +458,9 @@ func _ready() -> void:
 		&"fknee_hit": _fknee_hit, &"gyaku_load": _gyaku_load, &"gyaku_hit": _gyaku_hit, &"knife_hit": _knife_hit,
 		&"rpalm_hit": _rpalm_hit, &"lowside_hit": _lowside_hit, &"sweep_load": _sweep_load, &"sweep_extend": _sweep_extend,
 		&"back_extend": _back_extend, &"jrh_hit": _jrh_hit, &"deflect": _deflect,
+		# Directional reactions for finisher victims.
+		&"hitstun_hook": _hitstun_hook, &"hitstun_up": _hitstun_up, &"hitstun_down": _hitstun_down,
+		&"hitstun_leg": _hitstun_leg, &"hitstun_heavy": _hitstun_heavy,
 	}
 	_moves = {
 		CombatData.AttackType.LIGHT: [
@@ -1341,9 +1346,11 @@ func _draw() -> void:
 	var accent := fighter.accent_color
 	# Mirror for facing; script_flip turns away (spins), and the finisher spin
 	# squashes the body edge-on as it turns about the vertical axis.
-	var face := float(fighter.facing) * (-1.0 if fighter.script_flip else 1.0) * cos(_spin_angle)
-	if absf(face) < 0.08:
-		face = 0.08 * signf(face) if face != 0.0 else 0.08
+	# Edge-on the body keeps some width (foreshortened, not a line), so a spin
+	# reads as a turning body instead of collapsing to a stick.
+	var turn := cos(_spin_angle)
+	var face := float(fighter.facing) * (-1.0 if fighter.script_flip else 1.0) \
+		* (1.0 if turn >= 0.0 else -1.0) * lerpf(SPIN_MIN_WIDTH, 1.0, absf(turn))
 	var mirror := Transform2D(0.0, Vector2(face, 1.0), 0.0, Vector2(_shake_x, 0.0))
 
 	# Ground shadow: stays on the floor, shrinks with height, stretches when lying.

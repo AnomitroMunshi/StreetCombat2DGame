@@ -62,7 +62,22 @@ const WALL_CRUSH_CHANCE: float = 0.6
 ## pinning strike, final windup, final blow.
 const DEFAULT_WALL_ENTRY: Array[StringName] = [&"knee_windup", &"knee", &"heavy_strike", &"palm_windup", &"palm_strike"]
 ## The attacker never steps closer than this to the victim.
-const MIN_GAP: float = 50.0
+const MIN_GAP: float = 88.0
+## How each striking pose drives the victim (reaction pose and impact direction);
+## anything not listed is a straight blow.
+const POSE_KIND: Dictionary = {
+	&"lhook_hit": CombatData.ImpactKind.HOOK, &"rhook_hit": CombatData.ImpactKind.HOOK,
+	&"high_extend": CombatData.ImpactKind.HOOK, &"shook_hit": CombatData.ImpactKind.HOOK,
+	&"elbow_hit": CombatData.ImpactKind.HOOK, &"knife_hit": CombatData.ImpactKind.HOOK,
+	&"jrh_hit": CombatData.ImpactKind.HOOK, &"spin_kick": CombatData.ImpactKind.HOOK,
+	&"tornado_kick": CombatData.ImpactKind.HOOK, &"backhand_strike": CombatData.ImpactKind.HOOK,
+	&"uppercut_strike": CombatData.ImpactKind.RISING, &"knee": CombatData.ImpactKind.RISING,
+	&"fknee_hit": CombatData.ImpactKind.RISING, &"rpalm_hit": CombatData.ImpactKind.RISING,
+	&"axe_chop": CombatData.ImpactKind.DOWNWARD, &"overhand_hit": CombatData.ImpactKind.DOWNWARD,
+	&"hammer_strike": CombatData.ImpactKind.DOWNWARD,
+}
+## Low strikes: the victim's lead knee buckles.
+const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_extend"]
 
 ## Last finisher played. Static, so it survives scene reloads (restarts) and the
 ## same finisher is never chosen twice in a row.
@@ -135,6 +150,14 @@ func _init(finisher_kind: Kind, atk: Fighter, vic: Fighter) -> void:
 		for pose in atk.style.wall_entry:
 			_wall_entry.append(StringName(pose))
 	_beats = _build(kind)
+	# Room to strike: the bodies start at least MIN_GAP apart (the victim is
+	# shoved back, or the attacker steps back when the victim is at the wall).
+	var gap := (vic.position.x - atk.position.x) * _dir
+	if gap < MIN_GAP:
+		vic.position.x += (MIN_GAP - gap) * _dir
+		vic.clamp_to_arena()
+		atk.position.x = vic.position.x - maxf(MIN_GAP, absf(vic.position.x - atk.position.x)) * _dir
+		atk.clamp_to_arena()
 
 
 func get_display_name() -> String:
@@ -179,12 +202,26 @@ func _start_beat(beat: Dictionary) -> Dictionary:
 	var high: bool = beat.get("high", true)
 	var contact := (attacker.position + victim.position) * 0.5 + Vector2(0.0, -135.0 if high else -95.0)
 	var final: bool = beat.get("final", false)
+	var strike_kind: int = POSE_KIND.get(attacker.script_pose, CombatData.ImpactKind.STRAIGHT)
 	if final:
 		victim.finish_ko(_dir, beat["ko_vy"], beat["ko_drift"], beat.get("ko_rolls", 0), beat.get("ko_tumble", false))
 	else:
-		victim.scripted_hit(high)
+		victim.scripted_hit(high, strike_kind)
+		# The victim reacts the way the blow travelled (head) or buckles (legs).
+		if attacker.script_pose in LEG_POSES:
+			victim.script_pose = &"hitstun_leg"
+		elif high and victim.script_pose == &"hitstun":
+			match strike_kind:
+				CombatData.ImpactKind.HOOK:
+					victim.script_pose = &"hitstun_hook"
+				CombatData.ImpactKind.RISING:
+					victim.script_pose = &"hitstun_up"
+				CombatData.ImpactKind.DOWNWARD:
+					victim.script_pose = &"hitstun_down"
+				_:
+					victim.script_pose = &"hitstun_heavy" if victim.hit_counter % 2 == 0 else &"hitstun"
 	return {"pos": contact, "power": beat.get("power", 1), "final": final, "wall": beat.get("wall", false),
-		"dir": _dir}
+		"dir": _dir, "kind": strike_kind}
 
 
 func _move(fighter: Fighter, speed: float, is_attacker: bool) -> void:
@@ -277,7 +314,7 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 8, "atk": &"rpalm_hit", "def": &"knock_fly", "hit": true, "power": 2, "def_vy": -10.0},
 				{"ticks": 9, "atk": &"jump_rise", "def": &"knock_fly", "atk_vy": -13.0, "atk_move": 1.0},
 				{"ticks": 16, "atk": &"palm_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
-					"ko_vy": 16.0, "ko_drift": 2.0, "ko_rolls": 0, "ko_tumble": false},
+					"ko_vy": 16.0, "ko_drift": 6.0, "ko_rolls": 0, "ko_tumble": false},
 				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
 			]
 		Kind.LAST_COMBINATION:
@@ -354,7 +391,7 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 10, "atk": &"jump_rise", "def": &"stagger", "atk_vy": -13.0, "atk_move": 1.5},
 				{"ticks": 6, "atk": &"axe_raise", "def": &"stagger"},
 				{"ticks": 16, "atk": &"axe_chop", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
-					"ko_vy": 16.0, "ko_drift": 3.0, "ko_rolls": 0, "ko_tumble": false},
+					"ko_vy": 16.0, "ko_drift": 6.0, "ko_rolls": 0, "ko_tumble": false},
 				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
 			]
 		Kind.SPINNING_HEEL:

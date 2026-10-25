@@ -1100,10 +1100,10 @@ func scripted_launch(vy: float) -> void:
 	velocity_y = vy
 
 
-func scripted_hit(high: bool) -> void:
+func scripted_hit(high: bool, kind: int = CombatData.ImpactKind.STRAIGHT) -> void:
 	hit_counter += 1
 	last_hit_high = high
-	last_hit_kind = CombatData.ImpactKind.STRAIGHT
+	last_hit_kind = kind
 	flash_frames = HIT_FLASH_FRAMES
 
 
