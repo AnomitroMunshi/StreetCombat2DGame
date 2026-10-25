@@ -109,6 +109,10 @@ const CONTACT_DEPTH: float = 9.0
 ## Half the visible body thickness used for the target's near surface.
 const BODY_HALF: float = 18.0
 const REACH_SEARCH_STEPS: int = 6
+## Close-range kicks: how far the hips shift back and the torso leans away to
+## keep the leg extended before the knee has to fold.
+const KICK_ROOM_HIP: float = 18.0
+const KICK_ROOM_LEAN: float = 0.18
 ## Active idle (the looping fighting movement in neutral, per stance: see
 ## Stances.DATA "idle"). It fades in over 1 / IDLE_FADE_IN s after any action
 ## (so recoveries look settled, not bouncy), out fast when acting, and is damped
@@ -119,6 +123,22 @@ const IDLE_FADE_OUT: float = 14.0
 const IDLE_POSTURE_DAMP: float = 0.7
 const MAX_IDLE_BOB: float = 6.0
 const MAX_HEEL_LIFT: float = 5.0
+## Strike mechanics (see _mechanics): load depth against the strike, where the
+## load peaks (fraction of startup), and how much of the recovery the release takes.
+const MECH_LOAD: float = 0.35
+const MECH_LOAD_END: float = 0.55
+const MECH_RELEASE: float = 0.55
+enum { MECH_NONE, MECH_LEAD, MECH_REAR, MECH_RISING, MECH_KICK, MECH_ROUNDHOUSE, MECH_KNEE }
+## Per kind: channel -> offset at full drive.
+const MECH_GAINS: Dictionary = {
+	MECH_LEAD: {HIP_X: 5.0, TORSO: 0.08, SPREAD: 5.0, HEAD: 0.08},
+	MECH_REAR: {HIP_X: 9.0, TORSO: 0.12, SPREAD: -10.0, PIVOT: 0.6, DROP: 3.0, HEAD: 0.1},
+	MECH_RISING: {HIP_X: 5.0, TORSO: 0.0, SPREAD: -6.0, PIVOT: 0.5},
+	MECH_KICK: {HIP_X: 3.0, TORSO: -0.1, PIVOT: 0.8, TH_B: 0.3, SH_B: -0.25},
+	MECH_ROUNDHOUSE: {HIP_X: 3.0, TORSO: -0.05, PIVOT: 0.9, TH_B: 0.3, SH_B: -0.25, UA_B: -0.5, LA_B: -0.6},
+	MECH_KNEE: {HIP_X: 6.0, TORSO: -0.1, PIVOT: 0.5},
+}
+const MECH_FORWARD_ONLY: Array = [PIVOT, DROP, TH_B, SH_B, UA_B, LA_B]
 const SWOOSH_POINTS: int = 10
 const SWOOSH_FADE: float = 0.12
 
@@ -143,7 +163,7 @@ var _heavy_strike := PackedFloat32Array([0.5, 0.05, 0.75, 2.8, 1.57, 1.6, 0.85, 
 var _backhand_windup := PackedFloat32Array([0.1, 0.15, 1.3, 4.08, 0.55, 2.95, 0.6, -0.05, -0.62, -0.3, -3.0, 0.0])
 var _backhand_strike := PackedFloat32Array([0.25, 0.05, 1.8, 2.05, 0.55, 2.95, 0.68, 0.05, -0.66, -0.32, 6.0, 0.0])
 var _uppercut_windup := PackedFloat32Array([0.45, 0.15, 0.9, 2.6, 0.15, 0.9, 1.0, -0.4, -0.75, -1.1, -4.0, 0.0])
-var _uppercut_strike := PackedFloat32Array([-0.1, -0.1, 0.7, 2.8, 1.3, 2.95, 0.5, 0.05, -0.45, -0.15, 8.0, 0.0, 0.4])
+var _uppercut_strike := PackedFloat32Array([0.12, -0.05, 0.7, 2.8, 1.15, 2.95, 0.75, -0.2, -0.5, -0.55, 8.0, 4.0, 0.7])
 
 # Side kick (lead leg): pivot and chamber the knee across the body (heel to the
 # hip), thrust the heel out with the hips while the torso counter-leans and the
@@ -161,7 +181,7 @@ var _jk_extend := PackedFloat32Array([-0.5, 0.3, 0.7, 2.7, -1.0, -0.8, 1.25, 1.2
 # High kick: knee chambered high and diagonal, then the shin snaps out to face
 # level with the torso counter-leaning and the support foot pivoting.
 var _high_chamber := PackedFloat32Array([-0.3, 0.3, 1.15, 2.3, 0.55, 2.95, 2.15, -0.7, -0.25, -0.15, -4.0, 0.0, 0.8])
-var _high_extend := PackedFloat32Array([-0.6, 0.55, 1.3, 1.9, 0.6, 2.9, 2.6, 2.62, -0.25, -0.1, 10.0, 0.0, 1.0])
+var _high_extend := PackedFloat32Array([-0.6, 0.55, 1.3, 1.9, 0.6, 2.9, 2.38, 2.45, -0.25, -0.1, 10.0, 0.0, 1.0])
 # Flying punch: lead fist chambered with the knees tucked, then fired straight
 # forward with the rear leg trailing (the body travels with it).
 var _jump_punch_windup := PackedFloat32Array([0.15, 0.05, 0.4, 2.9, 0.5, 2.9, 1.7, -0.5, 1.2, -0.9, -4.0, 0.0])
@@ -230,8 +250,8 @@ var _gyaku_hit := PackedFloat32Array([0.25, 0.05, 0.6, 2.4, 1.57, 1.57, 1.0, -0.
 var _knife_load := PackedFloat32Array([0.05, 0.15, 2.7, 3.7, 0.9, 3.0, 0.6, -0.15, -0.6, -0.3, -2.0, 0.0, 0.0, 14.0])
 var _knife_hit := PackedFloat32Array([0.3, 0.1, 1.6, 1.25, 0.9, 3.0, 0.7, -0.1, -0.65, -0.35, 8.0, 0.0, 0.3, 6.0])
 # Rising punch / rising palm: a straight arm driving upward from a dip.
-var _rpunch_hit := PackedFloat32Array([-0.05, -0.1, 0.7, 2.8, 2.2, 2.5, 0.5, 0.05, -0.45, -0.15, 8.0, 0.0, 0.4, -6.0])
-var _rpalm_hit := PackedFloat32Array([-0.05, -0.1, 0.8, 2.8, 2.1, 2.9, 0.5, 0.05, -0.45, -0.15, 8.0, 0.0, 0.4, -6.0])
+var _rpunch_hit := PackedFloat32Array([0.1, -0.05, 0.7, 2.8, 1.6, 2.7, 0.75, -0.2, -0.5, -0.55, 8.0, 4.0, 0.7, -6.0])
+var _rpalm_hit := PackedFloat32Array([0.1, -0.05, 0.8, 2.8, 1.55, 2.8, 0.75, -0.2, -0.5, -0.55, 8.0, 4.0, 0.7, -6.0])
 # Spinning counter kick (turned away): the heel snaps back at chest height.
 var _scounter_load := PackedFloat32Array([0.45, 0.4, 1.0, 2.8, 0.9, 2.9, 0.4, -0.3, 0.6, -1.4, -2.0, 0.0, 0.0, 6.0])
 var _scounter_hit := PackedFloat32Array([0.7, 0.5, 1.2, 2.6, 0.6, 2.4, 0.3, -0.05, -1.8, -1.7, -6.0, 0.0, 0.0, 4.0])
@@ -1105,11 +1125,72 @@ func _air_pose() -> PackedFloat32Array:
 	return pose
 
 
-## Samples the move's keyframe timeline at tick time t.
+## Attack pose: the move's keyframes plus whole-body mechanics.
 func _attack_pose(t: float) -> PackedFloat32Array:
-	var attack := fighter.current_attack
-	if attack == null:
+	if fighter.current_attack == null:
 		return _guard
+	return _mechanics(_attack_keys(t), t)
+
+
+## Drive of a strike over time: a small load against the strike (anticipation),
+## a snap into the target, held through the active frames, then released quickly
+## at the start of the recovery (the limb snaps back, the body settles).
+static func _drive(t: float, attack: CombatData.Attack) -> float:
+	var s := float(attack.startup)
+	if t < s:
+		var u := t / maxf(s, 1.0)
+		if u < MECH_LOAD_END:
+			return -MECH_LOAD * smoothstep(0.0, MECH_LOAD_END, u)
+		var v := (u - MECH_LOAD_END) / (1.0 - MECH_LOAD_END)
+		return lerpf(-MECH_LOAD, 1.0, v * v)
+	var e := s + attack.active
+	if t < e:
+		return 1.0
+	return 1.0 - smoothstep(0.0, MECH_RELEASE, (t - e) / maxf(float(attack.recovery), 1.0))
+
+
+## Whole-body mechanics shared by every strike of a kind, so no technique is
+## thrown with the arm or leg alone: the hips drive in, the shoulders turn
+## through, the rear heel pivots, the chin tucks; kicks pivot on a bent support
+## leg with the torso counterbalancing. Spins, sequences and air moves have
+## their own full-body keys and are left alone.
+func _mechanics(pose: PackedFloat32Array, t: float) -> PackedFloat32Array:
+	var attack := fighter.current_attack
+	if fighter.airborne or attack.spin or attack.leap_vy != 0.0 or not attack.sequence.is_empty():
+		return pose
+	var gains: Dictionary = MECH_GAINS.get(_mech_kind(attack.type), {})
+	if gains.is_empty():
+		return pose
+	var d := _drive(t, attack)
+	var out := pose.duplicate()
+	for ch: int in gains:
+		var g: float = gains[ch]
+		# Pivots and knee bends only ever add (no reverse pivot in the load).
+		out[ch] += g * (maxf(d, 0.0) if ch in MECH_FORWARD_ONLY else d)
+	out[PIVOT] = clampf(out[PIVOT], 0.0, 1.0)
+	return out
+
+
+static func _mech_kind(type: CombatData.AttackType) -> int:
+	if type in [CombatData.AttackType.UPPERCUT, CombatData.AttackType.RISING_PUNCH, CombatData.AttackType.RISING_PALM]:
+		return MECH_RISING
+	if type in [CombatData.AttackType.HIGH_KICK, CombatData.AttackType.BODY_ROUNDHOUSE, CombatData.AttackType.LOW_ROUNDHOUSE]:
+		return MECH_ROUNDHOUSE
+	match _attack_joint(type):
+		J_HAND_F:
+			return MECH_LEAD
+		J_HAND_B, J_ELBOW_B:
+			return MECH_REAR
+		J_FOOT_F:
+			return MECH_KICK
+		J_KNEE_F:
+			return MECH_KNEE
+	return MECH_NONE
+
+
+## Samples the move's keyframe timeline at tick time t.
+func _attack_keys(t: float) -> PackedFloat32Array:
+	var attack := fighter.current_attack
 	var rest := _air_pose() if fighter.airborne else _guard
 	var keys: Array = _moves.get(attack.type, [])
 	var prev_t := 0.0
@@ -1124,7 +1205,7 @@ func _attack_pose(t: float) -> PackedFloat32Array:
 		prev_pose = key_pose
 	var total := float(attack.total_frames())
 	var w := (t - prev_t) / maxf(total - prev_t, 0.001)
-	return _blend(prev_pose, rest, smoothstep(0.0, 1.0, w))
+	return _blend(prev_pose, rest, _ease(w, EASE_OUT))
 
 
 static func _key_time(phase: int, fraction: float, attack: CombatData.Attack) -> float:
@@ -1603,12 +1684,21 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 	# Bisect the blend toward the stance: the largest extension that still fits.
 	var base := _air_pose() if fighter.airborne else _guard
 	if idx == J_FOOT_F or idx == J_FOOT_B:
-		# Kicks shorten by folding the knee (the knee stays at height, so a
-		# head kick still lands high) instead of dropping the whole leg.
-		var th := TH_F if idx == J_FOOT_F else TH_B
-		var sh := SH_F if idx == J_FOOT_F else SH_B
-		base = pose.duplicate()
-		base[sh] = pose[th] - signf(pose[th]) * 2.2
+		# Kicks first make room the way a fighter does: hips back and torso
+		# leaning away, the leg staying extended. Only if that is not enough
+		# does the knee fold (the knee stays at height, so a head kick still
+		# lands high) instead of dropping the whole leg.
+		var lean := pose.duplicate()
+		lean[HIP_X] -= KICK_ROOM_HIP * dir
+		lean[TORSO] -= KICK_ROOM_LEAN
+		if _solve_joints(lean)[idx].x * dir <= limit:
+			base = lean
+		else:
+			pose = lean
+			var th := TH_F if idx == J_FOOT_F else TH_B
+			var sh := SH_F if idx == J_FOOT_F else SH_B
+			base = pose.duplicate()
+			base[sh] = pose[th] - signf(pose[th]) * 1.8
 	var lo := 0.0  # 0 = full strike
 	var hi := 1.0  # 1 = stance
 	for i in REACH_SEARCH_STEPS:
