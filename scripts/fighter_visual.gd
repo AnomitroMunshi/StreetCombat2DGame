@@ -111,6 +111,13 @@ const BODY_HALF: float = 18.0
 const REACH_SEARCH_STEPS: int = 6
 ## Body width kept when turned edge-on in a spin (fraction of facing width).
 const SPIN_MIN_WIDTH: float = 0.4
+## Boxer skin tones (light fighter, dark fighter) and outfit colours.
+const SKIN_LIGHT := Color(0.87, 0.68, 0.54)
+const SKIN_DARK := Color(0.42, 0.27, 0.2)
+const SHADE_DARKEN: float = 0.22
+const HIGHLIGHT_ALPHA: float = 0.35
+const BOOT_COLOR := Color(0.94, 0.93, 0.9)
+const SOLE_COLOR := Color(0.16, 0.13, 0.12)
 ## Boxing gloves are drawn this much bigger than a bare fist.
 const GLOVE_SCALE: float = 1.35
 ## Straight punch aim limits (limb angle from straight down; pi/2 = level).
@@ -461,6 +468,11 @@ var _heel_draw := Vector2.ZERO
 var _foot_point := Vector2.ZERO
 ## Outfit (MartialArtStyle.kit).
 var _kit: StringName = &"gi"
+## Cel shading on the body fill pass (boxing kit): shadow on the far side of
+## every limb and the torso, a highlight along the near edge.
+var _shade: bool = false
+## Shoe colour on the fill pass (transparent = body colour).
+var _shoe := Color.TRANSPARENT
 
 @onready var fighter: Fighter = get_parent() as Fighter
 
@@ -1529,6 +1541,15 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 	var target := Vector2(_toe_point_for(j[J_FOOT_F]), _toe_point_for(j[J_FOOT_B]))
 	_foot_point = _foot_point.lerp(target, 1.0 - exp(-FOOT_POINT_RATE * _last_delta))
 	var rim := fighter.outline_color
+	_shade = _kit == &"boxing"
+	_shoe = BOOT_COLOR if _kit == &"boxing" else Color.TRANSPARENT
+	if _kit == &"boxing":
+		# Boxers are drawn with skin, the outfit carries the fighter's colours.
+		var skin := SKIN_LIGHT if fighter.body_color.get_luminance() > 0.4 else SKIN_DARK
+		if fighter.flash_frames > 0:
+			skin = skin.lerp(Color.WHITE, 0.6)
+		front = skin
+		back = skin.darkened(0.18)
 	# 1) Rim glow (dark fighters), 2) one outline around the whole body so
 	# overlapping limbs merge into a single silhouette, 3) the filled body.
 	if fighter.rim_glow:
@@ -1549,6 +1570,7 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 		_silhouette(j, forward, back_toe, 5.5, aura, aura)
 	_silhouette(j, forward, back_toe, OUTLINE_WIDTH, rim, rim)
 	_silhouette(j, forward, back_toe, 0.0, back, front)
+	_shade = false
 	_draw_kit(j, accent, forward)
 
 
@@ -1607,6 +1629,31 @@ func _muscle(a: Vector2, b: Vector2, front: Vector2, front_profile: Array[Vector
 	draw_colored_polygon(front_side + back_side, color)
 	draw_circle(a, (front_profile[0].y + back_profile[0].y) * 0.5 + pad, color, true, -1.0, true)
 	draw_circle(b, (front_profile[-1].y + back_profile[-1].y) * 0.5 + pad, color, true, -1.0, true)
+	if _shade and pad == 0.0:
+		_shade_limb(a, d, n, front_profile, back_profile, color)
+
+
+## Cel shading for a limb: the back half in shadow, a soft highlight just
+## inside the front edge (light from the front and above).
+func _shade_limb(a: Vector2, d: Vector2, n: Vector2, front_profile: Array[Vector2], back_profile: Array[Vector2],
+		color: Color) -> void:
+	var mid := PackedVector2Array()
+	var back_side := PackedVector2Array()
+	var hi := PackedVector2Array()
+	for i in MUSCLE_SAMPLES + 1:
+		var t := float(i) / MUSCLE_SAMPLES
+		var c := a + d * t
+		var bw := _profile_width(back_profile, t)
+		mid.append(c - n * bw * 0.15)
+		back_side.append(c - n * (bw - 0.6))
+		if t > 0.12 and t < 0.88:
+			hi.append(c + n * (_profile_width(front_profile, t) * 0.55))
+	back_side.reverse()
+	draw_colored_polygon(mid + back_side, color.darkened(SHADE_DARKEN))
+	if hi.size() > 1:
+		var h := color.lightened(0.35)
+		h.a = HIGHLIGHT_ALPHA
+		draw_polyline(hi, h, 2.2, true)
 
 
 ## Outside of a joint's bend (where the kneecap / elbow point is); `fallback`
@@ -1665,7 +1712,13 @@ func _leg(hip: Vector2, knee: Vector2, ankle: Vector2, toe_dir: Vector2, pad: fl
 		# Heel raised: tilt the shoe so the toes stay down on the floor.
 		var tip := sole + Vector2(toe.x * 13.0, heel_lift)
 		toe = (tip - sole).normalized()
-	_capsule(sole - toe * 3.5, sole + toe * 13.0, 4.8 + pad, 3.6 + pad, color)
+	if _shoe.a > 0.0 and pad == 0.0:
+		# Boxing boots: high-top in white with a dark sole.
+		_capsule(knee.lerp(ankle, 0.55), ankle, 6.0, 5.2, _shoe.darkened(0.08 if color.get_luminance() < 0.45 else 0.0))
+		_capsule(sole - toe * 3.5, sole + toe * 13.0, 4.8, 3.6, _shoe)
+		_capsule(sole - toe * 3.0 + shin * 3.2, sole + toe * 12.5 + shin * 3.2, 1.6, 1.4, SOLE_COLOR)
+	else:
+		_capsule(sole - toe * 3.5, sole + toe * 13.0, 4.8 + pad, 3.6 + pad, color)
 
 
 ## Boxing glove fill (only on the body fill pass; outlines and glows keep
@@ -1696,6 +1749,11 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 		draw_line(wrist - across * 6.5, wrist + across * 6.5, Color(0.95, 0.94, 0.9), 4.0, true)
 	_capsule(hand - along * 1.5 * g, hand + along * 5.5 * g, 7.0 * g + pad, 8.0 * g + pad, fill)
 	draw_circle(hand - along * 2.0 * g + inside.normalized() * 4.5 * g, 3.6 * g + pad, fill, true, -1.0, true)  # thumb
+	if glove.a > 0.0:
+		# Glove shading: a darker palm side and a shine on the knuckles.
+		var side := -inside.normalized()
+		draw_circle(hand + along * 2.0 * g - side * 3.5, 5.0 * g, fill.darkened(0.25), true, -1.0, true)
+		draw_circle(hand + along * 3.0 * g + side * 3.0, 3.2, Color(1.0, 1.0, 1.0, 0.45), true, -1.0, true)
 
 
 ## Side-profile torso: hips, narrower waist, chest out in front, shoulders.
@@ -1723,6 +1781,19 @@ func _torso(j: PackedVector2Array, forward: Vector2, pad: float, color: Color) -
 	draw_circle(j[J_SHOULDER_B], 8.5 + pad, color, true, -1.0, true)
 	_capsule(j[J_HIP_F], j[J_HIP_B], 10.0 + pad, 10.0 + pad, color)  # pelvis
 	_capsule(neck, neck + axis * 8.0, 5.0 + pad, 4.5 + pad, color)  # neck
+	if _shade and pad == 0.0:
+		# Back of the torso in shadow, a pec / ab highlight on the chest.
+		var shadow := PackedVector2Array()
+		var spine := PackedVector2Array()
+		for row in TORSO_PROFILE:
+			var c := hip + axis * length * row.x
+			shadow.append(c - n * (row.z - 0.6))
+			spine.append(c - n * row.z * 0.1)
+		spine.reverse()
+		draw_colored_polygon(shadow + spine, color.darkened(SHADE_DARKEN))
+		var h := color.lightened(0.35)
+		h.a = HIGHLIGHT_ALPHA
+		draw_arc(hip + axis * length * 0.72 + n * 5.0, 7.0, -PI * 0.6, PI * 0.6, 8, h, 2.0, true)
 
 
 ## Head with a jaw / chin profile toward the front.
@@ -1775,23 +1846,72 @@ func _draw_boxing_kit(j: PackedVector2Array, accent: Color) -> void:
 	var n := Vector2(-axis.y, axis.x)
 	var trunks := accent.darkened(0.1)
 	var trim := accent.lightened(0.45)
+	var forward := Vector2(signf(j[J_HAND_F].x - j[J_SHOULDER_F].x + 0.001), 0.0)
+	var nf := n if n.dot(forward) >= 0.0 else -n
+	# Tank top in the fighter's base colour, over the chest and stomach.
+	var top_col := Color(0.88, 0.88, 0.86) if fighter.body_color.get_luminance() > 0.4 else Color(0.16, 0.15, 0.17)
+	var length := (j[J_NECK] - hip).length()
+	var front_side := PackedVector2Array()
+	var back_side := PackedVector2Array()
+	for row in TORSO_PROFILE:
+		if row.x < 0.12 or row.x > 0.86:
+			continue
+		var c := hip + axis * length * row.x
+		front_side.append(c + nf * (row.y + 0.6))
+		back_side.append(c - nf * (row.z + 0.6))
+	back_side.reverse()
+	draw_colored_polygon(front_side + back_side, top_col)
+	var spine := PackedVector2Array()
+	var back_edge := PackedVector2Array()
+	for row in TORSO_PROFILE:
+		if row.x < 0.12 or row.x > 0.86:
+			continue
+		var c := hip + axis * length * row.x
+		back_edge.append(c - nf * (row.z + 0.6))
+		spine.append(c - nf * row.z * 0.1)
+	spine.reverse()
+	draw_colored_polygon(back_edge + spine, top_col.darkened(SHADE_DARKEN))
+	# Straps over the shoulders.
+	var neck_base := hip + axis * length * 0.86
+	draw_line(neck_base + nf * 4.0, j[J_SHOULDER_F] + axis * 2.0, top_col, 5.0, true)
+	draw_line(neck_base - nf * 3.0, j[J_SHOULDER_B] + axis * 2.0, top_col.darkened(SHADE_DARKEN), 5.0, true)
 	# Trunks: over the pelvis and the top of both thighs.
 	for leg in [[J_HIP_B, J_KNEE_B, trunks.darkened(0.3)], [J_HIP_F, J_KNEE_F, trunks]]:
 		var top: Vector2 = j[leg[0]]
 		var hem: Vector2 = top.lerp(j[leg[1]], 0.5)
 		_capsule(top, hem, 11.2, 9.6, leg[2])
 	_capsule(j[J_HIP_F], j[J_HIP_B], 11.0, 11.0, trunks)
+	# Shade on the back of the trunks, a stripe down the near leg.
+	var back_leg_top: Vector2 = j[J_HIP_F]
+	var hem_f: Vector2 = back_leg_top.lerp(j[J_KNEE_F], 0.5)
+	var leg_dir := (hem_f - back_leg_top).normalized()
+	var leg_n := Vector2(-leg_dir.y, leg_dir.x)
+	if leg_n.dot(nf) < 0.0:
+		leg_n = -leg_n
+	draw_line(back_leg_top - leg_n * 6.0, hem_f - leg_n * 5.0, trunks.darkened(SHADE_DARKEN), 6.0, true)
+	draw_line(back_leg_top + leg_n * 9.0 + leg_dir * 2.0, hem_f + leg_n * 7.5, trim, 2.5, true)
 	var band := hip + axis * 9.0
 	draw_line(band - n * 12.5, band + n * 12.5, trim, 4.0, true)
-	# Boot cuffs over the lower shins.
+	# Sock tops above the boots.
 	for leg in [[J_KNEE_B, J_FOOT_B], [J_KNEE_F, J_FOOT_F]]:
 		var knee: Vector2 = j[leg[0]]
 		var ankle: Vector2 = j[leg[1]]
-		var cuff := knee.lerp(ankle, 0.62)
-		_capsule(cuff, ankle, 5.6, 4.8, Color(0.13, 0.11, 0.1))
+		var cuff := knee.lerp(ankle, 0.55)
 		var dir := (ankle - knee).normalized()
 		var across := Vector2(-dir.y, dir.x)
-		draw_line(cuff - across * 6.0, cuff + across * 6.0, trim, 2.5, true)
+		draw_line(cuff - across * 6.2, cuff + across * 6.2, trim, 2.5, true)
+	# Headgear: padded cap with a brow bar and cheek pad, in the outfit colour.
+	var head := j[J_HEAD]
+	var up := (head - j[J_NECK]).normalized()
+	var face := nf
+	var gear := accent.darkened(0.05)
+	# Crown and back of the head covered; the face stays open.
+	var cap := PackedVector2Array()
+	for dir in [up.slerp(face, 0.45), up.slerp(face, 0.2), up, up.slerp(-face, 0.5), -face, (-face).slerp(-up, 0.35)]:
+		cap.append(head + (dir as Vector2).normalized() * (HEAD_R - 1.5))
+	draw_polyline(cap, gear, 6.5, true)
+	draw_circle(head - face * 7.0 - up * 1.0, 5.0, gear.darkened(0.15), true, -1.0, true)  # ear pad
+	draw_line(head - face * 5.0 - up * 5.0, head + face * 4.0 - up * 11.0, gear.darkened(0.3), 1.8, true)  # chin strap
 	# Gloves are coloured in the body pass (_arm), so the far glove stays
 	# behind the head and torso.
 
