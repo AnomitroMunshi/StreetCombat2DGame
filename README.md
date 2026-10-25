@@ -20,28 +20,49 @@ From a terminal:
 & "D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64.exe" --path D:\firstGame
 ```
 
+## Match flow
+
+1. **Pre-match:** the dojo, both fighters standing relaxed and a **START MATCH**
+   button. Nobody can move or attack yet. Press **Q** here to pick your stance.
+2. **Start:** click the button or press **Enter**. Both fighters walk to their
+   marks. The player salutes (fist in palm, small bow). The rival drops its chin
+   and glares. Then both raise their stance guard.
+3. **Countdown:** 3, 2, 1, **FIGHT!**, one second per number, with taiko cues.
+   The player's controls and the AI are unlocked on the same tick.
+4. **K.O.:** after the finisher, "K.O." stays up until the loser's body has
+   stopped moving. Then the winner appears with a **RESTART MATCH** button.
+   Enter or **R** also restarts. R works at any time.
+
+Restarting reloads the scene, so health, AI, effects and animation all reset.
+Everything in the flow is counted in simulation ticks, with no timers, so an
+old countdown can never fire into a new match.
+
 ## Controls
 
 | Key        | Action                      |
 |------------|-----------------------------|
 | A / D      | Move (backing up is slower) |
 | Space      | Jump (hold A/D to jump in that direction) |
-| A A / D D (double-tap) | Dodge: backstep sway (away) or slip-in (toward), with invulnerability |
+| A A / D D (double-tap) | Dodge: backstep sway (away) or slip-in (toward), with invulnerability. **Very close (within 80 px), toward the opponent: slip past behind them** |
+| Hold S + double-tap A/D | **Evasive roll:** forward rolls through the opponent to their other side; backward rolls retreat |
+| Space + toward | Jump; a jump from normal range clears the opponent and lands behind them (cross-up) |
 | J          | Jab (light punch)           |
 | K          | Cross (heavy punch)         |
 | U          | Backhand (lead-hand backfist) |
 | O          | Uppercut (launcher / anti-air) |
 | L          | Side kick                   |
 | W + L      | High kick (face level)      |
+| A/D (away) + L from standing | Spinning back kick: turn, heel thrust (slow, strongest push). Retreating then L stays a side kick |
 | S + L      | Sweep (low, always knocks down) |
 | I          | Front kick (push kick)      |
 | L or I in the air | Jump kick (one per jump) |
 | J / K / U / O in the air | Jump punch: flying forward punch (one air attack per jump) |
 | S (hold)   | Crouch: head-level strikes pass over you |
-| Shift      | Hold to block               |
+| Shift      | Tap just before a hit to **parry**; hold to block |
 | S + Shift  | Low block (needed against sweeps) |
 | Q          | Cycle your fighting stance  |
-| R          | Restart the match           |
+| Enter / click | START MATCH / RESTART MATCH button |
+| R          | Restart the match (back to the pre-match screen) |
 | F1         | Toggle developer overlay (off by default) |
 
 ## Combat rules
@@ -72,9 +93,24 @@ The full table, including hitboxes, knockback and lunge, is in
 
 - **Buffer:** an attack press is held for 10 ticks, until the fighter can act.
 - **Combos:** during the first few ticks of recovery (`cancel_window`), a
-  buffered attack chains into the next swing, up to 3 swings. Any mix works,
-  for example J-J-K or J-K-L. On hit, every chain listed above is a true combo.
-  The 3rd swing is a finisher with extra knockback and stun.
+  buffered attack chains into the next swing, up to 3 swings. Two conditions:
+  the swing must have **connected** (hit or blocked), and the branch must be
+  listed in `CombatData.CHAINS`. A whiffed attack always plays out its full
+  recovery.
+
+  | From | Can chain into |
+  |---|---|
+  | Jab (J) | anything |
+  | Backhand (U) | J, K, O, L, W+L |
+  | Cross (K) | L, I, W+L, O, S+L |
+  | Uppercut (O) | J, U, W+L (juggle) |
+  | Side kick (L) | J, U, K |
+  | Front kick (I) | L, W+L |
+  | High kick (W+L) | J, K |
+  | Sweep, air attacks | nothing |
+
+  Heavy enders never repeat (no cross→cross). The 3rd swing is a finisher
+  with extra knockback and stun. Juggles end with a knockdown on the 3rd hit.
 - **Interrupts:** an attack can end early only by being hit, by chaining,
   or (for a jump kick) by landing. You can't walk, block, jump or turn around
   mid-attack.
@@ -120,15 +156,82 @@ The full table, including hitboxes, knockback and lunge, is in
 - **Low block (S + Shift):** sweeps are low attacks, so a standing block does
   not stop them. Only a low block does. The low block also blocks everything
   else. The AI low-blocks when it sees a sweep coming.
+- **Back kick (away + L from standing):** a spinning back kick. The fighter
+  turns its back on the opponent and thrusts the heel straight into them.
+  - 13 damage, the biggest push in the game, and a good chance to send the
+    opponent flying.
+  - Slow (11-tick startup) and very unsafe if blocked or missed. It never chains.
+  - Press away and L together after standing still. If you've been walking
+    backwards, L stays a side kick.
+- **Changing sides:** there are three ways to get behind the opponent.
+  - **Jump** over them from normal range. A forward jump clears them once your
+    feet are 60 px up and your centre passes theirs.
+  - **Slip past:** dodge toward them from very close (within 80 px).
+  - **Roll:** hold S and double-tap toward them for a forward roll through them.
+
+  While you are crossing, the bodies don't block each other. After you land,
+  any remaining overlap is resolved smoothly by moving only you (up to 6 px per
+  tick, never a teleport), on to the side your centre reached. If your centre
+  didn't get past theirs, you're eased back.
+
+  Walking can never pass through. A raised guard doesn't turn around, so
+  landing behind a blocking opponent and attacking hits their back. Facing
+  flips only once the two centres are more than 8 px apart, so it never
+  flickers. Against a wall with no room, the crossing ends in a clean
+  separation.
+- **Evasive roll (hold S + double-tap):** 4 ticks to tuck, 16 ticks rolling
+  (170 px forward, or 130 px back), and 9 ticks to rise. You are invulnerable
+  for ticks 3–14 only, and use a low hurtbox throughout. Facing is locked
+  during the roll, and an attack pressed during it fires as it ends. All of
+  these values are the `ROLL_*` constants in `combat_data.gd`.
+- **AI and side changes:** when you cross over, the rival waits a human
+  reaction time (its reaction frames plus 2–6 ticks) before turning and
+  acting. It never predicts where you'll land, but it can still anti-air a
+  jump.
 - **Sweep (S + L):** a low leg sweep that always knocks down if it isn't blocked. The
   swept fighter's feet are kicked out from under them.
 - **Blocking:** hold Shift while idle or walking. A blocked hit does no damage,
   causes blockstun and has reduced pushback. Heavy attacks are unsafe on block.
+- **Perfect parry:** pressing Shift opens a 4-tick parry window (2 of them
+  before the guard is even up). A hit inside the window is deflected: no
+  damage, a bright glint and metallic ring, and the attacker staggers for
+  24 ticks, long enough for any counter. Attacking, dodging or jumping
+  cancels the deflect at once. Keep holding Shift and you are simply blocking.
+  Sweeps must be parried low (S + Shift).
+- **No parry spam:** after an attempt, no new window opens for 30 ticks
+  (pressing again just blocks). Letting go of an unused attempt within 14
+  ticks, or attacking out of it, costs 14 ticks of recovery instead of 6. A
+  successful parry resets the cooldown, so parries can be chained.
+- **Perfect dodge:** if a strike passes through you during the dodge's
+  invulnerable frames, the dodge skips its recovery and your counter comes out
+  sooner. You hear a whoosh and see a ring.
+- **AI defence:** the rival dodges instead of blocking when its posture is
+  above 70%, and always punishes a broken guard. Otherwise it mostly blocks. Sometimes (15%) it times a parry
+  against slow attacks it can read (startup of 8 or more ticks). It punishes
+  a staggered player.
+- **Posture (thin bar under health):** a guard meter separate from HP. It fills
+  from the centre outward when you:
+  - block a strike, by that attack's own posture value: jab 6, cross 14,
+    kicks 14–16, sweep 10;
+  - have your attack parried: 1.5× its posture value plus 8;
+  - get hit while staggered or during an attack's startup (a **counter hit**).
+
+  Ordinary hits do not fill it. After 1.5 s without new posture damage it drains
+  quickly in neutral and slowly while guarding.
+
+  Full posture **breaks the guard**: a shatter effect, a GUARD BREAK callout, and
+  about 0.9 s of BROKEN, with no blocking or acting. That is a guaranteed punish.
+  The first hit ends the break, so it never becomes a stun loop. Afterwards
+  posture is empty and locked for 2 seconds (a grey bar). A counter hit never
+  breaks the guard by itself: it stops one point short.
+- **Directional guard:** a raised guard does not turn around. If the opponent
+  jumps over you while you hold block, their attack hits your back. Let go of
+  Shift and block again to face them.
 - **Trades:** both fighters' hits are checked before either is applied, so
   simultaneous hits both land.
 - **KO and finishers:** a hit that would KO starts a scripted **finisher**.
   The camera zooms in, the final blow plays in slow motion, then "K.O." and the
-  winner appear. Press R to restart. Both the player and the AI get finishers.
+  winner appear. Both the player and the AI get finishers.
 
 ## Finishers
 
@@ -157,6 +260,48 @@ Finishers are data in `scripts/finisher.gd`. Each one is a list of beats
 (duration, poses, movement, launches, hits), so they're easy to tweak or extend.
 A simultaneous lethal trade skips the finisher and shows "DOUBLE K.O.".
 
+
+### Finisher presentation and stage damage
+
+Finishers follow the finisher VFX reference sheet. An **additive light layer**
+supplies:
+- warm impact **flares** with long rays on every contact, and a huge one on
+  the final blow;
+- blue **energy crescents**: the palm-blast shockwave fan, and the arc of
+  spinning kicks;
+- **glowing spin arcs**;
+- blue **speed lines** behind the attacker, and warm ones behind a launched
+  victim.
+
+The attacker also wears a **blue aura** for the whole finisher. Impacts throw
+**angular, lit debris chunks** and **billowing, soft-edged dust clouds**. The
+final-blow screen flash is kept moderate, so it never washes out the effects.
+
+Every finisher runs the same sequence:
+
+1. Setup and anticipation.
+2. Contact with hitstop.
+3. Slow motion on the final blow only.
+4. Victim reaction.
+5. Environmental damage.
+6. Aftermath.
+7. The result, which appears only once the body is at rest.
+
+The finisher is accompanied by a **taiko build-up** that accelerates under the
+choreography (the fight track is ducked). A **victory sting** plays with the result.
+
+| Finisher | What happens |
+|---|---|
+| **Air Smash** | A downward streak burst at the hammer-fist. The spike **smashes the floorboards**: a dark broken hole ringed with pale splintered wood, broken board ends sticking up, and a few cracks running along the planks. **Floorboard splinters** fly up and scatter, with a dust burst and a shockwave. |
+| **Wall Crush** | Every strike dents the pillar (a crushed hollow with a raw-wood rim), and the cracks run along it and stay on it. **Splinters burst out of the dent** on each hit, more each time. Grit trickles from the cracks while the victim is pinned. The final palm adds an inward streak burst. Chunks fall, and the pillar jolts. |
+| **Palm Flurry** | Every palm pushes a **crescent of air**. The final blast is a huge shockwave with forward streaks and blown dust. The body tumbles, then **skids**, leaving a dust trail and **scuff marks** on the boards. |
+| **Spinning Heel / Tornado** | **Wind swirls** around the spinning body, and **dust kicks up on takeoff**. At contact the heel's arc flashes through the head, with streaks and sparks. |
+
+Notes on the stage damage:
+- All damage is visual (decals and particles). It never changes collision.
+- Debris (chips and splinters) is pooled and capped at 90, decals at 140, and transient effects at 260, for mobile. Flying pieces are drawn in front of the fighters; settled pieces rest on the floor.
+- Effects use a seeded RNG.
+- Cracks and craters persist until the match restarts.
 ## Architecture
 
 ```
@@ -277,6 +422,63 @@ drives animation and the ragdoll:
   and legs reaching down to land. Air steering works in both directions.
 - **Feet stay planted:** crouches come from bending the knees, and the hips are
   placed from leg geometry, so feet never float above the floor.
+- **Strikes stop on the target:** a fist or foot never passes through the
+  opponent. If it would reach more than a few pixels into the body, the strike
+  pulls back along its own windup until it just lands. Up close, punches
+  become short hooks and kicks become knee-like jabs. This is presentation
+  only: hitboxes are unchanged. Whiffs, high kicks over a crouch, and
+  strikes through a dodge keep their full extension.
+- **Hit reactions** depend on where and how hard you are hit:
+  - light head hits (jab, backhand) are a short flinch with the guard half up;
+  - heavy head hits (cross, high kick) whip the head and shoulders back with
+    the arms flung;
+  - body hits fold the body, lightly or deeply;
+  - uppercuts and air hits arch the body back with the arms thrown up;
+  - sweeps take the feet away.
+
+  The joint impulses scale with the weight of the hit.
+- **Body mechanics:** the cross and uppercut turn the rear heel out as the
+  hips drive through. The sweep keeps the body back and lets the leg reach.
+- **Leg sweep (S + L),** following the reference sheet:
+  1. the body drops onto the bent rear leg;
+  2. the lead leg slides out, the torso pitches forward and the lead hand goes
+     to the floor for balance;
+  3. the straight lead leg sweeps along the floor at ankle height and carries
+     on in a low follow-through arc;
+  4. the body recovers to the stance.
+
+  A swept opponent has the feet kicked out toward the sweeper and falls onto
+  their back.
+- **Back kick:** the body turns its back on the opponent through the startup,
+  pulls the knee in, thrusts the heel straight back into the target, then
+  completes the turn during recovery. This is a visual spin only; gameplay
+  facing never changes.
+- **Active idle (fighting bounce):** in neutral, both fighters keep moving:
+  - a bounce: the hips dip over planted feet, so the knees bend;
+  - weight shifts between the feet;
+  - heel lifts, with the toes staying on the floor;
+  - shoulder roll;
+  - torso sway with a level head;
+  - small guard adjustments.
+
+  Each stance has its own loop (`Stances.DATA["idle"]`):
+  - **boxing:** energetic springy bounce;
+  - **Muay Thai:** measured and upright, with the lead heel rising;
+  - **karate:** bladed, with long elastic weight shifts;
+  - **kung fu:** fluid, hands tracing circles;
+  - **grappler:** low and grounded, big slow shifts, heels flat;
+  - **counter-fighter:** minimal, sharp settle-and-hold adjustments;
+  - **bladed / squared:** mobile hop / heavy rolling pressure.
+
+  Each fighter has its own `idle_tempo` and `idle_phase` (the rival runs at
+  0.92× with an offset), so the two never move in sync. The idle starts as
+  soon as the guard rises during the countdown. It fades out within a few
+  frames when you act, and eases back in over about half a second after any
+  action, so recoveries look settled. It also damps as posture fills. It is
+  purely visual: the gameplay root, collider and hitboxes never move, and
+  input is never delayed. Tunable constants: `IDLE_FADE_IN`, `IDLE_FADE_OUT`,
+  `IDLE_POSTURE_DAMP`, `MAX_IDLE_BOB`, `MAX_HEEL_LIFT` in `fighter_visual.gd`,
+  plus the per-stance values.
 - **Draw order:** the fighter who is attacking is drawn in front, so strikes
   read clearly at impact.
 - **Ragdoll:** knocked-down and KO'd bodies become a Verlet ragdoll with
@@ -322,11 +524,33 @@ files.
 - Labels above each fighter, plus a panel showing tick, hitstop, each
   fighter's state and frame, buffered input, AI state and the last hit event.
 
+## Tests
+
+Headless tests live in `tests/`. Run them all, starting with an import/parse
+check:
+
+```bash
+GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe" bash tests/run_all.sh
+```
+
+| Test | Covers |
+|---|---|
+| `test_core.gd` | Frame data, combos, block / low block, parry (window, whiff, cooldown, low), perfect dodge, cross-up guard, both facing directions, knockdown, dodge, finisher selection and choreography, audio |
+| `test_input.gd` | Real key mapping (W+L, S+L, S crouch, double-tap dodge, stance cycling) |
+| `test_flow.gd` | Start button, input lock, countdown order and timing, simultaneous unlock, button mashing, restart mid-countdown |
+| `test_match.gd` | A full scripted match against the real AI, KO, then restart |
+| `test_ai_finisher.gd` | AI finisher on a passive player; result only after the body is at rest |
+| `test_ai_defense.gd` | AI blocks most, parries some, punishes a stagger (seeded) |
+| `test_movement.gd` | Jump cross-ups (both directions, moving rival, simultaneous jumps, walls), forward/backward roll, close slip-past, walking never passes, back hits after crossing, AI reaction delay |
+
+The V0.3 plan and audit are in `docs/V0.3_PLAN.md`.
+
 ## Known limitations
 
 - Single round. No round timer, no best-of-3.
 - Hurtboxes are fixed rectangles; they don't follow extended limbs.
-- No crouching, throws, anti-air-specific moves or guard break. Blocking is unlimited.
+- No throws yet (see the grappling note in `docs/V0.3_PLAN.md`).
+- At the 60 px minimum distance, forward-leaning torsos can still overlap slightly. Strikes no longer pass through bodies.
 - Godot prints a harmless "2 ObjectDB instances leaked" warning on exit,
   because the audio server is still holding the looping music when the engine
   shuts down.

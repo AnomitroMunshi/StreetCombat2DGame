@@ -177,6 +177,80 @@ func _build_sfx() -> void:
 	_echo(b, 0.18, 0.3)
 	_sfx[&"finisher_sting"] = _finish(b)
 
+	# Parry: bright metallic ting (inharmonic ring) over a sharp click.
+	b = _buffer(0.7)
+	_noise(b, 0.0, 0.02, 0.004, 0.95, 0.8, rng)
+	_gong(b, 0.0, 0.65, 1180.0, 0.55)
+	_thump(b, 0.0, 0.08, 900.0, 600.0, 0.02, 0.4)
+	_sfx[&"parry"] = _finish(b, 0.75)
+
+	# Guard break: low crunch, a cracking noise burst and a falling metallic ring.
+	b = _buffer(0.9)
+	_thump(b, 0.0, 0.5, 160.0, 40.0, 0.14, 1.0)
+	_noise(b, 0.0, 0.25, 0.06, 0.8, 0.9, rng)
+	_noise(b, 0.04, 0.2, 0.05, 0.95, 0.5, rng)
+	_gong(b, 0.0, 0.8, 520.0, 0.3)
+	_soft_clip(b, 1.8)
+	_sfx[&"guard_break"] = _finish(b)
+
+	# Finisher music layer: a taiko roll that accelerates for ~2 s under the
+	# choreography (the fight track is ducked), with a rising noise swell.
+	b = _buffer(2.4)
+	var hit_t := 0.0
+	var gap := 0.28
+	while hit_t < 2.1:
+		var louder := 0.45 + 0.55 * hit_t / 2.1
+		_thump(b, hit_t, 0.35, 95.0, 48.0, 0.12, louder)
+		_noise(b, hit_t, 0.02, 0.005, 0.5, 0.25 * louder, rng)
+		hit_t += gap
+		gap = maxf(gap * 0.86, 0.07)
+	for i in int(2.1 * MIX_RATE):
+		var u := float(i) / (2.1 * MIX_RATE)
+		b[i] += rng.randf_range(-1.0, 1.0) * 0.08 * u * u
+	_soft_clip(b, 1.4)
+	_sfx[&"finisher_drums"] = _finish(b, 0.8)
+
+	# Victory: a deep gong under a bright open chord (A minor -> A major lift).
+	b = _buffer(3.0)
+	_gong(b, 0.0, 2.9, 110.0, 0.8)
+	for f in [440.0, 554.37, 659.25]:
+		_pluck(b, 0.05, f, 2.0, 0.18, rng)
+		_square(b, 0.1, f * 0.5, 1.6, 0.06, 0.15)
+	_echo(b, 0.21, 0.3)
+	_sfx[&"victory"] = _finish(b, 0.8)
+
+	# Counter hit: a sharp high crack on top of a punchy thud.
+	b = _buffer(0.35)
+	_noise(b, 0.0, 0.03, 0.006, 0.98, 0.9, rng)
+	_thump(b, 0.0, 0.25, 320.0, 90.0, 0.05, 0.9)
+	_gong(b, 0.0, 0.3, 880.0, 0.12)
+	_soft_clip(b, 1.8)
+	_sfx[&"counter"] = _finish(b, 0.8)
+
+	# Clash: two strikes meeting - a dry clap with a short bright ring.
+	b = _buffer(0.3)
+	_noise(b, 0.0, 0.05, 0.01, 0.9, 1.0, rng)
+	_thump(b, 0.0, 0.08, 600.0, 400.0, 0.02, 0.5)
+	_gong(b, 0.0, 0.25, 1500.0, 0.15)
+	_sfx[&"clash"] = _finish(b, 0.7)
+
+	# Countdown: a dry taiko beat with a short high ping (3, 2, 1).
+	b = _buffer(0.6)
+	_thump(b, 0.0, 0.4, 120.0, 62.0, 0.09, 1.0)
+	_noise(b, 0.0, 0.03, 0.006, 0.6, 0.35, rng)
+	_gong(b, 0.0, 0.5, 392.0, 0.18)
+	_sfx[&"count_tick"] = _finish(b, 0.7)
+
+	# FIGHT!: double taiko hit, bright crash and a low gong swell.
+	b = _buffer(1.6)
+	_thump(b, 0.0, 0.5, 140.0, 45.0, 0.14, 1.0)
+	_thump(b, 0.09, 0.6, 110.0, 38.0, 0.18, 0.9)
+	_noise(b, 0.0, 1.0, 0.3, 0.85, 0.5, rng)
+	_gong(b, 0.05, 1.5, 196.0, 0.45)
+	_echo(b, 0.11, 0.25)
+	_soft_clip(b, 1.5)
+	_sfx[&"fight_call"] = _finish(b)
+
 
 # --- Background music (worker thread) -------------------------------------------
 

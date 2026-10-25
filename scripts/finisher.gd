@@ -197,7 +197,9 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 9, "atk": &"heavy_strike", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 1.0, "wall": true},
 				{"ticks": 10, "atk": &"palm_windup", "def": &"stagger"},
 				{"ticks": 20, "atk": &"palm_strike", "def": &"slumped", "hit": true, "power": 3, "final": true, "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
-				{"ticks": 45, "atk": &"guard", "def": &"slumped"},
+				# Step back out of the slumped body's legs, then hold the guard.
+				{"ticks": 22, "atk": &"guard", "def": &"slumped", "atk_move": -3.2},
+				{"ticks": 30, "atk": &"guard", "def": &"slumped"},
 			]
 	# PALM_FLURRY (default): four fast alternating palm strikes, then a heavy
 	# double palm that blasts the victim across the arena.
@@ -209,6 +211,6 @@ func _build(k: Kind) -> Array[Dictionary]:
 		{"ticks": 6, "atk": &"palm_rear", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 1.5, "def_move": 1.5},
 		{"ticks": 10, "atk": &"palm_windup", "def": &"stagger"},
 		{"ticks": 20, "atk": &"palm_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
-			"ko_vy": -10.0, "ko_drift": 16.0, "ko_rolls": 2, "ko_tumble": true},
+			"ko_vy": -10.0, "ko_drift": 16.0, "ko_rolls": 0, "ko_tumble": true},
 		{"ticks": 55, "atk": &"guard", "def": &"knock_fly"},
 	]
