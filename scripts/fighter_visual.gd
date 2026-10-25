@@ -1544,6 +1544,11 @@ func _wants_plant() -> bool:
 		return false
 	if absf(_spin_angle) > 0.01 or fighter.script_flip:
 		return false
+	if fighter.state == Fighter.State.ATTACK:
+		# Hand strikes keep the feet planted, so the hips drive over them and a
+		# step-in steps front foot then rear (kicks own their legs).
+		var attack := fighter.current_attack
+		return attack != null and not attack.spin and attack.sequence.is_empty() 			and _mech_kind(attack.type) in [MECH_LEAD, MECH_REAR, MECH_RISING]
 	return fighter.state in [Fighter.State.IDLE, Fighter.State.WALK, Fighter.State.CROUCH, Fighter.State.BLOCK,
 		Fighter.State.BLOCKSTUN, Fighter.State.GUARD_RELEASE, Fighter.State.HITSTUN, Fighter.State.LAND,
 		Fighter.State.PARRY, Fighter.State.STAGGER, Fighter.State.BROKEN]

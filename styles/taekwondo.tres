@@ -43,4 +43,4 @@ ai_far_plans = [[&"side_kick"], [&"front_kick", &"side_kick"], [&"back_kick"], [
 wall_entry = PackedStringArray("knee_windup", "front_extend", "heavy_strike", "shook_load", "high_extend")
 signature = &"tornado_540"
 finishers = PackedStringArray("cyclone_360", "heavens_heel")
-ai_preferred_range = 115.0
+ai_preferred_range = 135.0

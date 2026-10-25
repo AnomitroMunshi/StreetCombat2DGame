@@ -44,4 +44,4 @@ ai_far_plans = [[&"front_kick", &"reverse_punch"], [&"side_kick", &"back_kick"],
 wall_entry = PackedStringArray("gyaku_load", "gyaku_hit", "knife_hit", "gyaku_load", "gyaku_hit")
 signature = &"perfect_gyaku"
 finishers = PackedStringArray("one_inch_verdict", "crimson_crescent")
-ai_preferred_range = 110.0
+ai_preferred_range = 130.0

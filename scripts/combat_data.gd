@@ -18,6 +18,20 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	STRAIGHT_PALM, DOUBLE_PALM, LOW_SIDE_KICK, RISING_PALM, CHAIN_PALMS, DEFLECT_COUNTER, PALM_BARRAGE,
 	BREAKER_COMBO }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
+## Step-in (px of root motion through the startup, front-loaded into its late
+## part): strikes travel into range like real footwork instead of being thrown
+## from a standing spot. Punches step and drag (the planted feet step front
+## then rear); kicks skip in a little. Blocked by the opponent's body.
+const STEP_IN: Dictionary = {
+	&"jab": 18.0, &"cross": 14.0, &"backhand": 12.0, &"uppercut": 8.0,
+	&"lead_hook": 10.0, &"rear_hook": 10.0, &"body_hook": 12.0, &"overhand": 22.0, &"slip_counter": 12.0,
+	&"elbow": 8.0, &"knee": 12.0, &"reverse_punch": 26.0, &"knife_hand": 16.0, &"rising_punch": 8.0,
+	&"perfect_gyaku": 32.0, &"straight_palm": 18.0, &"double_palm": 22.0, &"rising_palm": 8.0,
+	&"chain_palms": 10.0, &"side_kick": 14.0, &"front_kick": 12.0, &"high_kick": 6.0,
+	&"body_roundhouse": 8.0, &"low_roundhouse": 6.0, &"low_side_kick": 12.0, &"axe_kick": 8.0,
+}
+## Step-in profile: no travel before this fraction of the startup.
+const STEP_IN_START: float = 0.2
 ## How a strike travels into the target (presentation: impact direction, the
 ## victim's reaction). Body and leg hits are told apart by where they land.
 enum ImpactKind { STRAIGHT, HOOK, RISING, DOWNWARD }
@@ -616,6 +630,8 @@ class Attack extends RefCounted:
 	var blockstun: int = 0
 	var knockback: float = 0.0
 	var lunge: float = 0.0
+	## Step-in distance (STEP_IN).
+	var step: float = 0.0
 	var hitstop: int = 0
 	var posture: float = 0.0
 	var launch: float = 0.0
@@ -689,6 +705,7 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.blockstun = row["blockstun"]
 	attack.knockback = row["knockback"]
 	attack.lunge = row["lunge"]
+	attack.step = STEP_IN.get(row["id"], 0.0)
 	attack.hitstop = row["hitstop"]
 	attack.posture = row["posture"]
 	attack.launch = row.get("launch", 0.0)

@@ -44,4 +44,4 @@ ai_close_plans = [[&"jab", &"cross", &"elbow"], [&"elbow", &"knee"], [&"knee", &
 ai_far_plans = [[&"front_kick", &"body_roundhouse"], [&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"front_kick"]]
 signature = &"flying_knee"
 finishers = PackedStringArray("eight_limbs", "iron_knee")
-ai_preferred_range = 90.0
+ai_preferred_range = 110.0

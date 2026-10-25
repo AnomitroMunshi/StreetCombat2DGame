@@ -475,6 +475,10 @@ func _tick_attack() -> void:
 		return
 	if state_frame < strike_end:
 		position.x += attack.lunge * facing
+		if attack.step > 0.0 and not airborne and state_frame < attack.startup and not _step_blocked():
+			var s := float(attack.startup)
+			var k := smoothstep(CombatData.STEP_IN_START, 1.0, (state_frame + 1) / s) 				- smoothstep(CombatData.STEP_IN_START, 1.0, state_frame / s)
+			position.x += attack.step * k * facing
 	elif combo_step < CombatData.MAX_COMBO_CHAIN and state_frame - strike_end < attack.cancel_window 			and swing_has_hit and _can_chain(attack.type, buffered_attack):
 		# Chains need contact and a listed branch (CombatData.CHAINS).
 		if _consume_buffered_attack(combo_step + 1):
@@ -486,6 +490,14 @@ func _tick_attack() -> void:
 		else:
 			# Act on the same tick recovery ends so buffered presses never lose a frame.
 			_tick_neutral()
+
+
+## Step-ins stop at the opponent's body instead of shoving it.
+func _step_blocked() -> bool:
+	if opponent == null:
+		return false
+	var dx := (opponent.position.x - position.x) * facing
+	return dx > 0.0 and dx < PUSH_HALF_WIDTH * 2.0 + 6.0
 
 
 func _apply_motion() -> void:

@@ -44,4 +44,4 @@ ai_far_plans = [[&"low_side_kick"], [&"straight_palm", &"low_side_kick"], [&"dou
 wall_entry = PackedStringArray("palm_windup", "palm_lead", "palm_rear", "palm_windup", "palm_strike")
 signature = &"palm_barrage"
 finishers = PackedStringArray("hundred_palms", "dragons_descent")
-ai_preferred_range = 85.0
+ai_preferred_range = 105.0
