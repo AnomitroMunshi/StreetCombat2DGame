@@ -125,6 +125,29 @@ func _build_sfx() -> void:
 	_soft_clip(b, 1.5)
 	_sfx[&"hit_light"] = _finish(b)
 
+	# Jab: short, crisp glove snap.
+	b = _buffer(0.14)
+	_noise(b, 0.0, 0.04, 0.007, 0.92, 0.85, rng)
+	_thump(b, 0.0, 0.09, 330.0, 150.0, 0.02, 0.6)
+	_soft_clip(b, 1.4)
+	_sfx[&"hit_snap"] = _finish(b, 0.8)
+
+	# Hook: a rounder, swinging thump with a slap on the front.
+	b = _buffer(0.3)
+	_whoosh(b, 0.0, 0.07, 0.15, 0.5, 0.25, rng)
+	_thump(b, 0.03, 0.24, 175.0, 62.0, 0.055, 1.0)
+	_noise(b, 0.03, 0.06, 0.012, 0.78, 0.6, rng)
+	_soft_clip(b, 1.8)
+	_sfx[&"hit_hook"] = _finish(b)
+
+	# Uppercut: a deep thump with a sharp upper click (the jaw snapping shut).
+	b = _buffer(0.3)
+	_thump(b, 0.0, 0.26, 140.0, 48.0, 0.06, 1.0)
+	_noise(b, 0.0, 0.05, 0.01, 0.85, 0.6, rng)
+	_noise(b, 0.012, 0.02, 0.003, 0.98, 0.5, rng)
+	_soft_clip(b, 1.9)
+	_sfx[&"hit_upper"] = _finish(b)
+
 	# Body thud: low, dull and short (no bright slap on top).
 	b = _buffer(0.26)
 	_thump(b, 0.0, 0.22, 115.0, 52.0, 0.05, 1.0)

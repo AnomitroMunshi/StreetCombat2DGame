@@ -22,6 +22,10 @@ enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNT
 ##   shoulder  shoulder roll (body rotation) in px; guard: hand drift in rad
 ##   sway      torso sway in rad (the head counters it, eyes stay level)
 ##   head      extra head movement in rad; circles: hands trace small circles
+##   feint     optional lead-hand feint: rad of reach, every feint_every s
+##   alternate boxer's bounce: heels lift on alternate bounces (rear, then
+##             lead), the weight and shoulders rocking toward the planted
+##             foot; one loop = two bounces (2 / hz seconds)
 const DATA: Dictionary = {
 	Kind.BLADED: {
 		"name": "BLADED", "southpaw": false, "idle": {"hz": 2.0, "bob": 3.5, "shape": "hop", "shift": 4.0, "shift_hz": 0.9, "heel": 3.0, "lead_heel": 0.0, "shoulder": 1.5, "guard": 0.05, "sway": 0.02, "head": 0.02},
@@ -34,9 +38,11 @@ const DATA: Dictionary = {
 		"pose": [0.35, 0.2, 0.85, 2.95, 0.8, 2.95, 0.7, -0.2, -0.5, -0.5, 4.0, 0.0, 0.0, 2.0],
 	},
 	Kind.BOXING: {
-		"name": "BOXING GUARD", "southpaw": false, "idle": {"hz": 2.4, "bob": 6.0, "shape": "hop", "shift": 3.0, "shift_hz": 1.2, "heel": 4.0, "lead_heel": 2.0, "shoulder": 2.0, "guard": 0.06, "sway": 0.03, "head": 0.04},
-		# High guard, gloves at the temples, balanced on the balls of the feet.
-		"pose": [0.2, 0.2, 0.95, 2.95, 0.85, 3.0, 0.5, -0.15, -0.45, -0.45, 0.0, 0.0, 0.0, 7.0],
+		"name": "BOXING GUARD", "southpaw": false, "idle": {"hz": 2.5, "bob": 3.0, "shape": "hop", "alternate": true, "shift": 3.0, "shift_hz": 1.25, "heel": 3.5, "lead_heel": 3.0, "shoulder": 1.8, "guard": 0.05, "sway": 0.02, "head": 0.035, "feint": 0.35, "feint_every": 2.7},
+		# Compact high guard: chin tucked behind the lead shoulder, elbows in
+		# over the ribs, rear glove at the cheek, lead glove a little forward;
+		# knees soft, weight centred on a staggered stance.
+		"pose": [0.22, 0.34, 0.8, 2.75, 0.55, 3.05, 0.5, -0.15, -0.45, -0.45, 0.0, 2.0, 0.0, 8.0],
 	},
 	Kind.MUAY_THAI: {
 		"name": "MUAY THAI GUARD", "southpaw": false, "idle": {"hz": 1.0, "bob": 2.0, "shape": "sine", "shift": 2.5, "shift_hz": 0.5, "heel": 0.0, "lead_heel": 4.0, "shoulder": 1.0, "guard": 0.03, "sway": 0.02, "head": 0.01},

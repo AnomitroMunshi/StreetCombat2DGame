@@ -103,6 +103,8 @@ const SETTLE_SPEED: float = 3.0
 ## fighters in the same arena never bounce in sync. Presentation only.
 @export var idle_tempo: float = 1.0
 @export var idle_phase: float = 0.0
+## Scales the active idle's bounce, heel lifts and weight shift (presentation).
+@export var idle_amplitude: float = 1.0
 ## Silhouette outline colour, and whether it glows (rim light for dark fighters).
 @export var outline_color: Color = Color(0.1, 0.12, 0.18)
 @export var rim_glow: bool = false
@@ -476,8 +478,11 @@ func _tick_attack() -> void:
 		_start_attack(_sequence.pop_front(), combo_step, false)
 		return
 	if state_frame < strike_end:
-		position.x += attack.lunge * facing
-		if attack.step > 0.0 and not airborne and state_frame < attack.startup and not _step_blocked():
+		# Signatures keep chasing through their own knockback (up to body contact).
+		var in_range := not airborne and _in_strike_range(attack, in_signature)
+		if not in_range:
+			position.x += attack.lunge * facing
+		if attack.step > 0.0 and not airborne and state_frame < attack.startup and not in_range:
 			var s := float(attack.startup)
 			var k := smoothstep(CombatData.STEP_IN_START, 1.0, (state_frame + 1) / s) 				- smoothstep(CombatData.STEP_IN_START, 1.0, state_frame / s)
 			position.x += attack.step * k * facing
@@ -494,12 +499,15 @@ func _tick_attack() -> void:
 			_tick_neutral()
 
 
-## Step-ins stop at the opponent's body instead of shoving it.
-func _step_blocked() -> bool:
+## The opponent is already within this strike's reach (or touching): stop
+## closing in, so the punch or kick lands extended rather than jammed.
+func _in_strike_range(attack: CombatData.Attack, contact_only: bool = false) -> bool:
 	if opponent == null:
 		return false
 	var dx := (opponent.position.x - position.x) * facing
-	return dx > 0.0 and dx < PUSH_HALF_WIDTH * 2.0 + 6.0
+	var contact := PUSH_HALF_WIDTH * 2.0 + 6.0
+	var reach := contact if contact_only else maxf(attack.hitbox.end.x + CombatData.STRIKE_RANGE_MARGIN, contact)
+	return dx > 0.0 and dx <= reach
 
 
 func _apply_motion() -> void:

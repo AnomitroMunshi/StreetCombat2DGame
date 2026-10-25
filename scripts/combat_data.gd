@@ -30,6 +30,10 @@ const STEP_IN: Dictionary = {
 	&"chain_palms": 10.0, &"side_kick": 14.0, &"front_kick": 12.0, &"high_kick": 6.0,
 	&"body_roundhouse": 8.0, &"low_roundhouse": 6.0, &"low_side_kick": 12.0, &"axe_kick": 8.0,
 }
+## A grounded strike stops travelling (step-in and lunge) once the opponent is
+## within the move's own reach plus this margin, so the limb arrives extended
+## instead of the bodies crowding together. Reach and hits are unchanged.
+const STRIKE_RANGE_MARGIN: float = 14.0
 ## Step-in profile: no travel before this fraction of the startup.
 const STEP_IN_START: float = 0.2
 ## How a strike travels into the target (presentation: impact direction, the

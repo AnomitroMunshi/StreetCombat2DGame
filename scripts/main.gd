@@ -763,16 +763,23 @@ func _resolve_hits() -> void:
 
 ## Layered hit sound: a slap or thud by where it landed, with a bone crack
 ## on top of heavy blows.
-func _hit_sound(tier: int, defender: Fighter) -> void:
+func _hit_sound(tier: int, defender: Fighter, kind: int = CombatData.ImpactKind.STRAIGHT) -> void:
 	var head := not defender.last_hit_low and defender.last_hit_high
-	if tier == 1:
-		audio.play(&"hit_light" if head else &"hit_body", -2.0)
-		return
-	audio.play(&"hit_heavy" if tier == 3 or head else &"hit_body", 0.0 if tier == 3 else -2.0)
+	var vol: float = [0.0, -3.0, -1.0, 0.0][tier]
+	if not head:
+		audio.play(&"hit_body", vol)  # dull thud to the ribs / legs
+	elif tier == 1:
+		audio.play(&"hit_snap", vol)  # jab: short crisp snap
+	else:
+		match kind:
+			CombatData.ImpactKind.HOOK:
+				audio.play(&"hit_hook", vol)
+			CombatData.ImpactKind.RISING:
+				audio.play(&"hit_upper", vol)
+			_:
+				audio.play(&"hit_heavy", vol)  # cross / overhand: heavy thump
 	if tier == 3:
-		audio.play(&"hit_crack", -3.0, 0.08)
-	elif not head:
-		audio.play(&"hit_light", -8.0)
+		audio.play(&"hit_crack", -4.0, 0.08)
 
 
 ## Developer overlay bookkeeping: where a hit connected, and how far the drawn
@@ -797,8 +804,9 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 			# Light hits barely move the frame; heavy ones shake and kick it.
 			_shake(attack.hitstop + 2, 0.8 + tier * tier * 0.9 + (3.0 if finisher else 0.0))
 			_kick_camera(dir, attack.damage * CAMERA_KICK_PER_DAMAGE * (0.4 if tier == 1 else 1.0))
-			fx.hit(contact, dir, tier, HIT_COLOR)
-			_hit_sound(tier, defender)
+			var kind := CombatData.impact_kind(attack.type)
+			fx.hit(contact, dir, tier, HIT_COLOR, kind, not defender.last_hit_high)
+			_hit_sound(tier, defender, kind)
 			_camera_punch += [0.0, 0.004, 0.012, 0.025][tier]
 		CombatData.HitResult.GUARD_BREAK:
 			# Blocked into a broken guard, or parried while out of posture.

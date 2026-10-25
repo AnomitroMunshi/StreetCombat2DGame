@@ -111,6 +111,13 @@ const BODY_HALF: float = 18.0
 const REACH_SEARCH_STEPS: int = 6
 ## Body width kept when turned edge-on in a spin (fraction of facing width).
 const SPIN_MIN_WIDTH: float = 0.4
+## Straight punch aim limits (limb angle from straight down; pi/2 = level).
+const AIM_MIN: float = 1.15
+const AIM_MAX: float = 2.3
+## Close-range punches: how far the hips sit back and the torso straightens
+## before the elbow has to bend.
+const PUNCH_ROOM_HIP: float = 10.0
+const PUNCH_ROOM_LEAN: float = 0.12
 ## Close-range kicks: how far the hips shift back and the torso leans away to
 ## keep the leg extended before the knee has to fold.
 const KICK_ROOM_HIP: float = 18.0
@@ -124,6 +131,8 @@ const IDLE_FADE_IN: float = 2.2
 const IDLE_FADE_OUT: float = 14.0
 const IDLE_POSTURE_DAMP: float = 0.7
 const MAX_IDLE_BOB: float = 6.0
+## Duration of an idle lead-hand feint (s).
+const FEINT_TIME: float = 0.22
 const MAX_HEEL_LIFT: float = 5.0
 ## Strike mechanics (see _mechanics): load depth against the strike, where the
 ## load peaks (fraction of startup), and how much of the recovery the release takes.
@@ -133,8 +142,8 @@ const MECH_RELEASE: float = 0.55
 enum { MECH_NONE, MECH_LEAD, MECH_REAR, MECH_RISING, MECH_KICK, MECH_ROUNDHOUSE, MECH_KNEE }
 ## Per kind: channel -> offset at full drive.
 const MECH_GAINS: Dictionary = {
-	MECH_LEAD: {HIP_X: 5.0, TORSO: 0.08, SPREAD: 5.0, HEAD: 0.08},
-	MECH_REAR: {HIP_X: 9.0, TORSO: 0.12, SPREAD: -10.0, PIVOT: 0.6, DROP: 3.0, HEAD: 0.1},
+	MECH_LEAD: {HIP_X: 8.0, TORSO: 0.14, SPREAD: 9.0, HEAD: 0.1},
+	MECH_REAR: {HIP_X: 13.0, TORSO: 0.2, SPREAD: -16.0, PIVOT: 0.9, DROP: 5.0, HEAD: 0.12},
 	MECH_RISING: {HIP_X: 5.0, TORSO: 0.0, SPREAD: -6.0, PIVOT: 0.5},
 	MECH_KICK: {HIP_X: 3.0, TORSO: -0.1, PIVOT: 0.8, TH_B: 0.3, SH_B: -0.25},
 	MECH_ROUNDHOUSE: {HIP_X: 3.0, TORSO: -0.05, PIVOT: 0.9, TH_B: 0.3, SH_B: -0.25, UA_B: -0.5, LA_B: -0.6},
@@ -1065,13 +1074,23 @@ func _active_idle() -> PackedFloat32Array:
 	var shift := sin(TAU * shift_hz * t)
 	if shape == "snap":
 		shift = tanh(3.0 * shift) / tanh(3.0)  # settle and hold, then a quick adjustment
-	_bob_target = float(st["bob"]) * dip * k
-	# Heels: up on the balls of the feet as the hips rise out of a bounce, or the
-	# rear heel as the weight rocks forward (lead heel as it rocks back).
-	var rise := 1.0 - dip if shape == "hop" else 0.5 + 0.5 * shift
-	_heel_target = Vector2(float(st["lead_heel"]) * (0.5 - 0.5 * shift), float(st["heel"]) * rise) * k
-	idle[HIP_X] += float(st["shift"]) * shift * k
-	idle[SPREAD] += float(st["shoulder"]) * sin(TAU * shift_hz * t + 0.8) * k
+	var amp := fighter.idle_amplitude
+	_bob_target = float(st["bob"]) * dip * k * amp
+	if st.get("alternate", false):
+		# Boxer's bounce: the heels lift on alternate bounces (rear, then lead)
+		# while the weight and shoulders rock toward the planted foot.
+		var side := sin(PI * hz * t)
+		var rise := 1.0 - dip
+		_heel_target = Vector2(float(st["lead_heel"]) * maxf(-side, 0.0), float(st["heel"]) * maxf(side, 0.0)) 			* (0.4 + 0.6 * rise) * k * amp
+		idle[HIP_X] += float(st["shift"]) * side * k * amp
+		idle[SPREAD] += float(st["shoulder"]) * side * k * amp
+	else:
+		# Heels: up on the balls of the feet as the hips rise out of a bounce, or
+		# the rear heel as the weight rocks forward (lead heel as it rocks back).
+		var rise := 1.0 - dip if shape == "hop" else 0.5 + 0.5 * shift
+		_heel_target = Vector2(float(st["lead_heel"]) * (0.5 - 0.5 * shift), float(st["heel"]) * rise) * k * amp
+		idle[HIP_X] += float(st["shift"]) * shift * k * amp
+		idle[SPREAD] += float(st["shoulder"]) * sin(TAU * shift_hz * t + 0.8) * k * amp
 	var sway := float(st["sway"]) * sin(PI * shift_hz * t) * k
 	idle[TORSO] += sway
 	idle[HEAD] -= sway * 0.8  # eyes stay level on the opponent
@@ -1091,6 +1110,17 @@ func _active_idle() -> PackedFloat32Array:
 		idle[UA_F] += g * sin(gp * 1.7 + 0.4)
 		idle[LA_F] += g * 0.7 * sin(gp * 2.3 + 1.0)
 		idle[UA_B] += g * 0.6 * sin(gp * 1.3 + 2.0)
+	var feint := float(st.get("feint", 0.0))
+	if feint > 0.0:
+		# A quick half-jab with the lead hand now and then (out and straight
+		# back), the shoulder turning a touch with it.
+		var every := float(st.get("feint_every", 3.0))
+		var u := fposmod(t, every) / FEINT_TIME
+		if u < 1.0:
+			var f := sin(PI * u) * feint * k
+			idle[UA_F] += f
+			idle[LA_F] -= f * 1.6
+			idle[SPREAD] += f * 8.0
 	return idle
 
 
@@ -1243,6 +1273,35 @@ func _mechanics(pose: PackedFloat32Array, t: float) -> PackedFloat32Array:
 		# Pivots and knee bends only ever add (no reverse pivot in the load).
 		out[ch] += g * (maxf(d, 0.0) if ch in MECH_FORWARD_ONLY else d)
 	out[PIVOT] = clampf(out[PIVOT], 0.0, 1.0)
+	var kind := _mech_kind(attack.type)
+	if d > 0.0 and kind in [MECH_LEAD, MECH_REAR] 			and CombatData.impact_kind(attack.type) == CombatData.ImpactKind.STRAIGHT:
+		out = _aim_arm(out, J_SHOULDER_F if kind == MECH_LEAD else J_SHOULDER_B,
+			UA_F if kind == MECH_LEAD else UA_B, LA_F if kind == MECH_LEAD else LA_B,
+			attack.hitbox.get_center().y < -120.0, d)
+	return out
+
+
+## Straight punches fire along the line from the shoulder to the target (the
+## opponent's head, or the middle of the torso for a body shot) as drawn, so the
+## glove meets the face rather than the chest whatever the stance, lean or
+## crouch. Blended in by the strike drive.
+func _aim_arm(pose: PackedFloat32Array, shoulder_joint: int, ua: int, la: int, high: bool, weight: float) -> PackedFloat32Array:
+	var opp := fighter.opponent
+	if opp == null:
+		return pose
+	var opp_visual := opp.get_node_or_null("Visual") as FighterVisual
+	if opp_visual == null or opp_visual._last_joints.size() < JOINTS:
+		return pose
+	var target_world: Vector2 = opp_visual._last_joints[J_HEAD] if high 		else opp_visual._last_joints[J_HIP].lerp(opp_visual._last_joints[J_NECK], 0.55)
+	var target := Vector2((target_world.x - global_position.x) * fighter.facing, target_world.y - global_position.y)
+	var to := target - _solve_joints(pose)[shoulder_joint]
+	if to.x <= 0.0:
+		return pose
+	var angle := clampf(atan2(to.x, to.y), AIM_MIN, AIM_MAX)
+	var out := pose.duplicate()
+	var w := clampf(weight, 0.0, 1.0)
+	out[ua] = lerpf(pose[ua], angle, w)
+	out[la] = lerpf(pose[la], angle, w)
 	return out
 
 
@@ -1589,7 +1648,11 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 	var inside := -_bend_out(shoulder, elbow, hand, Vector2.UP)
 	_muscle(shoulder, elbow, inside, UPPER_ARM_FRONT, UPPER_ARM_BACK, pad, color)
 	_muscle(elbow, hand, inside, FOREARM_FRONT, FOREARM_BACK, pad, color)
-	draw_circle(hand, 7.0 + pad, color, true, -1.0, true)    # fist
+	# Glove: longer than wide along the forearm, so the knuckles visibly lead
+	# a punch (a round ball reads as a hammer fist).
+	var along := (hand - elbow).normalized() if hand.distance_squared_to(elbow) > 1.0 else Vector2.RIGHT
+	_capsule(hand - along * 1.5, hand + along * 5.5, 7.0 + pad, 8.0 + pad, color)
+	draw_circle(hand - along * 2.0 + inside.normalized() * 4.5, 3.6 + pad, color, true, -1.0, true)  # thumb
 
 
 ## Side-profile torso: hips, narrower waist, chest out in front, shoulders.
@@ -1856,7 +1919,23 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 		return pose
 	# Bisect the blend toward the stance: the largest extension that still fits.
 	var base := _air_pose() if fighter.airborne else _guard
-	if idx == J_FOOT_F or idx == J_FOOT_B:
+	if idx in [J_HAND_F, J_HAND_B, J_ELBOW_B]:
+		# Punches make room by sitting back from the shoulder; if that is not
+		# enough the glove stays on its line to the target and the elbow bends
+		# under it (a short punch). Blending the arm toward the guard instead
+		# raised the fist into a hammer-fist shape.
+		var sit := pose.duplicate()
+		sit[HIP_X] -= PUNCH_ROOM_HIP * dir
+		sit[TORSO] -= PUNCH_ROOM_LEAN
+		if _solve_joints(sit)[idx].x * dir <= limit:
+			base = sit
+		elif idx != J_ELBOW_B and dir > 0.0:
+			return _short_punch(sit, idx, limit)
+		else:
+			pose = sit
+			base = pose.duplicate()
+			base[UA_B] = pose[UA_B] - 1.1
+	elif idx == J_FOOT_F or idx == J_FOOT_B:
 		# Kicks first make room the way a fighter does: hips back and torso
 		# leaning away, the leg staying extended. Only if that is not enough
 		# does the knee fold (the knee stays at height, so a head kick still
@@ -1881,6 +1960,27 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 		else:
 			hi = mid
 	return _blend(pose, base, hi)
+
+
+## Two-bone arm IK: the glove placed on its current line from the shoulder,
+## just far enough to reach `limit`, the elbow bending below that line.
+func _short_punch(pose: PackedFloat32Array, idx: int, limit: float) -> PackedFloat32Array:
+	var j := _solve_joints(pose)
+	var shoulder := j[J_SHOULDER_F if idx == J_HAND_F else J_SHOULDER_B]
+	var line := j[idx] - shoulder
+	if line.x <= 1.0:
+		return pose
+	var u := line.normalized()
+	var reach := clampf((limit - shoulder.x) / u.x, 14.0, UPPER_ARM + FOREARM - 0.5)
+	var fist := shoulder + u * reach
+	var cos_a := (UPPER_ARM * UPPER_ARM + reach * reach - FOREARM * FOREARM) / (2.0 * UPPER_ARM * reach)
+	var upper := atan2(u.x, u.y) - acos(clampf(cos_a, -1.0, 1.0))
+	var elbow := shoulder + _limb_dir(upper) * UPPER_ARM
+	var fore := fist - elbow
+	var out := pose.duplicate()
+	out[UA_F if idx == J_HAND_F else UA_B] = upper
+	out[LA_F if idx == J_HAND_F else LA_B] = atan2(fore.x, fore.y)
+	return out
 
 
 func _striking_joint() -> int:

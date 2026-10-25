@@ -125,16 +125,24 @@ func impact(pos: Vector2, power: int, color: Color) -> void:
 ## Tiered, directional hit (1 light, 2 solid, 3 heavy): a hot core flash
 ## stretched along the blow, streaks and sweat flung the way it travels. Light
 ## hits stay small and sharp; only heavy ones get the flare and air wave.
-func hit(pos: Vector2, dir: Vector2, tier: int, color: Color) -> void:
+func hit(pos: Vector2, dir: Vector2, tier: int, color: Color, kind: int = CombatData.ImpactKind.STRAIGHT,
+		body: bool = false) -> void:
 	dir = dir.normalized()
+	if kind == CombatData.ImpactKind.HOOK:
+		# Hooks: a sideways swipe arcing into the target.
+		_spawn({"kind": "swipe", "pos": pos - dir * 6.0, "age": 0, "life": 8 + tier * 2, "color": color,
+			"size": 22.0 + tier * 8.0, "dir": dir.angle(), "turn": signf(dir.x)})
+	if body:
+		# Body shots: a compact thud low on the body, no big flare.
+		tier = mini(tier, 2)
 	_spawn({"kind": "flash", "pos": pos, "age": 0, "life": 5 + tier * 2, "color": color,
-		"size": 9.0 + tier * 7.0, "dir": dir.angle()})
+		"size": 8.0 + tier * 5.0, "dir": dir.angle()})
 	streaks(pos, dir, 3 + tier * 3, color, 0.3 + tier * 0.06, 24.0 + tier * 22.0)
 	sweat(pos, dir, 2 + tier * 3, 3.0 + tier * 1.6)
 	if tier >= 2:
 		ring(pos, color, 8.0 + tier * 6.0, 6 + tier)
 	if tier >= 3:
-		flare(pos, 1)
+		# Heavy: a shock wave off the impact (no flare: it hid the punch).
 		air_wave(pos + dir * 12.0, dir, 34.0, 10)
 
 
@@ -779,6 +787,16 @@ func _draw() -> void:
 				draw_circle(Vector2.ZERO, fs * (0.7 + 0.5 * t), Color(color.r, color.g, color.b, 0.45 * fk))
 				draw_circle(Vector2.ZERO, fs * 0.5 * fk, Color(1.0, 1.0, 1.0, 0.95 * fk))
 				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"swipe":
+				# Curved swipe: an arc sweeping toward the target, thinning out.
+				color.a = 0.85 * (1.0 - t)
+				var sr: float = e["size"] * (0.8 + t * 0.4)
+				var sd: float = e["dir"]
+				var turn: float = e["turn"]
+				var c := pos - Vector2.from_angle(sd) * sr * 0.6 + Vector2(0.0, sr * 0.55)
+				var a0 := sd - turn * 1.9
+				var a1 := sd - turn * (0.35 - t * 0.3)
+				draw_arc(c, sr, minf(a0, a1), maxf(a0, a1), 16, color, 6.0 * (1.0 - t) + 1.0, true)
 			"ring":
 				color.a = (1.0 - t) * 0.9
 				var r: float = e["size"] * (0.3 + t * 1.8)
