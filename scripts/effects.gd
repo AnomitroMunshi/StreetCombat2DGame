@@ -122,6 +122,31 @@ func impact(pos: Vector2, power: int, color: Color) -> void:
 		burst(pos, Color(1.0, 1.0, 1.0, 0.9), 22)
 
 
+## Tiered, directional hit (1 light, 2 solid, 3 heavy): a hot core flash
+## stretched along the blow, streaks and sweat flung the way it travels. Light
+## hits stay small and sharp; only heavy ones get the flare and air wave.
+func hit(pos: Vector2, dir: Vector2, tier: int, color: Color) -> void:
+	dir = dir.normalized()
+	_spawn({"kind": "flash", "pos": pos, "age": 0, "life": 5 + tier * 2, "color": color,
+		"size": 9.0 + tier * 7.0, "dir": dir.angle()})
+	streaks(pos, dir, 3 + tier * 3, color, 0.3 + tier * 0.06, 24.0 + tier * 22.0)
+	sweat(pos, dir, 2 + tier * 3, 3.0 + tier * 1.6)
+	if tier >= 2:
+		ring(pos, color, 8.0 + tier * 6.0, 6 + tier)
+	if tier >= 3:
+		flare(pos, 1)
+		air_wave(pos + dir * 12.0, dir, 34.0, 10)
+
+
+## Sweat / spit droplets thrown along a blow, falling under gravity.
+func sweat(pos: Vector2, dir: Vector2, count: int, speed: float) -> void:
+	for i in count:
+		var a := dir.angle() + _rng.randf_range(-0.55, 0.55)
+		var v := Vector2.from_angle(a) * speed * _rng.randf_range(0.6, 1.3) + Vector2(0.0, -_rng.randf_range(0.3, 1.5))
+		_spawn({"kind": "particle", "pos": pos, "vel": v, "gravity": PARTICLE_GRAVITY, "age": 0,
+			"life": 16 + _rng.randi_range(-3, 6), "color": Color(0.85, 0.93, 1.0, 0.9), "size": _rng.randf_range(1.5, 3.0)})
+
+
 func spark(pos: Vector2, color: Color, size: float) -> void:
 	_spawn({"kind": "spark", "pos": pos, "age": 0, "life": DEFAULT_LIFE, "color": color,
 		"size": size, "angle": _rng.randf() * TAU})
@@ -746,6 +771,14 @@ func _draw() -> void:
 					var dir := Vector2(cos(a), sin(a))
 					var reach := size * (0.6 + t * 1.3) * (1.0 if i % 2 == 0 else 0.6)
 					draw_line(pos + dir * size * 0.2 * (1.0 + t), pos + dir * reach, color, 3.0 * (1.0 - t) + 1.0, true)
+			"flash":
+				# Hot core stretched along the blow: white centre, coloured halo.
+				var fk := 1.0 - t
+				var fs: float = e["size"]
+				draw_set_transform(pos, e["dir"], Vector2(1.7, 0.6))
+				draw_circle(Vector2.ZERO, fs * (0.7 + 0.5 * t), Color(color.r, color.g, color.b, 0.45 * fk))
+				draw_circle(Vector2.ZERO, fs * 0.5 * fk, Color(1.0, 1.0, 1.0, 0.95 * fk))
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			"ring":
 				color.a = (1.0 - t) * 0.9
 				var r: float = e["size"] * (0.3 + t * 1.8)

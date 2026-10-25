@@ -18,6 +18,9 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	STRAIGHT_PALM, DOUBLE_PALM, LOW_SIDE_KICK, RISING_PALM, CHAIN_PALMS, DEFLECT_COUNTER, PALM_BARRAGE,
 	BREAKER_COMBO }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
+## How a strike travels into the target (presentation: impact direction, the
+## victim's reaction). Body and leg hits are told apart by where they land.
+enum ImpactKind { STRAIGHT, HOOK, RISING, DOWNWARD }
 
 const TICK_RATE: int = 60
 
@@ -737,6 +740,34 @@ static func type_for_id(move_id: StringName) -> AttackType:
 
 static func id_for_type(type: AttackType) -> StringName:
 	return ATTACK_TABLE[type]["id"] if ATTACK_TABLE.has(type) else &""
+
+
+static func impact_kind(type: AttackType) -> ImpactKind:
+	match type:
+		AttackType.LEAD_HOOK, AttackType.REAR_HOOK, AttackType.BODY_HOOK, AttackType.BACKHAND, 				AttackType.KNIFE_HAND, AttackType.ELBOW, AttackType.HIGH_KICK, AttackType.BODY_ROUNDHOUSE, 				AttackType.LOW_ROUNDHOUSE, AttackType.SPIN_HOOK_KICK, AttackType.JUMP_ROUNDHOUSE, 				AttackType.JUMP_SPIN_KICK, AttackType.TORNADO_540, AttackType.SPIN_COUNTER_KICK, AttackType.GAZELLE_HOOK:
+			return ImpactKind.HOOK
+		AttackType.UPPERCUT, AttackType.RISING_PUNCH, AttackType.RISING_PALM, AttackType.KNEE, AttackType.FLYING_KNEE:
+			return ImpactKind.RISING
+		AttackType.AXE_KICK, AttackType.OVERHAND, AttackType.JUMP_PUNCH:
+			return ImpactKind.DOWNWARD
+	return ImpactKind.STRAIGHT
+
+
+## World direction a strike drives the target (facing: the attacker's).
+static func impact_dir(type: AttackType, facing: int) -> Vector2:
+	match impact_kind(type):
+		ImpactKind.HOOK:
+			return Vector2(facing, -0.18).normalized()
+		ImpactKind.RISING:
+			return Vector2(facing * 0.55, -1.0).normalized()
+		ImpactKind.DOWNWARD:
+			return Vector2(facing * 0.75, 0.75).normalized()
+	return Vector2(facing, -0.06).normalized()
+
+
+## Impact tier for presentation: 1 light, 2 solid, 3 heavy.
+static func impact_tier(damage: int) -> int:
+	return 1 if damage <= 7 else (2 if damage <= 11 else 3)
 
 
 static func attack_name(type: AttackType) -> String:

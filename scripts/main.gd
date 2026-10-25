@@ -48,6 +48,25 @@ const CAMERA_FOLLOW_RATE: float = 4.0
 const CAMERA_PUNCH_DECAY: float = 9.0
 const SLOWMO_SCALE: float = 0.3
 const SLOWMO_TICKS: int = 28
+## Fight camera: frames both fighters, zoom = K / (gap + C) clamped to
+## [1, FIGHT_ZOOM_MAX], so it closes in during exchanges and widens as they
+## separate. The floor sits FIGHT_FLOOR_FRAME of the half-height below centre;
+## a jump lifts the frame and widens it a little.
+const FIGHT_ZOOM_K: float = 1540.0
+const FIGHT_ZOOM_C: float = 1000.0
+const FIGHT_ZOOM_MAX: float = 1.4
+const FIGHT_ZOOM_RATE: float = 2.5
+const FIGHT_FLOOR_FRAME: float = 0.56
+const FIGHT_AIR_ZOOM_OUT: float = 0.0015
+const FIGHT_AIR_LIFT: float = 0.45
+## Directional camera kick on hits (px per point of damage, decay rate).
+const CAMERA_KICK_PER_DAMAGE: float = 0.7
+const CAMERA_KICK_DECAY: float = 12.0
+## Short slow-motion beats on skill moments (ticks, time scale).
+const SLOWMO_PARRY := Vector2(10.0, 0.35)
+const SLOWMO_PERFECT_DODGE := Vector2(10.0, 0.4)
+const SLOWMO_COUNTER := Vector2(6.0, 0.45)
+const SLOWMO_GUARD_BREAK := Vector2(14.0, 0.3)
 const VIEW_MIN := Vector2(-200.0, -200.0)
 const VIEW_MAX := Vector2(1480.0, 920.0)
 const HIT_COLOR := Color(1.0, 0.9, 0.6)
@@ -83,6 +102,8 @@ var _shake_frames: int = 0
 var _shake_total: int = 1
 var _shake_strength: float = 0.0
 var _camera_punch: float = 0.0
+var _camera_kick := Vector2.ZERO
+var _shake_offset := Vector2.ZERO
 var _debug_visible: bool = false
 var _last_event: String = "-"
 var _fx_rng := RandomNumberGenerator.new()
@@ -570,6 +591,20 @@ func _resolve_hits() -> void:
 		_start_finisher(winner, victim, FinisherDirector.choose(winner, victim, killing_attack, _finisher_rng))
 
 
+## Layered hit sound: a slap or thud by where it landed, with a bone crack
+## on top of heavy blows.
+func _hit_sound(tier: int, defender: Fighter) -> void:
+	var head := not defender.last_hit_low and defender.last_hit_high
+	if tier == 1:
+		audio.play(&"hit_light" if head else &"hit_body", -2.0)
+		return
+	audio.play(&"hit_heavy" if tier == 3 or head else &"hit_body", 0.0 if tier == 3 else -2.0)
+	if tier == 3:
+		audio.play(&"hit_crack", -3.0, 0.08)
+	elif not head:
+		audio.play(&"hit_light", -8.0)
+
+
 ## Developer overlay bookkeeping: where a hit connected, and how far the drawn
 ## striking limb was from it (a large gap means the visual and hitbox disagree).
 func _record_contact(attacker: Fighter, contact: Vector2) -> void:
@@ -585,11 +620,16 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 	var heavy := attack.damage >= 10 or finisher
 	match result:
 		CombatData.HitResult.HIT:
+			var striker := attacker_of(defender)
+			var dir := CombatData.impact_dir(attack.type, striker.facing)
+			var tier := 3 if finisher else CombatData.impact_tier(attack.damage)
 			_hitstop = maxi(_hitstop, attack.hitstop + (3 if finisher else 0))
-			_shake(attack.hitstop + 2, 2.0 + attack.damage * 0.35 + (3.0 if finisher else 0.0))
-			fx.impact(contact, 2 if heavy else 1, HIT_COLOR)
-			audio.play(&"hit_heavy" if heavy else &"hit_light")
-			_camera_punch += 0.02 if heavy else 0.008
+			# Light hits barely move the frame; heavy ones shake and kick it.
+			_shake(attack.hitstop + 2, 0.8 + tier * tier * 0.9 + (3.0 if finisher else 0.0))
+			_kick_camera(dir, attack.damage * CAMERA_KICK_PER_DAMAGE * (0.4 if tier == 1 else 1.0))
+			fx.hit(contact, dir, tier, HIT_COLOR)
+			_hit_sound(tier, defender)
+			_camera_punch += [0.0, 0.004, 0.012, 0.025][tier]
 		CombatData.HitResult.GUARD_BREAK:
 			# Blocked into a broken guard, or parried while out of posture.
 			_hitstop = maxi(_hitstop, CombatData.GUARD_BREAK_HITSTOP_FRAMES)
@@ -600,7 +640,8 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 			fx.parry_flash(contact, defender.facing)
 			audio.play(&"parry", 0.0, 0.03)
 			hud.flash(0.12)
-			_camera_punch += 0.02
+			_camera_punch += 0.04
+			_slowmo(SLOWMO_PARRY)
 		CombatData.HitResult.BLOCKED:
 			_hitstop = maxi(_hitstop, CombatData.BLOCK_HITSTOP_FRAMES)
 			_shake(4, 1.5)
@@ -620,6 +661,9 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 		fx.streaks(contact, Vector2(float(attacker_of(defender).facing), 0.0), 10, Color(1.0, 0.85, 0.45))
 		audio.play(&"counter", 0.0, 0.04)
 		_hitstop += CombatData.COUNTER_HITSTOP_BONUS
+		_camera_punch += 0.03
+		if attack.damage >= 10:
+			_slowmo(SLOWMO_COUNTER)
 	if result == CombatData.HitResult.HIT and defender.state == Fighter.State.KNOCKDOWN:
 		_hitstop = maxi(_hitstop, attack.hitstop + 4)
 		_shake(14, 7.0)
@@ -884,7 +928,8 @@ func _on_fighter_posture_broken(fighter: Fighter) -> void:
 	_shake(14, 6.0)
 	hud.flash(0.3)
 	hud.popup(fighter, "GUARD BREAK", Color(1.0, 0.35, 0.25))
-	_camera_punch += 0.04
+	_camera_punch += 0.06
+	_slowmo(SLOWMO_GUARD_BREAK)
 
 
 func _on_fighter_perfect_evaded(fighter: Fighter) -> void:
@@ -892,6 +937,8 @@ func _on_fighter_perfect_evaded(fighter: Fighter) -> void:
 		fighter.add_focus(CombatData.FOCUS_PERFECT_DODGE)
 	audio.play(&"whoosh_heavy", -2.0, 0.05)
 	fx.ring(fighter.position + Vector2(0.0, -100.0), PARRY_COLOR, 46.0, 14)
+	_camera_punch += 0.03
+	_slowmo(SLOWMO_PERFECT_DODGE)
 
 
 func _on_fighter_rolled(_fighter: Fighter) -> void:
@@ -963,9 +1010,25 @@ func _update_shake() -> void:
 	if _shake_frames > 0:
 		_shake_frames -= 1
 		var k := _shake_strength * float(_shake_frames) / float(_shake_total)
-		camera.offset = Vector2(_fx_rng.randf_range(-k, k), _fx_rng.randf_range(-k, k) * 0.6)
+		_shake_offset = Vector2(_fx_rng.randf_range(-k, k), _fx_rng.randf_range(-k, k) * 0.6)
 	else:
-		camera.offset = Vector2.ZERO
+		_shake_offset = Vector2.ZERO
+
+
+## Knocks the camera along a hit's direction (it springs back in _process).
+func _kick_camera(dir: Vector2, amount: float) -> void:
+	_camera_kick += dir.normalized() * amount
+
+
+## A short slow-motion beat (never shortens or weakens one already running).
+func _slowmo(beat: Vector2) -> void:
+	if _round_state != RoundState.FIGHTING:
+		return
+	if _slowmo_ticks > 0 and Engine.time_scale <= beat.y:
+		_slowmo_ticks = maxi(_slowmo_ticks, int(beat.x))
+		return
+	_slowmo_ticks = int(beat.x)
+	Engine.time_scale = beat.y
 
 
 func _process(delta: float) -> void:
@@ -992,10 +1055,33 @@ func _process(delta: float) -> void:
 		focus += Vector2(0.0, -80.0)
 		target_pos = Vector2(clampf(focus.x, VIEW_MIN.x + half.x, VIEW_MAX.x - half.x),
 			clampf(focus.y, VIEW_MIN.y + half.y, VIEW_MAX.y - half.y))
+	else:
+		var framed := _fight_framing()
+		target_zoom = framed.z
+		target_pos = Vector2(framed.x, framed.y)
 	_camera_punch = maxf(_camera_punch - _camera_punch * CAMERA_PUNCH_DECAY * real_delta, 0.0)
+	_camera_kick *= exp(-CAMERA_KICK_DECAY * real_delta)
 	var k := 1.0 - exp(-CAMERA_FOLLOW_RATE * real_delta)
-	camera.zoom = camera.zoom.lerp(Vector2.ONE * target_zoom, k) + Vector2.ONE * (_camera_punch * k)
+	var kz := k
+	if _round_state >= RoundState.FIGHTING and _finisher == null:
+		# Zoom eases slower than the pan, so exchanges do not pump the frame.
+		kz = 1.0 - exp(-FIGHT_ZOOM_RATE * real_delta)
+	camera.zoom = camera.zoom.lerp(Vector2.ONE * target_zoom, kz) + Vector2.ONE * (_camera_punch * k)
 	camera.position = camera.position.lerp(target_pos, k)
+	camera.offset = _shake_offset + _camera_kick
+
+
+## Fight framing: (centre x, centre y, zoom) holding both fighters.
+func _fight_framing() -> Vector3:
+	var gap := absf(player.position.x - enemy.position.x)
+	var air := maxf(maxf(player.ground_y - player.position.y, enemy.ground_y - enemy.position.y), 0.0)
+	var zoom := clampf(FIGHT_ZOOM_K / (gap + FIGHT_ZOOM_C), 1.0, FIGHT_ZOOM_MAX)
+	zoom = maxf(zoom - air * FIGHT_AIR_ZOOM_OUT, 1.0)
+	var half := Vector2(640.0, 360.0) / zoom
+	var focus := Vector2((player.position.x + enemy.position.x) * 0.5,
+		FLOOR_Y - FIGHT_FLOOR_FRAME * half.y - air * FIGHT_AIR_LIFT)
+	return Vector3(clampf(focus.x, VIEW_MIN.x + half.x, VIEW_MAX.x - half.x),
+		clampf(focus.y, VIEW_MIN.y + half.y, VIEW_MAX.y - half.y), zoom)
 
 
 func _refresh_presentation() -> void:

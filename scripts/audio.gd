@@ -125,6 +125,20 @@ func _build_sfx() -> void:
 	_soft_clip(b, 1.5)
 	_sfx[&"hit_light"] = _finish(b)
 
+	# Body thud: low, dull and short (no bright slap on top).
+	b = _buffer(0.26)
+	_thump(b, 0.0, 0.22, 115.0, 52.0, 0.05, 1.0)
+	_noise(b, 0.0, 0.07, 0.02, 0.22, 0.45, rng)
+	_soft_clip(b, 1.8)
+	_sfx[&"hit_body"] = _finish(b)
+
+	# Crack layered on heavy blows: a very short bright snap.
+	b = _buffer(0.12)
+	_noise(b, 0.0, 0.03, 0.004, 0.98, 0.9, rng)
+	_thump(b, 0.0, 0.06, 1500.0, 650.0, 0.01, 0.35)
+	_soft_clip(b, 1.5)
+	_sfx[&"hit_crack"] = _finish(b, 0.8)
+
 	b = _buffer(0.4)
 	_thump(b, 0.0, 0.32, 150.0, 42.0, 0.08, 1.0)
 	_noise(b, 0.0, 0.12, 0.03, 0.45, 0.7, rng)
