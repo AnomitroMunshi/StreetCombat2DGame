@@ -10,6 +10,8 @@ extends Node2D
 ##
 ## Destruction kit (all visual, never collision):
 ##   crack()      branching cracks that grow outward from the impact point
+##   wall_crack() a dented impact crater on a pillar with tapered, bevelled
+##                cracks running along it, clipped to the pillar
 ##   crater()     floor crater outline (dark bowl + lit rim), grows in
 ##   debris()     chips with gravity that bounce on the floor and settle;
 ##                pooled and capped (MAX_DEBRIS) for mobile
@@ -28,6 +30,8 @@ const DEBRIS_LIFE: int = 150
 const CRACK_GROW_TICKS: int = 14
 const CRACK_COLOR := Color(0.06, 0.045, 0.04, 0.85)
 const CRACK_LIGHT := Color(0.6, 0.48, 0.36, 0.35)
+## Exposed raw wood inside pillar damage (much lighter than the painted pillar).
+const RAW_WOOD := Color(0.62, 0.48, 0.33, 0.85)
 
 ## Floor height for debris to land on (set by main.gd).
 var floor_y: float = 560.0
@@ -191,6 +195,69 @@ func crack(pos: Vector2, size: float, vertical: bool, branches: int = 6) -> void
 	decals_changed.emit()
 
 
+## Pillar damage: a dent (irregular dark hollow with a lit, chipped rim) and
+## tapered cracks that run mostly up and down the pillar, thinning as they go,
+## with short forks. Everything is clipped to `clip` (the pillar), so damage
+## never spills onto the paper walls. Higher `power` = bigger dent, more and
+## longer cracks. Repeated hits on the same spot stack up.
+func wall_crack(pos: Vector2, power: int, clip: Rect2) -> void:
+	pos.x = clampf(pos.x, clip.position.x + 6.0, clip.end.x - 6.0)
+	var r := 6.0 + power * 4.5
+	var dent := PackedVector2Array()
+	for i in 11:
+		var a := TAU * i / 11.0 + _rng.randf_range(-0.18, 0.18)
+		var p := pos + Vector2(cos(a) * 0.85, sin(a) * 1.15) * r * _rng.randf_range(0.7, 1.15)
+		p.x = clampf(p.x, clip.position.x + 1.0, clip.end.x - 1.0)
+		dent.append(p)
+	_add_decal({"kind": "dent", "pts": dent, "pos": pos, "r": r, "age": 0, "grow": 3})
+	# Chip specks scattered around the dent.
+	for i in 3 + power * 2:
+		var a := _rng.randf() * TAU
+		var p := pos + Vector2(cos(a), sin(a)) * r * _rng.randf_range(1.2, 2.0)
+		if clip.has_point(p):
+			_add_decal({"kind": "speck", "pos": p, "size": _rng.randf_range(1.0, 2.2), "age": 0, "grow": 4})
+	var count := 2 + power
+	for b in count:
+		# Mostly vertical: half the cracks run up, half down, fanned slightly.
+		var up := b % 2 == 0
+		var ang := (-PI * 0.5 if up else PI * 0.5) + _rng.randf_range(-0.7, 0.7)
+		var length := (26.0 + power * 24.0) * _rng.randf_range(0.6, 1.15)
+		var pts := PackedVector2Array([pos + Vector2(cos(ang), sin(ang)) * r * 0.8])
+		var p: Vector2 = pts[0]
+		var travelled := 0.0
+		while travelled < length:
+			ang += _rng.randf_range(-0.45, 0.45)
+			# Bend back inward instead of leaving the pillar.
+			var step := Vector2(cos(ang), sin(ang)) * _rng.randf_range(7.0, 13.0)
+			var nxt := p + step
+			if nxt.x < clip.position.x + 2.0 or nxt.x > clip.end.x - 2.0:
+				ang = PI - ang
+				nxt = p + Vector2(-step.x, step.y)
+			if not clip.grow(-1.0).has_point(nxt):
+				break
+			p = nxt
+			pts.append(p)
+			travelled += step.length()
+			# Occasional fork, thinner and shorter.
+			if pts.size() == 3 and power >= 3 and _rng.randf() < 0.5:
+				var fork := PackedVector2Array([p])
+				var fa := ang + _rng.randf_range(0.5, 0.9) * (1.0 if _rng.randf() < 0.5 else -1.0)
+				var q := p
+				for k in 3:
+					var fs := Vector2(cos(fa), sin(fa)) * _rng.randf_range(5.0, 9.0)
+					if not clip.grow(-1.0).has_point(q + fs):
+						break
+					q += fs
+					fork.append(q)
+					fa += _rng.randf_range(-0.4, 0.4)
+				if fork.size() >= 2:
+					_add_decal({"kind": "crack", "pts": fork, "w": 1.6 + power * 0.2,
+						"age": -CRACK_GROW_TICKS / 2, "grow": CRACK_GROW_TICKS, "wall": true})
+		if pts.size() >= 2:
+			_add_decal({"kind": "crack", "pts": pts, "w": 2.4 + power * 0.7, "age": -(b % 3), "grow": CRACK_GROW_TICKS, "wall": true})
+	decals_changed.emit()
+
+
 ## Floor crater: a dark elliptical bowl with a lit rim, punched in over 5 ticks.
 func crater(pos: Vector2, size: float) -> void:
 	_add_decal({"kind": "crater", "pos": pos, "size": size, "age": 0, "grow": 5})
@@ -282,11 +349,39 @@ func draw_decals(canvas: CanvasItem) -> void:
 			canvas.draw_arc(Vector2.ZERO, r * 1.05, PI * 1.05, PI * 1.95, 32, Color(0.04, 0.03, 0.02, 0.6), 3.0, true)
 			canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			continue
+		if d["kind"] == "dent":
+			_draw_dent(canvas, d, g)
+			continue
+		if d["kind"] == "speck":
+			canvas.draw_circle(d["pos"], d["size"], Color(0.05, 0.035, 0.03, 0.8))
+			continue
 		var pts: PackedVector2Array = d["pts"]
 		var shown := _grown_polyline(pts, g)
-		if shown.size() >= 2:
-			canvas.draw_polyline(shown, CRACK_COLOR, 3.0, true)
-			canvas.draw_polyline(shown, CRACK_LIGHT, 1.0, true)
+		if shown.size() < 2:
+			continue
+		# Tapered: thick at the origin, thinning toward the tip. A light bevel
+		# line just below each segment makes it read as a split in the surface.
+		var w0: float = d.get("w", 2.6)
+		var n := shown.size() - 1
+		# On the dark pillar the split shows pale splintered wood around it.
+		var wall: bool = d.get("wall", false)
+		var edge := RAW_WOOD if wall else CRACK_LIGHT
+		for i in n:
+			var w := lerpf(w0, 0.8, float(i) / maxf(float(pts.size() - 1), 1.0))
+			if wall:
+				# Splinters only near the hit, fading along the crack.
+				var near := 1.0 - float(i) / maxf(float(pts.size() - 1), 1.0)
+				if near > 0.35:
+					var c := edge
+					c.a *= near
+					canvas.draw_line(shown[i], shown[i + 1], c, w + 1.6 * near, true)
+			else:
+				canvas.draw_line(shown[i] + Vector2(0.8, 1.2), shown[i + 1] + Vector2(0.8, 1.2), edge, maxf(w * 0.5, 0.8), true)
+		for i in n:
+			var w := lerpf(w0, 0.8, float(i) / maxf(float(pts.size() - 1), 1.0))
+			canvas.draw_line(shown[i], shown[i + 1], CRACK_COLOR, w, true)
+			if i > 0:
+				canvas.draw_circle(shown[i], w * 0.5, CRACK_COLOR)
 	# Settled and flying debris chips (drawn with the decals so they sit on the floor).
 	for c in _debris:
 		var a := 1.0 - smoothstep(0.75, 1.0, float(c["age"]) / DEBRIS_LIFE)
@@ -297,6 +392,36 @@ func draw_decals(canvas: CanvasItem) -> void:
 		for k in 4:
 			pts2.append(c["pos"] + Vector2.from_angle(c["angle"] + k * TAU / 4.0) * s * (1.0 if k % 2 == 0 else 0.6))
 		canvas.draw_colored_polygon(pts2, col)
+
+
+## Dent: dark hollow, a deeper core, and a lit lower-right rim (light from the
+## upper left), punched in quickly.
+static func _draw_dent(canvas: CanvasItem, d: Dictionary, g: float) -> void:
+	var centre: Vector2 = d["pos"]
+	var pts: PackedVector2Array = d["pts"]
+	var scaled := PackedVector2Array()
+	var core := PackedVector2Array()
+	for p in pts:
+		scaled.append(centre + (p - centre) * (0.5 + 0.5 * g))
+		core.append(centre + (p - centre) * 0.55 * g + Vector2(-1.0, -1.0))
+	# Splintered raw wood around the hit, then the dark crushed hollow inside.
+	var ring := PackedVector2Array()
+	for p in scaled:
+		ring.append(centre + (p - centre) * 1.35)
+	canvas.draw_colored_polygon(ring, RAW_WOOD)
+	canvas.draw_colored_polygon(scaled, Color(0.08, 0.06, 0.05, 0.95))
+	canvas.draw_colored_polygon(core, Color(0.02, 0.015, 0.01, 0.95))
+	var rim := scaled.duplicate()
+	rim.append(scaled[0])
+	canvas.draw_polyline(rim, Color(0.03, 0.02, 0.015, 0.9), 2.0, true)
+	# Lit edge on the lower right half of the rim.
+	var lit := PackedVector2Array()
+	for p in scaled:
+		var dir := p - centre
+		if dir.x + dir.y > 0.0:
+			lit.append(p + dir.normalized() * 1.2)
+	if lit.size() >= 2:
+		canvas.draw_polyline(lit, Color(0.5, 0.4, 0.3, 0.7), 1.2, true)
 
 
 ## The first `g` (0..1) of a polyline, by segment count, with the last

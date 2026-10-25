@@ -446,6 +446,19 @@ func _initialize() -> void:
 	for i in 60:
 		fxl.crack(Vector2(100 + i * 10, 560), 80.0, false)
 	_check(fxl.get_decal_count() == FxLayer.MAX_DECALS, "crack decals capped at %d" % FxLayer.MAX_DECALS)
+	var fx2 := FxLayer.new()
+	root.add_child(fx2)
+	var pillar := Rect2(1210, 96, 46, 470)
+	for pw in [2, 2, 3]:
+		fx2.wall_crack(Vector2(1215, 430), pw, pillar)
+	var inside := true
+	for d in fx2.get("_decals"):
+		var pts: PackedVector2Array = d["pts"] if d.has("pts") else PackedVector2Array([d["pos"]])
+		for q in pts:
+			if not pillar.grow(1.0).has_point(q):
+				inside = false
+	_check(inside and fx2.get_decal_count() > 3, "wall damage (dents, cracks, specks) stays on the pillar (%d decals)" % fx2.get_decal_count())
+	fx2.queue_free()
 	fxl.jolt_wall(1, 6.0)
 	for t in 60:
 		fxl._physics_process(1.0 / 60.0)

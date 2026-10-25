@@ -55,6 +55,9 @@ const PARRY_COLOR := Color(0.75, 0.95, 1.0)
 const KO_COLOR := Color(1.0, 0.55, 0.4)
 const WOOD_COLOR := Color(0.5, 0.38, 0.27)
 const STONE_COLOR := Color(0.42, 0.36, 0.3)
+## Pillar wood (face and body), for chunks knocked off it.
+const PILLAR_LIGHT := Color(0.42, 0.33, 0.25)
+const PILLAR_DARK := Color(0.16, 0.12, 0.1)
 
 @onready var player: Fighter = $Player
 @onready var enemy: Fighter = $Enemy
@@ -649,15 +652,27 @@ func _wall_face_x(dir: int) -> float:
 	return Fighter.ARENA_MAX_X + 20.0 if dir > 0 else Fighter.ARENA_MIN_X - 20.0
 
 
-## A body slammed into a pillar. Damage scales with `power`: a finisher's last
-## palm cracks the wall the most, chips rain down, the pillar shakes.
+## The pillar on `side` (-1 left, +1 right), as drawn in _draw.
+func _pillar_rect(side: int) -> Rect2:
+	var edge := Fighter.ARENA_MIN_X - 20.0 if side < 0 else Fighter.ARENA_MAX_X + 20.0
+	var outer := edge - 46.0 if side < 0 else edge
+	return Rect2(outer, 96.0, 46.0, FLOOR_Y + 6.0 - 96.0)
+
+
+## A body slammed into a pillar. Damage scales with `power`: a dent with
+## cracks running along the pillar (the final palm of Wall Crush hits hardest),
+## chunks of wood breaking off, dust, and the pillar shakes.
 func _wall_impact(pos: Vector2, power: int) -> void:
 	var side := -1 if pos.x < 640.0 else 1
-	fx.crack(pos, 60.0 + power * 25.0, true, 5 + power)
-	fx.ring(pos, Color.WHITE, 50.0 + power * 10.0, 16)
-	fx.particles(pos, Color(0.55, 0.42, 0.3), 8 + power * 3, 4.0, 18)
-	# Chips fly inward off the wall face and fall to the floor.
-	fx.debris(pos, 4 + power * 4, STONE_COLOR, 3.0 + power, -side * 1.0)
+	var pillar := _pillar_rect(side)
+	var hit := Vector2(pos.x + side * 10.0, pos.y)
+	fx.wall_crack(hit, power, pillar)
+	fx.ring(hit, Color(1.0, 0.95, 0.85), 40.0 + power * 12.0, 14)
+	fx.particles(hit, PILLAR_LIGHT, 6 + power * 3, 4.0, 18)
+	# Chunks of the pillar break off and fall: big pieces in the pillar's wood
+	# colours, flung inward off the face.
+	fx.debris(hit, 3 + power * 3, PILLAR_LIGHT, 3.0 + power * 1.2, -side * 0.9)
+	fx.debris(hit, 2 + power * 2, PILLAR_DARK, 2.0 + power, -side * 0.6)
 	fx.dust_cloud(pos + Vector2(-side * 10.0, 0.0), 0.5 + power * 0.25, 30)
 	fx.jolt_wall(side, 2.0 + power * 2.0)
 	audio.play(&"wall_hit")

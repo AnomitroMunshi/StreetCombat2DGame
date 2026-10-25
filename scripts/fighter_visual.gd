@@ -230,7 +230,9 @@ var _spin_windup := PackedFloat32Array([-0.1, 0.3, 0.8, 2.6, 0.4, 2.7, 0.3, 0.0,
 var _spin_kick := PackedFloat32Array([-0.7, 0.5, 1.0, 2.5, -1.2, -1.0, 2.1, 1.9, -0.15, -0.05, 6.0, 0.0])
 var _knee_windup := PackedFloat32Array([0.0, 0.05, 1.2, 2.9, 0.8, 2.9, 0.4, 0.05, -0.6, -0.5, -4.0, 8.0])
 var _knee := PackedFloat32Array([0.25, -0.1, 1.4, 0.8, 1.2, 0.9, 1.9, -0.3, -0.3, -0.6, 8.0, 0.0])
-var _slumped := PackedFloat32Array([-0.35, 0.6, 0.2, 0.3, -0.1, 0.1, 1.45, 1.55, 1.4, 1.5, 0.0, 6.0])
+# Slumped against the wall: back resting on it, head dropped, one knee up,
+# the other leg out, arms limp on the floor.
+var _slumped := PackedFloat32Array([-0.7, 1.35, 0.35, 0.7, -0.15, 0.1, 2.1, 0.9, 1.45, 1.55, -24.0, 6.0, 0.0, 2.0])
 var _stagger := PackedFloat32Array([-0.15, -0.3, 0.1, 0.4, -0.1, 0.2, 0.25, 0.05, -0.35, -0.15, -2.0, 8.0])
 # Tornado (360) kick: coil low, spring up with knees tucked, lash out a high
 # roundhouse while the arms fling out for balance.
