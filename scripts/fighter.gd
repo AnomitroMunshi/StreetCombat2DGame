@@ -43,6 +43,12 @@ extends Node2D
 ## stop one point short); the next blocked or parried strike does. After a
 ## break, posture stays empty for a while so breaks cannot loop.
 ##
+## Martial-art style (MartialArtStyle): when set, this fighter is the single
+## gate for move legality. Player input arrives as slots and is resolved
+## through the style; attacks from AI / tests are rejected when the style does
+## not list them; air attacks and combo cancels go through the style too. A
+## fighter with no style (bare unit tests) keeps the legacy, unrestricted moves.
+##
 ## Finishers: a lethal hit puts the defender in FINISHED instead of KO. main.gd
 ## then hands both fighters to a FinisherDirector (attacker -> FINISHER), which
 ## drives poses/movement through the scripted_* API and ends with finish_ko().
@@ -181,8 +187,14 @@ var posture_idle: int = 0
 var posture_lock: int = 0
 ## The last clean hit landed on a staggered or starting-up fighter.
 var last_hit_counter: bool = false
-## Stance (presentation only; see Stances).
+## Stance (presentation only; see Stances). Set from the style.
 var stance: int = Stances.Kind.BLADED
+## The locked martial art for this match (null = unrestricted, tests only).
+var style: MartialArtStyle = null
+## Slot of the buffered press (for air conversion), &"" for direct attacks.
+var buffered_slot: StringName = &""
+## Attacks refused because the style does not allow them (tests / debug).
+var rejected_attacks: int = 0
 
 # Presentation data: read by visuals/HUD, never used for combat decisions.
 var hitstop_frames: int = 0
@@ -221,9 +233,21 @@ func push_intent(intent: CombatData.Intent) -> void:
 	move_input = intent.move
 	block_held = intent.block
 	crouch_held = intent.crouch
-	if intent.attack != CombatData.AttackType.NONE:
-		buffered_attack = intent.attack
-		buffer_frames = CombatData.INPUT_BUFFER_FRAMES
+	if intent.slot != &"":
+		# Player press: resolved through the style (an unmapped slot does nothing).
+		var resolved := style.resolve(intent.slot, false) if style != null else CombatData.AttackType.NONE
+		var air_ok := style != null and style.resolve(intent.slot, true) != CombatData.AttackType.NONE
+		if resolved != CombatData.AttackType.NONE or air_ok:
+			buffered_attack = resolved if resolved != CombatData.AttackType.NONE else style.resolve(intent.slot, true)
+			buffered_slot = intent.slot
+			buffer_frames = CombatData.INPUT_BUFFER_FRAMES
+	elif intent.attack != CombatData.AttackType.NONE:
+		if style != null and not style.allows(intent.attack):
+			rejected_attacks += 1
+		else:
+			buffered_attack = intent.attack
+			buffered_slot = &""
+			buffer_frames = CombatData.INPUT_BUFFER_FRAMES
 	if intent.jump:
 		jump_buffer_frames = CombatData.JUMP_BUFFER_FRAMES
 	if intent.dodge != 0:
@@ -390,12 +414,27 @@ func _tick_jump() -> void:
 		return
 	if air_attack_used or buffered_attack == CombatData.AttackType.NONE:
 		return
-	var kick := buffered_attack in [CombatData.AttackType.KICK, CombatData.AttackType.FRONT_KICK,
-		CombatData.AttackType.HIGH_KICK, CombatData.AttackType.SWEEP, CombatData.AttackType.BACK_KICK]
+	var air_move := _air_move_for(buffered_attack, buffered_slot)
 	buffered_attack = CombatData.AttackType.NONE
+	buffered_slot = &""
 	buffer_frames = 0
+	if air_move == CombatData.AttackType.NONE:
+		return  # this style has no air attack for that button
 	air_attack_used = true
-	_start_attack(CombatData.AttackType.JUMP_KICK if kick else CombatData.AttackType.JUMP_PUNCH, 1, false)
+	_start_attack(air_move, 1, false)
+
+
+## Which air attack a press becomes. With a style: its air_map (by slot, or by
+## whether the ground move was a kick); without: the legacy jump kick / punch.
+func _air_move_for(ground: CombatData.AttackType, slot: StringName) -> CombatData.AttackType:
+	if CombatData.get_attack(ground).air_only and (style == null or style.allows(ground)):
+		return ground
+	var kick := CombatData.attack_name(ground).contains("KICK") or ground == CombatData.AttackType.SWEEP
+	if style != null:
+		if slot != &"":
+			return style.resolve(slot, true)
+		return style.resolve(&"kick" if kick else &"light", true)
+	return CombatData.AttackType.JUMP_KICK if kick else CombatData.AttackType.JUMP_PUNCH
 
 
 func _tick_attack() -> void:
@@ -403,7 +442,7 @@ func _tick_attack() -> void:
 	var strike_end := attack.startup + attack.active
 	if state_frame < strike_end:
 		position.x += attack.lunge * facing
-	elif combo_step < CombatData.MAX_COMBO_CHAIN and state_frame - strike_end < attack.cancel_window 			and swing_has_hit and CombatData.can_chain(attack.type, buffered_attack):
+	elif combo_step < CombatData.MAX_COMBO_CHAIN and state_frame - strike_end < attack.cancel_window 			and swing_has_hit and _can_chain(attack.type, buffered_attack):
 		# Chains need contact and a listed branch (CombatData.CHAINS).
 		if _consume_buffered_attack(combo_step + 1):
 			return
@@ -552,12 +591,26 @@ func _tick_buffers() -> void:
 		parry_cooldown -= 1
 
 
+func _can_chain(from: CombatData.AttackType, to: CombatData.AttackType) -> bool:
+	return style.can_chain(from, to) if style != null else CombatData.can_chain(from, to)
+
+
+## Locks a martial art onto this fighter (its stance comes with it).
+func set_style(new_style: MartialArtStyle) -> void:
+	style = new_style
+	if style != null:
+		stance = style.stance
+
+
 func _consume_buffered_attack(step: int) -> bool:
 	if buffered_attack == CombatData.AttackType.NONE:
 		return false
 	var type := buffered_attack
 	buffered_attack = CombatData.AttackType.NONE
+	buffered_slot = &""
 	buffer_frames = 0
+	if CombatData.get_attack(type).air_only:
+		return false  # an air-only move pressed on the ground does nothing
 	_start_attack(type, step, true)
 	return true
 
@@ -781,6 +834,10 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	var finisher := step >= CombatData.MAX_COMBO_CHAIN
 	var knockback := attack.knockback * (CombatData.FINISHER_KNOCKBACK_MULT if finisher else 1.0)
 
+	if state == State.ATTACK and current_attack != null and state_frame < current_attack.slip_frames:
+		var slip_y := attacker.position.y + attack.hitbox.get_center().y
+		if slip_y < position.y - 125.0:
+			return CombatData.HitResult.WHIFF  # slipped: the head was off the line
 	var facing_attacker := facing == -push_dir
 	# Low attacks (sweeps) must be blocked (or parried) low: S + Shift.
 	var right_height := not attack.low or crouch_held

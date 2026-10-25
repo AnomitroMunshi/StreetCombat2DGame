@@ -53,9 +53,16 @@ class Driver extends Node:
 		match phase:
 			"pre":
 				if phase_frame == 1:
-					check(state == "PRE_MATCH", "game launches in PRE_MATCH (%s)" % state)
-					check(hud.is_button_visible(), "START MATCH button is shown")
+					check(state == "STYLE_SELECT", "game launches in style selection (%s)" % state)
+					check(hud.is_style_select_visible() and not hud.is_button_visible(), "style cards shown, no START yet")
+					hud.style_chosen.emit(&"taekwondo")
+					check(p.style.id == &"taekwondo" and p.stance == p.style.stance, "picking a card previews that style on the player")
+					check(e.style.id != p.style.id, "the rival never has the player's style")
+					hud.style_confirmed.emit()
+					check(main.call("get_round_state_name") == "PRE_MATCH" and hud.is_button_visible() and hud.is_change_style_visible(),
+						"confirm -> PRE_MATCH with START MATCH and CHANGE STYLE")
 					pre_positions = [p.position.x, e.position.x]
+					return
 				if state != "PRE_MATCH" or p.state != Fighter.State.IDLE or e.state != Fighter.State.IDLE:
 					locked_ok = false
 				if phase_frame == 60:
@@ -66,6 +73,8 @@ class Driver extends Node:
 					hud.press_button()  # mashing the button
 					main.call("start_match")  # and a stray direct call
 					check(not hud.is_button_visible(), "button hides on click")
+					main.call("select_style", &"boxing")
+					check(p.style.id == &"taekwondo", "style is locked once the match starts")
 					phase = "prep"
 					phase_frame = 0
 					locked_ok = true
@@ -105,7 +114,8 @@ class Driver extends Node:
 					phase_frame = 0
 			"restart_pre":
 				if phase_frame == 3:
-					check(state == "PRE_MATCH" and p.health == p.max_health, "restart returns to PRE_MATCH with full health")
+					check(state == "PRE_MATCH" and p.health == p.max_health, "restart (rematch) returns to PRE_MATCH with full health")
+					check(p.style.id == &"taekwondo", "rematch keeps the chosen style")
 					hud.press_button()
 				elif phase_frame == 3 + 100 + 75:
 					check(state == "COUNTDOWN" and hud.get_countdown() == "2", "second match counting down (%s %s)" % [state, hud.get_countdown()])

@@ -10,15 +10,19 @@ extends Node2D
 ##
 ## Match flow (all tick-driven, no timers, so a restart cannot leave stale
 ## callbacks behind; restarting reloads the scene):
-##   PRE_MATCH    fighters stand relaxed, START MATCH button shown, no control.
+##   STYLE_SELECT choose a martial art (cards + details); the player previews
+##                the style's guard and idle live. Confirm -> PRE_MATCH.
+##   PRE_MATCH    START MATCH (or CHANGE STYLE). No control yet.
 ##   STANCE_PREP  both walk to their marks, salute / glare, raise their guard.
 ##   COUNTDOWN    3, 2, 1 (one second each). Input and AI stay locked.
 ##   FIGHTING     unlocked for both on the same tick ("FIGHT!").
 ##   FINISHER     a lethal hit plays a scripted finisher.
 ##   KO           "K.O." until every knocked-out body has come to rest.
-##   RESULT       winner shown with a RESTART MATCH button (R also restarts).
+##   RESULT       winner shown with REMATCH (same style; R too) and CHANGE STYLE.
+## Styles are locked from START MATCH on: Q does nothing during a match, and the
+## fighters only accept moves from their own style (Fighter is the gate).
 
-enum RoundState { PRE_MATCH, STANCE_PREP, COUNTDOWN, FIGHTING, FINISHER, KO, RESULT }
+enum RoundState { STYLE_SELECT, PRE_MATCH, STANCE_PREP, COUNTDOWN, FIGHTING, FINISHER, KO, RESULT }
 
 const FLOOR_Y: float = 560.0
 const PLAYER_START_X: float = 440.0
@@ -69,7 +73,7 @@ const WIND_COLOR := Color(0.95, 0.95, 1.0)
 @onready var fx: FxLayer = $Effects
 @onready var audio: GameAudio = $Audio
 
-var _round_state: RoundState = RoundState.PRE_MATCH
+var _round_state: RoundState = RoundState.STYLE_SELECT
 ## Ticks since the round state last changed.
 var _state_tick: int = 0
 var _tick: int = 0
@@ -140,15 +144,18 @@ func _ready() -> void:
 		f.parried.connect(_on_fighter_parried)
 	fx.decals_changed.connect(queue_redraw)
 	fx.floor_y = FLOOR_Y
-	# Stances: the player's choice persists across restarts; the AI always picks
-	# a different one.
+	# Martial arts: the player's choice persists across restarts; the rival
+	# gets a different style.
 	_stance_rng.randomize()
-	player.stance = Stances.player_choice
-	enemy.stance = Stances.random_except(player.stance, _stance_rng)
+	player.set_style(StyleRegistry.player_style())
+	enemy.set_style(StyleRegistry.random_except(player.style.id, _stance_rng))
 	enemy_ai.setup(enemy, player)
 	hud.setup(player, enemy)
 	hud.start_pressed.connect(start_match)
 	hud.restart_pressed.connect(restart_match)
+	hud.change_style_pressed.connect(change_style)
+	hud.style_chosen.connect(select_style)
+	hud.style_confirmed.connect(confirm_style)
 	overlay.draw.connect(_draw_overlay)
 	_enter_pre_match()
 
@@ -159,8 +166,8 @@ func _physics_process(_delta: float) -> void:
 		return
 	if Input.is_action_just_pressed("toggle_debug"):
 		_debug_visible = not _debug_visible
-	if Input.is_action_just_pressed("cycle_stance") and _round_state <= RoundState.FIGHTING:
-		_cycle_player_stance()
+	if Input.is_action_just_pressed("cycle_stance") and _round_state == RoundState.STYLE_SELECT:
+		_cycle_style_choice()
 
 	_tick += 1
 	_state_tick += 1
@@ -218,17 +225,78 @@ func get_round_state_name() -> String:
 
 
 func _enter_pre_match() -> void:
-	_set_round_state(RoundState.PRE_MATCH)
 	for f: Fighter in [player, enemy]:
 		f.prefight_pose = &"relaxed"
-	hud.set_message("STREET COMBAT", "Q  choose stance    ·    ENTER or click to start")
-	hud.show_button(&"start")
 	audio.duck_bgm(PREFIGHT_BGM_DUCK_DB)
+	if StyleRegistry.skip_selection:
+		# Rematch: same style, straight to START MATCH.
+		StyleRegistry.skip_selection = false
+		_show_ready()
+		return
+	_set_round_state(RoundState.STYLE_SELECT)
+	# Preview the style live: the player stands in its guard with its idle.
+	player.prefight_pose = &""
+	hud.set_message("", "")
+	hud.show_style_select(StyleRegistry.all(), player.style.id)
 
 
-## START MATCH. Only acts once, from PRE_MATCH. `skip_intro` jumps straight to
-## the fight (tests).
+## STYLE_SELECT: preview another style (cards, Q).
+func select_style(style_id: StringName) -> void:
+	if _round_state != RoundState.STYLE_SELECT:
+		return  # locked once the match is set up
+	var chosen := StyleRegistry.by_id(style_id)
+	if chosen == null:
+		return
+	player.set_style(chosen)
+	StyleRegistry.player_choice = chosen.id
+	if enemy.style == null or enemy.style.id == chosen.id:
+		enemy.set_style(StyleRegistry.random_except(chosen.id, _stance_rng))
+	hud.show_style_select(StyleRegistry.all(), chosen.id)
+
+
+func _cycle_style_choice() -> void:
+	var styles := StyleRegistry.all()
+	var i := styles.find(player.style)
+	select_style(styles[(i + 1) % styles.size()].id)
+
+
+## Confirm the previewed style -> PRE_MATCH.
+func confirm_style() -> void:
+	if _round_state != RoundState.STYLE_SELECT:
+		return
+	StyleRegistry.player_choice = player.style.id
+	_show_ready()
+
+
+func _show_ready() -> void:
+	_set_round_state(RoundState.PRE_MATCH)
+	hud.hide_style_select()
+	player.prefight_pose = &"relaxed"
+	hud.set_message("%s  vs  %s" % [player.style.display_name.to_upper(), enemy.style.display_name.to_upper()],
+		"ENTER or click to start")
+	hud.show_button(&"start")
+
+
+## CHANGE STYLE (pre-match or after a match): back to the style screen.
+func change_style() -> void:
+	if _round_state == RoundState.PRE_MATCH:
+		_set_round_state(RoundState.STYLE_SELECT)
+		hud.show_button(&"")
+		hud.set_message("", "")
+		player.prefight_pose = &""
+		hud.show_style_select(StyleRegistry.all(), player.style.id)
+	elif _round_state == RoundState.RESULT:
+		StyleRegistry.skip_selection = false
+		Engine.time_scale = 1.0
+		get_tree().reload_current_scene()
+
+
+## START MATCH. Only acts once, from PRE_MATCH (or STYLE_SELECT, which then
+## confirms the previewed style). `skip_intro` jumps straight to the fight
+## (tests). From here on the styles are locked.
 func start_match(skip_intro: bool = false) -> void:
+	if _round_state == RoundState.STYLE_SELECT:
+		confirm_style()
 	if _round_state != RoundState.PRE_MATCH:
 		return
 	hud.show_button(&"")
@@ -244,9 +312,12 @@ func start_match(skip_intro: bool = false) -> void:
 	_set_round_state(RoundState.STANCE_PREP)
 
 
-## Restart: always back to a fresh pre-match state. The scene reload resets
-## health, AI, effects, animation and any countdown in progress.
+## Restart / REMATCH: a fresh match with the same styles, straight to START
+## MATCH. The scene reload resets health, posture, AI, effects, animation and
+## any countdown in progress.
 func restart_match() -> void:
+	StyleRegistry.player_choice = player.style.id if player.style != null else StyleRegistry.player_choice
+	StyleRegistry.skip_selection = true
 	Engine.time_scale = 1.0
 	get_tree().reload_current_scene()
 
@@ -336,26 +407,32 @@ func _read_player_intent() -> CombatData.Intent:
 				_last_tap[dir] = -1000
 			else:
 				_last_tap[dir] = _tick
+	# Attack buttons produce a slot; the fighter's martial art decides the move
+	# (and refuses anything its style does not have).
 	if Input.is_action_just_pressed("attack_light"):
-		intent.attack = CombatData.AttackType.LIGHT
+		intent.slot = &"light"
 	elif Input.is_action_just_pressed("attack_heavy"):
-		intent.attack = CombatData.AttackType.HEAVY
-	elif Input.is_action_just_pressed("attack_kick"):
-		# W + L = high kick, S + L = low sweep, L alone = side kick.
 		if Input.is_action_pressed("mod_up"):
-			intent.attack = CombatData.AttackType.HIGH_KICK
+			intent.slot = &"up_heavy"
 		elif Input.is_action_pressed("mod_down"):
-			intent.attack = CombatData.AttackType.SWEEP
-		elif _is_back_kick_input(intent.move):
-			intent.attack = CombatData.AttackType.BACK_KICK
+			intent.slot = &"down_heavy"
 		else:
-			intent.attack = CombatData.AttackType.KICK
+			intent.slot = &"heavy"
+	elif Input.is_action_just_pressed("attack_kick"):
+		if Input.is_action_pressed("mod_up"):
+			intent.slot = &"up_kick"
+		elif Input.is_action_pressed("mod_down"):
+			intent.slot = &"down_kick"
+		elif _is_back_kick_input(intent.move):
+			intent.slot = &"back_kick"
+		else:
+			intent.slot = &"kick"
 	elif Input.is_action_just_pressed("attack_front_kick"):
-		intent.attack = CombatData.AttackType.FRONT_KICK
+		intent.slot = &"front"
 	elif Input.is_action_just_pressed("attack_backhand"):
-		intent.attack = CombatData.AttackType.BACKHAND
+		intent.slot = &"lead"
 	elif Input.is_action_just_pressed("attack_uppercut"):
-		intent.attack = CombatData.AttackType.UPPERCUT
+		intent.slot = &"rising"
 	return intent
 
 
@@ -692,7 +769,7 @@ func _tick_round_over() -> void:
 	hud.set_banner("", Color.WHITE)
 	hud.set_letterbox(false)
 	hud.set_message(_result_text, "ENTER, click or R to restart")
-	hud.show_button(&"restart")
+	hud.show_button(&"rematch")
 	audio.play(&"victory", -2.0, 0.0)
 	audio.duck_bgm(-6.0)
 
@@ -794,14 +871,6 @@ func _on_fighter_posture_broken(fighter: Fighter) -> void:
 func _on_fighter_perfect_evaded(fighter: Fighter) -> void:
 	audio.play(&"whoosh_heavy", -2.0, 0.05)
 	fx.ring(fighter.position + Vector2(0.0, -100.0), PARRY_COLOR, 46.0, 14)
-
-
-## Q: next stance. The AI never shares the player's stance, so it moves off it.
-func _cycle_player_stance() -> void:
-	player.stance = (player.stance + 1) % Stances.count()
-	Stances.player_choice = player.stance
-	if enemy.stance == player.stance:
-		enemy.stance = Stances.random_except(player.stance, _stance_rng)
 
 
 func _on_fighter_rolled(_fighter: Fighter) -> void:

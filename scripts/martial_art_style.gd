@@ -1,0 +1,161 @@
+class_name MartialArtStyle
+extends Resource
+## One martial art: identity, look, legal moveset, combo graph and AI hints.
+## Pure data (one .tres per style in res://styles/), registered by
+## StyleRegistry. The Fighter is the single gate that enforces it: a fighter
+## with a style can only ever start moves listed here (player input, AI
+## intents, combos and air attacks alike).
+##
+## Input slots (keyboard -> slot; the style maps slot -> move id):
+##   light J · heavy K · lead U · rising O · front I · kick L
+##   up_kick W+L · down_kick S+L · back_kick away+L (from standing)
+##   up_heavy W+K · down_heavy S+K
+## A variant slot with no entry falls back to its base slot (SLOT_FALLBACK).
+## `air_map` uses the same slots for attacks started in the air.
+
+const SLOTS: Array[StringName] = [&"light", &"heavy", &"lead", &"rising", &"front", &"kick",
+	&"up_kick", &"down_kick", &"back_kick", &"up_heavy", &"down_heavy"]
+const SLOT_FALLBACK: Dictionary = {
+	&"up_kick": &"kick", &"down_kick": &"kick", &"back_kick": &"kick",
+	&"up_heavy": &"heavy", &"down_heavy": &"heavy",
+}
+## Key labels for each slot (move lists in the UI).
+const SLOT_KEYS: Dictionary = {
+	&"light": "J", &"heavy": "K", &"lead": "U", &"rising": "O", &"front": "I", &"kick": "L",
+	&"up_kick": "W+L", &"down_kick": "S+L", &"back_kick": "away+L", &"up_heavy": "W+K", &"down_heavy": "S+K",
+}
+## Known combat categories (metadata for the roster and future subsystems).
+const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"clinching",
+	&"grappling", &"throwing", &"ground", &"hybrid"]
+
+## Permanent id (never change it once released: saves refer to it).
+@export var id: StringName = &""
+## Position in the selection roster.
+@export var order: int = 0
+@export var display_name: String = ""
+@export_multiline var description: String = ""
+@export var category: StringName = &"striking"
+@export_range(1, 5) var difficulty: int = 2
+@export var strengths: PackedStringArray = PackedStringArray()
+@export var weaknesses: PackedStringArray = PackedStringArray()
+## Guard / idle / footwork: an index into Stances.Kind.
+@export var stance: int = 0
+## slot -> move id, on the ground and in the air.
+@export var input_map: Dictionary = {}
+@export var air_map: Dictionary = {}
+## move id -> Array of move ids it may cancel into (on contact).
+@export var chains: Dictionary = {}
+## AI: combo plans (arrays of move ids) up close and from range.
+@export var ai_close_plans: Array = []
+@export var ai_far_plans: Array = []
+@export var ai_preferred_range: float = 95.0
+
+var _allowed: Dictionary = {}
+
+
+## The move a slot performs for this style (NONE if the style has none).
+func resolve(slot: StringName, in_air: bool) -> CombatData.AttackType:
+	var table := air_map if in_air else input_map
+	var move_id: StringName = table.get(slot, &"")
+	if move_id == &"" and SLOT_FALLBACK.has(slot):
+		move_id = table.get(SLOT_FALLBACK[slot], &"")
+	return CombatData.type_for_id(move_id) if move_id != &"" else CombatData.AttackType.NONE
+
+
+## Every move this style can perform.
+func allows(type: CombatData.AttackType) -> bool:
+	if _allowed.is_empty():
+		for m in moves():
+			_allowed[CombatData.type_for_id(m)] = true
+	return _allowed.has(type)
+
+
+func moves() -> Array[StringName]:
+	var out: Array[StringName] = []
+	for table in [input_map, air_map]:
+		for m in table.values():
+			if not out.has(m):
+				out.append(m)
+	return out
+
+
+func can_chain(from: CombatData.AttackType, to: CombatData.AttackType) -> bool:
+	var next: Array = chains.get(CombatData.id_for_type(from), [])
+	return CombatData.id_for_type(to) in next
+
+
+## AI plans as move types (illegal ids are dropped, validate() reports them).
+func plans(close: bool) -> Array:
+	var out: Array = []
+	for plan in (ai_close_plans if close else ai_far_plans):
+		var types: Array = []
+		for m in plan:
+			var t := CombatData.type_for_id(m)
+			if allows(t):
+				types.append(t)
+		if not types.is_empty():
+			out.append(types)
+	return out
+
+
+## Problems with this definition (empty = valid). Malformed styles are refused
+## by StyleRegistry, so bad data can never reach a match.
+func validate() -> PackedStringArray:
+	var errors := PackedStringArray()
+	if id == &"":
+		errors.append("missing id")
+	if display_name == "":
+		errors.append("missing display_name")
+	if not category in CATEGORIES:
+		errors.append("unknown category %s" % category)
+	if stance < 0 or stance >= Stances.count():
+		errors.append("stance %d out of range" % stance)
+	if input_map.is_empty():
+		errors.append("empty input_map")
+	for table in [input_map, air_map]:
+		for slot in table:
+			if not slot in SLOTS:
+				errors.append("unknown slot %s" % slot)
+			if CombatData.type_for_id(table[slot]) == CombatData.AttackType.NONE:
+				errors.append("unknown move %s" % table[slot])
+	for slot in air_map:
+		var t := CombatData.type_for_id(air_map[slot])
+		if t != CombatData.AttackType.NONE and not CombatData.get_attack(t).air_only:
+			errors.append("air move %s is not an air attack" % air_map[slot])
+	for slot in input_map:
+		var t := CombatData.type_for_id(input_map[slot])
+		if t != CombatData.AttackType.NONE and CombatData.get_attack(t).air_only:
+			errors.append("ground slot %s maps to air-only move %s" % [slot, input_map[slot]])
+	var mine := moves()
+	for from in chains:
+		if not from in mine:
+			errors.append("chain from %s, not in the moveset" % from)
+		for to in chains[from]:
+			if not to in mine:
+				errors.append("chain %s -> %s leaves the moveset" % [from, to])
+	for plan in ai_close_plans + ai_far_plans:
+		for i in plan.size():
+			if not plan[i] in mine:
+				errors.append("AI plan uses %s, not in the moveset" % plan[i])
+			elif i > 0 and not plan[i] in chains.get(plan[i - 1], []):
+				errors.append("AI plan %s -> %s is not a chain" % [plan[i - 1], plan[i]])
+	return errors
+
+
+## Move list for the UI: [key label, move name] per mapped slot.
+func move_list() -> Array:
+	var out: Array = []
+	for slot in SLOTS:
+		if input_map.has(slot):
+			out.append([SLOT_KEYS[slot], CombatData.get_attack(CombatData.type_for_id(input_map[slot])).display_name])
+	# Air moves grouped by move: "air J/K/U" -> Jump Punch.
+	var air_keys: Dictionary = {}
+	for slot in SLOTS:
+		if air_map.has(slot):
+			var move_name := CombatData.get_attack(CombatData.type_for_id(air_map[slot])).display_name
+			if not air_keys.has(move_name):
+				air_keys[move_name] = []
+			air_keys[move_name].append(SLOT_KEYS[slot])
+	for move_name in air_keys:
+		out.append(["air " + "/".join(air_keys[move_name]), move_name])
+	return out

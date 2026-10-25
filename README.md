@@ -37,6 +37,31 @@ Restarting reloads the scene, so health, AI, effects and animation all reset.
 Everything in the flow is counted in simulation ticks, with no timers, so an
 old countdown can never fire into a new match.
 
+## Martial arts (M6.5, in progress)
+
+Before a match, you choose a **martial art** on the style screen:
+- Click a card, or press **Q** to cycle through them. Your fighter shows that
+  style's guard and idle live.
+- Press **ENTER**, or click CONFIRM, then START MATCH.
+
+The rival always gets a different style. Styles are **locked** once the match
+starts. After a match, **REMATCH** (or **R**) keeps your style, and
+**CHANGE STYLE** returns to the selection screen.
+
+The attack buttons (J K U O I L, plus W or S) do different things in each
+style. **A style can never use a move outside its own set**, whether through a
+key, the AI, a combo or a jump. The style screen lists every move with its key.
+
+| Style | Identity | Moves |
+|---|---|---|
+| **Boxing** | Pressure and counterpunching. No kicks or sweeps at all. | J jab · K cross · U lead hook · I rear hook · O uppercut · L body hook · W+K overhand · S+K slip counter (head-height strikes miss during the slip) · air: jump punch |
+| **Taekwondo** | Long-range kicking, with only two basic punches. | J jab · K cross · L side kick · I front kick · W+L high roundhouse · S+L axe kick · U spinning hook kick · away+L back kick · air: jump roundhouse (L/I), jumping spin kick (U, W+L), jump punch (J/K) |
+
+Muay Thai, Karate, Kung Fu and Kickboxing come next. The Focus meter,
+signatures (F) and style finishers come in later batches. Styles are data
+files in `styles/`; see `docs/ADDING_A_STYLE.md` and
+`docs/M6.5_ARCHITECTURE.md`.
+
 ## Controls
 
 | Key        | Action                      |
@@ -541,6 +566,7 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 | `test_match.gd` | A full scripted match against the real AI, KO, then restart |
 | `test_ai_finisher.gd` | AI finisher on a passive player; result only after the body is at rest |
 | `test_ai_defense.gd` | AI blocks most, parries some, punishes a stagger (seeded) |
+| `test_styles.gd` | Style registry and validation, Boxing cannot kick, Taekwondo has no boxing combos, air moves and combos follow the style, new moves in both directions, slip counter, AI rivals never use an illegal move |
 | `test_movement.gd` | Jump cross-ups (both directions, moving rival, simultaneous jumps, walls), forward/backward roll, close slip-past, walking never passes, back hits after crossing, AI reaction delay |
 
 The V0.3 plan and audit are in `docs/V0.3_PLAN.md`.

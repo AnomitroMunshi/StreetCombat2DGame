@@ -9,7 +9,8 @@ extends RefCounted
 ## Every stance keeps at least one hand at the chin and both knees bent; spread
 ## (body rotation) gives each stance its own silhouette.
 
-enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNTER }
+## APPEND-ONLY (style files refer to stances by index).
+enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNTER, TAEKWONDO, KICKBOXING }
 
 ## name, guard pose, southpaw (right foot forward), and the active idle (the
 ## looping fighting movement in neutral; presentation only):
@@ -61,6 +62,17 @@ const DATA: Dictionary = {
 		"name": "COUNTER-FIGHTER", "southpaw": false, "idle": {"hz": 1.4, "bob": 1.2, "shape": "snap", "shift": 3.0, "shift_hz": 0.7, "heel": 1.5, "lead_heel": 0.0, "shoulder": 1.0, "guard": 0.04, "sway": 0.03, "head": 0.08},
 		# Elusive: upright, lead hand low and loose, rear hand high, lots of head movement.
 		"pose": [0.05, 0.05, 0.6, 1.9, 0.9, 3.0, 0.5, -0.12, -0.45, -0.3, 0.0, 0.0, 0.0, 11.0],
+	},
+	Kind.TAEKWONDO: {
+		"name": "TAEKWONDO STANCE", "southpaw": false, "idle": {"hz": 2.6, "bob": 4.5, "shape": "hop", "shift": 3.0, "shift_hz": 1.3, "heel": 4.5, "lead_heel": 3.0, "shoulder": 1.0, "guard": 0.05, "sway": 0.02, "head": 0.02},
+		# Side-on and light on the balls of the feet, hands lower and loose:
+		# the legs do the work, the bounce never stops.
+		"pose": [0.02, 0.05, 1.0, 2.3, 0.8, 2.7, 0.45, -0.1, -0.5, -0.15, 0.0, 0.0, 0.0, 13.0],
+	},
+	Kind.KICKBOXING: {
+		"name": "KICKBOXING GUARD", "southpaw": false, "idle": {"hz": 2.0, "bob": 3.5, "shape": "hop", "shift": 4.0, "shift_hz": 1.0, "heel": 3.0, "lead_heel": 1.5, "shoulder": 1.6, "guard": 0.05, "sway": 0.03, "head": 0.03},
+		# Balanced, slightly square, high guard: ready to punch or kick.
+		"pose": [0.15, 0.15, 0.95, 2.9, 0.85, 3.0, 0.55, -0.15, -0.5, -0.35, 0.0, 0.0, 0.0, 9.0],
 	},
 }
 

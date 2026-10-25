@@ -13,12 +13,14 @@ class Driver extends Node:
 			fails += 1
 
 	func p0_e0_differ(main: Node) -> bool:
-		return (main.get_node("Player") as Fighter).stance != (main.get_node("Enemy") as Fighter).stance
+		return (main.get_node("Player") as Fighter).style.id != (main.get_node("Enemy") as Fighter).style.id
 
 	func _physics_process(_d: float) -> void:
 		frame += 1
 		var main := tree.current_scene
 		if frame == 1:
+			# Taekwondo has a kick on every kick button (and a back kick).
+			main.call("select_style", &"taekwondo")
 			main.call("start_match", true)
 		# Godot reports a scripted press as "just pressed" on the next physics
 		# frame, so: press on frame N, check on N + 1, release on N + 2.
@@ -44,13 +46,13 @@ class Driver extends Node:
 		if frame <= 19:
 			intent = main.call("_read_player_intent")
 		match frame:
-			1: check(p0_e0_differ(main), "match starts with different stances")
-			3: check(intent.attack == CombatData.AttackType.KICK, "L alone -> side kick")
-			7: check(intent.attack == CombatData.AttackType.HIGH_KICK, "W + L -> high kick")
-			11: check(intent.attack == CombatData.AttackType.SWEEP, "S + L -> sweep")
+			1: check(p0_e0_differ(main), "player and rival have different martial arts")
+			3: check(intent.slot == &"kick", "L alone -> kick slot (%s)" % intent.slot)
+			7: check(intent.slot == &"up_kick", "W + L -> up_kick slot (%s)" % intent.slot)
+			11: check(intent.slot == &"down_kick", "S + L -> down_kick slot (%s)" % intent.slot)
 			15:
-				check(intent.attack == CombatData.AttackType.NONE and intent.crouch, "S alone -> crouch (no attack)")
-			19: check(not intent.jump and intent.attack == CombatData.AttackType.NONE, "W alone does nothing (no jump)")
+				check(intent.slot == &"" and intent.crouch, "S alone -> crouch (no attack)")
+			19: check(not intent.jump and intent.slot == &"", "W alone does nothing (no jump)")
 			100:
 				Input.action_press("move_right")  # first tap
 			104:
@@ -76,9 +78,8 @@ class Driver extends Node:
 			154:
 				check(p.state != Fighter.State.DODGE, "taps 20 frames apart -> no dodge")
 			190:
-				check(p.stance != e.stance, "player and AI stances differ after cycling (P=%s, AI=%s)"
-					% [Stances.stance_name(p.stance), Stances.stance_name(e.stance)])
-				check(Stances.player_choice == p.stance, "player stance is remembered for restarts")
+				check(p.style.id == &"taekwondo" and p.stance == p.style.stance, "Q during a match does not change the locked style or stance")
+				check(StyleRegistry.player_choice == p.style.id, "player style is remembered for restarts")
 			206:
 				check(p.state == Fighter.State.CROUCH and p.is_crouched(), "holding S -> player crouches")
 			214:
@@ -91,9 +92,9 @@ class Driver extends Node:
 					if (ev as InputEventKey).physical_keycode == KEY_W:
 						w_bound = true
 				check(not w_bound and InputMap.action_get_events("jump").size() == 1, "jump is bound to Space only")
-				check(e.stance != p.stance, "stances never match at the end of the test")
-			225:
-				# Quiet the AI and move it away so the player can stand and guard.
+				check(e.style.id != p.style.id, "styles still differ at the end of the test")
+			156:
+				# Quiet the AI and move it away so the player can crouch, stand and guard.
 				(main.get_node("EnemyAI") as EnemyAI).setup(null, null)
 				e.position.x = p.position.x + 400.0 if p.position.x < 640.0 else p.position.x - 400.0
 			260:

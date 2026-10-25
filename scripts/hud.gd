@@ -7,6 +7,10 @@ extends CanvasLayer
 ## The centred match button was pressed (mouse, touch, or Enter while focused).
 signal start_pressed
 signal restart_pressed
+signal change_style_pressed
+## Style selection: a card was picked (preview) / the choice was confirmed.
+signal style_chosen(style_id: StringName)
+signal style_confirmed
 
 const SCREEN_W: float = 1280.0
 const BAR_WIDTH: float = 480.0
@@ -55,8 +59,16 @@ var _count_text: String = ""
 var _count_age: float = 0.0
 var _show_hints: bool = true
 var _button: Button = null
-## Which signal the button emits right now (&"start" / &"restart").
+## Which signal the button emits right now (&"start" / &"rematch" / &"restart").
 var _button_mode: StringName = &""
+## Secondary button under the main one: CHANGE STYLE.
+var _button2: Button = null
+# Style selection panel: card row (scrolls for big rosters), details, confirm.
+var _select_panel: PanelContainer = null
+var _cards: HBoxContainer = null
+var _details: RichTextLabel = null
+var _confirm: Button = null
+var _selected_id: StringName = &""
 
 
 func _ready() -> void:
@@ -68,6 +80,17 @@ func _ready() -> void:
 	_canvas.draw.connect(_on_canvas_draw)
 	_button = _make_button()
 	add_child(_button)
+	_button2 = _make_button()
+	_button2.size = Vector2(240.0, 44.0)
+	_button2.position = Vector2((SCREEN_W - _button2.size.x) * 0.5, 642.0)
+	_button2.add_theme_font_size_override("font_size", 20)
+	_button2.text = "CHANGE STYLE"
+	_button2.pressed.disconnect(_on_button_pressed)
+	_button2.pressed.connect(func() -> void:
+		_button2.visible = false
+		change_style_pressed.emit())
+	add_child(_button2)
+	_build_style_panel()
 
 
 ## A large flat button, centred; works with mouse, touch and keyboard focus.
@@ -98,18 +121,147 @@ func _make_button() -> Button:
 func _unhandled_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key != null and key.pressed and not key.echo and (key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER):
-		press_button()
+		if _select_panel.visible:
+			style_confirmed.emit()
+		else:
+			press_button()
 
 
-## Shows the centred button as START MATCH or RESTART MATCH (mode &"" hides it).
+## Shows the centred button as START MATCH, REMATCH or RESTART MATCH (mode &""
+## hides it). START and REMATCH also offer CHANGE STYLE underneath.
 func show_button(mode: StringName) -> void:
 	_button_mode = mode
 	_button.visible = mode != &""
 	_button.disabled = mode == &""
+	_button2.visible = mode == &"start" or mode == &"rematch"
 	if mode == &"start":
 		_button.text = "START MATCH"
+	elif mode == &"rematch":
+		_button.text = "REMATCH"
 	elif mode == &"restart":
 		_button.text = "RESTART MATCH"
+
+
+func is_change_style_visible() -> bool:
+	return _button2.visible
+
+
+func press_change_style() -> void:
+	if _button2.visible:
+		_button2.pressed.emit()
+
+
+# --- Style selection --------------------------------------------------------
+
+func _build_style_panel() -> void:
+	_select_panel = PanelContainer.new()
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.05, 0.04, 0.04, 0.9)
+	bg.border_color = Color(0.95, 0.76, 0.3, 0.8)
+	bg.set_border_width_all(2)
+	bg.set_corner_radius_all(8)
+	bg.set_content_margin_all(14)
+	_select_panel.add_theme_stylebox_override("panel", bg)
+	# Right half of the screen: the player previews the style on the left.
+	_select_panel.position = Vector2(600.0, 72.0)
+	_select_panel.size = Vector2(640.0, 616.0)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	_select_panel.add_child(box)
+	var title := Label.new()
+	title.text = "CHOOSE YOUR MARTIAL ART"
+	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_color_override("font_color", COLOR_TEXT)
+	box.add_child(title)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0.0, 62.0)
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	box.add_child(scroll)
+	_cards = HBoxContainer.new()
+	_cards.add_theme_constant_override("separation", 8)
+	scroll.add_child(_cards)
+	_details = RichTextLabel.new()
+	_details.bbcode_enabled = true
+	_details.fit_content = false
+	_details.scroll_active = true
+	_details.custom_minimum_size = Vector2(0.0, 420.0)
+	_details.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_details.add_theme_font_size_override("normal_font_size", 15)
+	_details.add_theme_font_size_override("bold_font_size", 15)
+	box.add_child(_details)
+	_confirm = _make_button()
+	_confirm.visible = true
+	_confirm.custom_minimum_size = Vector2(0.0, 48.0)
+	_confirm.add_theme_font_size_override("font_size", 22)
+	_confirm.pressed.disconnect(_on_button_pressed)
+	_confirm.pressed.connect(func() -> void: style_confirmed.emit())
+	box.add_child(_confirm)
+	_select_panel.visible = false
+	add_child(_select_panel)
+
+
+## Shows the roster with `selected_id` highlighted and its details.
+func show_style_select(styles: Array[MartialArtStyle], selected_id: StringName) -> void:
+	_selected_id = selected_id
+	for c in _cards.get_children():
+		_cards.remove_child(c)
+		c.queue_free()
+	var chosen: MartialArtStyle = null
+	for st in styles:
+		var card := _make_button()
+		card.visible = true
+		card.custom_minimum_size = Vector2(118.0, 54.0)
+		card.add_theme_font_size_override("font_size", 15)
+		card.text = "%s\n%s" % [st.display_name.to_upper(), _stars(st.difficulty)]
+		if st.id == selected_id:
+			chosen = st
+			var hi := StyleBoxFlat.new()
+			hi.bg_color = Color(0.42, 0.13, 0.11, 0.95)
+			hi.border_color = Color(1.0, 0.85, 0.4)
+			hi.set_border_width_all(3)
+			hi.set_corner_radius_all(6)
+			card.add_theme_stylebox_override("normal", hi)
+		card.pressed.disconnect(_on_button_pressed)
+		var sid := st.id
+		card.pressed.connect(func() -> void: style_chosen.emit(sid))
+		_cards.add_child(card)
+	if chosen != null:
+		_details.text = _style_details(chosen)
+		_confirm.text = "CONFIRM %s" % chosen.display_name.to_upper()
+	_select_panel.visible = true
+
+
+func hide_style_select() -> void:
+	_select_panel.visible = false
+
+
+func is_style_select_visible() -> bool:
+	return _select_panel.visible
+
+
+func get_selected_style_id() -> StringName:
+	return _selected_id
+
+
+static func _stars(n: int) -> String:
+	return "★".repeat(n) + "☆".repeat(5 - n)
+
+
+static func _style_details(st: MartialArtStyle) -> String:
+	var t := "[b][font_size=22]%s[/font_size][/b]   [color=#b9a98f]%s · difficulty %s[/color]\n" % [
+		st.display_name.to_upper(), String(st.category).to_upper(), _stars(st.difficulty)]
+	t += "%s\n\n" % st.description
+	for s in st.strengths:
+		t += "[color=#8fd18f]+ %s[/color]\n" % s
+	for w in st.weaknesses:
+		t += "[color=#e08a7a]- %s[/color]\n" % w
+	# Two columns so the whole moveset fits without scrolling.
+	t += "\n[b]MOVES[/b]\n[table=4]"
+	for row in st.move_list():
+		t += "[cell][color=#f2c14e]%s  [/color][/cell][cell]%s      [/cell]" % [row[0], row[1]]
+	t += "[/table]\n"
+	t += "\n[color=#b9a98f]Q next style · ENTER confirm[/color]"
+	return t
 
 
 func is_button_visible() -> bool:
@@ -128,6 +280,7 @@ func _on_button_pressed() -> void:
 		return
 	# One press per showing: further clicks before main.gd reacts do nothing.
 	show_button(&"")
+	_button2.visible = false
 	if mode == &"start":
 		start_pressed.emit()
 	else:
@@ -238,7 +391,7 @@ func _on_canvas_draw() -> void:
 
 	if _show_hints:
 		_canvas.draw_string(_font, Vector2(0.0, 706.0),
-			"A/D move · 2×A/D dodge (close: slip past) · S+2×A/D roll · SPACE jump · J/K/U/O punches · L kick · W+L high · S+L sweep · away+L back kick · I front kick · SHIFT block/parry · Q stance · R restart",
+			"A/D move · 2×A/D dodge (close: slip past) · S+2×A/D roll · SPACE jump · J K U O I L (+W/S) attacks: see your style's moves · SHIFT block/parry · R rematch",
 			HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
 
 	if _flash > 0.0:
@@ -270,7 +423,8 @@ func _draw_bar(f: Fighter, x: float, mirrored: bool, trail: float) -> void:
 		hp_align, BAR_WIDTH, 14, COLOR_DIM)
 	# Stance name on the opposite side of the HP readout.
 	var stance_align := HORIZONTAL_ALIGNMENT_RIGHT if mirrored else HORIZONTAL_ALIGNMENT_LEFT
-	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 27.0), Stances.stance_name(f.stance),
+	var style_label := f.style.display_name.to_upper() if f.style != null else Stances.stance_name(f.stance)
+	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 27.0), style_label,
 		stance_align, BAR_WIDTH, 14, f.accent_color.lerp(COLOR_TEXT, 0.4))
 
 

@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="MartialArtStyle" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/martial_art_style.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+id = &"taekwondo"
+order = 5
+display_name = "Taekwondo"
+description = "Long-range kicking. Keep them at the end of your leg, chain kicks off each other and finish with spinning and jumping techniques."
+category = &"kicking"
+difficulty = 4
+strengths = PackedStringArray("Longest reach in the game", "Kick chains and aerial kicks", "Axe kick crushes guards")
+weaknesses = PackedStringArray("Only two basic punches up close", "Spinning kicks are slow and punishable", "No sweeps or hooks")
+stance = 8
+input_map = {
+&"back_kick": &"back_kick",
+&"down_kick": &"axe_kick",
+&"front": &"front_kick",
+&"heavy": &"cross",
+&"kick": &"side_kick",
+&"lead": &"spin_hook_kick",
+&"light": &"jab",
+&"up_kick": &"high_kick"
+}
+air_map = {
+&"front": &"jump_roundhouse",
+&"heavy": &"jump_punch",
+&"kick": &"jump_roundhouse",
+&"lead": &"jump_spin_kick",
+&"light": &"jump_punch",
+&"up_kick": &"jump_spin_kick"
+}
+chains = {
+&"cross": [&"side_kick", &"high_kick", &"back_kick"],
+&"front_kick": [&"side_kick", &"high_kick", &"spin_hook_kick"],
+&"high_kick": [&"back_kick", &"spin_hook_kick"],
+&"jab": [&"cross", &"side_kick", &"high_kick", &"front_kick"],
+&"side_kick": [&"high_kick", &"back_kick", &"spin_hook_kick"]
+}
+ai_close_plans = [[&"jab", &"side_kick"], [&"jab", &"cross", &"high_kick"], [&"front_kick", &"high_kick"], [&"axe_kick"], [&"side_kick", &"back_kick"], [&"jab", &"front_kick"]]
+ai_far_plans = [[&"side_kick"], [&"front_kick", &"side_kick"], [&"back_kick"], [&"spin_hook_kick"], [&"high_kick", &"spin_hook_kick"]]
+ai_preferred_range = 115.0

@@ -36,7 +36,7 @@ class Driver extends Node:
 		var p: Fighter = main.get_node("Player")
 		var e: Fighter = main.get_node("Enemy")
 		var ai: EnemyAI = main.get_node("EnemyAI")
-		if phase == "fight" and main.call("get_round_state_name") == "PRE_MATCH":
+		if phase == "fight" and main.call("get_round_state_name") in ["STYLE_SELECT", "PRE_MATCH"]:
 			main.call("start_match", true)
 		ai_states_seen[ai.get_state_name().get_slice(" ", 0)] = true
 

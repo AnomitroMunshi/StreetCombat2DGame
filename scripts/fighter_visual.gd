@@ -182,6 +182,36 @@ var _sweep_follow := PackedFloat32Array([0.7, 0.5, 0.45, 0.3, 0.9, 2.9, 1.55, 1.
 # knee pulled to the chest, then a heel thrust straight back at the opponent.
 var _back_chamber := PackedFloat32Array([0.35, 0.35, 1.0, 2.8, 0.9, 2.9, 0.25, -0.1, 1.3, -1.0, 2.0, 0.0, 0.0, 6.0])
 var _back_extend := PackedFloat32Array([0.75, 0.55, 1.2, 2.6, 0.6, 2.4, 0.3, -0.05, -1.45, -1.5, -8.0, 0.0, 0.0, 4.0])
+# --- Boxing ---------------------------------------------------------------------
+# Hooks: the elbow comes up to shoulder height and the fist travels across on a
+# short arc; the shoulders turn through (spread swings from loaded to closed).
+var _lhook_load := PackedFloat32Array([0.15, 0.15, 0.8, 2.9, 0.85, 3.0, 0.55, -0.15, -0.5, -0.45, -3.0, 0.0, 0.0, 15.0])
+var _lhook_hit := PackedFloat32Array([0.3, 0.1, 1.5, 1.95, 0.85, 3.0, 0.6, -0.1, -0.55, -0.5, 6.0, 0.0, 0.3, -6.0])
+var _rhook_load := PackedFloat32Array([0.15, 0.15, 0.95, 2.95, 0.6, 2.9, 0.55, -0.15, -0.5, -0.45, -4.0, 0.0, 0.0, 16.0])
+var _rhook_hit := PackedFloat32Array([0.4, 0.05, 0.9, 2.9, 1.5, 1.95, 0.8, 0.2, -0.75, -0.6, 12.0, 0.0, 0.5, -10.0])
+# Body hook: dip at the knees and dig the lead fist in at rib height.
+var _bhook_load := PackedFloat32Array([0.4, 0.3, 0.6, 2.4, 0.85, 3.0, 0.9, -0.6, -0.4, -1.0, -4.0, 0.0, 0.0, 12.0])
+var _bhook_hit := PackedFloat32Array([0.55, 0.35, 1.25, 1.55, 0.85, 3.0, 1.0, -0.7, -0.45, -1.05, 8.0, 0.0, 0.2, -4.0])
+# Overhand: rear fist cocked high and back, then looping over the top and down.
+var _overhand_load := PackedFloat32Array([-0.05, 0.15, 0.95, 2.95, 3.3, 3.9, 0.5, -0.1, -0.5, -0.4, -6.0, 0.0, 0.0, 14.0])
+var _overhand_hit := PackedFloat32Array([0.6, 0.1, 0.8, 2.6, 1.9, 1.35, 0.9, 0.3, -0.8, -0.7, 14.0, 0.0, 0.5, -10.0])
+# Slip counter: the head slips down and off the line, then a straight rear hand.
+var _slip_dip := PackedFloat32Array([0.5, 0.45, 1.0, 3.0, 0.85, 3.0, 0.9, -0.6, -0.45, -0.9, -6.0, 0.0, 0.0, 4.0])
+var _slip_hit := PackedFloat32Array([0.35, 0.1, 0.75, 2.8, 1.57, 1.6, 0.8, 0.2, -0.75, -0.6, 14.0, 0.0, 0.5, -8.0])
+# --- Taekwondo ------------------------------------------------------------------
+# Axe kick: the straight leg swings up past the head, then chops down.
+var _axe_raise := PackedFloat32Array([-0.25, 0.3, 1.1, 2.4, 0.6, 2.8, 2.8, 2.9, -0.3, -0.2, -4.0, 0.0, 0.3, 10.0])
+var _axe_chop := PackedFloat32Array([0.15, 0.25, 1.0, 2.4, 0.6, 2.8, 2.15, 2.0, -0.35, -0.2, 6.0, 0.0, 0.3, 8.0])
+# Spinning hook kick (drawn turned away, like the back kick): the rear leg
+# whips up behind the body at head height.
+var _shook_load := PackedFloat32Array([0.4, 0.35, 1.0, 2.8, 0.9, 2.9, 0.25, -0.1, 0.9, -1.6, 0.0, 0.0, 0.0, 6.0])
+var _shook_hit := PackedFloat32Array([0.75, 0.5, 1.2, 2.6, 0.6, 2.4, 0.3, -0.05, -2.2, -2.0, -6.0, 0.0, 0.0, 4.0])
+# Jump roundhouse: in the air, knee up then the shin lashes out high.
+var _jrh_load := PackedFloat32Array([0.0, 0.1, 0.8, 2.7, 0.5, 2.8, 2.0, 0.4, 1.0, -1.2, -2.0, 0.0])
+var _jrh_hit := PackedFloat32Array([-0.4, 0.3, 0.9, 2.5, 0.3, 2.6, 2.1, 2.0, 0.8, -1.1, 6.0, 0.0])
+# Jumping spin kick (turned away in the air): rear heel thrust back at the target.
+var _jspin_load := PackedFloat32Array([0.3, 0.3, 1.0, 2.8, 0.8, 2.8, 1.6, -0.5, 0.6, -1.4, 0.0, 0.0])
+var _jspin_hit := PackedFloat32Array([0.6, 0.45, 1.2, 2.6, 0.5, 2.4, 1.5, -0.3, -1.7, -1.6, -4.0, 0.0])
 
 # Jump: deep crouch, toes pointed on the way up, knees tucked at the apex, legs
 # reaching for the floor coming down, absorb on landing.
@@ -383,6 +413,33 @@ func _ready() -> void:
 		CombatData.AttackType.BACK_KICK: [
 			[S, 0.7, _back_chamber, EASE_SMOOTH], [A, 0.0, _back_extend, EASE_IN],
 			[A, 1.0, _over(_back_extend, _back_chamber), EASE_LINEAR], [R, 0.35, _back_chamber, EASE_OUT]],
+		CombatData.AttackType.LEAD_HOOK: [
+			[S, 0.5, _lhook_load, EASE_SMOOTH], [A, 0.0, _lhook_hit, EASE_IN],
+			[A, 1.0, _over(_lhook_hit, _lhook_load), EASE_LINEAR], [R, 0.35, _lhook_hit, EASE_LINEAR]],
+		CombatData.AttackType.REAR_HOOK: [
+			[S, 0.55, _rhook_load, EASE_SMOOTH], [A, 0.0, _rhook_hit, EASE_IN],
+			[A, 1.0, _over(_rhook_hit, _rhook_load), EASE_LINEAR], [R, 0.3, _rhook_hit, EASE_LINEAR]],
+		CombatData.AttackType.BODY_HOOK: [
+			[S, 0.5, _bhook_load, EASE_SMOOTH], [A, 0.0, _bhook_hit, EASE_IN],
+			[A, 1.0, _over(_bhook_hit, _bhook_load), EASE_LINEAR], [R, 0.35, _bhook_load, EASE_OUT]],
+		CombatData.AttackType.OVERHAND: [
+			[S, 0.6, _overhand_load, EASE_SMOOTH], [A, 0.0, _overhand_hit, EASE_IN],
+			[A, 1.0, _over(_overhand_hit, _overhand_load), EASE_LINEAR], [R, 0.3, _overhand_hit, EASE_LINEAR]],
+		CombatData.AttackType.SLIP_COUNTER: [
+			[S, 0.45, _slip_dip, EASE_SMOOTH], [S, 0.8, _slip_dip, EASE_LINEAR], [A, 0.0, _slip_hit, EASE_IN],
+			[A, 1.0, _over(_slip_hit, _slip_dip), EASE_LINEAR], [R, 0.3, _slip_hit, EASE_LINEAR]],
+		CombatData.AttackType.AXE_KICK: [
+			[S, 0.7, _axe_raise, EASE_SMOOTH], [A, 0.0, _axe_chop, EASE_IN],
+			[A, 1.0, _over(_axe_chop, _axe_raise), EASE_LINEAR], [R, 0.4, _axe_chop, EASE_LINEAR]],
+		CombatData.AttackType.SPIN_HOOK_KICK: [
+			[S, 0.7, _shook_load, EASE_SMOOTH], [A, 0.0, _shook_hit, EASE_IN],
+			[A, 1.0, _over(_shook_hit, _shook_load), EASE_LINEAR], [R, 0.35, _shook_load, EASE_OUT]],
+		CombatData.AttackType.JUMP_ROUNDHOUSE: [
+			[S, 0.5, _jrh_load, EASE_SMOOTH], [A, 0.0, _jrh_hit, EASE_IN],
+			[A, 1.0, _jrh_hit, EASE_LINEAR], [R, 0.5, _jrh_load, EASE_OUT]],
+		CombatData.AttackType.JUMP_SPIN_KICK: [
+			[S, 0.6, _jspin_load, EASE_SMOOTH], [A, 0.0, _jspin_hit, EASE_IN],
+			[A, 1.0, _jspin_hit, EASE_LINEAR], [R, 0.5, _jspin_load, EASE_OUT]],
 	}
 	_build_light_reactions()
 	_pose = _guard.duplicate()
@@ -884,9 +941,10 @@ func _update_idle_amount(delta: float) -> void:
 	_idle_amount = move_toward(_idle_amount, target, delta * rate)
 
 
+## Back kick and the other spinning techniques (attack data "spin").
 func _is_back_kick() -> bool:
 	return fighter.state == Fighter.State.ATTACK and fighter.current_attack != null \
-		and fighter.current_attack.type == CombatData.AttackType.BACK_KICK
+		and (fighter.current_attack.type == CombatData.AttackType.BACK_KICK or fighter.current_attack.spin)
 
 
 ## Back kick body turn in half-turns: 0 -> 1 (back to the opponent) through the
@@ -1389,11 +1447,13 @@ func get_strike_point() -> Vector2:
 static func _attack_joint(type: CombatData.AttackType) -> int:
 	match type:
 		CombatData.AttackType.KICK, CombatData.AttackType.FRONT_KICK, CombatData.AttackType.JUMP_KICK, \
-				CombatData.AttackType.SWEEP, CombatData.AttackType.HIGH_KICK:
+				CombatData.AttackType.SWEEP, CombatData.AttackType.HIGH_KICK, CombatData.AttackType.AXE_KICK, \
+				CombatData.AttackType.JUMP_ROUNDHOUSE:
 			return J_FOOT_F
-		CombatData.AttackType.HEAVY, CombatData.AttackType.UPPERCUT:
+		CombatData.AttackType.HEAVY, CombatData.AttackType.UPPERCUT, CombatData.AttackType.REAR_HOOK, \
+				CombatData.AttackType.OVERHAND, CombatData.AttackType.SLIP_COUNTER:
 			return J_HAND_B
-		CombatData.AttackType.BACK_KICK:
+		CombatData.AttackType.BACK_KICK, CombatData.AttackType.SPIN_HOOK_KICK, CombatData.AttackType.JUMP_SPIN_KICK:
 			return J_FOOT_B
 	return J_HAND_F
 
@@ -1421,6 +1481,13 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 		return pose
 	# Bisect the blend toward the stance: the largest extension that still fits.
 	var base := _air_pose() if fighter.airborne else _guard
+	if idx == J_FOOT_F or idx == J_FOOT_B:
+		# Kicks shorten by folding the knee (the knee stays at height, so a
+		# head kick still lands high) instead of dropping the whole leg.
+		var th := TH_F if idx == J_FOOT_F else TH_B
+		var sh := SH_F if idx == J_FOOT_F else SH_B
+		base = pose.duplicate()
+		base[sh] = pose[th] - signf(pose[th]) * 2.2
 	var lo := 0.0  # 0 = full strike
 	var hi := 1.0  # 1 = stance
 	for i in REACH_SEARCH_STEPS:

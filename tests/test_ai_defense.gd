@@ -22,6 +22,7 @@ class Driver extends Node:
 		frame += 1
 		var main := tree.current_scene
 		if frame == 1:
+			main.call("select_style", &"taekwondo")  # readable side kicks to parry
 			main.call("start_match", true)
 		for a in ["attack_kick", "move_left", "move_right"]:
 			Input.action_release(a)

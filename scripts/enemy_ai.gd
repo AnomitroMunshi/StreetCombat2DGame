@@ -5,6 +5,13 @@ extends Node
 ## Reads both fighters' public state and returns one CombatData.Intent per
 ## simulation tick, the same thing the keyboard produces for the player. It
 ## never changes combat state directly. A seeded RNG makes fights reproducible.
+##
+## Style-aware: with a martial-art style, combo plans and range come from the
+## style (MartialArtStyle.ai_*), and every hard-coded choice (anti-air,
+## punishes, jump-ins) picks only moves the style has. The Fighter rejects
+## anything illegal anyway; this keeps the AI from wasting turns on it.
+## Personality (aggression, block/parry/dodge chances) stays separate from
+## style, so an aggressive and a defensive boxer share one moveset.
 
 enum AIState { IDLE, APPROACH, SPACING, ATTACK, BLOCK, RETREAT, JUMP_IN }
 
@@ -25,6 +32,7 @@ const CLOSE_PLANS: Array = [
 	[CombatData.AttackType.HIGH_KICK],
 	[CombatData.AttackType.LIGHT, CombatData.AttackType.HIGH_KICK],
 ]
+## Fallback plans for a fighter without a style (tests).
 const FAR_PLANS: Array = [
 	[CombatData.AttackType.KICK],
 	[CombatData.AttackType.HEAVY],
@@ -77,6 +85,8 @@ func setup(me: Fighter, target: Fighter) -> void:
 	_me = me
 	_target = target
 	_rng.seed = rng_seed
+	if _me != null and _me.style != null:
+		preferred_range = _me.style.ai_preferred_range
 	# Forget everything from a previous setup (restart / unlock at FIGHT).
 	_plan.clear()
 	_plan_index = 0
@@ -136,16 +146,18 @@ func compute_intent() -> CombatData.Intent:
 		_anti_air_rolled = false
 	elif not _anti_air_rolled and _target.velocity_y > 0.0 and dist < 100.0 and _me.can_act():
 		_anti_air_rolled = true
-		if _rng.randf() < anti_air_chance:
+		var aa := _first_legal([CombatData.AttackType.UPPERCUT, CombatData.AttackType.HIGH_KICK,
+			CombatData.AttackType.FRONT_KICK, CombatData.AttackType.LIGHT])
+		if _rng.randf() < anti_air_chance and aa != CombatData.AttackType.NONE:
 			_enter(AIState.SPACING, 20)
-			intent.attack = CombatData.AttackType.UPPERCUT
+			intent.attack = aa
 			return intent
 
 	# Punish: the opponent was parried (staggering) or guard-broken. A broken
 	# guard is always punished; a stagger is one roll per parried swing.
 	if _target.state == Fighter.State.BROKEN and _state != AIState.ATTACK and dist < 140.0 and _me.can_act():
-		_plan = [CombatData.AttackType.LIGHT, CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY] if dist < 100.0 \
-			else [CombatData.AttackType.FRONT_KICK]
+		_plan = _style_plan(dist < 100.0, [CombatData.AttackType.LIGHT, CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY] if dist < 100.0 \
+			else [CombatData.AttackType.FRONT_KICK])
 		_plan_index = 0
 		_last_pressed_swing = _me.swing_id
 		_parry_at = -1
@@ -156,8 +168,8 @@ func compute_intent() -> CombatData.Intent:
 			and dist < 130.0 and (_me.can_act() or _me.state == Fighter.State.PARRY):
 		_punish_checked_swing = _target.swing_id
 		if _rng.randf() < punish_chance:
-			_plan = [CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY] if dist < 100.0 \
-				else [CombatData.AttackType.KICK]
+			_plan = _style_plan(dist < 100.0, [CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY] if dist < 100.0 \
+				else [CombatData.AttackType.KICK])
 			_plan_index = 0
 			_last_pressed_swing = _me.swing_id
 			_parry_at = -1
@@ -235,7 +247,8 @@ func compute_intent() -> CombatData.Intent:
 			elif _me.airborne and not _kick_pressed and _me.velocity_y > -4.0:
 				# Kick (or sometimes punch) from just before the peak so it is
 				# still active on the way down.
-				intent.attack = CombatData.AttackType.KICK if _rng.randf() < 0.65 else CombatData.AttackType.LIGHT
+				# A slot, so the style picks its own air attack (or none).
+				intent.slot = &"kick" if _rng.randf() < 0.65 else &"light"
 				_kick_pressed = true
 			elif not _me.airborne and _me.state != Fighter.State.JUMP:
 				_enter(AIState.IDLE, _rng.randi_range(2, 6))
@@ -302,11 +315,30 @@ func _think(dist: float) -> void:
 
 
 func _start_plan(dist: float) -> void:
-	var pool := FAR_PLANS if dist > 105.0 else CLOSE_PLANS
-	_plan = pool[_rng.randi_range(0, pool.size() - 1)].duplicate()
+	var far := dist > maxf(preferred_range + 10.0, 105.0)
+	_plan = _style_plan(not far, (FAR_PLANS if far else CLOSE_PLANS)[_rng.randi_range(0, (FAR_PLANS if far else CLOSE_PLANS).size() - 1)])
 	_plan_index = 0
 	_last_pressed_swing = _me.swing_id
 	_enter(AIState.ATTACK, 150)
+
+
+## A random plan from the fighter's style (close or far), or `fallback` when
+## the fighter has no style.
+func _style_plan(close: bool, fallback: Array) -> Array:
+	if _me.style == null:
+		return fallback.duplicate()
+	var pool := _me.style.plans(close)
+	if pool.is_empty():
+		pool = _me.style.plans(not close)
+	return (pool[_rng.randi_range(0, pool.size() - 1)] as Array).duplicate() if not pool.is_empty() else []
+
+
+## The first of `candidates` this fighter's style allows (NONE if none).
+func _first_legal(candidates: Array) -> CombatData.AttackType:
+	for c in candidates:
+		if _me.style == null or _me.style.allows(c):
+			return c
+	return CombatData.AttackType.NONE
 
 
 func _after_stun() -> void:

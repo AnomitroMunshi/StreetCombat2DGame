@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="MartialArtStyle" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/martial_art_style.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+id = &"boxing"
+order = 1
+display_name = "Boxing"
+description = "Pressure and counterpunching. Fast hands, tight guard and head movement: walk them down, slip their shots and punish with hooks."
+category = &"striking"
+difficulty = 2
+strengths = PackedStringArray("Fastest punches and longest punch combos", "Slip counter dodges head strikes", "Body hook breaks guards")
+weaknesses = PackedStringArray("No kicks or sweeps at all", "Short reach: must get close", "No low attacks")
+stance = 2
+input_map = {
+&"down_heavy": &"slip_counter",
+&"front": &"rear_hook",
+&"heavy": &"cross",
+&"kick": &"body_hook",
+&"lead": &"lead_hook",
+&"light": &"jab",
+&"rising": &"uppercut",
+&"up_heavy": &"overhand"
+}
+air_map = {
+&"heavy": &"jump_punch",
+&"kick": &"jump_punch",
+&"lead": &"jump_punch",
+&"light": &"jump_punch",
+&"rising": &"jump_punch",
+&"front": &"jump_punch"
+}
+chains = {
+&"body_hook": [&"lead_hook", &"uppercut", &"cross"],
+&"cross": [&"lead_hook", &"body_hook", &"uppercut"],
+&"jab": [&"jab", &"cross", &"lead_hook", &"rear_hook", &"body_hook", &"uppercut", &"overhand"],
+&"lead_hook": [&"cross", &"rear_hook", &"body_hook", &"uppercut"],
+&"rear_hook": [&"lead_hook", &"body_hook"],
+&"slip_counter": [&"lead_hook", &"body_hook", &"uppercut"],
+&"uppercut": [&"lead_hook", &"rear_hook", &"jab"]
+}
+ai_close_plans = [[&"jab"], [&"jab", &"jab", &"cross"], [&"jab", &"cross", &"lead_hook"], [&"lead_hook", &"body_hook"], [&"body_hook", &"uppercut"], [&"jab", &"rear_hook"], [&"jab", &"overhand"], [&"slip_counter", &"lead_hook"], [&"cross", &"body_hook", &"uppercut"]]
+ai_far_plans = [[&"jab", &"cross"], [&"overhand"], [&"jab", &"jab"]]
+ai_preferred_range = 85.0
