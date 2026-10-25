@@ -224,6 +224,97 @@ func _initialize() -> void:
 			d.tick()
 		_check(d.position.x - x0 >= case[1], "%s drives the opponent back %.0f px (>= %.0f)" % [CombatData.attack_name(case[0]), d.position.x - x0, case[1]])
 
+	print("[focus]")
+	var jab_at := CombatData.get_attack(CombatData.AttackType.LIGHT)
+	var cross_at := CombatData.get_attack(CombatData.AttackType.HEAVY)
+	var kick_at := CombatData.get_attack(CombatData.AttackType.KICK)
+	_check(CombatData.focus_for_hit(jab_at, false) == 5.0 and CombatData.focus_for_hit(cross_at, false) == 10.0
+		and CombatData.focus_for_hit(kick_at, false) == 8.0 and CombatData.focus_for_hit(jab_at, true) == 15.0,
+		"focus per hit: light 5, heavy 10, kick 8, counter 15")
+	_check(CombatData.focus_for_hit(CombatData.get_attack(CombatData.AttackType.GAZELLE_HOOK), false) == 0.0, "signature hits earn no focus")
+	p = _pair(boxing, 80.0)
+	a = p[0]
+	_check(a.focus == 0.0, "focus starts at 0")
+	for i in 40:
+		a.add_focus(10.0)
+	_check(a.focus == CombatData.FOCUS_MAX, "focus never exceeds 100 (%.0f)" % a.focus)
+	a.focus = 0.0
+	a.add_block_focus()
+	a.add_block_focus()
+	_check(a.focus == CombatData.FOCUS_BLOCK, "two blocks in quick succession pay once (no block farming)")
+	for t in CombatData.FOCUS_BLOCK_COOLDOWN + 1:
+		a.tick()
+	a.add_block_focus()
+	_check(a.focus == CombatData.FOCUS_BLOCK * 2.0, "blocks pay again after the cooldown")
+
+	print("[signatures]")
+	for case in [[boxing, CombatData.AttackType.GAZELLE_HOOK], [tkd, CombatData.AttackType.TORNADO_540]]:
+		p = _pair(case[0], 300.0)
+		a = p[0]
+		a.focus = 60.0
+		var sig_i := CombatData.Intent.new()
+		sig_i.signature = true
+		a.push_intent(sig_i)
+		a.tick()
+		_check(a.state != Fighter.State.ATTACK and a.focus == 60.0, "%s: F without full focus does nothing and costs nothing" % case[0].id)
+		a.focus = CombatData.FOCUS_MAX
+		a.push_intent(sig_i)
+		a.tick()
+		_check(a.current_attack != null and a.current_attack.type == case[1] and a.focus == 0.0,
+			"%s: F at full focus starts %s and spends 100" % [case[0].id, CombatData.attack_name(case[1])])
+		var left_ground := false
+		for t in 80:
+			a.tick()
+			left_ground = left_ground or a.airborne
+		_check(a.focus == 0.0 and a.state == Fighter.State.IDLE, "%s: a whiffed signature is not refunded" % case[0].id)
+		if case[1] == CombatData.AttackType.TORNADO_540:
+			_check(left_ground, "540 tornado kick leaves the ground and lands")
+	p = _pair(boxing, 80.0)
+	a = p[0]
+	a.push_intent(_attack(CombatData.AttackType.TORNADO_540))
+	a.tick()
+	_check(a.state != Fighter.State.ATTACK and a.rejected_attacks == 1, "a boxer cannot do another style's signature")
+	for sig_t in [CombatData.AttackType.GAZELLE_HOOK, CombatData.AttackType.TORNADO_540]:
+		var res: Array = []
+		for side in [1, -1]:
+			p = _pair(null, 90.0, side)
+			a = p[0]
+			var b2: Fighter = p[1]
+			a.push_intent(_attack(sig_t))
+			var hits := 0
+			var blocked := false
+			for t in 60:
+				a.tick()
+				b2.tick()
+				if a.is_hitbox_active() and a.get_hitbox_world().intersects(b2.get_hurtbox_world()):
+					if b2.receive_hit(a.current_attack, a, a.combo_step) == CombatData.HitResult.HIT:
+						hits += 1
+					a.confirm_hit(CombatData.HitResult.HIT)
+			res.append([hits, b2.health, b2.state == Fighter.State.KNOCKDOWN])
+		_check(res[0][0] == 1 and res[0] == res[1] and res[0][2], "%s lands once, knocks down, same both ways (%s)" % [CombatData.attack_name(sig_t), res])
+	p = _pair(boxing, 90.0)
+	a = p[0]
+	var guard_b: Fighter = p[1]
+	var hold_i := CombatData.Intent.new()
+	hold_i.block = true
+	for t in 4:
+		guard_b.push_intent(hold_i)
+		guard_b.tick()
+	a.focus = CombatData.FOCUS_MAX
+	var fsig := CombatData.Intent.new()
+	fsig.signature = true
+	a.push_intent(fsig)
+	var sig_res := CombatData.HitResult.WHIFF
+	for t in 40:
+		guard_b.push_intent(hold_i)
+		a.tick()
+		guard_b.tick()
+		if a.is_hitbox_active() and a.get_hitbox_world().intersects(guard_b.get_hurtbox_world()):
+			sig_res = guard_b.receive_hit(a.current_attack, a, a.combo_step)
+			a.confirm_hit(sig_res)
+	_check(sig_res in [CombatData.HitResult.BLOCKED, CombatData.HitResult.GUARD_BREAK] and guard_b.health == 100,
+		"a signature can be blocked (%s, no damage)" % CombatData.HitResult.keys()[sig_res])
+
 	# AI rivals of each style never start an illegal move.
 	print("[AI rivals stay in style]")
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()

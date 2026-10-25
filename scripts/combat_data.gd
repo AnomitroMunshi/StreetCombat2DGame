@@ -11,7 +11,8 @@ extends RefCounted
 ## moves by their permanent string "id", resolved through type_for_id()).
 enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP_KICK, JUMP_PUNCH, SWEEP, HIGH_KICK, BACK_KICK,
 	LEAD_HOOK, REAR_HOOK, BODY_HOOK, OVERHAND, SLIP_COUNTER,
-	AXE_KICK, SPIN_HOOK_KICK, JUMP_ROUNDHOUSE, JUMP_SPIN_KICK }
+	AXE_KICK, SPIN_HOOK_KICK, JUMP_ROUNDHOUSE, JUMP_SPIN_KICK,
+	GAZELLE_HOOK, TORNADO_540 }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 
 const TICK_RATE: int = 60
@@ -136,6 +137,21 @@ const CROSS_RESOLVE_TICKS: int = 10
 ## Facing only flips once the centres are this far apart (no flicker when
 ## one fighter is directly above the other).
 const FACING_HYSTERESIS: float = 8.0
+## Focus (shared by every style): earned by fighting well, spent on the style's
+## signature technique (F at FOCUS_MAX). It never decays during a match and is
+## never earned during finishers or from signature hits. Blocking pays at most
+## once per FOCUS_BLOCK_COOLDOWN ticks, so turtling cannot farm it.
+const FOCUS_MAX: float = 100.0
+const FOCUS_LIGHT: float = 5.0
+const FOCUS_HEAVY: float = 10.0
+const FOCUS_KICK: float = 8.0
+const FOCUS_COUNTER: float = 15.0
+const FOCUS_PARRY: float = 20.0
+const FOCUS_PERFECT_DODGE: float = 12.0
+const FOCUS_BLOCK: float = 3.0
+const FOCUS_BLOCK_COOLDOWN: int = 30
+## F stays valid this long while the fighter cannot act yet.
+const SIGNATURE_BUFFER_FRAMES: int = 8
 ## Two taps of the same direction within this many ticks = dodge.
 const DOUBLE_TAP_WINDOW: int = 12
 const LANDING_FRAMES: int = 3
@@ -329,6 +345,30 @@ const ATTACK_TABLE: Dictionary = {
 		"hitbox": Rect2(34.0, -156.0, 60.0, 30.0),
 	},
 
+	# --- Signatures (F at full Focus; never in a combo, never on a key) ------
+	# Boxing: Gazelle Hook. An explosive forward step from a crouch into a
+	# rising lead hook. Huge stagger; badly punishable if it misses.
+	AttackType.GAZELLE_HOOK: {
+		"id": &"gazelle_hook", "name": "Gazelle Hook", "posture": 30.0, "signature": true,
+		"startup": 12, "active": 4, "recovery": 26, "cancel_window": 0,
+		"damage": 22, "hitstun": 30, "blockstun": 18,
+		"knockback": 9.0, "lunge": 4.0, "hitstop": 12,
+		"blowback_chance": 1.0, "blowback_vx": 9.0, "blowback_vy": -9.0, "blowback_rolls": 1,
+		"hitbox": Rect2(18.0, -178.0, 62.0, 62.0),
+	},
+	# Taekwondo: 540 Tornado Kick. Leap, one and a half turns in the air, a
+	# head-height kick at the end of the spin. Long landing on a miss.
+	AttackType.TORNADO_540: {
+		"id": &"tornado_540", "name": "540 Tornado Kick", "posture": 28.0, "signature": true,
+		"spin": true, "spin_turns": 1.5, "leap": -12.0, "land_lag": 18,
+		"startup": 14, "active": 5, "recovery": 28, "cancel_window": 0,
+		"damage": 24, "hitstun": 30, "blockstun": 18,
+		"knockback": 10.0, "lunge": 1.5, "hitstop": 12,
+		"blowback_chance": 1.0, "blowback_vx": 10.0, "blowback_vy": -9.0, "blowback_rolls": 2,
+		# Relative to the feet at the top of the leap (~70 px up): head height.
+		"hitbox": Rect2(22.0, -128.0, 82.0, 60.0),
+	},
+
 	# --- Taekwondo ------------------------------------------------------------
 	# Axe kick: the straight leg rises high and chops down onto the head/guard.
 	AttackType.AXE_KICK: {
@@ -419,6 +459,14 @@ class Attack extends RefCounted:
 	var air_only: bool = false
 	## Visual: the body turns its back through the move.
 	var spin: bool = false
+	## Turns for spinning moves (1 = turn the back and come round again).
+	var spin_turns: float = 1.0
+	## Signature technique (F at full Focus).
+	var signature: bool = false
+	## Leaves the ground at the start of the move with this vertical velocity.
+	var leap_vy: float = 0.0
+	## Landing recovery for a leaping move (0 = the normal air-attack landing).
+	var land_lag: int = 0
 
 	func total_frames() -> int:
 		return startup + active + recovery
@@ -436,6 +484,8 @@ class Intent extends RefCounted:
 	## Player input slot (light, heavy, kick, up_kick, ...): the fighter resolves
 	## it through its martial-art style. AI and tests set `attack` directly.
 	var slot: StringName = &""
+	## F: signature technique (only at full Focus).
+	var signature: bool = false
 	## Block was freshly pressed this tick: a parry attempt (see PARRY_*).
 	var parry: bool = false
 	var attack: CombatData.AttackType = CombatData.AttackType.NONE
@@ -474,8 +524,25 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.slip_frames = row.get("slip", 0)
 	attack.air_only = row.get("air", false)
 	attack.spin = row.get("spin", false)
+	attack.spin_turns = row.get("spin_turns", 1.0)
+	attack.signature = row.get("signature", false)
+	attack.leap_vy = row.get("leap", 0.0)
+	attack.land_lag = row.get("land_lag", 0)
 	_attack_cache[type] = attack
 	return attack
+
+
+## Focus for landing `attack` cleanly: kicks, heavy blows, light blows;
+## a counter hit pays the counter rate instead; signatures pay nothing.
+static func focus_for_hit(attack: Attack, counter: bool) -> float:
+	if attack.signature:
+		return 0.0
+	if counter:
+		return FOCUS_COUNTER
+	var n := String(attack.id)
+	if n.contains("kick") or n == "sweep" or n.contains("knee"):
+		return FOCUS_KICK
+	return FOCUS_HEAVY if attack.damage >= 10 else FOCUS_LIGHT
 
 
 static var _id_lookup: Dictionary = {}

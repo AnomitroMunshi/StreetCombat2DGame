@@ -66,6 +66,8 @@ signal parried(fighter: Fighter, attacker: Fighter)
 signal perfect_evaded(fighter: Fighter)
 ## Posture filled up: the guard is broken.
 signal posture_broken(fighter: Fighter)
+## The signature technique began (Focus was spent).
+signal signature_started(fighter: Fighter, attack: CombatData.Attack)
 
 enum State { IDLE, WALK, CROUCH, ATTACK, BLOCK, BLOCKSTUN, GUARD_RELEASE, HITSTUN, JUMP, LAND, DODGE, KNOCKDOWN, GETUP, FINISHER, FINISHED, KO, PARRY, STAGGER, BROKEN, EVADE_ROLL }
 enum Phase { NONE, STARTUP, ACTIVE, RECOVERY }
@@ -198,6 +200,10 @@ var style: MartialArtStyle = null
 var buffered_slot: StringName = &""
 ## Attacks refused because the style does not allow them (tests / debug).
 var rejected_attacks: int = 0
+## Focus meter (CombatData.FOCUS_*): full = the style's signature on F.
+var focus: float = 0.0
+var signature_buffer: int = 0
+var _block_focus_cd: int = 0
 
 # Presentation data: read by visuals/HUD, never used for combat decisions.
 var hitstop_frames: int = 0
@@ -258,6 +264,8 @@ func push_intent(intent: CombatData.Intent) -> void:
 		dodge_buffer_frames = CombatData.DODGE_BUFFER_FRAMES
 	if intent.parry:
 		parry_buffer_frames = CombatData.PARRY_BUFFER_FRAMES
+	if intent.signature:
+		signature_buffer = CombatData.SIGNATURE_BUFFER_FRAMES
 
 
 ## Drops any queued input. Used when the round ends.
@@ -268,6 +276,7 @@ func stop_combat() -> void:
 	dodge_buffer_frames = 0
 	dodge_request = 0
 	parry_buffer_frames = 0
+	signature_buffer = 0
 	move_input = 0
 	block_held = false
 	crouch_held = false
@@ -338,7 +347,7 @@ func tick() -> void:
 
 
 func _tick_neutral() -> void:
-	if _consume_buffered_attack(1):
+	if _try_signature() or _consume_buffered_attack(1):
 		return
 	face_opponent()
 	if _consume_dodge():
@@ -369,6 +378,8 @@ func _tick_neutral() -> void:
 ## A raised guard does not turn around: an opponent who crosses over (jumps
 ## behind) hits the unguarded back until the guard is dropped and re-raised.
 func _tick_block() -> void:
+	if _try_signature():
+		return
 	var wants_out := not block_held or buffered_attack != CombatData.AttackType.NONE or jump_buffer_frames > 0
 	if wants_out:
 		# Dropping an unused parry attempt early is a whiffed parry: slower recovery.
@@ -443,6 +454,12 @@ func _air_move_for(ground: CombatData.AttackType, slot: StringName) -> CombatDat
 func _tick_attack() -> void:
 	var attack := current_attack
 	var strike_end := attack.startup + attack.active
+	if attack.leap_vy != 0.0 and state_frame == 2 and not airborne:
+		airborne = true
+		air_attack_used = true
+		velocity_y = attack.leap_vy
+		jump_vx = facing * 2.5
+		jumped.emit(self)
 	if state_frame < strike_end:
 		position.x += attack.lunge * facing
 	elif combo_step < CombatData.MAX_COMBO_CHAIN and state_frame - strike_end < attack.cancel_window 			and swing_has_hit and _can_chain(attack.type, buffered_attack):
@@ -521,6 +538,8 @@ func _land() -> void:
 	crossing_grace = CombatData.CROSS_RESOLVE_TICKS
 	if state == State.JUMP or state == State.ATTACK:
 		var lag := CombatData.LANDING_FRAMES_AFTER_AIR_ATTACK if air_attack_used else CombatData.LANDING_FRAMES
+		if current_attack != null and current_attack.land_lag > 0:
+			lag = current_attack.land_lag
 		current_attack = null
 		combo_step = 0
 		_enter_state(State.LAND)
@@ -592,6 +611,43 @@ func _tick_buffers() -> void:
 		parry_buffer_frames -= 1
 	if parry_cooldown > 0:
 		parry_cooldown -= 1
+	if signature_buffer > 0:
+		signature_buffer -= 1
+	if _block_focus_cd > 0:
+		_block_focus_cd -= 1
+
+
+## F at full Focus from an actionable state: the style's signature starts and
+## the whole meter is spent (no refund if it misses or is blocked). Without
+## full Focus the press does nothing and costs nothing.
+func _try_signature() -> bool:
+	if signature_buffer <= 0:
+		return false
+	if focus < CombatData.FOCUS_MAX or style == null or style.signature == &"":
+		signature_buffer = 0
+		return false
+	var type := CombatData.type_for_id(style.signature)
+	if type == CombatData.AttackType.NONE:
+		return false
+	signature_buffer = 0
+	focus = 0.0
+	buffered_attack = CombatData.AttackType.NONE
+	buffer_frames = 0
+	_start_attack(type, 1, true)
+	signature_started.emit(self, current_attack)
+	return true
+
+
+func add_focus(amount: float) -> void:
+	focus = clampf(focus + amount, 0.0, CombatData.FOCUS_MAX)
+
+
+## A blocked hit pays FOCUS_BLOCK at most once per FOCUS_BLOCK_COOLDOWN ticks.
+func add_block_focus() -> void:
+	if _block_focus_cd > 0:
+		return
+	_block_focus_cd = CombatData.FOCUS_BLOCK_COOLDOWN
+	add_focus(CombatData.FOCUS_BLOCK)
 
 
 func _can_chain(from: CombatData.AttackType, to: CombatData.AttackType) -> bool:
@@ -670,7 +726,7 @@ func _tick_dodge() -> void:
 ## Crouching: no walking; attacks, jumps, dodges and blocks come straight out.
 func _tick_crouch() -> void:
 	face_opponent()
-	if _consume_buffered_attack(1) or _consume_dodge() or _consume_jump():
+	if _try_signature() or _consume_buffered_attack(1) or _consume_dodge() or _consume_jump():
 		return
 	if block_held:
 		_enter_block()

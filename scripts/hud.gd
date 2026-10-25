@@ -34,6 +34,11 @@ const COLOR_POSTURE := Color(0.98, 0.62, 0.2)
 const COLOR_POSTURE_HIGH := Color(1.0, 0.25, 0.15)
 const COLOR_POSTURE_LOCK := Color(0.6, 0.6, 0.65, 0.6)
 const POPUP_LIFE: float = 0.9
+## Focus bar: under the posture bar, filling from the inner end.
+const FOCUS_Y: float = POSTURE_Y + POSTURE_H + 4.0
+const FOCUS_H: float = 5.0
+const COLOR_FOCUS := Color(0.95, 0.8, 0.35)
+const COLOR_FOCUS_FULL := Color(1.0, 0.95, 0.65)
 
 var _player: Fighter = null
 var _enemy: Fighter = null
@@ -260,6 +265,13 @@ static func _style_details(st: MartialArtStyle) -> String:
 	for row in st.move_list():
 		t += "[cell][color=#f2c14e]%s  [/color][/cell][cell]%s      [/cell]" % [row[0], row[1]]
 	t += "[/table]\n"
+	if st.signature != &"":
+		t += "[b]SIGNATURE[/b] (F at full Focus)  [color=#f2c14e]%s[/color]\n" % CombatData.get_attack(CombatData.type_for_id(st.signature)).display_name
+	if not st.finishers.is_empty():
+		var names: Array = []
+		for fid in st.finishers:
+			names.append(FinisherDirector.DISPLAY_NAMES[FinisherDirector.kind_for_id(fid)])
+		t += "[b]FINISHERS[/b]  %s\n" % "  ·  ".join(names)
 	t += "\n[color=#b9a98f]Q next style · ENTER confirm[/color]"
 	return t
 
@@ -371,6 +383,8 @@ func _on_canvas_draw() -> void:
 	_draw_bar(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, true, _trail[1])
 	_draw_posture(_player, BAR_MARGIN, _posture_shown[0])
 	_draw_posture(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, _posture_shown[1])
+	_draw_focus(_player, BAR_MARGIN, false)
+	_draw_focus(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, true)
 	_draw_popups()
 	_draw_combo(_enemy, BAR_MARGIN, HORIZONTAL_ALIGNMENT_LEFT)
 	_draw_combo(_player, SCREEN_W - BAR_MARGIN - BAR_WIDTH, HORIZONTAL_ALIGNMENT_RIGHT)
@@ -419,12 +433,12 @@ func _draw_bar(f: Fighter, x: float, mirrored: bool, trail: float) -> void:
 	var swatch_x := x + BAR_WIDTH - 12.0 if not mirrored else x
 	_canvas.draw_rect(Rect2(swatch_x, BAR_Y - 24.0, 12.0, 12.0), f.accent_color)
 	var hp_align := HORIZONTAL_ALIGNMENT_LEFT if mirrored else HORIZONTAL_ALIGNMENT_RIGHT
-	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 27.0), "%d / %d" % [f.health, f.max_health],
+	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 36.0), "%d / %d" % [f.health, f.max_health],
 		hp_align, BAR_WIDTH, 14, COLOR_DIM)
 	# Stance name on the opposite side of the HP readout.
 	var stance_align := HORIZONTAL_ALIGNMENT_RIGHT if mirrored else HORIZONTAL_ALIGNMENT_LEFT
 	var style_label := f.style.display_name.to_upper() if f.style != null else Stances.stance_name(f.stance)
-	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 27.0), style_label,
+	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 36.0), style_label,
 		stance_align, BAR_WIDTH, 14, f.accent_color.lerp(COLOR_TEXT, 0.4))
 
 
@@ -445,6 +459,26 @@ func _draw_posture(f: Fighter, x: float, shown: float) -> void:
 	if f.is_posture_broken():
 		color = Color.WHITE if int(Time.get_ticks_msec() / 80) % 2 == 0 else COLOR_POSTURE_HIGH
 	_canvas.draw_rect(fill, color)
+
+
+## Focus: fills toward the outer end; full = pulsing, with the signature name
+## and SIGNATURE READY - F for the player.
+func _draw_focus(f: Fighter, x: float, mirrored: bool) -> void:
+	var track := Rect2(x, FOCUS_Y, BAR_WIDTH, FOCUS_H)
+	_canvas.draw_rect(track.grow(1.0), Color(0.0, 0.0, 0.0, 0.5))
+	var ratio := clampf(f.focus / CombatData.FOCUS_MAX, 0.0, 1.0)
+	if ratio <= 0.0:
+		return
+	var w := BAR_WIDTH * ratio
+	var fill := Rect2(x + BAR_WIDTH - w if mirrored else x, FOCUS_Y, w, FOCUS_H)
+	var full := ratio >= 1.0
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.008)
+	_canvas.draw_rect(fill, COLOR_FOCUS.lerp(COLOR_FOCUS_FULL, pulse) if full else COLOR_FOCUS)
+	if full and f.style != null and f.style.signature != &"":
+		var sig := CombatData.get_attack(CombatData.type_for_id(f.style.signature)).display_name.to_upper()
+		var text := ("SIGNATURE READY - F   " + sig) if f == _player else sig + " READY"
+		var align := HORIZONTAL_ALIGNMENT_RIGHT if mirrored else HORIZONTAL_ALIGNMENT_LEFT
+		_shadow_text(Vector2(x, BAR_Y + 84.0), text, 18, align, BAR_WIDTH, Color(1.0, 0.9, 0.5, 0.75 + 0.25 * pulse))
 
 
 func _draw_popups() -> void:

@@ -198,6 +198,15 @@ var _overhand_hit := PackedFloat32Array([0.6, 0.1, 0.8, 2.6, 1.9, 1.35, 0.9, 0.3
 # Slip counter: the head slips down and off the line, then a straight rear hand.
 var _slip_dip := PackedFloat32Array([0.5, 0.45, 1.0, 3.0, 0.85, 3.0, 0.9, -0.6, -0.45, -0.9, -6.0, 0.0, 0.0, 4.0])
 var _slip_hit := PackedFloat32Array([0.35, 0.1, 0.75, 2.8, 1.57, 1.6, 0.8, 0.2, -0.75, -0.6, 14.0, 0.0, 0.5, -8.0])
+# --- Signatures -------------------------------------------------------------------
+# Gazelle Hook: sink into a deep crouch, then spring up and forward into a
+# rising lead hook (the whole body drives up through the fist).
+var _gazelle_load := PackedFloat32Array([0.55, 0.4, 0.6, 1.6, 0.85, 3.0, 1.1, -0.9, -0.3, -1.2, -6.0, 0.0, 0.0, 14.0])
+var _gazelle_hit := PackedFloat32Array([-0.05, 0.0, 2.0, 2.5, 0.85, 3.0, 0.55, -0.1, -0.6, -0.3, 10.0, 0.0, 0.3, -8.0])
+# 540 Tornado Kick (airborne, drawn turned away at contact): knees tucked
+# through the spin, then the rear leg lashes out at head height.
+var _t540_load := PackedFloat32Array([0.3, 0.3, 1.0, 2.8, 0.8, 2.8, 1.8, -0.6, 1.4, -1.2, 0.0, 0.0])
+var _t540_hit := PackedFloat32Array([0.65, 0.5, 1.3, 2.6, 0.5, 2.4, 1.6, -0.4, -2.3, -2.2, -4.0, 0.0])
 # --- Taekwondo ------------------------------------------------------------------
 # Axe kick: the straight leg swings up past the head, then chops down.
 var _axe_raise := PackedFloat32Array([-0.25, 0.3, 1.1, 2.4, 0.6, 2.8, 2.8, 2.9, -0.3, -0.2, -4.0, 0.0, 0.3, 10.0])
@@ -442,6 +451,13 @@ func _ready() -> void:
 		CombatData.AttackType.JUMP_ROUNDHOUSE: [
 			[S, 0.5, _jrh_load, EASE_SMOOTH], [A, 0.0, _jrh_hit, EASE_IN],
 			[A, 1.0, _jrh_hit, EASE_LINEAR], [R, 0.5, _jrh_load, EASE_OUT]],
+		CombatData.AttackType.GAZELLE_HOOK: [
+			[S, 0.45, _gazelle_load, EASE_SMOOTH], [S, 0.8, _gazelle_load, EASE_LINEAR],
+			[A, 0.0, _gazelle_hit, EASE_IN], [A, 1.0, _over(_gazelle_hit, _gazelle_load), EASE_LINEAR],
+			[R, 0.4, _gazelle_hit, EASE_LINEAR]],
+		CombatData.AttackType.TORNADO_540: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _t540_load, EASE_SMOOTH],
+			[A, 0.0, _t540_hit, EASE_IN], [A, 1.0, _t540_hit, EASE_LINEAR], [R, 0.4, _t540_load, EASE_OUT]],
 		CombatData.AttackType.JUMP_SPIN_KICK: [
 			[S, 0.6, _jspin_load, EASE_SMOOTH], [A, 0.0, _jspin_hit, EASE_IN],
 			[A, 1.0, _jspin_hit, EASE_LINEAR], [R, 0.5, _jspin_load, EASE_OUT]],
@@ -957,6 +973,13 @@ func _is_back_kick() -> bool:
 ## through the recovery.
 func _back_turn(t: float) -> float:
 	var attack := fighter.current_attack
+	if attack.spin_turns > 1.0:
+		# Multi-turn spins (540): odd half-turns by contact (back to the target
+		# as the heel lands), then the last half-turn round to face again.
+		var halves := attack.spin_turns * 2.0
+		var spin := halves * smoothstep(0.0, attack.startup + attack.active * 0.3, t)
+		var end := float(attack.startup + attack.active)
+		return spin + smoothstep(end + attack.recovery * 0.2, end + attack.recovery * 0.8, t)
 	var turned := smoothstep(0.0, attack.startup * 0.75, t)
 	var strike_end := float(attack.startup + attack.active)
 	var back := smoothstep(strike_end + attack.recovery * 0.3, strike_end + attack.recovery * 0.9, t)
@@ -1458,7 +1481,8 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 		CombatData.AttackType.HEAVY, CombatData.AttackType.UPPERCUT, CombatData.AttackType.REAR_HOOK, \
 				CombatData.AttackType.OVERHAND, CombatData.AttackType.SLIP_COUNTER:
 			return J_HAND_B
-		CombatData.AttackType.BACK_KICK, CombatData.AttackType.SPIN_HOOK_KICK, CombatData.AttackType.JUMP_SPIN_KICK:
+		CombatData.AttackType.BACK_KICK, CombatData.AttackType.SPIN_HOOK_KICK, CombatData.AttackType.JUMP_SPIN_KICK, \
+				CombatData.AttackType.TORNADO_540:
 			return J_FOOT_B
 	return J_HAND_F
 

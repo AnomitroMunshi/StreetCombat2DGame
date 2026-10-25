@@ -57,8 +57,36 @@ key, the AI, a combo or a jump. The style screen lists every move with its key.
 | **Boxing** | Pressure and counterpunching. No kicks or sweeps at all. | J jab · K cross · U lead hook · I rear hook · O uppercut · L body hook · W+K overhand · S+K slip counter (head-height strikes miss during the slip) · air: jump punch |
 | **Taekwondo** | Long-range kicking, with only two basic punches. | J jab · K cross · L side kick · I front kick · W+L high roundhouse · S+L axe kick · U spinning hook kick · away+L back kick · air: jump roundhouse (L/I), jumping spin kick (U, W+L), jump punch (J/K) |
 
-Muay Thai, Karate, Kung Fu and Kickboxing come next. The Focus meter,
-signatures (F) and style finishers come in later batches. Styles are data
+**Focus meter and signature (F).** The thin gold bar under posture is
+**Focus**. It fills as you fight well:
+
+| Event | Focus |
+|---|---|
+| Light hit | +5 |
+| Heavy hit | +10 |
+| Kick | +8 |
+| Counter-hit | +15 |
+| Perfect parry | +20 |
+| Perfect dodge | +12 |
+| Block | +3, at most once every half second, so turtling can't farm it |
+
+Misses earn nothing. Finishers and signature hits earn nothing either. At
+100 the HUD shows **SIGNATURE READY – F**. Pressing **F** spends the whole
+meter on your style's signature: Boxing's **Gazelle Hook** (an explosive step
+into a rising hook) or Taekwondo's **540 Tornado Kick** (a leaping 1.5-turn
+spinning kick). Signatures can be blocked, parried or dodged. A miss is not
+refunded and leaves a long, punishable recovery. F with a part-full meter
+does nothing. The rival uses its signature too, sparingly and in range.
+
+**Style finishers.** On open floor, each style finishes with its own two
+finishers:
+- **Boxing:** The Final Bell, Eight-Count.
+- **Taekwondo:** Cyclone 360, Heaven's Heel.
+
+Air Smash and Wall Crush are shared by all styles and still take priority.
+
+Muay Thai, Karate, Kung Fu and Kickboxing come next, each with its own
+signature and two finishers. Styles are data
 files in `styles/`; see `docs/ADDING_A_STYLE.md` and
 `docs/M6.5_ARCHITECTURE.md`.
 

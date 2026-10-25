@@ -141,6 +141,7 @@ func _ready() -> void:
 		f.dodged.connect(_on_fighter_dodged)
 		f.perfect_evaded.connect(_on_fighter_perfect_evaded)
 		f.posture_broken.connect(_on_fighter_posture_broken)
+		f.signature_started.connect(_on_signature_started)
 		f.parried.connect(_on_fighter_parried)
 	fx.decals_changed.connect(queue_redraw)
 	fx.floor_y = FLOOR_Y
@@ -398,6 +399,7 @@ func _read_player_intent() -> CombatData.Intent:
 	_block_was_held = intent.block
 	# S: crouch (S + Shift = low block). S + L is read below as the sweep.
 	intent.crouch = Input.is_action_pressed("mod_down")
+	intent.signature = Input.is_action_just_pressed("signature")
 	intent.jump = Input.is_action_just_pressed("jump")
 	# Double-tap A or D within the window = dodge in that direction.
 	for dir in [-1, 1]:
@@ -540,6 +542,12 @@ func _resolve_hits() -> void:
 		var attack: CombatData.Attack = hit["attack"]
 		var step: int = hit["step"]
 		var result := defender.receive_hit(attack, attacker, step)
+		# Focus: one award per hit event, only while fighting.
+		match result:
+			CombatData.HitResult.HIT:
+				attacker.add_focus(CombatData.focus_for_hit(attack, defender.last_hit_counter))
+			CombatData.HitResult.BLOCKED:
+				defender.add_block_focus()
 		if result == CombatData.HitResult.KO:
 			killing_attack = attack
 		attacker.confirm_hit(result)
@@ -855,6 +863,16 @@ func attacker_of(defender: Fighter) -> Fighter:
 
 func _on_fighter_parried(fighter: Fighter, _attacker: Fighter) -> void:
 	hud.popup(fighter, "PARRY", PARRY_COLOR)
+	if _round_state == RoundState.FIGHTING:
+		fighter.add_focus(CombatData.FOCUS_PARRY)
+
+
+## Signature started: its name over the bar, a grounded power cue (no magic).
+func _on_signature_started(fighter: Fighter, attack: CombatData.Attack) -> void:
+	hud.popup(fighter, attack.display_name.to_upper(), Color(1.0, 0.85, 0.4))
+	audio.play(&"signature", 0.0, 0.02)
+	fx.dust(Vector2(fighter.position.x, FLOOR_Y), 1.4)
+	_shake(6, 2.5)
 
 
 ## Posture full: shattered guard, big stop, a short callout over the bar.
@@ -869,6 +887,8 @@ func _on_fighter_posture_broken(fighter: Fighter) -> void:
 
 
 func _on_fighter_perfect_evaded(fighter: Fighter) -> void:
+	if _round_state == RoundState.FIGHTING:
+		fighter.add_focus(CombatData.FOCUS_PERFECT_DODGE)
 	audio.play(&"whoosh_heavy", -2.0, 0.05)
 	fx.ring(fighter.position + Vector2(0.0, -100.0), PARRY_COLOR, 46.0, 14)
 

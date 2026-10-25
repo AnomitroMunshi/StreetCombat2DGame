@@ -42,5 +42,6 @@ chains = {
 }
 ai_close_plans = [[&"jab"], [&"jab", &"jab", &"cross"], [&"jab", &"cross", &"lead_hook"], [&"lead_hook", &"body_hook"], [&"body_hook", &"uppercut"], [&"jab", &"rear_hook"], [&"jab", &"overhand"], [&"slip_counter", &"lead_hook"], [&"cross", &"body_hook", &"uppercut"]]
 ai_far_plans = [[&"jab", &"cross"], [&"overhand"], [&"jab", &"jab"]]
+signature = &"gazelle_hook"
 finishers = PackedStringArray("final_bell", "eight_count")
 ai_preferred_range = 85.0

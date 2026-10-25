@@ -234,6 +234,14 @@ func _build_sfx() -> void:
 	_gong(b, 0.0, 0.25, 1500.0, 0.15)
 	_sfx[&"clash"] = _finish(b, 0.7)
 
+	# Signature: a sharp intake (short rising whoosh) into a deep body thump.
+	b = _buffer(0.6)
+	_whoosh(b, 0.0, 0.25, 0.02, 0.5, 0.7, rng)
+	_thump(b, 0.18, 0.4, 110.0, 45.0, 0.12, 0.9)
+	_noise(b, 0.18, 0.05, 0.01, 0.8, 0.4, rng)
+	_soft_clip(b, 1.5)
+	_sfx[&"signature"] = _finish(b, 0.8)
+
 	# Countdown: a dry taiko beat with a short high ping (3, 2, 1).
 	b = _buffer(0.6)
 	_thump(b, 0.0, 0.4, 120.0, 62.0, 0.09, 1.0)

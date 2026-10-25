@@ -52,6 +52,8 @@ const FAR_PLANS: Array = [
 ## Chance to time a perfect parry instead of blocking (only against attacks
 ## slow enough to read: startup at least reaction_frames + 2).
 @export_range(0.0, 1.0) var parry_chance: float = 0.15
+## Per-tick chance to fire the signature when Focus is full and in range.
+@export_range(0.0, 1.0) var signature_chance: float = 0.05
 ## Chance to punish a staggered (parried) or whiffing opponent.
 @export_range(0.0, 1.0) var punish_chance: float = 0.8
 ## Chance to uppercut a player who is jumping in close.
@@ -151,6 +153,16 @@ func compute_intent() -> CombatData.Intent:
 		if _rng.randf() < anti_air_chance and aa != CombatData.AttackType.NONE:
 			_enter(AIState.SPACING, 20)
 			intent.attack = aa
+			return intent
+
+	# Signature: at full Focus, in range, sometimes (never a guaranteed hit: it
+	# has a long startup the player can read, block, parry or dodge).
+	if _me.focus >= CombatData.FOCUS_MAX and _me.style != null and _me.style.signature != &"" and _me.can_act():
+		var sig := CombatData.get_attack(CombatData.type_for_id(_me.style.signature))
+		var reach := sig.hitbox.end.x + sig.lunge * sig.startup
+		if dist < reach and dist > 50.0 and _rng.randf() < signature_chance:
+			intent.signature = true
+			_enter(AIState.SPACING, 30)
 			return intent
 
 	# Punish: the opponent was parried (staggering) or guard-broken. A broken

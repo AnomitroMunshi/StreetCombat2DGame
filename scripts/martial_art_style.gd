@@ -52,6 +52,8 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 ## The style's own open-floor finishers (FinisherDirector ids). Air Smash and
 ## Wall Crush are environmental and shared by every style.
 @export var finishers: PackedStringArray = PackedStringArray()
+## Signature technique (move id of a "signature" attack): F at full Focus.
+@export var signature: StringName = &""
 
 var _allowed: Dictionary = {}
 
@@ -70,6 +72,8 @@ func allows(type: CombatData.AttackType) -> bool:
 	if _allowed.is_empty():
 		for m in moves():
 			_allowed[CombatData.type_for_id(m)] = true
+		if signature != &"":
+			_allowed[CombatData.type_for_id(signature)] = true
 	return _allowed.has(type)
 
 
@@ -136,6 +140,14 @@ func validate() -> PackedStringArray:
 		for to in chains[from]:
 			if not to in mine:
 				errors.append("chain %s -> %s leaves the moveset" % [from, to])
+	if signature != &"":
+		var st := CombatData.type_for_id(signature)
+		if st == CombatData.AttackType.NONE or not CombatData.get_attack(st).signature:
+			errors.append("signature %s is not a signature technique" % signature)
+	for m in moves():
+		var mt := CombatData.type_for_id(m)
+		if mt != CombatData.AttackType.NONE and CombatData.get_attack(mt).signature:
+			errors.append("signature %s must not be mapped to a key" % m)
 	for fid in finishers:
 		var fk := FinisherDirector.kind_for_id(fid)
 		if fk < 0:
