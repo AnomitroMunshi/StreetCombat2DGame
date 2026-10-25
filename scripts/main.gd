@@ -58,6 +58,10 @@ const STONE_COLOR := Color(0.42, 0.36, 0.3)
 ## Pillar wood (face and body), for chunks knocked off it.
 const PILLAR_LIGHT := Color(0.42, 0.33, 0.25)
 const PILLAR_DARK := Color(0.16, 0.12, 0.1)
+## Raw splintered wood (inside the pillar / under the floorboards).
+const RAW_WOOD := Color(0.62, 0.48, 0.33)
+const FLOOR_WOOD := Color(0.52, 0.4, 0.28)
+const WIND_COLOR := Color(0.95, 0.95, 1.0)
 
 @onready var player: Fighter = $Player
 @onready var enemy: Fighter = $Enemy
@@ -88,6 +92,12 @@ var _slowmo_ticks: int = 0
 # Double-tap detection for dodges: tick of the last A / D tap.
 var _last_tap := {-1: -1000, 1: -1000}
 var _block_was_held: bool = false
+# Finisher ambience: where the wall was last hit (dust keeps trickling from the
+# cracks), whether the attacker was airborne last tick (takeoff dust), and the
+# last x of each skidding body (floor scuff marks).
+var _wall_dent := Vector2.INF
+var _fin_attacker_air: bool = false
+var _skid_prev_x: Dictionary = {}
 ## Developer overlay: recent contact points {pos, age, gap} (gap = distance from
 ## the drawn fist / foot to the contact point at impact, -1 if unknown).
 var _contacts: Array[Dictionary] = []
@@ -172,6 +182,7 @@ func _physics_process(_delta: float) -> void:
 		player.tick()
 		enemy.tick()
 		_finisher_feedback(event)
+		_finisher_ambient()
 		if _finisher.done:
 			_end_round()
 	else:
@@ -527,8 +538,11 @@ func _finisher_feedback(event: Dictionary) -> void:
 		return
 	var power: int = event["power"]
 	var pos: Vector2 = event["pos"]
+	var fdir := Vector2(float(event["dir"]), 0.0)
 	if event["wall"]:
 		_wall_impact(Vector2(_wall_face_x(event["dir"]), pos.y), power)
+		_wall_dent = Vector2(_wall_face_x(event["dir"]) + event["dir"] * 10.0, pos.y)
+	_finisher_kind_fx(pos, fdir, power, event["final"])
 	if event["final"]:
 		_hitstop = maxi(_hitstop, 12)
 		_shake(30, 12.0)
@@ -547,6 +561,52 @@ func _finisher_feedback(event: Dictionary) -> void:
 		fx.impact(pos, power, HIT_COLOR)
 		audio.play(&"hit_heavy" if power >= 2 else &"hit_light")
 		_camera_punch += 0.015 * power
+
+
+## Each finisher's own particle signature, at the moment of each hit.
+func _finisher_kind_fx(pos: Vector2, dir: Vector2, power: int, final: bool) -> void:
+	match _finisher.kind:
+		FinisherDirector.Kind.PALM_FLURRY:
+			# Every palm pushes a crescent of air; the final blast is huge.
+			fx.air_wave(pos + dir * 10.0, dir, 30.0 + power * 12.0, 12 + power * 2)
+			if final:
+				fx.air_wave(pos + dir * 20.0, dir, 90.0, 20)
+				fx.streaks(pos, dir, 22, Color(1.0, 0.95, 0.85), 0.35, 110.0)
+				fx.dust_cloud(Vector2(pos.x + dir.x * 40.0, FLOOR_Y), 1.3, 40)
+		FinisherDirector.Kind.SPINNING_HEEL, FinisherDirector.Kind.TORNADO_KICK:
+			if final:
+				# The heel's arc flashes through the head, streaks fly with it.
+				fx.air_wave(pos - dir * 20.0, dir, 70.0, 16, Color(1.0, 0.9, 0.7))
+				fx.streaks(pos, dir + Vector2(0.0, -0.25), 20, Color(1.0, 0.92, 0.75), 0.45, 100.0)
+				fx.particles(pos, Color(1.0, 0.85, 0.6), 14, 7.0, 16)
+		FinisherDirector.Kind.AIR_SMASH:
+			if final:
+				# Hammer-fist: everything is driven straight down.
+				fx.streaks(pos, Vector2.DOWN, 18, Color(1.0, 0.9, 0.75), 0.3, 120.0)
+				fx.air_wave(pos, Vector2.DOWN, 60.0, 14)
+		FinisherDirector.Kind.WALL_CRUSH:
+			if final:
+				fx.streaks(pos, -dir, 16, Color(1.0, 0.92, 0.8), 0.6, 90.0)
+
+
+## Continuous finisher effects between hits.
+func _finisher_ambient() -> void:
+	if _finisher == null or _finisher.done:
+		return
+	var atk := _finisher.attacker
+	match _finisher.kind:
+		FinisherDirector.Kind.TORNADO_KICK, FinisherDirector.Kind.SPINNING_HEEL:
+			# Wind around the spinning body; dust kicked up on takeoff.
+			if atk.script_spin_rate != 0.0 and _tick % 3 == 0:
+				fx.swirl(atk.position + Vector2(0.0, -95.0), 46.0, WIND_COLOR)
+			if atk.airborne and not _fin_attacker_air:
+				fx.ground_ring(Vector2(atk.position.x, FLOOR_Y), 70.0, 16)
+				fx.dust_cloud(Vector2(atk.position.x, FLOOR_Y), 0.9, 30)
+		FinisherDirector.Kind.WALL_CRUSH:
+			# Grit keeps trickling out of the cracked pillar.
+			if _wall_dent != Vector2.INF and _tick % 5 == 0:
+				fx.debris(_wall_dent + Vector2(0.0, _fx_rng.randf_range(-12.0, 12.0)), 1, PILLAR_LIGHT, 1.0, 0.0)
+	_fin_attacker_air = atk.airborne
 
 
 func _tick_slowmo() -> void:
@@ -621,10 +681,11 @@ func _on_fighter_landed(fighter: Fighter) -> void:
 	if speed > 12.0:
 		# Spiked into the floor: crater, radial cracks growing out of it,
 		# splintered floorboards, a dust burst and a floor shockwave.
-		var centre := floor_pos + Vector2(0.0, 6.0)
-		fx.crater(centre, 70.0)
-		fx.crack(centre, 160.0, false, 9)
+		# Just in front of the floor's back edge, so the hole lies on the boards.
+		var centre := floor_pos + Vector2(0.0, 20.0)
+		fx.floor_break(centre, 3)
 		fx.debris(centre + Vector2(0.0, -4.0), 24, WOOD_COLOR, 8.0)
+		fx.splinters(centre + Vector2(0.0, -4.0), 18, FLOOR_WOOD, 11.0, 0.0, 0.9)
 		fx.dust_cloud(floor_pos, 1.7, 50)
 		fx.ground_ring(floor_pos, 160.0, 24)
 		audio.play(&"ko_boom", -4.0)
@@ -704,6 +765,8 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 	# colours, flung inward off the face.
 	fx.debris(hit, 3 + power * 3, PILLAR_LIGHT, 3.0 + power * 1.2, -side * 0.9)
 	fx.debris(hit, 2 + power * 2, PILLAR_DARK, 2.0 + power, -side * 0.6)
+	# Splinters of raw wood burst out of the dent, flung inward (more each hit).
+	fx.splinters(hit, 4 + power * 5, RAW_WOOD, 5.0 + power * 1.5, -side * 1.1, 0.9)
 	fx.dust_cloud(pos + Vector2(-side * 10.0, 0.0), 0.5 + power * 0.25, 30)
 	fx.jolt_wall(side, 2.0 + power * 2.0)
 	audio.play(&"wall_hit")
@@ -719,8 +782,12 @@ func _trail_rolling_dust() -> void:
 		if f.rolling:
 			fx.dust(Vector2(f.position.x, FLOOR_Y), 0.7)
 		elif f.skidding:
-			# Body sliding along the floor: a dust trail that thins as it slows.
+			# Body sliding along the floor: a dust trail that thins as it slows,
+			# and scuff marks on the boards.
 			fx.dust(Vector2(f.position.x, FLOOR_Y), 0.5 + f.skid_speed * 0.12)
+			var prev: float = _skid_prev_x.get(f, f.position.x)
+			fx.scuff(Vector2(prev, FLOOR_Y + 3.0), Vector2(f.position.x, FLOOR_Y + 3.0))
+		_skid_prev_x[f] = f.position.x
 
 
 # --- Camera -------------------------------------------------------------------

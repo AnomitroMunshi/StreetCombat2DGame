@@ -12,7 +12,9 @@ extends Node2D
 ##   crack()      branching cracks that grow outward from the impact point
 ##   wall_crack() a dented impact crater on a pillar with tapered, bevelled
 ##                cracks running along it, clipped to the pillar
-##   crater()     floor crater outline (dark bowl + lit rim), grows in
+##   floor_break() a smashed hole in the floorboards: dark broken-board hole
+##                ringed with pale splintered wood, broken board ends sticking
+##                up, and a few tapered cracks running along the planks
 ##   debris()     chips with gravity that bounce on the floor and settle;
 ##                pooled and capped (MAX_DEBRIS) for mobile
 ##   dust_cloud() billowing dust that rises and spreads
@@ -274,15 +276,45 @@ func wall_crack(pos: Vector2, power: int, clip: Rect2) -> void:
 					fa += _rng.randf_range(-0.4, 0.4)
 				if fork.size() >= 2:
 					_add_decal({"kind": "crack", "pts": fork, "w": 1.6 + power * 0.2,
-						"age": -CRACK_GROW_TICKS / 2, "grow": CRACK_GROW_TICKS, "wall": true})
+						"age": -CRACK_GROW_TICKS / 2, "grow": CRACK_GROW_TICKS, "raw": true})
 		if pts.size() >= 2:
-			_add_decal({"kind": "crack", "pts": pts, "w": 2.4 + power * 0.7, "age": -(b % 3), "grow": CRACK_GROW_TICKS, "wall": true})
+			_add_decal({"kind": "crack", "pts": pts, "w": 2.4 + power * 0.7, "age": -(b % 3), "grow": CRACK_GROW_TICKS, "raw": true})
 	decals_changed.emit()
 
 
-## Floor crater: a dark elliptical bowl with a lit rim, punched in over 5 ticks.
-func crater(pos: Vector2, size: float) -> void:
-	_add_decal({"kind": "crater", "pos": pos, "size": size, "age": 0, "grow": 5})
+## A body spiked into the floorboards (seen at the floor's foreshortened
+## angle): an irregular hole of broken boards, a ring of pale splintered raw
+## wood, broken board ends sticking up around the rim, and a few cracks that
+## run along the planks (wood splits with the grain), thick at the hole and
+## thinning out. Higher `power` = bigger hole, more and longer cracks.
+func floor_break(pos: Vector2, power: int) -> void:
+	var r := 30.0 + power * 12.0
+	var hole := PackedVector2Array()
+	for i in 14:
+		var a := TAU * i / 14.0 + _rng.randf_range(-0.12, 0.12)
+		hole.append(pos + Vector2(cos(a) * r, sin(a) * r * 0.26) * 1.0 + Vector2(cos(a), sin(a) * 0.26) * r * _rng.randf_range(-0.2, 0.1))
+	_add_decal({"kind": "crater", "pts": hole, "pos": pos, "r": r, "age": 0, "grow": 5})
+	for i in 5 + power:
+		var a := _rng.randf_range(0.0, TAU)
+		var base := pos + Vector2(cos(a) * r * 0.92, sin(a) * r * 0.24)
+		var tip := base + Vector2(cos(a) * _rng.randf_range(5.0, 11.0), -_rng.randf_range(5.0, 12.0))
+		_add_decal({"kind": "spike", "pts": PackedVector2Array([base + Vector2(-3.5, 0.0), tip, base + Vector2(3.5, 0.0)]),
+			"age": -2, "grow": 4})
+	for b in 3 + power:
+		var grain := 0.0 if b % 2 == 0 else PI
+		var ang := grain + _rng.randf_range(-0.3, 0.3)
+		var start := pos + Vector2(cos(ang) * r * 0.85, sin(ang) * r * 0.22)
+		var pts := PackedVector2Array([start])
+		var p := start
+		var length := (45.0 + power * 25.0) * _rng.randf_range(0.6, 1.2)
+		var travelled := 0.0
+		while travelled < length:
+			ang = lerp_angle(ang + _rng.randf_range(-0.35, 0.35), grain, 0.3)
+			var step := Vector2(cos(ang), sin(ang) * 0.25) * _rng.randf_range(8.0, 14.0)
+			p += step
+			pts.append(p)
+			travelled += step.length()
+		_add_decal({"kind": "crack", "pts": pts, "w": 2.6 + power * 0.6, "age": -(b % 3), "grow": CRACK_GROW_TICKS, "raw": true})
 	decals_changed.emit()
 
 
@@ -297,6 +329,38 @@ func debris(pos: Vector2, count: int, color: Color, speed: float = 6.0, bias: fl
 			"spin": _rng.randf_range(-0.4, 0.4), "color": color.darkened(_rng.randf_range(0.0, 0.35))})
 	while _debris.size() > MAX_DEBRIS:
 		_debris.pop_front()
+
+
+## Long thin wood splinters (pooled with the debris): they tumble fast, bounce
+## on the floor and settle like the chips.
+func splinters(pos: Vector2, count: int, color: Color, speed: float = 8.0, bias: float = 0.0, spread: float = 1.1) -> void:
+	for i in count:
+		var a := -PI * 0.5 + bias + _rng.randf_range(-spread, spread)
+		var v := Vector2(cos(a), sin(a)) * speed * _rng.randf_range(0.45, 1.15)
+		_debris.append({"pos": pos + Vector2(_rng.randf_range(-5.0, 5.0), _rng.randf_range(-5.0, 5.0)),
+			"vel": v, "age": 0, "size": _rng.randf_range(9.0, 16.0), "angle": _rng.randf() * TAU,
+			"spin": _rng.randf_range(-0.6, 0.6), "color": color.lightened(_rng.randf_range(0.0, 0.2)), "stick": true})
+	while _debris.size() > MAX_DEBRIS:
+		_debris.pop_front()
+
+
+## A crescent of air pushed out along `dir` (palm strikes, kick arcs).
+func air_wave(pos: Vector2, dir: Vector2, size: float, life: int = 14, color: Color = Color(1.0, 0.97, 0.9)) -> void:
+	_spawn({"kind": "wave", "pos": pos, "dir": dir.angle(), "age": 0, "life": life, "color": color, "size": size})
+
+
+## Wind swirling around a spinning body (tornado / spinning kicks).
+func swirl(pos: Vector2, radius: float, color: Color = Color(0.95, 0.95, 1.0)) -> void:
+	_spawn({"kind": "swirl", "pos": pos, "age": 0, "life": 12, "color": color, "size": radius,
+		"angle": _rng.randf() * TAU})
+
+
+## Scuff mark left on the floor by a skidding body (persistent decal).
+func scuff(from: Vector2, to: Vector2) -> void:
+	if from.distance_to(to) < 1.0:
+		return
+	_add_decal({"kind": "scuff", "pts": PackedVector2Array([from, to]), "age": 0, "grow": 1})
+	decals_changed.emit()
 
 
 ## Billowing dust: several puffs that rise, spread and fade.
@@ -374,17 +438,21 @@ func draw_decals(canvas: CanvasItem) -> void:
 		if g <= 0.0:
 			continue
 		if d["kind"] == "crater":
-			var pos: Vector2 = d["pos"]
-			var r: float = d["size"] * (0.4 + 0.6 * g)
-			canvas.draw_set_transform(pos, 0.0, Vector2(1.0, 0.24))
-			canvas.draw_circle(Vector2.ZERO, r, Color(0.07, 0.05, 0.04, 0.75))
-			canvas.draw_circle(Vector2(0.0, -r * 0.25), r * 0.7, Color(0.12, 0.09, 0.07, 0.6))
-			canvas.draw_arc(Vector2.ZERO, r, PI * 0.05, PI * 0.95, 32, Color(0.62, 0.5, 0.38, 0.6), 4.0, true)
-			canvas.draw_arc(Vector2.ZERO, r * 1.05, PI * 1.05, PI * 1.95, 32, Color(0.04, 0.03, 0.02, 0.6), 3.0, true)
-			canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			_draw_floor_hole(canvas, d, g)
+			continue
+		if d["kind"] == "spike":
+			# Broken board end sticking up out of the floor.
+			var sk: PackedVector2Array = d["pts"]
+			canvas.draw_colored_polygon(sk, RAW_WOOD)
+			canvas.draw_polyline(sk, Color(0.08, 0.06, 0.05, 0.8), 1.2, true)
 			continue
 		if d["kind"] == "dent":
 			_draw_dent(canvas, d, g)
+			continue
+		if d["kind"] == "scuff":
+			var sp: PackedVector2Array = d["pts"]
+			canvas.draw_line(sp[0], sp[1], Color(0.1, 0.07, 0.05, 0.35), 3.0, true)
+			canvas.draw_line(sp[0] + Vector2(0, 3), sp[1] + Vector2(0, 3), Color(0.1, 0.07, 0.05, 0.2), 2.0, true)
 			continue
 		if d["kind"] == "speck":
 			canvas.draw_circle(d["pos"], d["size"], Color(0.05, 0.035, 0.03, 0.8))
@@ -398,7 +466,7 @@ func draw_decals(canvas: CanvasItem) -> void:
 		var w0: float = d.get("w", 2.6)
 		var n := shown.size() - 1
 		# On the dark pillar the split shows pale splintered wood around it.
-		var wall: bool = d.get("wall", false)
+		var wall: bool = d.get("raw", false)
 		var edge := RAW_WOOD if wall else CRACK_LIGHT
 		for i in n:
 			var w := lerpf(w0, 0.8, float(i) / maxf(float(pts.size() - 1), 1.0))
@@ -416,16 +484,59 @@ func draw_decals(canvas: CanvasItem) -> void:
 			canvas.draw_line(shown[i], shown[i + 1], CRACK_COLOR, w, true)
 			if i > 0:
 				canvas.draw_circle(shown[i], w * 0.5, CRACK_COLOR)
-	# Settled and flying debris chips (drawn with the decals so they sit on the floor).
+	# Settled debris rests on the floor under the fighters; pieces still in
+	# flight are drawn on this layer, above them (see _draw).
 	for c in _debris:
-		var a := 1.0 - smoothstep(0.75, 1.0, float(c["age"]) / DEBRIS_LIFE)
-		var col: Color = c["color"]
-		col.a *= a
-		var s: float = c["size"]
-		var pts2 := PackedVector2Array()
-		for k in 4:
-			pts2.append(c["pos"] + Vector2.from_angle(c["angle"] + k * TAU / 4.0) * s * (1.0 if k % 2 == 0 else 0.6))
-		canvas.draw_colored_polygon(pts2, col)
+		if c["vel"] != Vector2.ZERO:
+			continue
+		_draw_chip(canvas, c)
+
+
+## One debris chip or splinter.
+static func _draw_chip(canvas: CanvasItem, c: Dictionary) -> void:
+	var a := 1.0 - smoothstep(0.75, 1.0, float(c["age"]) / DEBRIS_LIFE)
+	var col: Color = c["color"]
+	col.a *= a
+	var s: float = c["size"]
+	if c.get("stick", false):
+		# Splinter: a thin tapered sliver.
+		var ax := Vector2.from_angle(c["angle"]) * s * 0.5
+		var nx := Vector2(-ax.y, ax.x).normalized() * 1.8
+		canvas.draw_colored_polygon(PackedVector2Array([c["pos"] - ax, c["pos"] + nx, c["pos"] + ax, c["pos"] - nx]), col)
+		return
+	var pts2 := PackedVector2Array()
+	for k in 4:
+		pts2.append(c["pos"] + Vector2.from_angle(c["angle"] + k * TAU / 4.0) * s * (1.0 if k % 2 == 0 else 0.6))
+	canvas.draw_colored_polygon(pts2, col)
+
+
+## Floorboard hole: splintered raw-wood ring, dark broken hole, deeper core,
+## a lit near rim (toward the viewer) and a dark far rim.
+static func _draw_floor_hole(canvas: CanvasItem, d: Dictionary, g: float) -> void:
+	var centre: Vector2 = d["pos"]
+	var pts: PackedVector2Array = d["pts"]
+	var ring := PackedVector2Array()
+	var hole := PackedVector2Array()
+	var core := PackedVector2Array()
+	var k := 0.45 + 0.55 * g
+	for p in pts:
+		ring.append(centre + (p - centre) * 1.28 * k)
+		hole.append(centre + (p - centre) * k)
+		core.append(centre + (p - centre) * 0.55 * k + Vector2(0.0, -1.5))
+	canvas.draw_colored_polygon(ring, RAW_WOOD)
+	canvas.draw_colored_polygon(hole, Color(0.08, 0.06, 0.05, 0.96))
+	canvas.draw_colored_polygon(core, Color(0.02, 0.015, 0.01, 0.95))
+	var near := PackedVector2Array()
+	var far := PackedVector2Array()
+	for p in hole:
+		if p.y >= centre.y:
+			near.append(p)
+		else:
+			far.append(p)
+	if near.size() >= 2:
+		canvas.draw_polyline(near, Color(0.7, 0.56, 0.4, 0.8), 1.6, true)
+	if far.size() >= 2:
+		canvas.draw_polyline(far, Color(0.03, 0.02, 0.015, 0.9), 2.0, true)
 
 
 ## Dent: dark hollow, a deeper core, and a lit lower-right rim (light from the
@@ -474,6 +585,9 @@ static func _grown_polyline(pts: PackedVector2Array, g: float) -> PackedVector2A
 
 
 func _draw() -> void:
+	for c in _debris:
+		if c["vel"] != Vector2.ZERO:
+			_draw_chip(self, c)
 	for e in _effects:
 		var t := float(e["age"]) / float(e["life"])
 		var color: Color = e["color"]
@@ -534,6 +648,22 @@ func _draw() -> void:
 					var dir := Vector2.from_angle(PI * 0.25 + k * PI * 0.5)
 					var reach := 75.0 if k % 2 == 0 else 45.0
 					draw_line(pos - dir * 4.0, pos + dir * reach * g, color, 4.0 * (1.0 - t) + 1.0, true)
+			"wave":
+				# Crescent pushing outward along its direction, thinning as it goes.
+				color.a = 0.8 * (1.0 - t)
+				var wr: float = e["size"] * (0.35 + t * 1.3)
+				var wd: float = e["dir"]
+				draw_arc(pos, wr, wd - 0.85, wd + 0.85, 18, color, 7.0 * (1.0 - t) + 1.0, true)
+				draw_arc(pos, wr * 0.8, wd - 0.6, wd + 0.6, 14, Color(color, color.a * 0.5), 3.0 * (1.0 - t) + 0.5, true)
+			"swirl":
+				# Two flattened arcs circling the body like a wind trail.
+				color.a = 0.55 * (1.0 - t)
+				var sr: float = e["size"]
+				var sa: float = e["angle"] + t * 6.0
+				draw_set_transform(pos, 0.0, Vector2(1.0, 0.32))
+				draw_arc(Vector2.ZERO, sr * (1.0 + t * 0.3), sa, sa + 2.2, 20, color, 4.0 * (1.0 - t) + 1.0, true)
+				draw_arc(Vector2.ZERO, sr * (0.8 + t * 0.3), sa + PI, sa + PI + 1.8, 16, color, 3.0 * (1.0 - t) + 1.0, true)
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			"streaks":
 				color.a = 0.9 * (1.0 - t)
 				var sl: PackedVector3Array = e["lines"]

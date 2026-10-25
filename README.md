@@ -244,13 +244,14 @@ choreography (the fight track is ducked). A **victory sting** plays with the res
 
 | Finisher | What happens |
 |---|---|
-| **Air Smash** | The spike into the floor punches a **crater** with **radial cracks that grow outward**. It also throws **splintered floorboards** that bounce and settle, a **dust burst** and a floor shockwave. |
-| **Wall Crush** | The knee, cross and double palm each crack the pillar harder, with **branching cracks** that grow. **Chips** fly off the wall face and fall, dust puffs out, and the **pillar jolts**. The rival slumps against the cracked wall. |
-| **Palm Flurry** | The double palm launches the rival into a tumble. The body then **skids along the floor**, slowing by friction, with a dust trail. |
+| **Air Smash** | A downward streak burst at the hammer-fist. The spike **smashes the floorboards**: a dark broken hole ringed with pale splintered wood, broken board ends sticking up, and a few cracks running along the planks. **Floorboard splinters** fly up and scatter, with a dust burst and a shockwave. |
+| **Wall Crush** | Every strike dents the pillar (a crushed hollow with a raw-wood rim), and the cracks run along it and stay on it. **Splinters burst out of the dent** on each hit, more each time. Grit trickles from the cracks while the victim is pinned. The final palm adds an inward streak burst. Chunks fall, and the pillar jolts. |
+| **Palm Flurry** | Every palm pushes a **crescent of air**. The final blast is a huge shockwave with forward streaks and blown dust. The body tumbles, then **skids**, leaving a dust trail and **scuff marks** on the boards. |
+| **Spinning Heel / Tornado** | **Wind swirls** around the spinning body, and **dust kicks up on takeoff**. At contact the heel's arc flashes through the head, with streaks and sparks. |
 
 Notes on the stage damage:
 - All damage is visual (decals and particles). It never changes collision.
-- Debris is pooled and capped at 90 chips, and decals at 140, for mobile.
+- Debris (chips and splinters) is pooled and capped at 90, decals at 140, and transient effects at 260, for mobile. Flying pieces are drawn in front of the fighters; settled pieces rest on the floor.
 - Effects use a seeded RNG.
 - Cracks and craters persist until the match restarts.
 ## Architecture
