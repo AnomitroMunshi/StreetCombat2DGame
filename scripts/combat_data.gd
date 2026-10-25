@@ -121,6 +121,10 @@ const GETUP_FRAMES_AFTER_ROLL: int = 16
 const WALL_BOUNCE_MIN_SPEED: float = 4.0
 const WALL_BOUNCE_VELOCITY: float = -6.0
 const WALL_BOUNCE_DAMPING: float = 0.45
+## A body that lands with sideways speed and no rolls left skids along the
+## floor, slowing by SKID_FRICTION each tick (a dust trail follows it).
+const SKID_MIN_SPEED: float = 2.5
+const SKID_FRICTION: float = 0.9
 ## Bodies flying through the air slow down slightly each tick.
 const AIR_DRAG: float = 0.992
 

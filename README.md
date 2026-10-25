@@ -225,6 +225,33 @@ Finishers are data in `scripts/finisher.gd`. Each one is a list of beats
 (duration, poses, movement, launches, hits), so they're easy to tweak or extend.
 A simultaneous lethal trade skips the finisher and shows "DOUBLE K.O.".
 
+
+### Finisher presentation and stage damage
+
+Every finisher runs the same sequence:
+
+1. Setup and anticipation.
+2. Contact with hitstop.
+3. Slow motion on the final blow only.
+4. Victim reaction.
+5. Environmental damage.
+6. Aftermath.
+7. The result, which appears only once the body is at rest.
+
+The finisher is accompanied by a **taiko build-up** that accelerates under the
+choreography (the fight track is ducked). A **victory sting** plays with the result.
+
+| Finisher | What happens |
+|---|---|
+| **Air Smash** | The spike into the floor punches a **crater** with **radial cracks that grow outward**. It also throws **splintered floorboards** that bounce and settle, a **dust burst** and a floor shockwave. |
+| **Wall Crush** | The knee, cross and double palm each crack the pillar harder, with **branching cracks** that grow. **Chips** fly off the wall face and fall, dust puffs out, and the **pillar jolts**. The rival slumps against the cracked wall. |
+| **Palm Flurry** | The double palm launches the rival into a tumble. The body then **skids along the floor**, slowing by friction, with a dust trail. |
+
+Notes on the stage damage:
+- All damage is visual (decals and particles). It never changes collision.
+- Debris is pooled and capped at 90 chips, and decals at 140, for mobile.
+- Effects use a seeded RNG.
+- Cracks and craters persist until the match restarts.
 ## Architecture
 
 ```

@@ -74,7 +74,8 @@ func _ready() -> void:
 func _make_button() -> Button:
 	var b := Button.new()
 	b.size = Vector2(320.0, 72.0)
-	b.position = Vector2((SCREEN_W - b.size.x) * 0.5, 420.0)
+	# Below the fighters (bodies lie around y 470 under the K.O. camera).
+	b.position = Vector2((SCREEN_W - b.size.x) * 0.5, 560.0)
 	b.add_theme_font_size_override("font_size", 30)
 	for state in ["normal", "hover", "pressed", "focus"]:
 		var box := StyleBoxFlat.new()

@@ -209,6 +209,6 @@ func _build(k: Kind) -> Array[Dictionary]:
 		{"ticks": 6, "atk": &"palm_rear", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 1.5, "def_move": 1.5},
 		{"ticks": 10, "atk": &"palm_windup", "def": &"stagger"},
 		{"ticks": 20, "atk": &"palm_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
-			"ko_vy": -10.0, "ko_drift": 16.0, "ko_rolls": 2, "ko_tumble": true},
+			"ko_vy": -10.0, "ko_drift": 16.0, "ko_rolls": 0, "ko_tumble": true},
 		{"ticks": 55, "atk": &"guard", "def": &"knock_fly"},
 	]

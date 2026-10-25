@@ -53,6 +53,8 @@ const HIT_COLOR := Color(1.0, 0.9, 0.6)
 const BLOCK_COLOR := Color(0.6, 0.8, 1.0)
 const PARRY_COLOR := Color(0.75, 0.95, 1.0)
 const KO_COLOR := Color(1.0, 0.55, 0.4)
+const WOOD_COLOR := Color(0.5, 0.38, 0.27)
+const STONE_COLOR := Color(0.42, 0.36, 0.3)
 
 @onready var player: Fighter = $Player
 @onready var enemy: Fighter = $Enemy
@@ -117,6 +119,7 @@ func _ready() -> void:
 		f.posture_broken.connect(_on_fighter_posture_broken)
 		f.parried.connect(_on_fighter_parried)
 	fx.decals_changed.connect(queue_redraw)
+	fx.floor_y = FLOOR_Y
 	# Stances: the player's choice persists across restarts; the AI always picks
 	# a different one.
 	_stance_rng.randomize()
@@ -459,6 +462,7 @@ func _start_finisher(attacker: Fighter, victim: Fighter, kind: FinisherDirector.
 	hud.set_letterbox(true)
 	hud.flash(0.35)
 	audio.play(&"finisher_sting")
+	audio.play(&"finisher_drums", -2.0, 0.0)
 	audio.duck_bgm(-14.0)
 
 
@@ -525,12 +529,13 @@ func _tick_round_over() -> void:
 	hud.set_letterbox(false)
 	hud.set_message(_result_text, "ENTER, click or R to restart")
 	hud.show_button(&"restart")
+	audio.play(&"victory", -2.0, 0.0)
 	audio.duck_bgm(-6.0)
 
 
 func _bodies_at_rest() -> bool:
 	for f: Fighter in [player, enemy]:
-		if f.state == Fighter.State.KO and (f.airborne or f.rolling or f.settling):
+		if f.state == Fighter.State.KO and (f.airborne or f.rolling or f.skidding or f.settling):
 			return false
 	return true
 
@@ -558,11 +563,17 @@ func _on_fighter_landed(fighter: Fighter) -> void:
 	audio.play(&"body_fall", minf(-4.0 + speed * 0.4, 2.0))
 	_shake(8, 3.0 + speed * 0.3)
 	if speed > 12.0:
-		# Spiked into the floor: crater crack and a floor shockwave.
-		fx.crack(floor_pos + Vector2(0.0, 6.0), 110.0, false)
+		# Spiked into the floor: crater, radial cracks growing out of it,
+		# splintered floorboards, a dust burst and a floor shockwave.
+		var centre := floor_pos + Vector2(0.0, 6.0)
+		fx.crater(centre, 70.0)
+		fx.crack(centre, 160.0, false, 9)
+		fx.debris(centre + Vector2(0.0, -4.0), 24, WOOD_COLOR, 8.0)
+		fx.dust_cloud(floor_pos, 1.7, 50)
 		fx.ground_ring(floor_pos, 160.0, 24)
 		audio.play(&"ko_boom", -4.0)
 		hud.flash(0.4)
+		_shake(18, 9.0)
 		_camera_punch += 0.05
 
 
@@ -616,10 +627,17 @@ func _wall_face_x(dir: int) -> float:
 	return Fighter.ARENA_MAX_X + 20.0 if dir > 0 else Fighter.ARENA_MIN_X - 20.0
 
 
+## A body slammed into a pillar. Damage scales with `power`: a finisher's last
+## palm cracks the wall the most, chips rain down, the pillar shakes.
 func _wall_impact(pos: Vector2, power: int) -> void:
-	fx.crack(pos, 70.0 + power * 15.0, true)
+	var side := -1 if pos.x < 640.0 else 1
+	fx.crack(pos, 60.0 + power * 25.0, true, 5 + power)
 	fx.ring(pos, Color.WHITE, 50.0 + power * 10.0, 16)
 	fx.particles(pos, Color(0.55, 0.42, 0.3), 8 + power * 3, 4.0, 18)
+	# Chips fly inward off the wall face and fall to the floor.
+	fx.debris(pos, 4 + power * 4, STONE_COLOR, 3.0 + power, -side * 1.0)
+	fx.dust_cloud(pos + Vector2(-side * 10.0, 0.0), 0.5 + power * 0.25, 30)
+	fx.jolt_wall(side, 2.0 + power * 2.0)
 	audio.play(&"wall_hit")
 	_shake(12, 6.0 + power)
 	hud.flash(0.25)
@@ -632,6 +650,9 @@ func _trail_rolling_dust() -> void:
 	for f: Fighter in [player, enemy]:
 		if f.rolling:
 			fx.dust(Vector2(f.position.x, FLOOR_Y), 0.7)
+		elif f.skidding:
+			# Body sliding along the floor: a dust trail that thins as it slows.
+			fx.dust(Vector2(f.position.x, FLOOR_Y), 0.5 + f.skid_speed * 0.12)
 
 
 # --- Camera -------------------------------------------------------------------
@@ -738,7 +759,9 @@ func _draw() -> void:
 
 	# Solid pillars mark the arena edges (the walls fighters get pinned against).
 	for side in [-1.0, 1.0]:
-		var edge := Fighter.ARENA_MIN_X - 20.0 if side < 0.0 else Fighter.ARENA_MAX_X + 20.0
+		# A hard wall impact jolts the pillar for a moment (drawing only).
+		var jolt: float = fx.wall_jolt[int(side)] * sin(_tick * 2.7)
+		var edge := (Fighter.ARENA_MIN_X - 20.0 if side < 0.0 else Fighter.ARENA_MAX_X + 20.0) + jolt
 		var outer := edge - 46.0 if side < 0.0 else edge
 		var pillar := Rect2(outer, 96.0, 46.0, FLOOR_Y + 6.0 - 96.0)
 		draw_rect(pillar, Color(0.13, 0.1, 0.085))

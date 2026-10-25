@@ -373,41 +373,84 @@ func _initialize() -> void:
 
 	for kind in [FinisherDirector.Kind.PALM_FLURRY, FinisherDirector.Kind.SPINNING_HEEL, FinisherDirector.Kind.AIR_SMASH,
 			FinisherDirector.Kind.WALL_CRUSH, FinisherDirector.Kind.TORNADO_KICK]:
-		var kname: String = FinisherDirector.DISPLAY_NAMES[kind]
-		print("[finisher %s]" % kname)
-		p = _make_pair()
-		a = p[0]
-		b = p[1]
-		a.ground_y = 560
-		b.ground_y = 560
-		if kind == FinisherDirector.Kind.WALL_CRUSH:
-			b.position.x = Fighter.ARENA_MAX_X - 120.0
-			a.position.x = b.position.x - 90.0
-		b.health = 0
-		var director := FinisherDirector.new(kind, a, b)
-		var hits_n := 0
-		var finals := 0
-		var crossed := false
-		var ticks := 0
-		while not director.done and ticks < 400:
-			var ev := director.tick()
-			a.tick()
-			b.tick()
-			if not ev.is_empty():
-				hits_n += 1
-				if ev["final"]:
-					finals += 1
-			if finals == 0 and (b.position.x - a.position.x) < 30.0:
-				crossed = true
-			ticks += 1
-		for t in 200:
-			a.tick()
-			b.tick()
-		_check(director.done and ticks < 400, "%s completes (%d ticks, %d hits)" % [kname, ticks, hits_n])
-		_check(finals == 1 and b.state == Fighter.State.KO, "%s ends in exactly one final blow -> KO" % kname)
-		_check(not b.airborne and not b.rolling and is_equal_approx(b.position.y, 560.0) and not a.airborne, "%s: both back on the floor" % kname)
-		_check(not crossed, "%s: attacker never passes through the victim" % kname)
-		_check(b.position.x <= Fighter.ARENA_MAX_X and a.position.x >= Fighter.ARENA_MIN_X, "%s: both inside the arena" % kname)
+		for side in [1, -1]:
+			var kname: String = "%s (%s)" % [FinisherDirector.DISPLAY_NAMES[kind], "facing right" if side == 1 else "facing left"]
+			print("[finisher %s]" % kname)
+			p = _make_pair()
+			a = p[0]
+			b = p[1]
+			a.ground_y = 560
+			b.ground_y = 560
+			# Mirror the setup around the arena centre for the left-facing run.
+			if kind == FinisherDirector.Kind.WALL_CRUSH:
+				b.position.x = Fighter.ARENA_MAX_X - 120.0 if side == 1 else Fighter.ARENA_MIN_X + 120.0
+			else:
+				b.position.x = 640.0 + side * 40.0
+			a.position.x = b.position.x - side * 90.0
+			a.face_opponent()
+			b.face_opponent()
+			var start_b := b.position.x
+			b.health = 0
+			var director := FinisherDirector.new(kind, a, b)
+			var hits_n := 0
+			var finals := 0
+			var crossed := false
+			var ticks := 0
+			while not director.done and ticks < 400:
+				var ev := director.tick()
+				a.tick()
+				b.tick()
+				if not ev.is_empty():
+					hits_n += 1
+					if ev["final"]:
+						finals += 1
+				if finals == 0 and (b.position.x - a.position.x) * side < 30.0:
+					crossed = true
+				ticks += 1
+			for t in 200:
+				a.tick()
+				b.tick()
+			_check(director.done and ticks < 400, "%s completes (%d ticks, %d hits)" % [kname, ticks, hits_n])
+			_check(finals == 1 and b.state == Fighter.State.KO, "%s ends in exactly one final blow -> KO" % kname)
+			_check(not b.airborne and not b.rolling and not b.skidding and is_equal_approx(b.position.y, 560.0) and not a.airborne, "%s: both at rest on the floor" % kname)
+			_check(not crossed, "%s: attacker never passes through the victim" % kname)
+			_check((b.position.x - start_b) * side >= -1.0, "%s: victim driven away from the attacker" % kname)
+			_check(b.position.x <= Fighter.ARENA_MAX_X and a.position.x >= Fighter.ARENA_MIN_X
+				and b.position.x >= Fighter.ARENA_MIN_X and a.position.x <= Fighter.ARENA_MAX_X, "%s: both inside the arena" % kname)
+
+	print("[destruction effects]")
+	var fxl := FxLayer.new()
+	root.add_child(fxl)
+	fxl.set_seed(1)
+	fxl.crack(Vector2(640, 560), 160.0, false, 9)
+	var g0 := fxl.get_newest_decal_growth()
+	for t in 5:
+		fxl._physics_process(1.0 / 60.0)
+	var g1 := fxl.get_newest_decal_growth()
+	for t in 40:
+		fxl._physics_process(1.0 / 60.0)
+	var g2 := fxl.get_newest_decal_growth()
+	_check(g0 < g1 and g1 < 1.0 and g2 == 1.0, "cracks grow outward progressively (%.2f -> %.2f -> %.2f)" % [g0, g1, g2])
+	fxl.debris(Vector2(640, 500), 300, Color.BROWN, 8.0)
+	_check(fxl.get_debris_count() == FxLayer.MAX_DEBRIS, "debris pool capped at %d (%d)" % [FxLayer.MAX_DEBRIS, fxl.get_debris_count()])
+	for t in 80:
+		fxl._physics_process(1.0 / 60.0)
+	var all_landed := true
+	for c in fxl.get("_debris"):
+		if absf((c["pos"] as Vector2).y - fxl.floor_y) > 0.5:
+			all_landed = false
+	_check(all_landed, "debris chips come to rest on the floor")
+	for t in FxLayer.DEBRIS_LIFE:
+		fxl._physics_process(1.0 / 60.0)
+	_check(fxl.get_debris_count() == 0, "settled debris fades out")
+	for i in 60:
+		fxl.crack(Vector2(100 + i * 10, 560), 80.0, false)
+	_check(fxl.get_decal_count() == FxLayer.MAX_DECALS, "crack decals capped at %d" % FxLayer.MAX_DECALS)
+	fxl.jolt_wall(1, 6.0)
+	for t in 60:
+		fxl._physics_process(1.0 / 60.0)
+	_check(fxl.wall_jolt[1] == 0.0, "pillar jolt settles back to rest")
+	fxl.queue_free()
 
 	print("[blowback: tumble -> bounce -> roll -> crouch get-up]")
 	p = _make_pair()
@@ -953,11 +996,11 @@ func _initialize() -> void:
 	await process_frame  # _ready runs once the tree processes
 	var all_sfx := true
 	for snd in [&"whoosh_light", &"whoosh_heavy", &"jump", &"hit_light", &"hit_heavy", &"block", &"land",
-			&"body_fall", &"wall_hit", &"roll", &"ko_boom", &"finisher_sting", &"count_tick", &"fight_call", &"parry"]:
+			&"body_fall", &"wall_hit", &"roll", &"ko_boom", &"finisher_sting", &"count_tick", &"fight_call", &"parry", &"guard_break", &"finisher_drums", &"victory"]:
 		if not audio.has_sound(snd):
 			all_sfx = false
 			printerr("missing sound ", snd)
-	_check(all_sfx, "all 15 sound effects synthesized")
+	_check(all_sfx, "all 18 sound effects synthesized")
 	var t0 := Time.get_ticks_msec()
 	while not audio.is_bgm_playing() and Time.get_ticks_msec() - t0 < 20000:
 		await process_frame

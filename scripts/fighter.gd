@@ -116,6 +116,10 @@ var tumble: bool = false
 var wall_bounced: bool = false
 var pending_rolls: int = 0
 var rolling: bool = false
+## Lying body sliding along the floor after landing (see CombatData.SKID_*).
+var skidding: bool = false
+var skid_speed: float = 0.0
+var skid_dir: int = 1
 var roll_distance: float = 0.0
 var roll_target: float = 0.0
 var roll_speed: float = 0.0
@@ -266,7 +270,9 @@ func tick() -> void:
 					_enter_state(State.IDLE)
 		State.KNOCKDOWN:
 			_tick_settle()
-			if rolling:
+			if skidding:
+				_tick_skid()
+			elif rolling:
 				_tick_roll()
 			elif not airborne:
 				down_frames += 1
@@ -277,7 +283,9 @@ func tick() -> void:
 				_enter_state(State.IDLE)
 		State.KO:
 			_tick_settle()
-			if rolling:
+			if skidding:
+				_tick_skid()
+			elif rolling:
 				_tick_roll()
 	_apply_motion()
 	_tick_buffers()
@@ -439,6 +447,10 @@ func _land() -> void:
 			roll_speed = maxf(absf(jump_vx), CombatData.ROLL_MIN_SPEED + 1.5)
 			pending_rolls = 0
 			rolled.emit(self)
+		elif absf(jump_vx) > CombatData.SKID_MIN_SPEED:
+			skidding = true
+			skid_speed = absf(jump_vx)
+			skid_dir = 1 if jump_vx > 0.0 else -1
 		else:
 			_settle_down()
 		jump_vx = 0.0
@@ -607,6 +619,16 @@ func _start_attack(type: CombatData.AttackType, step: int, turn_to_opponent: boo
 	swing_has_hit = false
 	_enter_state(State.ATTACK)
 	attack_started.emit(self, current_attack)
+
+
+func _tick_skid() -> void:
+	var before := position.x
+	position.x += skid_dir * skid_speed
+	clamp_to_arena()
+	skid_speed *= CombatData.SKID_FRICTION
+	if skid_speed < 0.4 or absf(position.x - before) < 0.2:
+		skidding = false
+		_settle_down()
 
 
 func _tick_roll() -> void:
@@ -784,6 +806,7 @@ func blowback(push_dir: int, vx: float, vy: float, rolls: int, spin: bool) -> vo
 	pending_rolls = rolls
 	tumble = spin
 	rolling = false
+	skidding = false
 	settling = false
 	wall_bounced = false
 	air_attack_used = true

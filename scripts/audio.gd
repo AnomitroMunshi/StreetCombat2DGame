@@ -193,6 +193,32 @@ func _build_sfx() -> void:
 	_soft_clip(b, 1.8)
 	_sfx[&"guard_break"] = _finish(b)
 
+	# Finisher music layer: a taiko roll that accelerates for ~2 s under the
+	# choreography (the fight track is ducked), with a rising noise swell.
+	b = _buffer(2.4)
+	var hit_t := 0.0
+	var gap := 0.28
+	while hit_t < 2.1:
+		var louder := 0.45 + 0.55 * hit_t / 2.1
+		_thump(b, hit_t, 0.35, 95.0, 48.0, 0.12, louder)
+		_noise(b, hit_t, 0.02, 0.005, 0.5, 0.25 * louder, rng)
+		hit_t += gap
+		gap = maxf(gap * 0.86, 0.07)
+	for i in int(2.1 * MIX_RATE):
+		var u := float(i) / (2.1 * MIX_RATE)
+		b[i] += rng.randf_range(-1.0, 1.0) * 0.08 * u * u
+	_soft_clip(b, 1.4)
+	_sfx[&"finisher_drums"] = _finish(b, 0.8)
+
+	# Victory: a deep gong under a bright open chord (A minor -> A major lift).
+	b = _buffer(3.0)
+	_gong(b, 0.0, 2.9, 110.0, 0.8)
+	for f in [440.0, 554.37, 659.25]:
+		_pluck(b, 0.05, f, 2.0, 0.18, rng)
+		_square(b, 0.1, f * 0.5, 1.6, 0.06, 0.15)
+	_echo(b, 0.21, 0.3)
+	_sfx[&"victory"] = _finish(b, 0.8)
+
 	# Countdown: a dry taiko beat with a short high ping (3, 2, 1).
 	b = _buffer(0.6)
 	_thump(b, 0.0, 0.4, 120.0, 62.0, 0.09, 1.0)
