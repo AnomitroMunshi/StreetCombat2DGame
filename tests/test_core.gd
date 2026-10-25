@@ -1083,7 +1083,9 @@ func _initialize() -> void:
 	p = _make_pair()
 	a = p[0]
 	b = p[1]
-	# Slip in toward the jab so it passes through the body during the i-frames.
+	# Slip in toward the jab so it passes through the body during the i-frames
+	# (from 90 px: outside the slip-past range, so it is an ordinary step).
+	b.position.x = a.position.x + 90.0
 	var slip_i := _intent()
 	slip_i.dodge = -1
 	var idle_at := -1

@@ -38,9 +38,6 @@ const KO_MIN_TICKS: int = 50
 const PREFIGHT_ZOOM: float = 1.12
 const PREFIGHT_FOCUS_Y: float = 440.0
 const PREFIGHT_BGM_DUCK_DB: float = -10.0
-## Pushboxes only collide when the fighters' feet are this close vertically,
-## so a high enough jump can cross over the opponent.
-const PUSH_VERTICAL_RANGE: float = 90.0
 ## Camera / presentation.
 const FINISHER_ZOOM: float = 1.3
 const CAMERA_FOLLOW_RATE: float = 4.0
@@ -371,12 +368,40 @@ func _is_back_kick_input(move: int) -> bool:
 
 # --- Combat resolution --------------------------------------------------------
 
+## Bodies keep 2 * PUSH_HALF_WIDTH apart. Exceptions, so movement can cross:
+## - a fighter whose feet clear CROSSUP_CLEARANCE passes over the other;
+## - a forward roll, or a close-range slip-past dodge, passes through while
+##   it moves;
+## - a crossing fighter (airborne, just landed, just rolled) is the only one
+##   moved, toward the side its centre is on now, smoothly (CROSS_RESOLVE_STEP
+##   px per tick): a jump that got past the opponent's centre completes the
+##   cross-up, one that did not is eased back. Pinned at a wall, the other
+##   fighter is moved instead. Walking fighters split the overlap as before,
+##   so walking never passes through.
 func _resolve_pushboxes() -> void:
 	var min_dist := Fighter.PUSH_HALF_WIDTH * 2.0
 	var dx := enemy.position.x - player.position.x
-	if absf(dx) >= min_dist or absf(enemy.position.y - player.position.y) > PUSH_VERTICAL_RANGE:
+	if absf(dx) >= min_dist or absf(enemy.position.y - player.position.y) > CombatData.CROSSUP_CLEARANCE:
 		return
 	if player.is_down() or enemy.is_down():
+		return
+	if player.is_passing_through() or enemy.is_passing_through():
+		return
+	var p_cross := player.is_crossing()
+	if p_cross != enemy.is_crossing():
+		var mover := player if p_cross else enemy
+		var other := enemy if p_cross else player
+		var side := signf(mover.position.x - other.position.x)
+		if side == 0.0:
+			side = float(mover.dodge_world_dir if mover.state in [Fighter.State.EVADE_ROLL, Fighter.State.DODGE] else -mover.facing)
+		var step := minf(min_dist - absf(mover.position.x - other.position.x), CombatData.CROSS_RESOLVE_STEP)
+		var before := mover.position.x
+		mover.position.x += side * step
+		mover.clamp_to_arena()
+		var short := step - absf(mover.position.x - before)
+		if short > 0.01:
+			other.position.x -= side * short
+			other.clamp_to_arena()
 		return
 	var dir: float = signf(dx) if not is_zero_approx(dx) else float(player.facing)
 	var overlap := min_dist - absf(dx)
@@ -662,13 +687,24 @@ func _on_attack_started(_fighter: Fighter, attack: CombatData.Attack) -> void:
 	audio.play(&"whoosh_heavy" if attack.damage >= 10 else &"whoosh_light", -5.0, 0.1)
 
 
+## Debug log for cross-ups: which side the jump started on.
+var _jump_side: Dictionary = {}
+
+
 func _on_fighter_jumped(fighter: Fighter) -> void:
+	_jump_side[fighter] = signf(fighter.position.x - fighter.opponent.position.x)
 	fx.dust(Vector2(fighter.position.x, FLOOR_Y), 1.0)
 	audio.play(&"jump", -8.0)
 
 
 func _on_fighter_landed(fighter: Fighter) -> void:
 	var floor_pos := Vector2(fighter.position.x, FLOOR_Y)
+	if not fighter.is_down() and _jump_side.has(fighter):
+		var now := signf(fighter.position.x - fighter.opponent.position.x)
+		var gap := absf(fighter.position.x - fighter.opponent.position.x)
+		_last_event = "%s jump: %s (gap %.0f px)" % [fighter.fighter_name,
+			"crossed over" if now != _jump_side[fighter] else "same side", gap]
+		_jump_side.erase(fighter)
 	if not fighter.is_down():
 		fx.dust(floor_pos, 1.0)
 		audio.play(&"land", -6.0)
@@ -779,7 +815,7 @@ func _trail_rolling_dust() -> void:
 	if _tick % 4 != 0:
 		return
 	for f: Fighter in [player, enemy]:
-		if f.rolling:
+		if f.rolling or f.is_rolling_through():
 			fx.dust(Vector2(f.position.x, FLOOR_Y), 0.7)
 		elif f.skidding:
 			# Body sliding along the floor: a dust trail that thins as it slows,
@@ -925,8 +961,10 @@ func _draw_overlay() -> void:
 		else:
 			overlay.draw_rect(hurt, Color(0.6, 0.6, 0.6, 0.35), false, 1.0)
 		var push_y := f.position.y + 8.0
+		# Pushbox: yellow when solid, grey while crossing (passing over / through).
+		var push_col := Color(0.6, 0.6, 0.6, 0.7) if f.is_crossing() else Color(1.0, 0.9, 0.2, 0.9)
 		overlay.draw_line(Vector2(f.position.x - Fighter.PUSH_HALF_WIDTH, push_y),
-			Vector2(f.position.x + Fighter.PUSH_HALF_WIDTH, push_y), Color(1.0, 0.9, 0.2, 0.9), 3.0)
+			Vector2(f.position.x + Fighter.PUSH_HALF_WIDTH, push_y), push_col, 3.0)
 		if f.state == Fighter.State.ATTACK and f.current_attack != null:
 			var hit_rect := f.get_hitbox_world()
 			match f.get_phase():

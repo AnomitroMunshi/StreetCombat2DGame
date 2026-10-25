@@ -105,6 +105,33 @@ const DODGE_BUFFER_FRAMES: int = 4
 ## without moving, so a retreating fighter's L stays a side kick.
 const BACK_KICK_PRESS_WINDOW: int = 3
 const BACK_KICK_STILL_TICKS: int = 6
+## Slip past: a forward dodge (double-tap toward) started within
+## SLIP_PAST_RANGE of a standing opponent slips through to their other side,
+## landing SLIP_PAST_BEYOND px past their centre. Same frames and i-frames as
+## the dodge; it passes through the pushbox only while it moves.
+const SLIP_PAST_RANGE: float = 80.0
+const SLIP_PAST_BEYOND: float = 64.0
+## Evasive roll (hold S + double-tap A/D): a committed tuck roll, longer than
+## the dodge step. A forward roll passes through the opponent's pushbox while
+## travelling. Phases in ticks: startup (tuck), travel, recovery (rise).
+## Invulnerable only for ROLL_INVULN_START <= frame < ROLL_INVULN_END.
+const ROLL_STARTUP: int = 4
+const ROLL_TRAVEL: int = 16
+const ROLL_RECOVERY: int = 9
+const ROLL_FORWARD_DIST: float = 170.0
+const ROLL_BACK_DIST: float = 130.0
+const ROLL_INVULN_START: int = 3
+const ROLL_INVULN_END: int = 15
+## Cross-ups: a fighter whose feet are this high above the other's passes over
+## their pushbox. After a jump lands or a roll ends, overlap is resolved for
+## CROSS_RESOLVE_TICKS by moving only that fighter toward the side its centre
+## is on, at most CROSS_RESOLVE_STEP px per tick (smooth, no teleport).
+const CROSSUP_CLEARANCE: float = 60.0
+const CROSS_RESOLVE_STEP: float = 6.0
+const CROSS_RESOLVE_TICKS: int = 10
+## Facing only flips once the centres are this far apart (no flicker when
+## one fighter is directly above the other).
+const FACING_HYSTERESIS: float = 8.0
 ## Two taps of the same direction within this many ticks = dodge.
 const DOUBLE_TAP_WINDOW: int = 12
 const LANDING_FRAMES: int = 3

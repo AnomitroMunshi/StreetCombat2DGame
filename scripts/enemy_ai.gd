@@ -66,6 +66,10 @@ var _block_low: bool = false
 ## Target's state_frame at which to press block for a timed parry (-1 = none).
 var _parry_at: int = -1
 var _punish_checked_swing: int = -1
+# Side changes (the player crossed over / rolled through): a human-like pause
+# before the AI turns and acts on it. It never predicts the landing spot.
+var _last_side: int = 0
+var _side_wait: int = 0
 var _rng := RandomNumberGenerator.new()
 
 
@@ -73,6 +77,15 @@ func setup(me: Fighter, target: Fighter) -> void:
 	_me = me
 	_target = target
 	_rng.seed = rng_seed
+	# Forget everything from a previous setup (restart / unlock at FIGHT).
+	_plan.clear()
+	_plan_index = 0
+	_last_side = 0
+	_side_wait = 0
+	_parry_at = -1
+	_dodge_now = false
+	_block_low = false
+	_was_stunned = false
 	_enter(AIState.IDLE, 40)
 
 
@@ -107,6 +120,16 @@ func compute_intent() -> CombatData.Intent:
 	if _was_stunned:
 		_was_stunned = false
 		_after_stun()
+
+	var side := toward
+	if _last_side != 0 and side != _last_side:
+		_side_wait = reaction_frames + _rng.randi_range(2, 6)
+		_plan.clear()
+	_last_side = side
+	if _side_wait > 0:
+		_side_wait -= 1
+		intent.block = _state == AIState.BLOCK  # a raised guard stays up (facing the old way)
+		return intent
 
 	# Anti-air: one roll per player jump, as they come down within reach.
 	if not _target.airborne:

@@ -609,13 +609,21 @@ func _satisfy(a: int, b: int, length: float, at_least: bool) -> void:
 ## A controlled breakfall (knockdown with rolls) curls into a ball. Limp KO'd
 ## bodies are ragdolls instead.
 func _is_balled() -> bool:
+	if fighter.state == Fighter.State.EVADE_ROLL:
+		# Tucked from the end of the startup until the roll has travelled.
+		return fighter.state_frame >= CombatData.ROLL_STARTUP - 1 and fighter.is_rolling_through()
 	return fighter.state == Fighter.State.KNOCKDOWN and (fighter.rolling or (fighter.airborne and fighter.tumble))
 
 
 func _update_spin(dt: float, fraction: float) -> void:
 	var balled := _is_balled()
 	_tuck_amount = move_toward(_tuck_amount, 1.0 if balled else 0.0, dt * 14.0)
-	if fighter.rolling and balled:
+	if fighter.state == Fighter.State.EVADE_ROLL and balled:
+		# Evasive roll: the ball turns by the distance actually travelled
+		# (rolls without slipping, forward or backward).
+		var roll_dir := float(fighter.dodge_world_dir * fighter.facing)
+		_body_rot = roll_dir * fighter.evade_travelled / ROLL_RADIUS
+	elif fighter.rolling and balled:
 		var local_dir := float(fighter.roll_dir * fighter.facing)
 		var dist := lerpf(_prev_roll, _cur_roll, fraction)
 		if not _was_rolling:
@@ -759,6 +767,15 @@ func _target_pose(t: float) -> PackedFloat32Array:
 			if f < CombatData.DODGE_INVULN_END:
 				return d
 			return _blend(d, _guard, smoothstep(0.0, 1.0, (f - CombatData.DODGE_INVULN_END) / float(CombatData.DODGE_FRAMES - CombatData.DODGE_INVULN_END)))
+		Fighter.State.EVADE_ROLL:
+			if _is_balled():
+				return _tuck
+			var travel_end := CombatData.ROLL_STARTUP + CombatData.ROLL_TRAVEL
+			if t < travel_end:
+				# Anticipation: drop low and lean into the roll.
+				return _blend(_guard, _jump_squat, smoothstep(0.0, float(CombatData.ROLL_STARTUP), t))
+			# Recovery: come out of the tuck in a crouch and rise to the stance.
+			return _blend(_getup_crouch, _guard, smoothstep(float(travel_end), float(travel_end + CombatData.ROLL_RECOVERY), t))
 		Fighter.State.PARRY:
 			return _blend(_deflect, _block if fighter.block_held else _guard,
 				smoothstep(0.3, 1.0, t / float(CombatData.PARRY_DEFLECT_FRAMES)))

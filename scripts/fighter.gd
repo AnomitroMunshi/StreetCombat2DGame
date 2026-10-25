@@ -61,13 +61,15 @@ signal perfect_evaded(fighter: Fighter)
 ## Posture filled up: the guard is broken.
 signal posture_broken(fighter: Fighter)
 
-enum State { IDLE, WALK, CROUCH, ATTACK, BLOCK, BLOCKSTUN, GUARD_RELEASE, HITSTUN, JUMP, LAND, DODGE, KNOCKDOWN, GETUP, FINISHER, FINISHED, KO, PARRY, STAGGER, BROKEN }
+enum State { IDLE, WALK, CROUCH, ATTACK, BLOCK, BLOCKSTUN, GUARD_RELEASE, HITSTUN, JUMP, LAND, DODGE, KNOCKDOWN, GETUP, FINISHER, FINISHED, KO, PARRY, STAGGER, BROKEN, EVADE_ROLL }
 enum Phase { NONE, STARTUP, ACTIVE, RECOVERY }
 
 ## Hurtbox relative to the feet. Symmetric, so facing does not change it.
 const HURTBOX: Rect2 = Rect2(-20.0, -172.0, 40.0, 172.0)
 ## Crouching (and low blocking): head-level strikes pass over this.
 const HURTBOX_CROUCH: Rect2 = Rect2(-22.0, -128.0, 44.0, 128.0)
+## Curled up in an evasive roll.
+const HURTBOX_ROLL: Rect2 = Rect2(-26.0, -64.0, 52.0, 64.0)
 ## Bodies keep their centres at least 2 * PUSH_HALF_WIDTH apart, about the width
 ## of a silhouette, so fighters never stand inside each other.
 const PUSH_HALF_WIDTH: float = 30.0
@@ -155,6 +157,14 @@ var dodge_request: int = 0
 var dodge_world_dir: int = 0
 var dodge_relative: int = -1
 var dodge_perfect: bool = false
+## Slip-past dodge: total distance to travel (0 = an ordinary dodge step).
+var dodge_slip_dist: float = 0.0
+# Evasive roll: distance for this roll and distance covered so far.
+var evade_total: float = 0.0
+var evade_travelled: float = 0.0
+## Ticks left in which overlap after a jump landing / roll is resolved by
+## moving only this fighter (see CombatData.CROSS_RESOLVE_*).
+var crossing_grace: int = 0
 # Parry bookkeeping (see CombatData.PARRY_*).
 var parry_buffer_frames: int = 0
 ## Parry window of the current guard: hits while state_frame < this are parried
@@ -255,6 +265,8 @@ func tick() -> void:
 			_tick_attack()
 		State.DODGE:
 			_tick_dodge()
+		State.EVADE_ROLL:
+			_tick_evade_roll()
 		State.JUMP:
 			_tick_jump()
 		State.PARRY:
@@ -294,6 +306,8 @@ func tick() -> void:
 	_apply_motion()
 	_tick_buffers()
 	_tick_posture()
+	if crossing_grace > 0:
+		crossing_grace -= 1
 
 
 func _tick_neutral() -> void:
@@ -462,6 +476,7 @@ func _land() -> void:
 	airborne = false
 	velocity_y = 0.0
 	jump_vx = 0.0
+	crossing_grace = CombatData.CROSS_RESOLVE_TICKS
 	if state == State.JUMP or state == State.ATTACK:
 		var lag := CombatData.LANDING_FRAMES_AFTER_AIR_ATTACK if air_attack_used else CombatData.LANDING_FRAMES
 		current_attack = null
@@ -523,7 +538,7 @@ func is_posture_broken() -> bool:
 
 func _tick_buffers() -> void:
 	# A counter pressed during a dodge is held until the dodge ends.
-	if buffer_frames > 0 and state != State.DODGE:
+	if buffer_frames > 0 and state != State.DODGE and state != State.EVADE_ROLL:
 		buffer_frames -= 1
 		if buffer_frames == 0:
 			buffered_attack = CombatData.AttackType.NONE
@@ -555,6 +570,19 @@ func _consume_dodge() -> bool:
 	dodge_relative = 1 if dodge_world_dir == facing else -1
 	dodge_request = 0
 	dodge_perfect = false
+	if crouch_held:
+		# Low double-tap: a committed evasive roll instead of the step.
+		evade_total = CombatData.ROLL_FORWARD_DIST if dodge_relative > 0 else CombatData.ROLL_BACK_DIST
+		evade_travelled = 0.0
+		_enter_state(State.EVADE_ROLL)
+		dodged.emit(self)
+		return true
+	# Very close and dodging toward the opponent: slip past to their other side.
+	dodge_slip_dist = 0.0
+	if dodge_relative > 0 and opponent != null and not opponent.is_down() and not opponent.airborne:
+		var gap := absf(opponent.position.x - position.x)
+		if gap <= CombatData.SLIP_PAST_RANGE:
+			dodge_slip_dist = gap + CombatData.SLIP_PAST_BEYOND
 	_enter_state(State.DODGE)
 	dodged.emit(self)
 	return true
@@ -565,10 +593,19 @@ func _tick_dodge() -> void:
 	if f >= CombatData.DODGE_INVULN_START and f < CombatData.DODGE_INVULN_START + CombatData.DODGE_MOVE_FRAMES:
 		# Fast at first, easing out.
 		var u := float(f - CombatData.DODGE_INVULN_START) / CombatData.DODGE_MOVE_FRAMES
-		var speed := CombatData.DODGE_FORWARD_SPEED if dodge_relative > 0 else CombatData.DODGE_BACK_SPEED
-		position.x += dodge_world_dir * speed * 2.0 * (1.0 - u)
+		if dodge_slip_dist > 0.0:
+			# Same fast-then-easing profile, scaled to reach the far side
+			# (the weights (1 - u) sum to MOVE_FRAMES * 0.55 over the move).
+			position.x += dodge_world_dir * dodge_slip_dist * (1.0 - u) / (CombatData.DODGE_MOVE_FRAMES * 0.55)
+			clamp_to_arena()
+		else:
+			var speed := CombatData.DODGE_FORWARD_SPEED if dodge_relative > 0 else CombatData.DODGE_BACK_SPEED
+			position.x += dodge_world_dir * speed * 2.0 * (1.0 - u)
 	# A perfect dodge skips the recovery once the i-frames end.
 	if f >= CombatData.DODGE_FRAMES or (dodge_perfect and f >= CombatData.DODGE_INVULN_END):
+		if dodge_slip_dist > 0.0:
+			crossing_grace = CombatData.CROSS_RESOLVE_TICKS
+			dodge_slip_dist = 0.0
 		_enter_state(State.IDLE)
 		# Counter opportunity: an attack buffered during the dodge fires now.
 		_tick_neutral()
@@ -592,6 +629,50 @@ func is_crouched() -> bool:
 	return crouch_held and (state == State.BLOCK or state == State.BLOCKSTUN or state == State.GUARD_RELEASE)
 
 
+## Evasive roll: tuck (startup), roll along the floor with momentum (fast,
+## easing out), then rise (recovery). Facing is locked throughout; an attack
+## buffered during the roll fires as it ends.
+func _tick_evade_roll() -> void:
+	var f := state_frame
+	var s := CombatData.ROLL_STARTUP
+	var travel := CombatData.ROLL_TRAVEL
+	if f > s and f <= s + travel:
+		var u0 := float(f - 1 - s) / travel
+		var u1 := float(f - s) / travel
+		var d := evade_total * (_roll_ease(u1) - _roll_ease(u0))
+		var before := position.x
+		position.x += dodge_world_dir * d
+		clamp_to_arena()
+		evade_travelled += absf(position.x - before)
+	if f >= s + travel + CombatData.ROLL_RECOVERY:
+		crossing_grace = CombatData.CROSS_RESOLVE_TICKS
+		_enter_state(State.IDLE)
+		_tick_neutral()
+
+
+static func _roll_ease(u: float) -> float:
+	return 1.0 - (1.0 - u) * (1.0 - u)
+
+
+## Rolling along the floor right now.
+func is_rolling_through() -> bool:
+	return state == State.EVADE_ROLL and state_frame <= CombatData.ROLL_STARTUP + CombatData.ROLL_TRAVEL
+
+
+## Rolling through or slipping past: passes through the opponent's pushbox.
+func is_passing_through() -> bool:
+	if is_rolling_through():
+		return true
+	return state == State.DODGE and dodge_slip_dist > 0.0 \
+		and state_frame < CombatData.DODGE_INVULN_START + CombatData.DODGE_MOVE_FRAMES
+
+
+## Airborne, rolling through, or just landed / finished rolling: overlap with
+## the opponent is resolved by moving this fighter only.
+func is_crossing() -> bool:
+	return (airborne and not is_down()) or crossing_grace > 0 or is_passing_through()
+
+
 ## Called by main.gd when an active hitbox passes through this fighter's i-frames.
 func perfect_evade() -> void:
 	if state == State.DODGE and not dodge_perfect:
@@ -601,6 +682,8 @@ func perfect_evade() -> void:
 
 ## True during the dodge's invulnerable window.
 func is_evading() -> bool:
+	if state == State.EVADE_ROLL:
+		return state_frame >= CombatData.ROLL_INVULN_START and state_frame < CombatData.ROLL_INVULN_END
 	return state == State.DODGE and state_frame >= CombatData.DODGE_INVULN_START \
 		and state_frame < CombatData.DODGE_INVULN_END
 
@@ -893,6 +976,8 @@ func get_hitbox_world() -> Rect2:
 
 func get_hurtbox_world() -> Rect2:
 	var box := HURTBOX_CROUCH if is_crouched() else HURTBOX
+	if state == State.EVADE_ROLL:
+		box = HURTBOX_ROLL
 	return Rect2(position + box.position, box.size)
 
 
@@ -920,7 +1005,7 @@ func face_opponent() -> void:
 	if opponent == null:
 		return
 	var dx := opponent.position.x - position.x
-	if absf(dx) > 1.0:
+	if absf(dx) > CombatData.FACING_HYSTERESIS:
 		facing = 1 if dx > 0.0 else -1
 
 

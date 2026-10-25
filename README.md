@@ -43,7 +43,9 @@ old countdown can never fire into a new match.
 |------------|-----------------------------|
 | A / D      | Move (backing up is slower) |
 | Space      | Jump (hold A/D to jump in that direction) |
-| A A / D D (double-tap) | Dodge: backstep sway (away) or slip-in (toward), with invulnerability |
+| A A / D D (double-tap) | Dodge: backstep sway (away) or slip-in (toward), with invulnerability. **Very close (within 80 px), toward the opponent: slip past behind them** |
+| Hold S + double-tap A/D | **Evasive roll:** forward rolls through the opponent to their other side; backward rolls retreat |
+| Space + toward | Jump; a jump from normal range clears the opponent and lands behind them (cross-up) |
 | J          | Jab (light punch)           |
 | K          | Cross (heavy punch)         |
 | U          | Backhand (lead-hand backfist) |
@@ -154,6 +156,38 @@ The full table, including hitboxes, knockback and lunge, is in
 - **Low block (S + Shift):** sweeps are low attacks, so a standing block does
   not stop them. Only a low block does. The low block also blocks everything
   else. The AI low-blocks when it sees a sweep coming.
+- **Back kick (away + L from standing):** a spinning back kick. The fighter
+  turns its back on the opponent and thrusts the heel straight into them.
+  - 13 damage, the biggest push in the game, and a good chance to send the
+    opponent flying.
+  - Slow (11-tick startup) and very unsafe if blocked or missed. It never chains.
+  - Press away and L together after standing still. If you've been walking
+    backwards, L stays a side kick.
+- **Changing sides:** there are three ways to get behind the opponent.
+  - **Jump** over them from normal range. A forward jump clears them once your
+    feet are 60 px up and your centre passes theirs.
+  - **Slip past:** dodge toward them from very close (within 80 px).
+  - **Roll:** hold S and double-tap toward them for a forward roll through them.
+
+  While you are crossing, the bodies don't block each other. After you land,
+  any remaining overlap is resolved smoothly by moving only you (up to 6 px per
+  tick, never a teleport), on to the side your centre reached. If your centre
+  didn't get past theirs, you're eased back.
+
+  Walking can never pass through. A raised guard doesn't turn around, so
+  landing behind a blocking opponent and attacking hits their back. Facing
+  flips only once the two centres are more than 8 px apart, so it never
+  flickers. Against a wall with no room, the crossing ends in a clean
+  separation.
+- **Evasive roll (hold S + double-tap):** 4 ticks to tuck, 16 ticks rolling
+  (170 px forward, or 130 px back), and 9 ticks to rise. You are invulnerable
+  for ticks 3–14 only, and use a low hurtbox throughout. Facing is locked
+  during the roll, and an attack pressed during it fires as it ends. All of
+  these values are the `ROLL_*` constants in `combat_data.gd`.
+- **AI and side changes:** when you cross over, the rival waits a human
+  reaction time (its reaction frames plus 2–6 ticks) before turning and
+  acting. It never predicts where you'll land, but it can still anti-air a
+  jump.
 - **Sweep (S + L):** a low leg sweep that always knocks down if it isn't blocked. The
   swept fighter's feet are kicked out from under them.
 - **Blocking:** hold Shift while idle or walking. A blocked hit does no damage,
@@ -493,6 +527,7 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 | `test_match.gd` | A full scripted match against the real AI, KO, then restart |
 | `test_ai_finisher.gd` | AI finisher on a passive player; result only after the body is at rest |
 | `test_ai_defense.gd` | AI blocks most, parries some, punishes a stagger (seeded) |
+| `test_movement.gd` | Jump cross-ups (both directions, moving rival, simultaneous jumps, walls), forward/backward roll, close slip-past, walking never passes, back hits after crossing, AI reaction delay |
 
 The V0.3 plan and audit are in `docs/V0.3_PLAN.md`.
 
