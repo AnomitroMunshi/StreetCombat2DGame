@@ -111,6 +111,8 @@ const BODY_HALF: float = 18.0
 const REACH_SEARCH_STEPS: int = 6
 ## Body width kept when turned edge-on in a spin (fraction of facing width).
 const SPIN_MIN_WIDTH: float = 0.4
+## Boxing gloves are drawn this much bigger than a bare fist.
+const GLOVE_SCALE: float = 1.35
 ## Straight punch aim limits (limb angle from straight down; pi/2 = level).
 const AIM_MIN: float = 1.15
 const AIM_MAX: float = 2.3
@@ -143,7 +145,7 @@ enum { MECH_NONE, MECH_LEAD, MECH_REAR, MECH_RISING, MECH_KICK, MECH_ROUNDHOUSE,
 ## Per kind: channel -> offset at full drive.
 const MECH_GAINS: Dictionary = {
 	MECH_LEAD: {HIP_X: 8.0, TORSO: 0.14, SPREAD: 9.0, HEAD: 0.1},
-	MECH_REAR: {HIP_X: 13.0, TORSO: 0.2, SPREAD: -16.0, PIVOT: 0.9, DROP: 5.0, HEAD: 0.12},
+	MECH_REAR: {HIP_X: 12.0, TORSO: 0.12, SPREAD: -18.0, PIVOT: 0.9, DROP: 5.0, HEAD: 0.12},
 	MECH_RISING: {HIP_X: 5.0, TORSO: 0.0, SPREAD: -6.0, PIVOT: 0.5},
 	MECH_KICK: {HIP_X: 3.0, TORSO: -0.1, PIVOT: 0.8, TH_B: 0.3, SH_B: -0.25},
 	MECH_ROUNDHOUSE: {HIP_X: 3.0, TORSO: -0.05, PIVOT: 0.9, TH_B: 0.3, SH_B: -0.25, UA_B: -0.5, LA_B: -0.6},
@@ -190,7 +192,7 @@ var _jab_strike := PackedFloat32Array([0.3, 0.1, 1.57, 1.6, 0.55, 2.95, 0.66, 0.
 # Cross: hips and shoulders rotate in, rear leg drives straight, front knee bends into a lunge.
 var _heavy_windup := PackedFloat32Array([0.05, 0.15, 0.95, 2.7, 0.25, 2.5, 0.55, -0.1, -0.6, -0.35, -6.0, 0.0])
 # The rear heel turns out (pivot) as the hips drive the cross through.
-var _heavy_strike := PackedFloat32Array([0.5, 0.05, 0.75, 2.8, 1.57, 1.6, 0.85, 0.25, -0.8, -0.65, 16.0, 0.0, 0.5])
+var _heavy_strike := PackedFloat32Array([0.32, 0.05, 0.75, 2.8, 1.57, 1.6, 0.6, 0.0, -0.5, -0.78, 12.0, 0.0, 0.8])
 var _backhand_windup := PackedFloat32Array([0.1, 0.15, 1.3, 4.08, 0.55, 2.95, 0.6, -0.05, -0.62, -0.3, -3.0, 0.0])
 var _backhand_strike := PackedFloat32Array([0.25, 0.05, 1.8, 2.05, 0.55, 2.95, 0.68, 0.05, -0.66, -0.32, 6.0, 0.0])
 var _uppercut_windup := PackedFloat32Array([0.45, 0.15, 0.9, 2.6, 0.15, 0.9, 1.0, -0.4, -0.75, -1.1, -4.0, 0.0])
@@ -450,6 +452,8 @@ var _heel_target := Vector2.ZERO
 var _heel_draw := Vector2.ZERO
 ## Current toe point per leg (x lead, y rear), eased toward the technique's.
 var _foot_point := Vector2.ZERO
+## Outfit (MartialArtStyle.kit).
+var _kit: StringName = &"gi"
 
 @onready var fighter: Fighter = get_parent() as Fighter
 
@@ -635,6 +639,7 @@ func _sync_stance() -> void:
 		return
 	_seen_stance = fighter.stance
 	_guard = Stances.pose(fighter.stance)
+	_kit = fighter.style.kit if fighter.style != null else &"gi"
 	while _guard.size() < CHANNELS:
 		_guard.append(DEFAULT_SPREAD if _guard.size() == SPREAD else 0.0)
 	_pose_library[&"guard"] = _guard
@@ -1076,12 +1081,14 @@ func _active_idle() -> PackedFloat32Array:
 		shift = tanh(3.0 * shift) / tanh(3.0)  # settle and hold, then a quick adjustment
 	var amp := fighter.idle_amplitude
 	_bob_target = float(st["bob"]) * dip * k * amp
+	var heel_base := float(st.get("rear_heel", 0.0)) * k
 	if st.get("alternate", false):
 		# Boxer's bounce: the heels lift on alternate bounces (rear, then lead)
 		# while the weight and shoulders rock toward the planted foot.
 		var side := sin(PI * hz * t)
 		var rise := 1.0 - dip
-		_heel_target = Vector2(float(st["lead_heel"]) * maxf(-side, 0.0), float(st["heel"]) * maxf(side, 0.0)) 			* (0.4 + 0.6 * rise) * k * amp
+		_heel_target = Vector2(float(st["lead_heel"]) * maxf(-side, 0.0), float(st["heel"]) * maxf(side, 0.0)) \
+			* (0.4 + 0.6 * rise) * k * amp + Vector2(0.0, heel_base)
 		idle[HIP_X] += float(st["shift"]) * side * k * amp
 		idle[SPREAD] += float(st["shoulder"]) * side * k * amp
 	else:
@@ -1530,11 +1537,11 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 ## Far-side limbs use `far`, everything else `near`.
 func _silhouette(j: PackedVector2Array, forward: Vector2, back_toe: Vector2, pad: float, far: Color, near: Color) -> void:
 	_leg(j[J_HIP_B], j[J_KNEE_B], j[J_FOOT_B], back_toe, pad, far, _heel_draw.y * _plant, _foot_point.y)
-	_arm(j[J_SHOULDER_B], j[J_ELBOW_B], j[J_HAND_B], pad, far)
+	_arm(j[J_SHOULDER_B], j[J_ELBOW_B], j[J_HAND_B], pad, far, _glove_color(false, pad))
 	_torso(j, forward, pad, near)
 	_head(j, forward, pad, near)
 	_leg(j[J_HIP_F], j[J_KNEE_F], j[J_FOOT_F], forward, pad, near, _heel_draw.x * _plant, _foot_point.x)
-	_arm(j[J_SHOULDER_F], j[J_ELBOW_F], j[J_HAND_F], pad, near)
+	_arm(j[J_SHOULDER_F], j[J_ELBOW_F], j[J_HAND_F], pad, near, _glove_color(true, pad))
 
 
 ## Tapered segment: radius ra at a, rb at b, with rounded ends.
@@ -1642,7 +1649,17 @@ func _leg(hip: Vector2, knee: Vector2, ankle: Vector2, toe_dir: Vector2, pad: fl
 	_capsule(sole - toe * 3.5, sole + toe * 13.0, 4.8 + pad, 3.6 + pad, color)
 
 
-func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: Color) -> void:
+## Boxing glove fill (only on the body fill pass; outlines and glows keep
+## their colour). Transparent = draw the hand in the body colour.
+func _glove_color(near: bool, pad: float) -> Color:
+	if _kit != &"boxing" or pad != 0.0:
+		return Color.TRANSPARENT
+	var c := fighter.accent_color
+	return c if near else c.darkened(0.25)
+
+
+func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: Color,
+		glove: Color = Color.TRANSPARENT) -> void:
 	# Biceps on the inside of the bend, forearm swelling below the elbow and
 	# tapering to the wrist.
 	var inside := -_bend_out(shoulder, elbow, hand, Vector2.UP)
@@ -1651,8 +1668,15 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 	# Glove: longer than wide along the forearm, so the knuckles visibly lead
 	# a punch (a round ball reads as a hammer fist).
 	var along := (hand - elbow).normalized() if hand.distance_squared_to(elbow) > 1.0 else Vector2.RIGHT
-	_capsule(hand - along * 1.5, hand + along * 5.5, 7.0 + pad, 8.0 + pad, color)
-	draw_circle(hand - along * 2.0 + inside.normalized() * 4.5, 3.6 + pad, color, true, -1.0, true)  # thumb
+	var g := GLOVE_SCALE if _kit == &"boxing" else 1.0
+	var fill := glove if glove.a > 0.0 else color
+	if glove.a > 0.0:
+		# Boxing glove cuff at the wrist.
+		var across := Vector2(-along.y, along.x)
+		var wrist := hand - along * 8.5
+		draw_line(wrist - across * 6.5, wrist + across * 6.5, Color(0.95, 0.94, 0.9), 4.0, true)
+	_capsule(hand - along * 1.5 * g, hand + along * 5.5 * g, 7.0 * g + pad, 8.0 * g + pad, fill)
+	draw_circle(hand - along * 2.0 * g + inside.normalized() * 4.5 * g, 3.6 * g + pad, fill, true, -1.0, true)  # thumb
 
 
 ## Side-profile torso: hips, narrower waist, chest out in front, shoulders.
@@ -1692,6 +1716,9 @@ func _head(j: PackedVector2Array, forward: Vector2, pad: float, color: Color) ->
 
 ## Belt with a hanging knot, headband with trailing tails, wrist wraps.
 func _draw_kit(j: PackedVector2Array, accent: Color, forward: Vector2) -> void:
+	if _kit == &"boxing":
+		_draw_boxing_kit(j, accent)
+		return
 	var hip := j[J_HIP]
 	var axis := (j[J_NECK] - hip).normalized()
 	var n := Vector2(-axis.y, axis.x)
@@ -1719,6 +1746,35 @@ func _draw_kit(j: PackedVector2Array, accent: Color, forward: Vector2) -> void:
 			var c := e.lerp(h, 0.7 + k * 0.1)
 			var half := _profile_width(FOREARM_FRONT, 0.7 + k * 0.1) + 0.6
 			draw_line(c - across * half, c + across * half, accent.darkened(0.15), 3.2, true)
+
+
+## Boxer: trunks with a waistband and boot cuffs (no belt or headband); the
+## gloves are coloured in _arm.
+func _draw_boxing_kit(j: PackedVector2Array, accent: Color) -> void:
+	var hip := j[J_HIP]
+	var axis := (j[J_NECK] - hip).normalized()
+	var n := Vector2(-axis.y, axis.x)
+	var trunks := accent.darkened(0.1)
+	var trim := accent.lightened(0.45)
+	# Trunks: over the pelvis and the top of both thighs.
+	for leg in [[J_HIP_B, J_KNEE_B, trunks.darkened(0.3)], [J_HIP_F, J_KNEE_F, trunks]]:
+		var top: Vector2 = j[leg[0]]
+		var hem: Vector2 = top.lerp(j[leg[1]], 0.5)
+		_capsule(top, hem, 11.2, 9.6, leg[2])
+	_capsule(j[J_HIP_F], j[J_HIP_B], 11.0, 11.0, trunks)
+	var band := hip + axis * 9.0
+	draw_line(band - n * 12.5, band + n * 12.5, trim, 4.0, true)
+	# Boot cuffs over the lower shins.
+	for leg in [[J_KNEE_B, J_FOOT_B], [J_KNEE_F, J_FOOT_F]]:
+		var knee: Vector2 = j[leg[0]]
+		var ankle: Vector2 = j[leg[1]]
+		var cuff := knee.lerp(ankle, 0.62)
+		_capsule(cuff, ankle, 5.6, 4.8, Color(0.13, 0.11, 0.1))
+		var dir := (ankle - knee).normalized()
+		var across := Vector2(-dir.y, dir.x)
+		draw_line(cuff - across * 6.0, cuff + across * 6.0, trim, 2.5, true)
+	# Gloves are coloured in the body pass (_arm), so the far glove stays
+	# behind the head and torso.
 
 
 ## States where the feet are planted on the floor (legs solved by IK).

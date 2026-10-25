@@ -23,6 +23,7 @@ enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNT
 ##   sway      torso sway in rad (the head counters it, eyes stay level)
 ##   head      extra head movement in rad; circles: hands trace small circles
 ##   feint     optional lead-hand feint: rad of reach, every feint_every s
+##   rear_heel rear heel kept raised in px (on the ball of the rear foot)
 ##   alternate boxer's bounce: heels lift on alternate bounces (rear, then
 ##             lead), the weight and shoulders rocking toward the planted
 ##             foot; one loop = two bounces (2 / hz seconds)
@@ -38,11 +39,12 @@ const DATA: Dictionary = {
 		"pose": [0.35, 0.2, 0.85, 2.95, 0.8, 2.95, 0.7, -0.2, -0.5, -0.5, 4.0, 0.0, 0.0, 2.0],
 	},
 	Kind.BOXING: {
-		"name": "BOXING GUARD", "southpaw": false, "idle": {"hz": 2.5, "bob": 3.0, "shape": "hop", "alternate": true, "shift": 3.0, "shift_hz": 1.25, "heel": 3.5, "lead_heel": 3.0, "shoulder": 1.8, "guard": 0.05, "sway": 0.02, "head": 0.035, "feint": 0.35, "feint_every": 2.7},
+		"name": "BOXING GUARD", "southpaw": false, "idle": {"hz": 2.5, "bob": 3.0, "shape": "hop", "alternate": true, "shift": 3.0, "shift_hz": 1.25, "heel": 3.5, "lead_heel": 3.0, "shoulder": 1.8, "guard": 0.05, "sway": 0.02, "head": 0.035, "feint": 0.35, "feint_every": 2.7, "rear_heel": 4.0},
 		# Compact high guard: chin tucked behind the lead shoulder, elbows in
 		# over the ribs, rear glove at the cheek, lead glove a little forward;
 		# knees soft, weight centred on a staggered stance.
-		"pose": [0.22, 0.34, 0.8, 2.75, 0.55, 3.05, 0.5, -0.15, -0.45, -0.45, 0.0, 2.0, 0.0, 8.0],
+		# Rear leg: knee soft and pointing forward, heel up on the ball of the foot.
+		"pose": [0.22, 0.34, 0.8, 2.75, 0.55, 3.05, 0.45, -0.12, -0.25, -0.62, 0.0, 2.0, 0.0, 8.0],
 	},
 	Kind.MUAY_THAI: {
 		"name": "MUAY THAI GUARD", "southpaw": false, "idle": {"hz": 1.0, "bob": 2.0, "shape": "sine", "shift": 2.5, "shift_hz": 0.5, "heel": 0.0, "lead_heel": 4.0, "shoulder": 1.0, "guard": 0.03, "sway": 0.02, "head": 0.01},

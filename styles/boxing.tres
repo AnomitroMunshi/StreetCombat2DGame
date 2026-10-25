@@ -13,6 +13,7 @@ difficulty = 2
 strengths = PackedStringArray("Fastest punches and longest punch combos", "Slip counter dodges head strikes", "Body hook breaks guards")
 weaknesses = PackedStringArray("No kicks or sweeps at all", "Short reach: must get close", "No low attacks")
 stance = 2
+kit = &"boxing"
 input_map = {
 &"down_heavy": &"slip_counter",
 &"front": &"rear_hook",

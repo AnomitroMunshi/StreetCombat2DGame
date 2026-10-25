@@ -40,6 +40,9 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 @export var weaknesses: PackedStringArray = PackedStringArray()
 ## Guard / idle / footwork: an index into Stances.Kind.
 @export var stance: int = 0
+## Outfit drawn over the body: &"gi" (belt, headband, wrist wraps) or
+## &"boxing" (gloves, trunks, boots). Presentation only.
+@export var kit: StringName = &"gi"
 ## slot -> move id, on the ground and in the air.
 @export var input_map: Dictionary = {}
 @export var air_map: Dictionary = {}
