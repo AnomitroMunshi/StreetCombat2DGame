@@ -43,6 +43,10 @@ const DATA: Dictionary = {
 		# Compact high guard: chin tucked behind the lead shoulder, elbows in
 		# over the ribs, rear glove at the cheek, lead glove a little forward;
 		# knees soft, weight centred on a staggered stance.
+		# Boxing duck (S): knees and waist bend, the head drops under the punch
+		# line with the gloves still up; not a full crouch.
+		"crouch": [0.7, 0.4, 1.0, 2.95, 0.65, 3.05, 1.05, -0.45, -0.35, -1.1, 6.0, 0.0, 0.0, 5.0],
+		"crouch_block": [0.72, 0.5, 1.2, 3.15, 0.95, 3.1, 1.05, -0.45, -0.35, -1.1, 4.0, 0.0, 0.0, 4.0],
 		# Rear leg: knee soft and pointing forward, heel up on the ball of the foot.
 		"pose": [0.22, 0.34, 0.8, 2.75, 0.55, 3.05, 0.45, -0.12, -0.25, -0.62, 0.0, 2.0, 0.0, 8.0],
 	},
@@ -102,6 +106,11 @@ static func pose(kind: Kind) -> PackedFloat32Array:
 
 static func is_southpaw(kind: Kind) -> bool:
 	return DATA[kind]["southpaw"]
+
+
+## The stance's own crouch / low-block pose, or an empty array for the default.
+static func crouch_pose(kind: Kind, blocking: bool) -> PackedFloat32Array:
+	return PackedFloat32Array(DATA[kind].get("crouch_block" if blocking else "crouch", []))
 
 
 static func active_idle(kind: Kind) -> Dictionary:

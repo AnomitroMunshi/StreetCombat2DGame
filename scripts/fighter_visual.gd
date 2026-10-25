@@ -141,7 +141,7 @@ const MAX_HEEL_LIFT: float = 5.0
 const MECH_LOAD: float = 0.35
 const MECH_LOAD_END: float = 0.55
 const MECH_RELEASE: float = 0.55
-enum { MECH_NONE, MECH_LEAD, MECH_REAR, MECH_RISING, MECH_KICK, MECH_ROUNDHOUSE, MECH_KNEE }
+enum { MECH_NONE, MECH_LEAD, MECH_REAR, MECH_RISING, MECH_KICK, MECH_ROUNDHOUSE, MECH_KNEE, MECH_HOOK_LEAD, MECH_HOOK_REAR }
 ## Per kind: channel -> offset at full drive.
 const MECH_GAINS: Dictionary = {
 	MECH_LEAD: {HIP_X: 8.0, TORSO: 0.14, SPREAD: 9.0, HEAD: 0.1},
@@ -150,6 +150,9 @@ const MECH_GAINS: Dictionary = {
 	MECH_KICK: {HIP_X: 3.0, TORSO: -0.1, PIVOT: 0.8, TH_B: 0.3, SH_B: -0.25},
 	MECH_ROUNDHOUSE: {HIP_X: 3.0, TORSO: -0.05, PIVOT: 0.9, TH_B: 0.3, SH_B: -0.25, UA_B: -0.5, LA_B: -0.6},
 	MECH_KNEE: {HIP_X: 6.0, TORSO: -0.1, PIVOT: 0.5},
+	# Hooks turn the shoulders in (closing) rather than reaching out.
+	MECH_HOOK_LEAD: {HIP_X: 5.0, TORSO: 0.05, SPREAD: -10.0, HEAD: 0.08},
+	MECH_HOOK_REAR: {HIP_X: 9.0, TORSO: 0.08, SPREAD: -16.0, PIVOT: 0.9, DROP: 3.0, HEAD: 0.1},
 }
 const MECH_FORWARD_ONLY: Array = [PIVOT, DROP, TH_B, SH_B, UA_B, LA_B]
 ## Limb muscle profiles: (t along the bone 0..1, half-width) on the front
@@ -239,9 +242,11 @@ var _back_extend := PackedFloat32Array([0.75, 0.55, 1.2, 2.6, 0.6, 2.4, 0.3, -0.
 # Hooks: the elbow comes up to shoulder height and the fist travels across on a
 # short arc; the shoulders turn through (spread swings from loaded to closed).
 var _lhook_load := PackedFloat32Array([0.15, 0.15, 0.8, 2.9, 0.85, 3.0, 0.55, -0.15, -0.5, -0.45, -3.0, 0.0, 0.0, 15.0])
-var _lhook_hit := PackedFloat32Array([0.3, 0.1, 1.5, 1.95, 0.85, 3.0, 0.6, -0.1, -0.55, -0.5, 6.0, 0.0, 0.3, -6.0])
+# Hooks: elbow up at shoulder height, arm bent about 90 degrees, the
+# shoulders turning in through the punch (not a straight).
+var _lhook_hit := PackedFloat32Array([0.3, 0.1, 1.62, 2.5, 0.85, 3.0, 0.6, -0.1, -0.55, -0.5, 6.0, 0.0, 0.3, -12.0])
 var _rhook_load := PackedFloat32Array([0.15, 0.15, 0.95, 2.95, 0.6, 2.9, 0.55, -0.15, -0.5, -0.45, -4.0, 0.0, 0.0, 16.0])
-var _rhook_hit := PackedFloat32Array([0.4, 0.05, 0.9, 2.9, 1.5, 1.95, 0.8, 0.2, -0.75, -0.6, 12.0, 0.0, 0.5, -10.0])
+var _rhook_hit := PackedFloat32Array([0.35, 0.05, 0.9, 2.9, 1.62, 2.5, 0.7, 0.1, -0.6, -0.65, 10.0, 0.0, 0.8, -18.0])
 # Body hook: dip at the knees and dig the lead fist in at rib height.
 var _bhook_load := PackedFloat32Array([0.4, 0.3, 0.6, 2.4, 0.85, 3.0, 0.9, -0.6, -0.4, -1.0, -4.0, 0.0, 0.0, 12.0])
 var _bhook_hit := PackedFloat32Array([0.55, 0.35, 1.25, 1.55, 0.85, 3.0, 1.0, -0.7, -0.45, -1.05, 8.0, 0.0, 0.2, -4.0])
@@ -318,6 +323,8 @@ var _land := PackedFloat32Array([0.3, 0.15, 0.7, 2.7, 0.3, 2.85, 1.05, -0.45, -0
 # Crouch: low squat, rear knee near the floor, guard up; and the crouched (low) block.
 var _crouch := PackedFloat32Array([0.35, 0.2, 1.0, 2.75, 0.7, 2.9, 1.25, -0.25, 0.5, -1.5, 0.0, 0.0])
 var _crouch_block := PackedFloat32Array([0.42, 0.35, 1.25, 3.1, 1.05, 3.05, 1.25, -0.25, 0.5, -1.5, -2.0, 0.0])
+var _crouch_default := PackedFloat32Array()
+var _crouch_block_default := PackedFloat32Array()
 # Dodge: backstep sway (lean out of range) and slip-in (duck under, forward).
 var _dodge_back := PackedFloat32Array([-0.45, -0.25, 1.0, 2.9, 0.8, 3.0, 0.35, 0.1, -0.85, -0.6, -10.0, 0.0])
 var _dodge_slip := PackedFloat32Array([0.65, 0.35, 1.0, 2.9, 0.8, 3.0, 0.9, -0.3, -0.7, -0.55, 8.0, 0.0])
@@ -616,6 +623,8 @@ func _ready() -> void:
 			[A, 1.0, _jspin_hit, EASE_LINEAR], [R, 0.5, _jspin_load, EASE_OUT]],
 	}
 	_build_light_reactions()
+	_crouch_default = _crouch.duplicate()
+	_crouch_block_default = _crouch_block.duplicate()
 	_pose = _guard.duplicate()
 	_swing_from = _guard.duplicate()
 	_pose_vel.resize(CHANNELS)
@@ -640,6 +649,12 @@ func _sync_stance() -> void:
 	_seen_stance = fighter.stance
 	_guard = Stances.pose(fighter.stance)
 	_kit = fighter.style.kit if fighter.style != null else &"gi"
+	# The stance's own crouch (the boxer's duck), else the default.
+	for pair in [[false, "_crouch", _crouch_default], [true, "_crouch_block", _crouch_block_default]]:
+		var own := Stances.crouch_pose(fighter.stance, pair[0])
+		while not own.is_empty() and own.size() < CHANNELS:
+			own.append(DEFAULT_SPREAD if own.size() == SPREAD else 0.0)
+		set(pair[1], own if not own.is_empty() else pair[2])
 	while _guard.size() < CHANNELS:
 		_guard.append(DEFAULT_SPREAD if _guard.size() == SPREAD else 0.0)
 	_pose_library[&"guard"] = _guard
@@ -1315,6 +1330,10 @@ func _aim_arm(pose: PackedFloat32Array, shoulder_joint: int, ua: int, la: int, h
 static func _mech_kind(type: CombatData.AttackType) -> int:
 	if type in [CombatData.AttackType.UPPERCUT, CombatData.AttackType.RISING_PUNCH, CombatData.AttackType.RISING_PALM]:
 		return MECH_RISING
+	if type in [CombatData.AttackType.LEAD_HOOK, CombatData.AttackType.BODY_HOOK]:
+		return MECH_HOOK_LEAD
+	if type == CombatData.AttackType.REAR_HOOK:
+		return MECH_HOOK_REAR
 	if type in [CombatData.AttackType.HIGH_KICK, CombatData.AttackType.BODY_ROUNDHOUSE, CombatData.AttackType.LOW_ROUNDHOUSE]:
 		return MECH_ROUNDHOUSE
 	match _attack_joint(type):
