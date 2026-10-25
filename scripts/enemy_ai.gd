@@ -234,6 +234,10 @@ func _next_attack() -> CombatData.AttackType:
 	var can_press := false
 	if _plan_index == 0:
 		can_press = _me.can_act() or _me.state == Fighter.State.PARRY
+	elif _me.can_act():
+		# The chain did not happen (whiffed, or not a listed branch): carry on
+		# with the plan from neutral rather than stalling.
+		can_press = true
 	else:
 		can_press = _me.state == Fighter.State.ATTACK and _me.swing_id != _last_pressed_swing \
 				and _me.get_phase() != Fighter.Phase.STARTUP

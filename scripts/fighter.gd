@@ -10,7 +10,9 @@ extends Node2D
 ## Interrupt rules — the ONLY ways an attack can end before its recovery is over:
 ##   1. Being hit: the attack is discarded and the fighter enters HITSTUN or KO.
 ##   2. Chaining: during the first `cancel_window` ticks of recovery a buffered
-##      attack starts the next combo step (up to CombatData.MAX_COMBO_CHAIN).
+##      attack starts the next combo step (up to CombatData.MAX_COMBO_CHAIN),
+##      if the swing connected (hit or block) and the branch is listed in
+##      CombatData.CHAINS. Whiffs always play out their full recovery.
 ##   3. Landing: an air attack ends when the fighter touches the floor (LAND).
 ## Walking, blocking, jumping and turning around are never allowed mid-attack.
 ##
@@ -375,7 +377,8 @@ func _tick_attack() -> void:
 	var strike_end := attack.startup + attack.active
 	if state_frame < strike_end:
 		position.x += attack.lunge * facing
-	elif combo_step < CombatData.MAX_COMBO_CHAIN and state_frame - strike_end < attack.cancel_window:
+	elif combo_step < CombatData.MAX_COMBO_CHAIN and state_frame - strike_end < attack.cancel_window 			and swing_has_hit and CombatData.can_chain(attack.type, buffered_attack):
+		# Chains need contact and a listed branch (CombatData.CHAINS).
 		if _consume_buffered_attack(combo_step + 1):
 			return
 	if state_frame >= attack.total_frames():

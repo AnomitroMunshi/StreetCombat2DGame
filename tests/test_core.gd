@@ -843,6 +843,60 @@ func _initialize() -> void:
 	_check(ch == CombatData.HitResult.HIT and a.last_hit_counter, "hit on a staggered fighter is a counter hit")
 	_check(is_equal_approx(a.posture, CombatData.POSTURE_MAX - 1.0) and a.state == Fighter.State.HITSTUN, "a counter hit stops one point short of a break (%.0f)" % a.posture)
 
+	print("[combo branches]")
+	# Returns [chain step reached by the follow-up, tick it started].
+	var chain_try := func(first: CombatData.AttackType, second: CombatData.AttackType, gap: float, press_at: int) -> Array:
+		var pp := _make_pair()
+		var x: Fighter = pp[0]
+		var y: Fighter = pp[1]
+		y.position.x = x.position.x + gap
+		var seen_step := 0
+		var started := -1
+		for t in 60:
+			var ia := _intent(first) if t == 0 else (_intent(second) if t == press_at else none)
+			_step(x, y, ia, none)
+			if t > 0 and x.state == Fighter.State.ATTACK and x.current_attack.type == second and started < 0:
+				started = t
+				seen_step = x.combo_step
+		return [seen_step, started]
+	var r1: Array = chain_try.call(CombatData.AttackType.LIGHT, CombatData.AttackType.HIGH_KICK, 80.0, 9)
+	_check(r1[0] == 2, "jab (hit) -> W+L high kick chains as step 2 (%s)" % [r1])
+	var r2: Array = chain_try.call(CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY, 80.0, 9)
+	_check(r2[0] == 2 and r2[1] <= 12, "jab (hit) -> cross chains in the cancel window (%s)" % [r2])
+	var r3: Array = chain_try.call(CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY, 220.0, 9)
+	var jab_total := CombatData.get_attack(CombatData.AttackType.LIGHT).total_frames()
+	_check(r3[0] == 0 or (r3[0] == 1 and r3[1] >= jab_total), "whiffed jab cannot cancel: full recovery first (%s)" % [r3])
+	var r4: Array = chain_try.call(CombatData.AttackType.HEAVY, CombatData.AttackType.HEAVY, 80.0, 16)
+	_check(r4[0] != 2, "cross -> cross is not a branch (%s)" % [r4])
+	var r5: Array = chain_try.call(CombatData.AttackType.SWEEP, CombatData.AttackType.LIGHT, 80.0, 15)
+	_check(r5[0] != 2, "sweep never chains (%s)" % [r5])
+	# Every AI plan only uses listed branches.
+	var plans_ok := true
+	for plan in EnemyAI.CLOSE_PLANS + EnemyAI.FAR_PLANS:
+		for i in range(1, plan.size()):
+			if not CombatData.can_chain(plan[i - 1], plan[i]):
+				plans_ok = false
+				printerr("  AI plan uses an unlisted branch: %s" % [plan])
+	_check(plans_ok, "every AI combo plan follows the branch table")
+
+	print("[juggle limits]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.ground_y = 560
+	b.ground_y = 560
+	b.position.x = 560
+	var max_juggle := 0
+	var knocked := false
+	for t in 150:
+		# Uppercut, then mash jabs: the juggle must end in a knockdown, never loop.
+		var ja := CombatData.AttackType.UPPERCUT if t == 0 else (CombatData.AttackType.LIGHT if t >= 10 and t % 3 == 0 else CombatData.AttackType.NONE)
+		_step(a, b, _intent(ja), none)
+		max_juggle = maxi(max_juggle, b.received_combo)
+		knocked = knocked or b.state == Fighter.State.KNOCKDOWN
+	_check(max_juggle == CombatData.KNOCKDOWN_COMBO_HITS and knocked,
+		"uppercut + mashed jabs: juggle reaches %d hits, then knockdown (max %d, knocked %s)" % [CombatData.KNOCKDOWN_COMBO_HITS, max_juggle, knocked])
+
 	print("[contact-aware reach (visual)]")
 	var fs: PackedScene = load("res://scenes/fighter.tscn")
 	var va: Fighter = fs.instantiate()

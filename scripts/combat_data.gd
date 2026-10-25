@@ -226,6 +226,29 @@ const ATTACK_TABLE: Dictionary = {
 }
 
 
+## Combo branches: which attacks each attack may cancel into during its
+## cancel_window. A cancel also needs the swing to have connected (hit or
+## blocked); a whiffed attack always plays out its full recovery. Anything not
+## listed waits for the recovery to end and starts a fresh chain.
+## Heavy enders never repeat themselves (no cross -> cross, kick -> kick).
+const CHAINS: Dictionary = {
+	AttackType.LIGHT: [AttackType.LIGHT, AttackType.HEAVY, AttackType.BACKHAND, AttackType.UPPERCUT,
+		AttackType.KICK, AttackType.FRONT_KICK, AttackType.HIGH_KICK, AttackType.SWEEP],
+	AttackType.BACKHAND: [AttackType.LIGHT, AttackType.HEAVY, AttackType.UPPERCUT, AttackType.KICK, AttackType.HIGH_KICK],
+	AttackType.HEAVY: [AttackType.KICK, AttackType.FRONT_KICK, AttackType.HIGH_KICK, AttackType.UPPERCUT, AttackType.SWEEP],
+	# Launcher: follow the body up with quick strikes or a high kick.
+	AttackType.UPPERCUT: [AttackType.LIGHT, AttackType.BACKHAND, AttackType.HIGH_KICK],
+	AttackType.KICK: [AttackType.LIGHT, AttackType.BACKHAND, AttackType.HEAVY],
+	# Push kick, then chase with a kick.
+	AttackType.FRONT_KICK: [AttackType.KICK, AttackType.HIGH_KICK],
+	AttackType.HIGH_KICK: [AttackType.LIGHT, AttackType.HEAVY],
+}
+
+
+static func can_chain(from: AttackType, to: AttackType) -> bool:
+	return to in CHAINS.get(from, [])
+
+
 class Attack extends RefCounted:
 	var type: CombatData.AttackType = CombatData.AttackType.NONE
 	var display_name: String = ""

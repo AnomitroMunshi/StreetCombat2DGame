@@ -90,9 +90,24 @@ The full table, including hitboxes, knockback and lunge, is in
 
 - **Buffer:** an attack press is held for 10 ticks, until the fighter can act.
 - **Combos:** during the first few ticks of recovery (`cancel_window`), a
-  buffered attack chains into the next swing, up to 3 swings. Any mix works,
-  for example J-J-K or J-K-L. On hit, every chain listed above is a true combo.
-  The 3rd swing is a finisher with extra knockback and stun.
+  buffered attack chains into the next swing, up to 3 swings. Two conditions:
+  the swing must have **connected** (hit or blocked), and the branch must be
+  listed in `CombatData.CHAINS`. A whiffed attack always plays out its full
+  recovery.
+
+  | From | Can chain into |
+  |---|---|
+  | Jab (J) | anything |
+  | Backhand (U) | J, K, O, L, W+L |
+  | Cross (K) | L, I, W+L, O, S+L |
+  | Uppercut (O) | J, U, W+L (juggle) |
+  | Side kick (L) | J, U, K |
+  | Front kick (I) | L, W+L |
+  | High kick (W+L) | J, K |
+  | Sweep, air attacks | nothing |
+
+  Heavy enders never repeat (no cross→cross). The 3rd swing is a finisher
+  with extra knockback and stun. Juggles end with a knockdown on the 3rd hit.
 - **Interrupts:** an attack can end early only by being hit, by chaining,
   or (for a jump kick) by landing. You can't walk, block, jump or turn around
   mid-attack.

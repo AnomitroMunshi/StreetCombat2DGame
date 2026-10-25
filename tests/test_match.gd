@@ -51,7 +51,8 @@ class Driver extends Node:
 			prev_enemy_state = e.state
 			max_combo = maxi(max_combo, e.received_combo)
 			# Pushboxes: standing bodies never overlap (checked after the game's tick).
-			if not p.airborne and not e.airborne and not p.is_down() and not e.is_down() 					and absf(e.position.x - p.position.x) < Fighter.PUSH_HALF_WIDTH * 2.0 - 0.5 and not overlap_reported:
+			# (Finishers are choreographed and close in deliberately: FIGHTING only.)
+			if main.call("get_round_state_name") == "FIGHTING" and not p.airborne and not e.airborne and not p.is_down() and not e.is_down() 					and absf(e.position.x - p.position.x) < Fighter.PUSH_HALF_WIDTH * 2.0 - 0.5 and not overlap_reported:
 				overlap_reported = true
 				fail("fighters overlapped: %.1f px apart" % absf(e.position.x - p.position.x))
 			if p.state == Fighter.State.KO or e.state == Fighter.State.KO:
