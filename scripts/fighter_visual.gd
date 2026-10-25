@@ -294,6 +294,15 @@ var _hitstun_body := PackedFloat32Array([0.5, 0.35, 0.35, 1.9, 0.25, 1.7, 0.55, 
 # Heavy head hit: head and shoulders whipped back and twisted, arms flung.
 var _hitstun_heavy := PackedFloat32Array([-0.62, -0.6, -0.35, 0.4, -0.55, 0.1, 0.25, 0.05, -0.55, -0.25, -10.0, 8.0, 0.0, -4.0])
 # Launched (uppercut / air hit): arched back, arms thrown up, legs trailing.
+# Directional head reactions (heavy; light ones blend halfway from the guard).
+# Hook: the head whips round and down, the shoulders turn with it, a cross-step.
+var _hitstun_hook := PackedFloat32Array([-0.25, 0.65, 0.2, 1.0, -0.35, 0.5, 0.5, -0.1, -0.75, -0.4, -8.0, 6.0, 0.3, -10.0])
+# Uppercut / knee to the head: chin snapped up, leaning back on the heels, arms flung up.
+var _hitstun_up := PackedFloat32Array([-0.75, -0.8, 1.9, 2.6, 1.4, 2.4, 0.35, 0.05, -0.55, -0.25, -10.0, -2.0, 0.0, 2.0])
+# Axe kick / overhand: driven down, knees buckling, head dropped.
+var _hitstun_down := PackedFloat32Array([0.65, 0.9, 0.5, 1.4, 0.35, 1.2, 0.95, -0.5, -0.45, -0.9, -4.0, 18.0, 0.0, 4.0])
+# Low kick: the lead knee buckles, the body dips toward it, a hand drops to the leg.
+var _hitstun_leg := PackedFloat32Array([0.5, 0.4, 0.25, 0.5, 0.55, 2.6, 1.15, -0.35, -0.55, -0.5, -6.0, 24.0, 0.0, 6.0])
 var _launched := PackedFloat32Array([-0.75, -0.55, 2.3, 2.9, 1.9, 2.5, 0.5, 0.35, -0.1, -0.4, 0.0, 0.0])
 # Light hits are half-way between the stance and the full reaction (built in _ready).
 var _hitstun_light := PackedFloat32Array()
@@ -892,6 +901,17 @@ func _apply_impulses() -> void:
 			_pose_vel[TORSO] -= 9.0 * k
 			_pose_vel[HEAD] -= 14.0 * k
 			_pose_vel[HIP_X] -= 120.0 * k
+			# The head whips the way the blow travelled.
+			match fighter.last_hit_kind:
+				CombatData.ImpactKind.HOOK:
+					_pose_vel[HEAD] += 26.0 * k
+					_pose_vel[SPREAD] -= 260.0 * k
+				CombatData.ImpactKind.RISING:
+					_pose_vel[HEAD] -= 14.0 * k
+					_pose_vel[TORSO] -= 6.0 * k
+				CombatData.ImpactKind.DOWNWARD:
+					_pose_vel[HEAD] += 30.0 * k
+					_pose_vel[DROP] += 140.0 * k
 		else:
 			_pose_vel[TORSO] += 7.0 * k
 			_pose_vel[HEAD] += 6.0 * k
@@ -1090,14 +1110,42 @@ func _back_turn(t: float) -> float:
 	return turned + back
 
 
-## Hit reaction by where and how hard the hit landed: launched (in the air),
-## head (light flinch / heavy whip) or body (light / heavy fold).
+## Hit reaction by where, how and how hard the hit landed: launched (in the
+## air), legs (knee buckles), head (by direction: straight whip back, hook
+## turning the head, uppercut snapping the chin up, overhand driving it down)
+## or body (fold). Light hits blend halfway from the guard. Consecutive hits
+## alternate small variations so a combo never repeats the same frame.
 func _reaction_pose() -> PackedFloat32Array:
 	if fighter.airborne:
 		return _launched
-	if fighter.last_hit_high:
-		return _hitstun_heavy if fighter.last_hit_heavy else _hitstun_light
-	return _hitstun_body if fighter.last_hit_heavy else _hitstun_body_light
+	var heavy := fighter.last_hit_heavy
+	var pose: PackedFloat32Array
+	if fighter.last_hit_low:
+		pose = _hitstun_leg
+	elif fighter.last_hit_high:
+		match fighter.last_hit_kind:
+			CombatData.ImpactKind.HOOK:
+				pose = _hitstun_hook
+			CombatData.ImpactKind.RISING:
+				pose = _hitstun_up
+			CombatData.ImpactKind.DOWNWARD:
+				pose = _hitstun_down
+			_:
+				return _varied(_hitstun_heavy if heavy else _hitstun_light)
+	else:
+		return _varied(_hitstun_body if heavy else _hitstun_body_light)
+	# Leg kicks always buckle the knee fully; other light hits go most of the way.
+	return _varied(pose if heavy or fighter.last_hit_low else _blend(_guard, pose, 0.75))
+
+
+func _varied(pose: PackedFloat32Array) -> PackedFloat32Array:
+	var out := pose.duplicate()
+	var s := 1.0 if fighter.hit_counter % 2 == 0 else -1.0
+	out[TORSO] += 0.06 * s
+	out[HEAD] += 0.12 * s
+	out[HIP_X] += 3.0 * s
+	out[SPREAD] += 3.0 * s
+	return out
 
 
 ## Holds a reaction pose, then eases back over the last part of the stun.
