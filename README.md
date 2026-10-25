@@ -481,6 +481,47 @@ drives animation and the ragdoll:
   steadily, backs off slowly and rarely, blocks more and dodges less. Damage and
   frame data are the same for both.
 
+## Combat feel
+
+- **Strike mechanics:** every strike shares a whole-body layer on top of its
+  keyframes (`FighterVisual._mechanics`).
+  - Each strike has a small load against it, then a snap in, then a release
+    early in the recovery: the limb snaps back first and the body settles last.
+  - Punches drive the hips forward, turn the shoulders through, pivot the rear
+    heel and tuck the chin.
+  - Kicks pivot on a bent support leg, with the torso (and on roundhouses the
+    rear arm) counterbalancing.
+  - Close-range kicks lean back to make room before the knee folds.
+- **Step-in strikes:** strikes travel into range (`CombatData.STEP_IN`, in px
+  through the late startup), and stop at the opponent's body.
+  - Hand strikes keep the feet planted, so a step-in steps front foot then rear
+    while the hips drive over them.
+  - Kicks skip in.
+  - Neutral is played from a real distance; the rival's preferred ranges were
+    widened to match.
+- **Fight camera:** frames both fighters.
+  - It zooms in to 1.4x during exchanges, widens as they separate and lifts for
+    jumps.
+  - Hits kick the camera along the blow, scaled by damage.
+  - Short slow-motion beats mark parries, perfect dodges, heavy counters and
+    guard breaks.
+- **Impacts:** every hit is tiered (light, solid, heavy) and directional
+  (`CombatData.impact_kind`).
+  - Each hit has a hot core flash stretched along the blow, with streaks and
+    sweat flung the way it travels.
+  - Only heavy blows get the flare and air wave.
+  - Shake and sound scale by tier: a head slap or body thud, with a crack
+    layered on heavy blows.
+- **Hit reactions** follow how the blow travelled:
+  - straight shots whip the head back;
+  - hooks turn the head and shoulders;
+  - uppercuts snap the chin up onto the heels;
+  - overhands and axe kicks drive the head down;
+  - low kicks buckle the lead knee;
+  - body shots fold the fighter.
+
+  Consecutive hits alternate small variations.
+
 ## Animation
 
 - **Moves are keyframe timelines** keyed to the frame data. Kicks follow real
