@@ -140,6 +140,9 @@ var getup_frames: int = CombatData.GETUP_FRAMES
 var getup_from_roll: bool = false
 var settling: bool = false
 var settle_x: float = 0.0
+## This flight was driven downward into the floor (Air Smash, axe-kick
+## spikes): only such landings smash the floorboards.
+var spiked: bool = false
 ## Downward speed at the last floor contact (presentation: impact size).
 var last_impact_speed: float = 0.0
 # Deterministic per-fighter randomness (blowback chances).
@@ -940,6 +943,7 @@ func _launch_down(push_dir: int) -> void:
 ## Launches a downed body: vx along push_dir, vy vertical (negative = up,
 ## positive = spiked down), then `rolls` floor rolls after the bounce.
 func blowback(push_dir: int, vx: float, vy: float, rolls: int, spin: bool) -> void:
+	spiked = vy > 0.0
 	if vy > 0.0:
 		velocity_y = vy
 	else:

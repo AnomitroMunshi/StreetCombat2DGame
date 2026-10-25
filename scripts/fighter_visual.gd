@@ -377,6 +377,11 @@ func _ready() -> void:
 		&"spin_kick": _spin_kick, &"knee_windup": _knee_windup, &"knee": _knee, &"slumped": _slumped,
 		&"tornado_windup": _tornado_windup, &"tornado_chamber": _tornado_chamber, &"tornado_kick": _tornado_kick,
 		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare,
+		# Style finishers reuse the move poses.
+		&"lhook_hit": _lhook_hit, &"rhook_hit": _rhook_hit, &"bhook_load": _bhook_load, &"bhook_hit": _bhook_hit,
+		&"overhand_hit": _overhand_hit, &"slip_dip": _slip_dip, &"uppercut_windup": _uppercut_windup,
+		&"heavy_windup": _heavy_windup, &"front_extend": _front_extend, &"high_extend": _high_extend,
+		&"shook_load": _shook_load, &"shook_hit": _shook_hit, &"axe_raise": _axe_raise, &"axe_chop": _axe_chop,
 	}
 	_moves = {
 		CombatData.AttackType.LIGHT: [
@@ -1508,8 +1513,14 @@ func _striking_joint() -> int:
 		return _attack_joint(attack.type)
 	if fighter.state == Fighter.State.FINISHER:
 		var pose_name := String(fighter.script_pose)
-		if pose_name.contains("kick") or pose_name == "knee":
+		if pose_name == "shook_hit":
+			return J_FOOT_B
+		if pose_name.contains("kick") or pose_name == "knee" or pose_name.ends_with("_extend") or pose_name == "axe_chop":
 			return J_FOOT_F if pose_name != "knee" else J_KNEE_F
+		if pose_name in ["rhook_hit", "overhand_hit", "uppercut_strike"]:
+			return J_HAND_B
+		if pose_name in ["lhook_hit", "bhook_hit"]:
+			return J_HAND_F
 		if pose_name.contains("strike") or pose_name.begins_with("palm_") or pose_name == "grab":
 			return J_HAND_B if pose_name == "heavy_strike" or pose_name == "palm_rear" else J_HAND_F
 	return -1

@@ -371,8 +371,7 @@ func _initialize() -> void:
 	_check(randoms.size() == 3 and randoms.has(FinisherDirector.Kind.PALM_FLURRY) and randoms.has(FinisherDirector.Kind.SPINNING_HEEL)
 		and randoms.has(FinisherDirector.Kind.TORNADO_KICK), "open floor -> random Palm Flurry / Spinning Heel / Tornado Kick")
 
-	for kind in [FinisherDirector.Kind.PALM_FLURRY, FinisherDirector.Kind.SPINNING_HEEL, FinisherDirector.Kind.AIR_SMASH,
-			FinisherDirector.Kind.WALL_CRUSH, FinisherDirector.Kind.TORNADO_KICK]:
+	for kind in FinisherDirector.Kind.values():
 		for side in [1, -1]:
 			var kname: String = "%s (%s)" % [FinisherDirector.DISPLAY_NAMES[kind], "facing right" if side == 1 else "facing left"]
 			print("[finisher %s]" % kname)

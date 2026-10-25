@@ -818,7 +818,7 @@ func _on_fighter_landed(fighter: Fighter) -> void:
 		# Heavy landing: a dust burst and a few bits of floor kicked up.
 		fx.dust_cloud(floor_pos, 1.0 + speed * 0.05, 50, 8)
 		fx.chunks(floor_pos + Vector2(0.0, -4.0), 3, FLOOR_WOOD, 4.0 + speed * 0.2, 0.0, 1.0, 3.0, 6.0)
-	if speed > 12.0:
+	if speed > 12.0 and fighter.spiked:
 		# Spiked into the floor: crater, radial cracks growing out of it,
 		# splintered floorboards, a dust burst and a floor shockwave.
 		# Just in front of the floor's back edge, so the hole lies on the boards.

@@ -289,7 +289,7 @@ const ATTACK_TABLE: Dictionary = {
 		"id": &"lead_hook", "name": "Lead Hook", "posture": 10.0,
 		"startup": 7, "active": 3, "recovery": 14, "cancel_window": 8,
 		"damage": 9, "hitstun": 18, "blockstun": 12,
-		"knockback": 3.5, "lunge": 1.0, "hitstop": 5,
+		"knockback": 4.5, "lunge": 1.0, "hitstop": 5,
 		"hitbox": Rect2(20.0, -160.0, 52.0, 36.0),
 	},
 	# Rear hook: the power hook, hips and rear heel turning through.
@@ -297,8 +297,8 @@ const ATTACK_TABLE: Dictionary = {
 		"id": &"rear_hook", "name": "Rear Hook", "posture": 14.0,
 		"startup": 10, "active": 3, "recovery": 19, "cancel_window": 7,
 		"damage": 12, "hitstun": 21, "blockstun": 14,
-		"knockback": 5.0, "lunge": 1.5, "hitstop": 7,
-		"blowback_chance": 0.15, "blowback_vx": 6.0, "blowback_vy": -6.0, "blowback_rolls": 0,
+		"knockback": 7.5, "lunge": 1.5, "hitstop": 8,
+		"blowback_chance": 0.3, "blowback_vx": 8.0, "blowback_vy": -6.5, "blowback_rolls": 1,
 		"hitbox": Rect2(20.0, -160.0, 56.0, 36.0),
 	},
 	# Body hook: dip and dig into the ribs. Heavy posture damage on a guard.
@@ -306,7 +306,7 @@ const ATTACK_TABLE: Dictionary = {
 		"id": &"body_hook", "name": "Body Hook", "posture": 16.0,
 		"startup": 8, "active": 3, "recovery": 15, "cancel_window": 8,
 		"damage": 10, "hitstun": 20, "blockstun": 12,
-		"knockback": 3.0, "lunge": 1.2, "hitstop": 6,
+		"knockback": 5.5, "lunge": 1.2, "hitstop": 7,
 		"hitbox": Rect2(22.0, -120.0, 52.0, 36.0),
 	},
 	# Overhand: looping rear hand over the top. Slow, big, an ender.
@@ -314,8 +314,8 @@ const ATTACK_TABLE: Dictionary = {
 		"id": &"overhand", "name": "Overhand", "posture": 18.0,
 		"startup": 13, "active": 3, "recovery": 22, "cancel_window": 0,
 		"damage": 15, "hitstun": 24, "blockstun": 16,
-		"knockback": 6.5, "lunge": 2.2, "hitstop": 8,
-		"blowback_chance": 0.2, "blowback_vx": 7.0, "blowback_vy": -6.0, "blowback_rolls": 1,
+		"knockback": 9.0, "lunge": 2.2, "hitstop": 9,
+		"blowback_chance": 0.45, "blowback_vx": 9.5, "blowback_vy": -7.0, "blowback_rolls": 1,
 		"hitbox": Rect2(30.0, -170.0, 58.0, 40.0),
 	},
 	# Slip counter: the head slips off the line (head-height strikes whiff during
@@ -324,7 +324,8 @@ const ATTACK_TABLE: Dictionary = {
 		"id": &"slip_counter", "name": "Slip Counter", "posture": 12.0,
 		"startup": 10, "active": 3, "recovery": 16, "cancel_window": 6,
 		"damage": 11, "hitstun": 22, "blockstun": 13,
-		"knockback": 5.0, "lunge": 1.0, "hitstop": 7, "slip": 8,
+		"knockback": 6.5, "lunge": 1.0, "hitstop": 8, "slip": 8,
+		"blowback_chance": 0.2, "blowback_vx": 7.5, "blowback_vy": -6.0, "blowback_rolls": 0,
 		"hitbox": Rect2(34.0, -156.0, 60.0, 30.0),
 	},
 

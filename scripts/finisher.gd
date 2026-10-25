@@ -13,7 +13,9 @@ extends RefCounted
 ## the director once per tick (not during hitstop) and turns the returned hit
 ## events into feedback (sparks, hitstop, shake, slow motion).
 
-enum Kind { PALM_FLURRY, SPINNING_HEEL, AIR_SMASH, WALL_CRUSH, TORNADO_KICK }
+## APPEND-ONLY (style files refer to finishers by the ids in IDS).
+enum Kind { PALM_FLURRY, SPINNING_HEEL, AIR_SMASH, WALL_CRUSH, TORNADO_KICK,
+	FINAL_BELL, EIGHT_COUNT, CYCLONE_360, HEAVENS_HEEL }
 
 const DISPLAY_NAMES: Dictionary = {
 	Kind.PALM_FLURRY: "PALM FLURRY",
@@ -21,8 +23,20 @@ const DISPLAY_NAMES: Dictionary = {
 	Kind.AIR_SMASH: "AIR SMASH",
 	Kind.WALL_CRUSH: "WALL CRUSH",
 	Kind.TORNADO_KICK: "TORNADO KICK 360",
+	Kind.FINAL_BELL: "THE FINAL BELL",
+	Kind.EIGHT_COUNT: "EIGHT-COUNT",
+	Kind.CYCLONE_360: "CYCLONE 360",
+	Kind.HEAVENS_HEEL: "HEAVEN'S HEEL",
 }
-## Finishers picked at random on open floor.
+## Permanent finisher ids (used by MartialArtStyle.finishers).
+const IDS: Dictionary = {
+	Kind.PALM_FLURRY: &"palm_flurry", Kind.SPINNING_HEEL: &"spinning_heel", Kind.AIR_SMASH: &"air_smash",
+	Kind.WALL_CRUSH: &"wall_crush", Kind.TORNADO_KICK: &"tornado_kick", Kind.FINAL_BELL: &"final_bell",
+	Kind.EIGHT_COUNT: &"eight_count", Kind.CYCLONE_360: &"cyclone_360", Kind.HEAVENS_HEEL: &"heavens_heel",
+}
+## Environmental finishers: shared by every style, chosen by situation.
+const ENVIRONMENTAL: Array[Kind] = [Kind.AIR_SMASH, Kind.WALL_CRUSH]
+## Open-floor finishers for a fighter with no style (tests).
 const OPEN_FLOOR_KINDS: Array[Kind] = [Kind.PALM_FLURRY, Kind.SPINNING_HEEL, Kind.TORNADO_KICK]
 ## Victim this close to the wall behind them -> Wall Crush.
 const WALL_RANGE: float = 170.0
@@ -47,8 +61,18 @@ var _beat_tick: int = 0
 var _dir: int = 1
 
 
-## Picks the finisher that fits the situation, otherwise a random one, never
-## repeating the previous finisher.
+## Finisher by permanent id (-1 if unknown).
+static func kind_for_id(fid: StringName) -> int:
+	for k in IDS:
+		if IDS[k] == fid:
+			return k
+	return -1
+
+
+## Picks the finisher that fits the situation: Air Smash for an airborne or
+## launching kill, else Wall Crush near the wall behind the victim, else one of
+## the ATTACKER'S STYLE's own finishers (never another style's), never repeating
+## the previous finisher when there is a choice.
 static func choose(atk: Fighter, vic: Fighter, killing_attack: CombatData.Attack, rng: RandomNumberGenerator) -> Kind:
 	var picked: Kind
 	var wall_x := Fighter.ARENA_MAX_X if atk.facing > 0 else Fighter.ARENA_MIN_X
@@ -60,10 +84,18 @@ static func choose(atk: Fighter, vic: Fighter, killing_attack: CombatData.Attack
 	elif near_wall and _last_played != Kind.WALL_CRUSH and rng.randf() < WALL_CRUSH_CHANCE:
 		picked = Kind.WALL_CRUSH
 	else:
+		var own: Array[Kind] = []
+		if atk.style != null and not atk.style.finishers.is_empty():
+			for fid in atk.style.finishers:
+				own.append(kind_for_id(fid))
+		else:
+			own = OPEN_FLOOR_KINDS.duplicate()
 		var pool: Array[Kind] = []
-		for k in OPEN_FLOOR_KINDS:
+		for k in own:
 			if k != _last_played:
 				pool.append(k)
+		if pool.is_empty():
+			pool = own
 		picked = pool[rng.randi_range(0, pool.size() - 1)]
 	_last_played = picked
 	return picked
@@ -153,6 +185,59 @@ func _build(k: Kind) -> Array[Dictionary]:
 	# Every finisher ends with a short final-blow hold and then a follow-through
 	# beat, so the attacker recovers naturally while the victim is still flying.
 	match k:
+		Kind.FINAL_BELL:
+			# Boxing: dig a body hook, a second body shot, then a rising uppercut
+			# that lifts them off their feet and drops them on their back.
+			return [
+				{"ticks": 8, "atk": &"bhook_load", "def": &"stagger"},
+				{"ticks": 8, "atk": &"bhook_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 1.5, "def_move": 1.2},
+				{"ticks": 6, "atk": &"bhook_load", "def": &"hitstun_body"},
+				{"ticks": 8, "atk": &"bhook_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 1.0, "def_move": 1.0},
+				{"ticks": 10, "atk": &"uppercut_windup", "def": &"hitstun_body"},
+				{"ticks": 18, "atk": &"uppercut_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -15.0, "ko_drift": 8.0, "ko_rolls": 0, "ko_tumble": false},
+				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.EIGHT_COUNT:
+			# Boxing: slip under, a six-punch flurry (hook, hook, jab, cross,
+			# hook, body), then a power cross that tumbles them away.
+			return [
+				{"ticks": 8, "atk": &"slip_dip", "def": &"stagger"},
+				{"ticks": 4, "atk": &"lhook_hit", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 4, "atk": &"rhook_hit", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 4, "atk": &"jab_strike", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 4, "atk": &"heavy_strike", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 4, "atk": &"lhook_hit", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 5, "atk": &"bhook_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 0.8, "def_move": 1.0},
+				{"ticks": 10, "atk": &"heavy_windup", "def": &"stagger"},
+				{"ticks": 18, "atk": &"heavy_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -10.0, "ko_drift": 15.0, "ko_rolls": 2, "ko_tumble": true},
+				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.CYCLONE_360:
+			# Taekwondo: a double kick (front, then high), coil, jump into a full
+			# spin and a head-height roundhouse.
+			return [
+				{"ticks": 7, "atk": &"front_extend", "def": &"hitstun_body", "hit": true, "high": false, "atk_move": 1.0, "def_move": 1.5},
+				{"ticks": 8, "atk": &"high_extend", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 1.0, "def_move": 1.5},
+				{"ticks": 12, "atk": &"tornado_windup", "def": &"stagger", "atk_spin": 0.25},
+				{"ticks": 14, "atk": &"tornado_chamber", "def": &"stagger", "atk_vy": -10.0, "atk_move": 2.5, "atk_spin": 0.75},
+				{"ticks": 16, "atk": &"tornado_kick", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -13.0, "ko_drift": 15.0, "ko_rolls": 2, "ko_tumble": true},
+				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
+			]
+		Kind.HEAVENS_HEEL:
+			# Taekwondo: spinning hook kick, leap, and a descending axe kick that
+			# drives them into the floor.
+			return [
+				{"ticks": 10, "atk": &"shook_load", "def": &"stagger", "atk_spin": 0.4},
+				{"ticks": 8, "atk": &"shook_hit", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 1.0, "def_move": 1.2, "atk_spin": 0.6},
+				{"ticks": 10, "atk": &"jump_rise", "def": &"stagger", "atk_vy": -13.0, "atk_move": 1.5},
+				{"ticks": 6, "atk": &"axe_raise", "def": &"stagger"},
+				{"ticks": 16, "atk": &"axe_chop", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": 16.0, "ko_drift": 3.0, "ko_rolls": 0, "ko_tumble": false},
+				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
+			]
 		Kind.SPINNING_HEEL:
 			# Jab, cross, spin with the back turned, head-high spinning heel kick.
 			return [

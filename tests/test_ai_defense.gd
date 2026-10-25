@@ -24,6 +24,9 @@ class Driver extends Node:
 		if frame == 1:
 			main.call("select_style", &"taekwondo")  # readable side kicks to parry
 			main.call("start_match", true)
+			# This test is about defensive choices: a patient rival, so most kicks
+			# meet a guard (or a parry) rather than a trade.
+			(main.get_node("EnemyAI") as EnemyAI).aggression = 0.2
 		for a in ["attack_kick", "move_left", "move_right"]:
 			Input.action_release(a)
 		var p: Fighter = main.get_node("Player")

@@ -171,6 +171,59 @@ func _initialize() -> void:
 	var low := CombatData.get_attack(CombatData.AttackType.SWEEP)
 	_check(a.receive_hit(low, opp, 1) != CombatData.HitResult.WHIFF, "a low attack still lands during the slip")
 
+	print("[style finishers]")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	for st in [boxing, tkd]:
+		p = _pair(st, 80.0)
+		a = p[0]
+		var v: Fighter = p[1]
+		var own := {}
+		for fid in st.finishers:
+			own[FinisherDirector.kind_for_id(fid)] = true
+		var picked := {}
+		var foreign := 0
+		var repeats := 0
+		var last := -1
+		for i in 200:
+			var k := FinisherDirector.choose(a, v, CombatData.get_attack(CombatData.AttackType.LIGHT), rng)
+			picked[k] = true
+			if not own.has(k):
+				foreign += 1
+			if k == last:
+				repeats += 1
+			last = k
+		_check(foreign == 0 and picked.size() == 2 and repeats == 0,
+			"%s on open floor: only its own two finishers, alternating (%s)" % [st.id, picked.keys().map(func(k: int) -> String: return FinisherDirector.DISPLAY_NAMES[k])])
+	p = _pair(boxing, 80.0)
+	a = p[0]
+	var vic: Fighter = p[1]
+	vic.airborne = true
+	var air_n := 0
+	for i in 100:
+		if FinisherDirector.choose(a, vic, null, rng) == FinisherDirector.Kind.AIR_SMASH:
+			air_n += 1
+	_check(air_n > 40, "airborne kill: Air Smash still has priority for a styled attacker (%d/100)" % air_n)
+	vic.airborne = false
+	vic.position.x = Fighter.ARENA_MAX_X - 60.0
+	a.position.x = vic.position.x - 80.0
+	var wall_n := 0
+	for i in 100:
+		if FinisherDirector.choose(a, vic, null, rng) == FinisherDirector.Kind.WALL_CRUSH:
+			wall_n += 1
+	_check(wall_n > 30, "near the wall: Wall Crush still has priority (%d/100)" % wall_n)
+
+	print("[boxing power]")
+	for case in [[CombatData.AttackType.REAR_HOOK, 40.0], [CombatData.AttackType.OVERHAND, 50.0], [CombatData.AttackType.BODY_HOOK, 30.0]]:
+		p = _pair(null, 80.0)
+		a = p[0]
+		var d: Fighter = p[1]
+		var x0 := d.position.x
+		d.receive_hit(CombatData.get_attack(case[0]), a, 1)
+		for t in 40:
+			d.tick()
+		_check(d.position.x - x0 >= case[1], "%s drives the opponent back %.0f px (>= %.0f)" % [CombatData.attack_name(case[0]), d.position.x - x0, case[1]])
+
 	# AI rivals of each style never start an illegal move.
 	print("[AI rivals stay in style]")
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()

@@ -40,4 +40,5 @@ chains = {
 }
 ai_close_plans = [[&"jab", &"side_kick"], [&"jab", &"cross", &"high_kick"], [&"front_kick", &"high_kick"], [&"axe_kick"], [&"side_kick", &"back_kick"], [&"jab", &"front_kick"]]
 ai_far_plans = [[&"side_kick"], [&"front_kick", &"side_kick"], [&"back_kick"], [&"spin_hook_kick"], [&"high_kick", &"spin_hook_kick"]]
+finishers = PackedStringArray("cyclone_360", "heavens_heel")
 ai_preferred_range = 115.0
