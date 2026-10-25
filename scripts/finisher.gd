@@ -171,6 +171,36 @@ func _init(finisher_kind: Kind, atk: Fighter, vic: Fighter) -> void:
 		atk.clamp_to_arena()
 
 
+## How far through the build-up (0 at the start, 1 at the knockout blow).
+func progress() -> float:
+	var final_index := _beats.size() - 1
+	for i in _beats.size():
+		if _beats[i].get("final", false):
+			final_index = i
+			break
+	return clampf(float(maxi(_index, 0)) / maxf(float(final_index), 1.0), 0.0, 1.0)
+
+
+## Ticks since the knockout blow landed (-1 before it).
+func ticks_since_ko() -> int:
+	for i in _beats.size():
+		if not _beats[i].get("final", false):
+			continue
+		if _index < i:
+			return -1
+		if _index == i:
+			return _beat_tick
+		return int(_beats[i]["ticks"]) + _sum_ticks(i + 1, _index) + _beat_tick
+	return -1
+
+
+func _sum_ticks(from: int, to: int) -> int:
+	var t := 0
+	for k in range(from, to):
+		t += int(_beats[k]["ticks"])
+	return t
+
+
 ## Playback speed for the current tick (1.0 when done).
 func playback_speed() -> float:
 	if done or _index < 0 or _index >= _beats.size():

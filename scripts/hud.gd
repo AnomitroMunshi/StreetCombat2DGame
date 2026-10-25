@@ -56,6 +56,14 @@ var _banner: String = ""
 var _banner_color: Color = Color.WHITE
 var _flash: float = 0.0
 var _letterbox: float = 0.0
+## Finisher cinematics: vignette amount, focus-line amount and their centre.
+var _cine: float = 0.0
+var _cine_target: float = 0.0
+var _cine_lines: float = 0.0
+var _cine_focus := Vector2(640.0, 360.0)
+var _vignette: GradientTexture2D = null
+var _line_seed: int = 0
+var _line_clock: float = 0.0
 var _letterbox_target: float = 0.0
 var _debug_visible: bool = true
 var _debug_lines: PackedStringArray = PackedStringArray()
@@ -475,6 +483,12 @@ func flash(strength: float) -> void:
 
 
 ## Cinematic black bars (finishers).
+func set_cinematic(amount: float, lines: float, focus: Vector2) -> void:
+	_cine_target = amount
+	_cine_lines = lines
+	_cine_focus = focus
+
+
 func set_letterbox(on: bool) -> void:
 	_letterbox_target = 1.0 if on else 0.0
 
@@ -496,6 +510,11 @@ func _process(delta: float) -> void:
 	_flash = maxf(_flash - FLASH_DECAY_PER_SEC * real_delta, 0.0)
 	_count_age += real_delta
 	_letterbox = move_toward(_letterbox, _letterbox_target, real_delta * 4.0)
+	_cine = move_toward(_cine, _cine_target, real_delta * 2.5)
+	_line_clock += real_delta
+	if _line_clock > 0.05:
+		_line_clock = 0.0
+		_line_seed += 1  # focus lines flicker
 	var fighters: Array[Fighter] = [_player, _enemy]
 	for i in fighters.size():
 		var f := fighters[i]
@@ -512,13 +531,59 @@ func _process(delta: float) -> void:
 	_canvas.queue_redraw()
 
 
+## Dark edges pulling the eye to the middle of the frame.
+func _draw_vignette(amount: float) -> void:
+	if _vignette == null:
+		var g := Gradient.new()
+		g.set_color(0, Color(0.0, 0.0, 0.0, 0.0))
+		g.set_color(1, Color(0.0, 0.0, 0.0, 1.0))
+		g.add_point(0.55, Color(0.0, 0.0, 0.0, 0.0))
+		g.add_point(0.8, Color(0.0, 0.0, 0.0, 0.45))
+		_vignette = GradientTexture2D.new()
+		_vignette.gradient = g
+		_vignette.fill = GradientTexture2D.FILL_RADIAL
+		_vignette.fill_from = Vector2(0.5, 0.5)
+		_vignette.fill_to = Vector2(1.05, 0.5)
+		_vignette.width = 256
+		_vignette.height = 144
+	_canvas.draw_texture_rect(_vignette, Rect2(0.0, 0.0, SCREEN_W, 720.0), false,
+		Color(1.0, 1.0, 1.0, 0.85 * smoothstep(0.0, 1.0, amount)))
+
+
+## Manga focus lines from the frame edges converging on the knockout blow.
+func _draw_focus_lines(amount: float) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _line_seed
+	var centre := _cine_focus
+	for i in 56:
+		var a := rng.randf() * TAU
+		var dir := Vector2.from_angle(a)
+		var outer := centre + dir * 1500.0
+		var inner := centre + dir * rng.randf_range(150.0, 260.0)
+		var w := rng.randf_range(1.0, 4.5)
+		var c := Color(1.0, 1.0, 1.0, rng.randf_range(0.25, 0.7) * amount)
+		var side := Vector2(-dir.y, dir.x) * w
+		_canvas.draw_colored_polygon(PackedVector2Array([outer + side, outer - side, inner]), c)
+
+
 func _on_canvas_draw() -> void:
 	if _player == null or _enemy == null:
 		return
+	if _cine > 0.0:
+		_draw_vignette(_cine)
+	if _cine_lines > 0.0:
+		_draw_focus_lines(_cine_lines)
 	if _letterbox > 0.0:
 		var h := LETTERBOX_HEIGHT * smoothstep(0.0, 1.0, _letterbox)
 		_canvas.draw_rect(Rect2(0.0, 0.0, SCREEN_W, h), Color.BLACK)
 		_canvas.draw_rect(Rect2(0.0, 720.0 - h, SCREEN_W, h), Color.BLACK)
+	# A finisher is a clean cinematic shot: the gameplay HUD steps aside.
+	if _cine < 0.05:
+		_draw_gameplay_hud()
+	_draw_overlays()
+
+
+func _draw_gameplay_hud() -> void:
 	_draw_bar(_player, BAR_MARGIN, false, _trail[0])
 	_draw_bar(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, true, _trail[1])
 	_draw_posture(_player, BAR_MARGIN, _posture_shown[0])
@@ -528,7 +593,14 @@ func _on_canvas_draw() -> void:
 	_draw_popups()
 	_draw_combo(_enemy, BAR_MARGIN, HORIZONTAL_ALIGNMENT_LEFT)
 	_draw_combo(_player, SCREEN_W - BAR_MARGIN - BAR_WIDTH, HORIZONTAL_ALIGNMENT_RIGHT)
+	if _show_hints:
+		_canvas.draw_string(_font, Vector2(0.0, 706.0),
+			"A/D move · 2×A/D dodge (close: slip past) · S+2×A/D roll · SPACE jump · J K U O I L (+W/S) attacks: see your style's moves · F signature (full Focus) · SHIFT block/parry · R rematch",
+			HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
 
+
+## Messages, banner, countdown, flash and the developer panel (always shown).
+func _draw_overlays() -> void:
 	if _banner != "":
 		# Lower third, clear of the health bars and the dev panel.
 		var band := Rect2(0.0, 600.0, SCREEN_W, 52.0)
@@ -542,11 +614,6 @@ func _on_canvas_draw() -> void:
 		_shadow_text(Vector2(0.0, 350.0), _subline, 24, HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, COLOR_DIM)
 	if _count_text != "":
 		_draw_countdown()
-
-	if _show_hints:
-		_canvas.draw_string(_font, Vector2(0.0, 706.0),
-			"A/D move · 2×A/D dodge (close: slip past) · S+2×A/D roll · SPACE jump · J K U O I L (+W/S) attacks: see your style's moves · F signature (full Focus) · SHIFT block/parry · R rematch",
-			HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
 
 	if _flash > 0.0:
 		_canvas.draw_rect(Rect2(0.0, 0.0, SCREEN_W, 720.0), Color(1.0, 0.97, 0.9, _flash * 0.75))

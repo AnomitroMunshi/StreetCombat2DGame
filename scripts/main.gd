@@ -44,6 +44,16 @@ const PREFIGHT_FOCUS_Y: float = 440.0
 const PREFIGHT_BGM_DUCK_DB: float = -10.0
 ## Camera / presentation.
 const FINISHER_ZOOM: float = 1.3
+## Cinematic finisher camera: pushes in from FIN_ZOOM_START to FIN_ZOOM_END
+## through the build-up, slams to FIN_ZOOM_KO on the knockout blow for
+## FIN_KO_HOLD ticks with a tilt, then follows the flying body out.
+const FIN_ZOOM_START: float = 1.5
+const FIN_ZOOM_END: float = 2.05
+const FIN_ZOOM_KO: float = 2.5
+const FIN_KO_HOLD: int = 16
+const FIN_TILT: float = 0.06
+const FIN_FOCUS_Y: float = -118.0
+const FIN_CAMERA_RATE: float = 7.0
 const CAMERA_FOLLOW_RATE: float = 4.0
 const CAMERA_PUNCH_DECAY: float = 9.0
 const SLOWMO_SCALE: float = 0.3
@@ -110,6 +120,8 @@ var _fx_rng := RandomNumberGenerator.new()
 var _finisher_rng := RandomNumberGenerator.new()
 var _finisher: FinisherDirector = null
 var _follow_victim: bool = false
+## Where the knockout blow landed (world), for the KO shot.
+var _ko_focus := Vector2.INF
 var _slowmo_ticks: int = 0
 # Double-tap detection for dodges: tick of the last A / D tap.
 var _last_tap := {-1: -1000, 1: -1000}
@@ -144,6 +156,7 @@ func _ready() -> void:
 	set_game_speed(1.0)
 	# The camera is moved in _process, so it must not be physics-interpolated.
 	camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	camera.ignore_rotation = false  # the finisher's knockout shot tilts
 	player.position = Vector2(PLAYER_PRE_X, FLOOR_Y)
 	enemy.position = Vector2(ENEMY_PRE_X, FLOOR_Y)
 	player.ground_y = FLOOR_Y
@@ -367,6 +380,7 @@ func _training_finisher(kind: FinisherDirector.Kind) -> void:
 func _reset_training() -> void:
 	_finisher = null
 	_follow_victim = false
+	_ko_focus = Vector2.INF
 	_hitstop = 0
 	_slowmo_ticks = 0
 	set_game_speed(_base_time_scale())
@@ -871,6 +885,8 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 
 func _start_finisher(attacker: Fighter, victim: Fighter, kind: FinisherDirector.Kind) -> void:
 	_set_round_state(RoundState.FINISHER)
+	_ko_focus = Vector2.INF
+	_follow_victim = false
 	_finisher = FinisherDirector.new(kind, attacker, victim)
 	last_finisher_name = _finisher.get_display_name()
 	hud.set_message("", "")
@@ -903,6 +919,7 @@ func _finisher_feedback(event: Dictionary) -> void:
 		audio.play(&"ko_boom")
 		_camera_punch += 0.12
 		_follow_victim = true
+		_ko_focus = pos
 	else:
 		_hitstop = maxi(_hitstop, 1 + power)
 		_shake(4 + power * 3, 2.0 + power * 2.0)
@@ -1254,6 +1271,7 @@ func _process(delta: float) -> void:
 	var real_delta := delta / maxf(Engine.time_scale, 0.01)
 	var target_zoom := 1.0
 	var target_pos := Vector2(640.0, 360.0)
+	var target_rot := 0.0
 	if _round_state <= RoundState.COUNTDOWN:
 		# Steady, centred pre-fight framing, a little closer for the silhouettes.
 		target_zoom = PREFIGHT_ZOOM
@@ -1262,15 +1280,21 @@ func _process(delta: float) -> void:
 		var attacker := _finisher.attacker
 		var victim := _finisher.victim
 		var mid := (attacker.position + victim.position) * 0.5
-		target_zoom = FINISHER_ZOOM
-		var focus := mid
-		if _follow_victim:
+		var since_ko := _finisher.ticks_since_ko()
+		var focus := mid + Vector2(0.0, FIN_FOCUS_Y)
+		target_zoom = lerpf(FIN_ZOOM_START, FIN_ZOOM_END, smoothstep(0.0, 1.0, _finisher.progress()))
+		target_rot = 0.0
+		if since_ko >= 0 and since_ko < FIN_KO_HOLD and _ko_focus != Vector2.INF:
+			# The knockout shot: tight on the blow, tilted.
+			focus = _ko_focus
+			target_zoom = FIN_ZOOM_KO
+			target_rot = FIN_TILT * float(_finisher.attacker.facing)
+		elif _follow_victim:
 			# Track the flying victim, widening the shot as they get thrown away.
-			focus = mid.lerp(victim.position, 0.55)
+			focus = mid.lerp(victim.position, 0.55) + Vector2(0.0, -80.0)
 			var spread := absf(attacker.position.x - victim.position.x)
-			target_zoom = clampf(1050.0 / (spread + 650.0), 1.0, FINISHER_ZOOM)
+			target_zoom = clampf(1300.0 / (spread + 650.0), 1.15, 1.7)
 		var half := Vector2(640.0, 360.0) / target_zoom
-		focus += Vector2(0.0, -80.0)
 		target_pos = Vector2(clampf(focus.x, VIEW_MIN.x + half.x, VIEW_MAX.x - half.x),
 			clampf(focus.y, VIEW_MIN.y + half.y, VIEW_MAX.y - half.y))
 	else:
@@ -1284,9 +1308,28 @@ func _process(delta: float) -> void:
 	if _round_state >= RoundState.FIGHTING and _finisher == null:
 		# Zoom eases slower than the pan, so exchanges do not pump the frame.
 		kz = 1.0 - exp(-FIGHT_ZOOM_RATE * real_delta)
+	elif _finisher != null:
+		k = 1.0 - exp(-FIN_CAMERA_RATE * real_delta)
+		kz = k
+	camera.rotation = lerp_angle(camera.rotation, target_rot, k)
+	_update_cinematic_overlay()
 	camera.zoom = camera.zoom.lerp(Vector2.ONE * target_zoom, kz) + Vector2.ONE * (_camera_punch * k)
 	camera.position = camera.position.lerp(target_pos, k)
 	camera.offset = _shake_offset + _camera_kick
+
+
+## Finisher overlay: vignette while a finisher plays, focus lines converging
+## on the knockout blow.
+func _update_cinematic_overlay() -> void:
+	var amount := 1.0 if _finisher != null and not _finisher.done else 0.0
+	var lines := 0.0
+	var focus := Vector2(640.0, 360.0)
+	if _finisher != null and _ko_focus != Vector2.INF:
+		var since := _finisher.ticks_since_ko()
+		if since >= 0 and since < FIN_KO_HOLD + 6:
+			lines = 1.0 - smoothstep(float(FIN_KO_HOLD - 4), float(FIN_KO_HOLD + 6), float(since))
+			focus = get_viewport().get_canvas_transform() * _ko_focus
+	hud.set_cinematic(amount, lines, focus)
 
 
 ## Fight framing: (centre x, centre y, zoom) holding both fighters.
