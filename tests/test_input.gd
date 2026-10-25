@@ -22,7 +22,7 @@ class Driver extends Node:
 			main.call("start_match", true)
 		# Godot reports a scripted press as "just pressed" on the next physics
 		# frame, so: press on frame N, check on N + 1, release on N + 2.
-		if frame % 4 == 0:
+		if frame % 4 == 0 and frame < 255:
 			for a in ["attack_kick", "mod_up", "mod_down", "jump", "move_left", "move_right", "cycle_stance"]:
 				Input.action_release(a)
 		match frame:
@@ -96,6 +96,26 @@ class Driver extends Node:
 				# Quiet the AI and move it away so the player can stand and guard.
 				(main.get_node("EnemyAI") as EnemyAI).setup(null, null)
 				e.position.x = p.position.x + 400.0 if p.position.x < 640.0 else p.position.x - 400.0
+			260:
+				# Standing still, then away (A) + L together: back kick.
+				Input.action_press("move_left")
+				Input.action_press("attack_kick")
+			261:
+				Input.action_press("move_left")
+			262:
+				check(p.current_attack != null and p.current_attack.type == CombatData.AttackType.BACK_KICK,
+					"standing + away + L -> back kick (%s)" % p.get_debug_label())
+				Input.action_release("move_left")
+				Input.action_release("attack_kick")
+			300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310:
+				# Retreating for a while, then L: stays a side kick.
+				Input.action_press("move_left")
+				if frame == 309:
+					Input.action_press("attack_kick")
+			311:
+				check(p.current_attack != null and p.current_attack.type == CombatData.AttackType.KICK,
+					"retreating + L -> side kick, not a back kick (%s)" % p.get_debug_label())
+				Input.action_release("move_left")
 			340, 341, 342:
 				Input.action_press("block")
 				if p.state == Fighter.State.BLOCK:

@@ -7,7 +7,7 @@ extends RefCounted
 
 ## JUMP_KICK / JUMP_PUNCH are never pressed directly: any kick or punch button
 ## while airborne becomes one of them.
-enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP_KICK, JUMP_PUNCH, SWEEP, HIGH_KICK }
+enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP_KICK, JUMP_PUNCH, SWEEP, HIGH_KICK, BACK_KICK }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 
 const TICK_RATE: int = 60
@@ -96,6 +96,11 @@ const DODGE_MOVE_FRAMES: int = 10
 const DODGE_BACK_SPEED: float = 8.5
 const DODGE_FORWARD_SPEED: float = 7.0
 const DODGE_BUFFER_FRAMES: int = 4
+## Back kick: away + L from standing. Away must be pressed at most
+## BACK_KICK_PRESS_WINDOW ticks before L, after at least BACK_KICK_STILL_TICKS
+## without moving, so a retreating fighter's L stays a side kick.
+const BACK_KICK_PRESS_WINDOW: int = 3
+const BACK_KICK_STILL_TICKS: int = 6
 ## Two taps of the same direction within this many ticks = dodge.
 const DOUBLE_TAP_WINDOW: int = 12
 const LANDING_FRAMES: int = 3
@@ -226,6 +231,16 @@ const ATTACK_TABLE: Dictionary = {
 		"knockback": 2.0, "lunge": 1.0, "hitstop": 6, "knockdown": true, "low": true,
 		"blowback_vx": 2.5, "blowback_vy": -6.0,
 		"hitbox": Rect2(30.0, -30.0, 82.0, 30.0),
+	},
+	# Spinning back kick (away + L from standing): turn the back, heel thrust.
+	# Slow and very unsafe, but the strongest push in the game. Never chains.
+	AttackType.BACK_KICK: {
+		"name": "Back Kick", "posture": 18.0,
+		"startup": 11, "active": 3, "recovery": 20, "cancel_window": 0,
+		"damage": 13, "hitstun": 22, "blockstun": 15,
+		"knockback": 8.0, "lunge": 0.8, "hitstop": 8,
+		"blowback_chance": 0.35, "blowback_vx": 9.0, "blowback_vy": -6.0, "blowback_rolls": 1,
+		"hitbox": Rect2(38.0, -128.0, 66.0, 36.0),
 	},
 }
 

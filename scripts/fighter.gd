@@ -89,6 +89,10 @@ const SETTLE_SPEED: float = 3.0
 @export var back_walk_mult: float = 0.75
 @export var body_color: Color = Color(0.93, 0.9, 0.84)
 @export var accent_color: Color = Color(0.25, 0.55, 0.95)
+## Active idle rhythm: tempo multiplier and phase offset (seconds), so two
+## fighters in the same arena never bounce in sync. Presentation only.
+@export var idle_tempo: float = 1.0
+@export var idle_phase: float = 0.0
 ## Silhouette outline colour, and whether it glows (rim light for dark fighters).
 @export var outline_color: Color = Color(0.1, 0.12, 0.18)
 @export var rim_glow: bool = false
@@ -373,7 +377,7 @@ func _tick_jump() -> void:
 	if air_attack_used or buffered_attack == CombatData.AttackType.NONE:
 		return
 	var kick := buffered_attack in [CombatData.AttackType.KICK, CombatData.AttackType.FRONT_KICK,
-		CombatData.AttackType.HIGH_KICK, CombatData.AttackType.SWEEP]
+		CombatData.AttackType.HIGH_KICK, CombatData.AttackType.SWEEP, CombatData.AttackType.BACK_KICK]
 	buffered_attack = CombatData.AttackType.NONE
 	buffer_frames = 0
 	air_attack_used = true

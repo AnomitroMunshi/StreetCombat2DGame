@@ -11,45 +11,54 @@ extends RefCounted
 
 enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNTER }
 
-## name, guard pose, southpaw (right foot forward), idle: [bounce Hz, knee flex, torso sway]
+## name, guard pose, southpaw (right foot forward), and the active idle (the
+## looping fighting movement in neutral; presentation only):
+##   hz        bounce rhythm; bob: hip dip in px (knees bend over planted feet)
+##   shape     "hop" (springy boxing bounce), "sine" (smooth), "snap" (sharp
+##             settle-and-hold adjustments)
+##   shift     weight shift between the feet in px, at shift_hz
+##   heel      rear heel lift in px (toes stay down); lead_heel: same, lead foot
+##   shoulder  shoulder roll (body rotation) in px; guard: hand drift in rad
+##   sway      torso sway in rad (the head counters it, eyes stay level)
+##   head      extra head movement in rad; circles: hands trace small circles
 const DATA: Dictionary = {
 	Kind.BLADED: {
-		"name": "BLADED", "southpaw": false, "idle": [2.6, 0.07, 0.02],
+		"name": "BLADED", "southpaw": false, "idle": {"hz": 2.0, "bob": 3.5, "shape": "hop", "shift": 4.0, "shift_hz": 0.9, "heel": 3.0, "lead_heel": 0.0, "shoulder": 1.5, "guard": 0.05, "sway": 0.02, "head": 0.02},
 		# Mobile, side-on, open lead hand reaching forward, rear hand at the chin.
 		"pose": [0.12, 0.08, 1.15, 2.2, 0.95, 3.0, 0.55, -0.1, -0.6, -0.15, 0.0, 0.0, 0.0, 13.0],
 	},
 	Kind.SQUARED: {
-		"name": "SQUARED", "southpaw": true, "idle": [1.4, 0.05, 0.05],
+		"name": "SQUARED", "southpaw": true, "idle": {"hz": 1.6, "bob": 3.0, "shape": "sine", "shift": 5.0, "shift_hz": 0.6, "heel": 2.0, "lead_heel": 0.0, "shoulder": 2.5, "guard": 0.04, "sway": 0.05, "head": 0.03},
 		# Pressure fighter: squared up, crouched forward, both fists high and closed.
 		"pose": [0.35, 0.2, 0.85, 2.95, 0.8, 2.95, 0.7, -0.2, -0.5, -0.5, 4.0, 0.0, 0.0, 2.0],
 	},
 	Kind.BOXING: {
-		"name": "BOXING GUARD", "southpaw": false, "idle": [3.0, 0.08, 0.02],
+		"name": "BOXING GUARD", "southpaw": false, "idle": {"hz": 2.4, "bob": 6.0, "shape": "hop", "shift": 3.0, "shift_hz": 1.2, "heel": 4.0, "lead_heel": 2.0, "shoulder": 2.0, "guard": 0.06, "sway": 0.03, "head": 0.04},
 		# High guard, gloves at the temples, balanced on the balls of the feet.
 		"pose": [0.2, 0.2, 0.95, 2.95, 0.85, 3.0, 0.5, -0.15, -0.45, -0.45, 0.0, 0.0, 0.0, 7.0],
 	},
 	Kind.MUAY_THAI: {
-		"name": "MUAY THAI GUARD", "southpaw": false, "idle": [1.6, 0.1, 0.03],
+		"name": "MUAY THAI GUARD", "southpaw": false, "idle": {"hz": 1.0, "bob": 2.0, "shape": "sine", "shift": 2.5, "shift_hz": 0.5, "heel": 0.0, "lead_heel": 4.0, "shoulder": 1.0, "guard": 0.03, "sway": 0.02, "head": 0.01},
 		# Upright, high hands, elbows in, lead knee lifted and ready to check.
 		"pose": [0.02, 0.05, 1.05, 3.0, 0.9, 3.05, 0.75, -0.6, -0.3, -0.3, 0.0, 0.0, 0.0, 4.0],
 	},
 	Kind.KARATE: {
-		"name": "KARATE STANCE", "southpaw": false, "idle": [0.8, 0.03, 0.01],
+		"name": "KARATE STANCE", "southpaw": false, "idle": {"hz": 1.7, "bob": 3.0, "shape": "hop", "shift": 7.0, "shift_hz": 0.85, "heel": 3.0, "lead_heel": 0.0, "shoulder": 1.2, "guard": 0.03, "sway": 0.015, "head": 0.01},
 		# Side-on long stance, low centre, extended lead guard, rear hand close to the body.
 		"pose": [0.05, 0.1, 1.45, 1.9, 0.9, 2.75, 0.95, -0.2, -0.85, -0.35, 0.0, 0.0, 0.0, 15.0],
 	},
 	Kind.KUNG_FU: {
-		"name": "KUNG FU STANCE", "southpaw": false, "idle": [0.9, 0.04, 0.04],
+		"name": "KUNG FU STANCE", "southpaw": false, "idle": {"hz": 0.8, "bob": 3.0, "shape": "sine", "shift": 5.0, "shift_hz": 0.4, "heel": 1.0, "lead_heel": 0.0, "shoulder": 2.5, "guard": 0.12, "sway": 0.05, "head": 0.02, "circles": true},
 		# Low and wide, both hands open and forward, fluid.
 		"pose": [0.15, 0.1, 1.3, 2.4, 1.0, 2.85, 1.0, -0.4, -0.95, -0.55, 0.0, 0.0, 0.0, 10.0],
 	},
 	Kind.GRAPPLER: {
-		"name": "GRAPPLER STANCE", "southpaw": false, "idle": [1.8, 0.06, 0.03],
+		"name": "GRAPPLER STANCE", "southpaw": false, "idle": {"hz": 0.7, "bob": 2.0, "shape": "sine", "shift": 6.0, "shift_hz": 0.35, "heel": 0.0, "lead_heel": 0.0, "shoulder": 3.0, "guard": 0.05, "sway": 0.06, "head": 0.02},
 		# Judo: low posture, bent forward, open hands reaching to clinch.
 		"pose": [0.45, 0.3, 1.35, 1.7, 1.0, 2.9, 0.7, -0.35, -0.45, -0.6, 6.0, 0.0, 0.0, 4.0],
 	},
 	Kind.COUNTER: {
-		"name": "COUNTER-FIGHTER", "southpaw": false, "idle": [2.2, 0.05, 0.08],
+		"name": "COUNTER-FIGHTER", "southpaw": false, "idle": {"hz": 1.4, "bob": 1.2, "shape": "snap", "shift": 3.0, "shift_hz": 0.7, "heel": 1.5, "lead_heel": 0.0, "shoulder": 1.0, "guard": 0.04, "sway": 0.03, "head": 0.08},
 		# Elusive: upright, lead hand low and loose, rear hand high, lots of head movement.
 		"pose": [0.05, 0.05, 0.6, 1.9, 0.9, 3.0, 0.5, -0.12, -0.45, -0.3, 0.0, 0.0, 0.0, 11.0],
 	},
@@ -75,7 +84,7 @@ static func is_southpaw(kind: Kind) -> bool:
 	return DATA[kind]["southpaw"]
 
 
-static func idle_style(kind: Kind) -> Array:
+static func active_idle(kind: Kind) -> Dictionary:
 	return DATA[kind]["idle"]
 
 

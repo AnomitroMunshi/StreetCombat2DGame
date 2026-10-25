@@ -50,6 +50,7 @@ old countdown can never fire into a new match.
 | O          | Uppercut (launcher / anti-air) |
 | L          | Side kick                   |
 | W + L      | High kick (face level)      |
+| A/D (away) + L from standing | Spinning back kick: turn, heel thrust (slow, strongest push). Retreating then L stays a side kick |
 | S + L      | Sweep (low, always knocks down) |
 | I          | Front kick (push kick)      |
 | L or I in the air | Jump kick (one per jump) |
@@ -389,6 +390,46 @@ drives animation and the ragdoll:
   The joint impulses scale with the weight of the hit.
 - **Body mechanics:** the cross and uppercut turn the rear heel out as the
   hips drive through. The sweep keeps the body back and lets the leg reach.
+- **Leg sweep (S + L),** following the reference sheet:
+  1. the body drops onto the bent rear leg;
+  2. the lead leg slides out, the torso pitches forward and the lead hand goes
+     to the floor for balance;
+  3. the straight lead leg sweeps along the floor at ankle height and carries
+     on in a low follow-through arc;
+  4. the body recovers to the stance.
+
+  A swept opponent has the feet kicked out toward the sweeper and falls onto
+  their back.
+- **Back kick:** the body turns its back on the opponent through the startup,
+  pulls the knee in, thrusts the heel straight back into the target, then
+  completes the turn during recovery. This is a visual spin only; gameplay
+  facing never changes.
+- **Active idle (fighting bounce):** in neutral, both fighters keep moving:
+  - a bounce: the hips dip over planted feet, so the knees bend;
+  - weight shifts between the feet;
+  - heel lifts, with the toes staying on the floor;
+  - shoulder roll;
+  - torso sway with a level head;
+  - small guard adjustments.
+
+  Each stance has its own loop (`Stances.DATA["idle"]`):
+  - **boxing:** energetic springy bounce;
+  - **Muay Thai:** measured and upright, with the lead heel rising;
+  - **karate:** bladed, with long elastic weight shifts;
+  - **kung fu:** fluid, hands tracing circles;
+  - **grappler:** low and grounded, big slow shifts, heels flat;
+  - **counter-fighter:** minimal, sharp settle-and-hold adjustments;
+  - **bladed / squared:** mobile hop / heavy rolling pressure.
+
+  Each fighter has its own `idle_tempo` and `idle_phase` (the rival runs at
+  0.92× with an offset), so the two never move in sync. The idle starts as
+  soon as the guard rises during the countdown. It fades out within a few
+  frames when you act, and eases back in over about half a second after any
+  action, so recoveries look settled. It also damps as posture fills. It is
+  purely visual: the gameplay root, collider and hitboxes never move, and
+  input is never delayed. Tunable constants: `IDLE_FADE_IN`, `IDLE_FADE_OUT`,
+  `IDLE_POSTURE_DAMP`, `MAX_IDLE_BOB`, `MAX_HEEL_LIFT` in `fighter_visual.gd`,
+  plus the per-stance values.
 - **Draw order:** the fighter who is attacking is drawn in front, so strikes
   read clearly at impact.
 - **Ragdoll:** knocked-down and KO'd bodies become a Verlet ragdoll with

@@ -675,7 +675,7 @@ func _initialize() -> void:
 	var mirror_ok := true
 	for type in [CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY, CombatData.AttackType.KICK,
 			CombatData.AttackType.FRONT_KICK, CombatData.AttackType.BACKHAND, CombatData.AttackType.UPPERCUT,
-			CombatData.AttackType.HIGH_KICK, CombatData.AttackType.SWEEP]:
+			CombatData.AttackType.HIGH_KICK, CombatData.AttackType.SWEEP, CombatData.AttackType.BACK_KICK]:
 		var results: Array = []
 		for side in [1, -1]:
 			p = _make_pair()
@@ -972,6 +972,44 @@ func _initialize() -> void:
 	vb.state_frame = CombatData.DODGE_INVULN_START + 1
 	_check(is_equal_approx(vis._solve_joints(vis._limit_reach(strike))[FighterVisual.J_HAND_B].x, free_x),
 		"a strike through a dodge passes freely")
+	va.queue_free()
+	vb.queue_free()
+
+	print("[active idle (visual)]")
+	va = fs.instantiate()
+	vb = fs.instantiate()
+	root.add_child(va)
+	root.add_child(vb)
+	await process_frame
+	va.position = Vector2(500, 560)
+	vb.position = Vector2(700, 560)
+	va.ground_y = 560
+	vb.ground_y = 560
+	va.opponent = vb
+	vb.opponent = va
+	va.face_opponent()
+	var iv: FighterVisual = va.get_node("Visual")
+	var root_before := va.position
+	var bob_max := 0.0
+	for i in 90:
+		iv._process(1.0 / 60.0)
+		bob_max = maxf(bob_max, float(iv.get("_bob")))
+	_check(float(iv.get("_idle_amount")) > 0.99 and bob_max > 1.0, "idle fades in and bounces (amount %.2f, dip up to %.1f px)" % [iv.get("_idle_amount"), bob_max])
+	_check(va.position == root_before, "the idle never moves the gameplay root")
+	va.current_attack = CombatData.get_attack(CombatData.AttackType.LIGHT)
+	va.state = Fighter.State.ATTACK
+	for i in 6:
+		iv._process(1.0 / 60.0)
+	_check(float(iv.get("_idle_amount")) < 0.01, "acting fades the idle out within 0.1 s (%.2f)" % iv.get("_idle_amount"))
+	va.state = Fighter.State.IDLE
+	va.current_attack = null
+	for i in 12:
+		iv._process(1.0 / 60.0)
+	_check(float(iv.get("_idle_amount")) < 0.5, "after an action the idle eases back in slowly (%.2f after 0.2 s)" % iv.get("_idle_amount"))
+	va.posture = CombatData.POSTURE_MAX
+	for i in 120:
+		iv._process(1.0 / 60.0)
+	_check(float(iv.get("_idle_amount")) <= 1.0 - FighterVisual.IDLE_POSTURE_DAMP + 0.01, "full posture damps the idle (%.2f)" % iv.get("_idle_amount"))
 	va.queue_free()
 	vb.queue_free()
 

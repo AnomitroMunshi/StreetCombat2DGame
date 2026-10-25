@@ -85,6 +85,12 @@ var _slowmo_ticks: int = 0
 # Double-tap detection for dodges: tick of the last A / D tap.
 var _last_tap := {-1: -1000, 1: -1000}
 var _block_was_held: bool = false
+# Back kick detection: when the current movement started and how long the
+# player stood still before it.
+var _move_prev: int = 0
+var _move_start_tick: int = -1000
+var _still_since_tick: int = 0
+var _still_before_move: int = 0
 var _stance_rng := RandomNumberGenerator.new()
 ## Name of the finisher played this round ("" if none). Read by tests/HUD.
 var last_finisher_name: String = ""
@@ -288,6 +294,13 @@ func _read_player_intent() -> CombatData.Intent:
 	var intent := CombatData.Intent.new()
 	var axis := Input.get_axis("move_left", "move_right")
 	intent.move = 0 if is_zero_approx(axis) else (1 if axis > 0.0 else -1)
+	if intent.move != _move_prev:
+		if _move_prev == 0:
+			_move_start_tick = _tick
+			_still_before_move = _tick - _still_since_tick
+		if intent.move == 0:
+			_still_since_tick = _tick
+		_move_prev = intent.move
 	intent.block = Input.is_action_pressed("block")
 	# A fresh Shift press is a parry attempt; holding it is a normal block. The
 	# press is the held-state edge, so it always lands on the tick the guard rises.
@@ -314,6 +327,8 @@ func _read_player_intent() -> CombatData.Intent:
 			intent.attack = CombatData.AttackType.HIGH_KICK
 		elif Input.is_action_pressed("mod_down"):
 			intent.attack = CombatData.AttackType.SWEEP
+		elif _is_back_kick_input(intent.move):
+			intent.attack = CombatData.AttackType.BACK_KICK
 		else:
 			intent.attack = CombatData.AttackType.KICK
 	elif Input.is_action_just_pressed("attack_front_kick"):
@@ -323,6 +338,13 @@ func _read_player_intent() -> CombatData.Intent:
 	elif Input.is_action_just_pressed("attack_uppercut"):
 		intent.attack = CombatData.AttackType.UPPERCUT
 	return intent
+
+
+## Away + L from standing: away pressed together with L (within a few ticks)
+## after standing still. Retreating (already moving away) keeps the side kick.
+func _is_back_kick_input(move: int) -> bool:
+	return move == -player.facing and _tick - _move_start_tick <= CombatData.BACK_KICK_PRESS_WINDOW \
+		and _still_before_move >= CombatData.BACK_KICK_STILL_TICKS
 
 
 # --- Combat resolution --------------------------------------------------------
