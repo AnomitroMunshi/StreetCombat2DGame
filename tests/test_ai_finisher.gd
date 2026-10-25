@@ -7,6 +7,8 @@ class Driver extends Node:
 	var frame: int = 0
 	var ko_frame: int = -1
 	var fails: int = 0
+	var changed: bool = false
+	var change_frame: int = -1
 
 	func check(cond: bool, msg: String) -> void:
 		print(("  ok   " if cond else "  FAIL ") + msg)
@@ -24,10 +26,17 @@ class Driver extends Node:
 			ko_frame = frame
 			print("  player KO'd at frame %d by finisher: %s" % [frame, main.get("last_finisher_name")])
 			check(main.get("last_finisher_name") != "", "a finisher played before the KO")
-		if state == "RESULT":
+		if state == "RESULT" and not changed:
 			check(ko_frame > 0 and frame - ko_frame >= 50, "K.O. shown before the result (%d ticks)" % (frame - ko_frame))
 			check(not p.airborne and not p.rolling and not p.settling, "loser at rest when the result appears")
-			check((main.get_node("HUD") as Hud).is_button_visible(), "RESTART MATCH offered")
+			check((main.get_node("HUD") as Hud).is_button_visible() and (main.get_node("HUD") as Hud).is_change_style_visible(),
+				"REMATCH and CHANGE STYLE offered")
+			if not changed:
+				changed = true
+				(main.get_node("HUD") as Hud).press_change_style()
+				change_frame = frame
+		if changed and frame == change_frame + 5:
+			check(main.call("get_round_state_name") == "STYLE_SELECT", "CHANGE STYLE after a match returns to style selection")
 			print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 			tree.quit(fails)
 		elif frame > 5000:

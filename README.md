@@ -37,7 +37,7 @@ Restarting reloads the scene, so health, AI, effects and animation all reset.
 Everything in the flow is counted in simulation ticks, with no timers, so an
 old countdown can never fire into a new match.
 
-## Martial arts (M6.5, in progress)
+## Martial arts (M6.5)
 
 Before a match, you choose a **martial art** on the style screen:
 - Click a card, or press **Q** to cycle through them. Your fighter shows that
@@ -96,6 +96,12 @@ finishers:
 - **Taekwondo:** Cyclone 360, Heaven's Heel.
 
 Air Smash and Wall Crush are shared by all styles and still take priority.
+
+**Environmental finishers.** Air Smash and Wall Crush are shared by every
+style. Wall Crush uses **your style's strikes** (the style's `wall_entry`): a
+boxer charges in with a rear hook and finishes with an overhand, Karate drives
+reverse punches, Kung Fu palms. Muay Thai keeps the classic flying knee and
+double palm.
 
 The AI rival also punishes you when you're stuck in an attack's recovery
 within its reach. That keeps short-range styles (Boxing, Kung Fu)
@@ -610,7 +616,9 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 | `test_styles.gd` | Style registry and validation, Boxing cannot kick, Taekwondo has no boxing combos, air moves and combos follow the style, new moves in both directions, slip counter, AI rivals never use an illegal move |
 | `test_movement.gd` | Jump cross-ups (both directions, moving rival, simultaneous jumps, walls), forward/backward roll, close slip-past, walking never passes, back hits after crossing, AI reaction delay |
 
-The V0.3 plan and audit are in `docs/V0.3_PLAN.md`.
+The V0.3 plan and audit are in `docs/V0.3_PLAN.md`. M6.5 design and merge
+review: `docs/M6.5_ARCHITECTURE.md`, `docs/M6.5_REVIEW.md`,
+`docs/ADDING_A_STYLE.md`.
 
 ## Known limitations
 

@@ -131,6 +131,7 @@ class Driver extends Node:
 					check(p.state == Fighter.State.IDLE and e.state == Fighter.State.IDLE, "both fighters idle")
 					check(p.posture == 0.0 and e.posture == 0.0 and p.posture_lock == 0, "posture reset on restart")
 					check(not p.is_crossing() and not e.is_crossing(), "no crossing / roll state survives a restart")
+					check(p.focus == 0.0 and e.focus == 0.0, "focus resets on restart")
 					print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 					tree.quit(fails)
 

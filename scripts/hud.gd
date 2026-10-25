@@ -405,7 +405,7 @@ func _on_canvas_draw() -> void:
 
 	if _show_hints:
 		_canvas.draw_string(_font, Vector2(0.0, 706.0),
-			"A/D move · 2×A/D dodge (close: slip past) · S+2×A/D roll · SPACE jump · J K U O I L (+W/S) attacks: see your style's moves · SHIFT block/parry · R rematch",
+			"A/D move · 2×A/D dodge (close: slip past) · S+2×A/D roll · SPACE jump · J K U O I L (+W/S) attacks: see your style's moves · F signature (full Focus) · SHIFT block/parry · R rematch",
 			HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
 
 	if _flash > 0.0:

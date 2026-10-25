@@ -52,6 +52,10 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 ## The style's own open-floor finishers (FinisherDirector ids). Air Smash and
 ## Wall Crush are environmental and shared by every style.
 @export var finishers: PackedStringArray = PackedStringArray()
+## Wall Crush strikes in this style (5 pose names: windup, entry strike into
+## the wall, pinning strike, final windup, final blow). Empty = the shared
+## default (flying knee, cross, double palm).
+@export var wall_entry: PackedStringArray = PackedStringArray()
 ## Signature technique (move id of a "signature" attack): F at full Focus.
 @export var signature: StringName = &""
 
@@ -152,6 +156,8 @@ func validate() -> PackedStringArray:
 		var mt := CombatData.type_for_id(m)
 		if mt != CombatData.AttackType.NONE and CombatData.get_attack(mt).signature:
 			errors.append("signature %s must not be mapped to a key" % m)
+	if not wall_entry.is_empty() and wall_entry.size() != 5:
+		errors.append("wall_entry needs 5 poses (got %d)" % wall_entry.size())
 	for fid in finishers:
 		var fk := FinisherDirector.kind_for_id(fid)
 		if fk < 0:

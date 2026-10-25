@@ -433,6 +433,84 @@ func _initialize() -> void:
 			res2.append([hits2, b3.health])
 		_check(res2[0][0] == 1 and res2[0] == res2[1], "%s hits exactly once, same both ways (%s)" % [CombatData.attack_name(t_new), res2])
 
+	print("[finisher poses and wall entries]")
+	var fs2: PackedScene = load("res://scenes/fighter.tscn")
+	var probe: Fighter = fs2.instantiate()
+	root.add_child(probe)
+	await process_frame
+	var library: Dictionary = (probe.get_node("Visual") as FighterVisual).get("_pose_library")
+	var missing: Array = []
+	for st in StyleRegistry.all() + [null]:
+		for k in FinisherDirector.Kind.values():
+			p = _pair(st, 90.0)
+			var dir := FinisherDirector.new(k, p[0], p[1])
+			for beat in dir.get("_beats"):
+				for key in ["atk", "def"]:
+					if beat.has(key) and not library.has(beat[key]):
+						missing.append("%s/%s:%s" % [st.id if st != null else "none", FinisherDirector.DISPLAY_NAMES[k], beat[key]])
+	_check(missing.is_empty(), "every finisher pose (all styles, incl. wall entries) exists in the pose library (%s)" % [missing.slice(0, 5)])
+	probe.queue_free()
+	# Wall Crush as a boxer: punches only, no knee hop, ends slumped.
+	p = _pair(boxing, 90.0)
+	a = p[0]
+	var wv: Fighter = p[1]
+	wv.position.x = Fighter.ARENA_MAX_X - 100.0
+	a.position.x = wv.position.x - 90.0
+	wv.health = 0
+	var wd := FinisherDirector.new(FinisherDirector.Kind.WALL_CRUSH, a, wv)
+	var kicked := false
+	var hopped := false
+	var wt := 0
+	while not wd.done and wt < 400:
+		wd.tick()
+		a.tick()
+		wv.tick()
+		hopped = hopped or a.airborne
+		kicked = kicked or String(a.script_pose).contains("knee") or String(a.script_pose).contains("kick")
+		wt += 1
+	_check(wd.done and not kicked and not hopped and wv.state == Fighter.State.KO, "Wall Crush as a boxer: hooks and an overhand, no knee or kick, ends in the slump")
+
+	print("[palm barrage and parried signatures]")
+	p = _pair(StyleRegistry.by_id(&"kung_fu"), 75.0)
+	a = p[0]
+	var pb: Fighter = p[1]
+	a.focus = CombatData.FOCUS_MAX
+	var fpb := CombatData.Intent.new()
+	fpb.signature = true
+	a.push_intent(fpb)
+	var pb_hits: Array = []
+	for t in 120:
+		a.tick()
+		pb.tick()
+		if a.is_hitbox_active() and a.get_hitbox_world().intersects(pb.get_hurtbox_world()):
+			var r2 := pb.receive_hit(a.current_attack, a, a.combo_step)
+			a.confirm_hit(r2)
+			if r2 == CombatData.HitResult.HIT:
+				pb_hits.append(a.current_attack.display_name)
+	_check(pb_hits == ["Straight Palm", "Straight Palm", "Straight Palm", "Double Palm"], "Flowing Palm Barrage: three palms then the double palm (%s)" % [pb_hits])
+	for sig_style in [&"taekwondo", &"karate"]:
+		p = _pair(StyleRegistry.by_id(sig_style), 90.0)
+		a = p[0]
+		var par: Fighter = p[1]
+		a.focus = CombatData.FOCUS_MAX
+		a.push_intent(fpb)
+		var sig_a := CombatData.get_attack(CombatData.type_for_id(StyleRegistry.by_id(sig_style).signature))
+		var res3 := CombatData.HitResult.WHIFF
+		for t in 60:
+			var pi := CombatData.Intent.new()
+			# Press the guard two ticks before the strike lands (inside the window).
+			if a.state == Fighter.State.ATTACK and a.state_frame >= sig_a.startup - 2:
+				pi.block = true
+				pi.parry = par.state != Fighter.State.BLOCK
+			par.push_intent(pi)
+			a.tick()
+			par.tick()
+			if a.is_hitbox_active() and a.get_hitbox_world().intersects(par.get_hurtbox_world()):
+				res3 = par.receive_hit(a.current_attack, a, a.combo_step)
+				a.confirm_hit(res3)
+		_check(res3 in [CombatData.HitResult.PARRIED, CombatData.HitResult.GUARD_BREAK] and par.health == 100,
+			"%s signature can be parried (%s)" % [sig_style, CombatData.HitResult.keys()[res3]])
+
 	# AI rivals of each style never start an illegal move.
 	print("[AI rivals stay in style]")
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
@@ -462,6 +540,17 @@ func _initialize() -> void:
 		root.add_child(main)
 		current_scene = main
 		await process_frame
+
+	print("[every style selectable]")
+	var main2: Node = current_scene
+	var sel_ok := true
+	for st in StyleRegistry.all():
+		main2.call("select_style", st.id)
+		var pl2: Fighter = main2.get_node("Player")
+		var en2: Fighter = main2.get_node("Enemy")
+		if pl2.style != st or pl2.stance != st.stance or en2.style == st or StyleRegistry.player_choice != st.id:
+			sel_ok = false
+	_check(sel_ok, "each of the %d styles can be selected; it loads into the fighter and the rival differs" % StyleRegistry.count())
 
 	print("RESULT: %s (%d failures)" % ["PASS" if _fails == 0 else "FAIL", _fails])
 	quit(1 if _fails > 0 else 0)

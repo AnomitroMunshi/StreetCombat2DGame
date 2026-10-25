@@ -57,6 +57,10 @@ const WALL_RANGE: float = 170.0
 ## Chance to use the situational finisher when it applies.
 const AIR_SMASH_CHANCE: float = 0.7
 const WALL_CRUSH_CHANCE: float = 0.6
+## Wall Crush strikes when the attacker's style does not set its own
+## (MartialArtStyle.wall_entry): windup, opening strike (into the wall),
+## pinning strike, final windup, final blow.
+const DEFAULT_WALL_ENTRY: Array[StringName] = [&"knee_windup", &"knee", &"heavy_strike", &"palm_windup", &"palm_strike"]
 ## The attacker never steps closer than this to the victim.
 const MIN_GAP: float = 50.0
 
@@ -73,6 +77,7 @@ var _beats: Array[Dictionary] = []
 var _index: int = -1
 var _beat_tick: int = 0
 var _dir: int = 1
+var _wall_entry: Array[StringName] = []
 
 
 ## Finisher by permanent id (-1 if unknown).
@@ -124,6 +129,11 @@ func _init(finisher_kind: Kind, atk: Fighter, vic: Fighter) -> void:
 	victim.begin_scripted(true)
 	attacker.facing = _dir
 	victim.facing = -_dir
+	_wall_entry = DEFAULT_WALL_ENTRY.duplicate()
+	if atk.style != null and atk.style.wall_entry.size() == 5:
+		_wall_entry.clear()
+		for pose in atk.style.wall_entry:
+			_wall_entry.append(StringName(pose))
 	_beats = _build(kind)
 
 
@@ -160,7 +170,7 @@ func _start_beat(beat: Dictionary) -> Dictionary:
 	attacker.script_spin_rate = float(beat.get("atk_spin", 0.0)) / maxf(float(beat["ticks"]), 1.0)
 	if beat.has("def"):
 		victim.script_pose = beat["def"]
-	if beat.has("atk_vy"):
+	if beat.has("atk_vy") and beat["atk_vy"] != 0.0:
 		attacker.scripted_launch(beat["atk_vy"])
 	if beat.has("def_vy"):
 		victim.scripted_launch(beat["def_vy"])
@@ -382,15 +392,18 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
 			]
 		Kind.WALL_CRUSH:
-			# Flying knee into the wall, cross to pin, double palm strike; the
-			# wall cracks and the victim slumps against it.
+			# Driving entry into the wall, a pinning strike, then the big final
+			# blow; the wall cracks and the victim slumps against it. The strikes
+			# come from the attacker's style (default: the flying knee, cross
+			# and double palm); only the knee entry leaves the ground.
+			var leap := -5.0 if _wall_entry[1] == &"knee" else 0.0
 			return [
-				{"ticks": 8, "atk": &"knee_windup", "def": &"stagger"},
-				{"ticks": 8, "atk": &"knee", "def": &"stagger", "atk_vy": -5.0, "atk_move": 7.0},
-				{"ticks": 8, "atk": &"knee", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "def_move": 9.0, "atk_move": 5.0, "wall": true},
-				{"ticks": 9, "atk": &"heavy_strike", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 1.0, "wall": true},
-				{"ticks": 10, "atk": &"palm_windup", "def": &"stagger"},
-				{"ticks": 20, "atk": &"palm_strike", "def": &"slumped", "hit": true, "power": 3, "final": true, "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
+				{"ticks": 8, "atk": _wall_entry[0], "def": &"stagger"},
+				{"ticks": 8, "atk": _wall_entry[1], "def": &"stagger", "atk_vy": leap, "atk_move": 7.0},
+				{"ticks": 8, "atk": _wall_entry[1], "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "def_move": 9.0, "atk_move": 5.0, "wall": true},
+				{"ticks": 9, "atk": _wall_entry[2], "def": &"hitstun", "hit": true, "power": 2, "atk_move": 1.0, "wall": true},
+				{"ticks": 10, "atk": _wall_entry[3], "def": &"stagger"},
+				{"ticks": 20, "atk": _wall_entry[4], "def": &"slumped", "hit": true, "power": 3, "final": true, "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
 				# Step back out of the slumped body's legs, then hold the guard.
 				{"ticks": 22, "atk": &"guard", "def": &"slumped", "atk_move": -3.2},
 				{"ticks": 30, "atk": &"guard", "def": &"slumped"},

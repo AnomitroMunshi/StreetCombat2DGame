@@ -42,6 +42,7 @@ chains = {
 }
 ai_close_plans = [[&"jab", &"cross", &"low_roundhouse"], [&"jab", &"lead_hook", &"body_roundhouse"], [&"cross", &"uppercut", &"high_kick"], [&"lead_hook", &"cross"], [&"jab", &"cross", &"high_kick"]]
 ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"back_kick"], [&"jab", &"body_roundhouse"]]
+wall_entry = PackedStringArray("knee_windup", "bodyrh_hit", "heavy_strike", "heavy_windup", "high_extend")
 signature = &"breaker_combo"
 finishers = PackedStringArray("last_combination", "knockout_rhythm")
 ai_preferred_range = 100.0
