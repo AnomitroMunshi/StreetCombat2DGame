@@ -196,6 +196,12 @@ var _stagger := PackedFloat32Array([-0.15, -0.3, 0.1, 0.4, -0.1, 0.2, 0.25, 0.05
 var _tornado_windup := PackedFloat32Array([0.3, 0.2, -0.5, 1.0, 1.2, 2.0, 0.8, -0.4, -0.5, -0.9, -4.0, 18.0])
 var _tornado_chamber := PackedFloat32Array([0.1, 0.1, 0.9, 2.8, 0.6, 2.8, 1.9, -0.6, 1.6, -1.0, 0.0, 0.0])
 var _tornado_kick := PackedFloat32Array([-0.6, 0.45, 1.3, 2.3, -1.3, -1.0, 1.95, 2.05, 0.9, -1.1, 6.0, 0.0])
+# Pre-match: standing relaxed (arms loose at the sides, narrow natural stance),
+# a fist-in-palm salute with a slight bow, and a chin-down glare with the fists
+# held low and loose. main.gd picks them through Fighter.prefight_pose.
+var _relaxed := PackedFloat32Array([0.03, 0.02, 0.14, 0.32, 0.1, 0.28, 0.24, 0.02, -0.2, -0.26, 0.0, 0.0, 0.0, 3.0])
+var _salute := PackedFloat32Array([0.34, 0.42, 0.8, 1.95, 0.85, 2.15, 0.24, 0.02, -0.2, -0.26, -1.0, 2.0, 0.0, 2.0])
+var _glare := PackedFloat32Array([0.22, 0.35, 0.4, 1.35, 0.32, 1.25, 0.34, -0.1, -0.32, -0.32, 0.0, 3.0, 0.0, 5.0])
 
 ## Named poses a FinisherDirector can request via Fighter.script_pose.
 var _pose_library: Dictionary = {}
@@ -257,6 +263,7 @@ var _last_hip_x: float = 0.0
 var _body_speed: float = 0.0
 # Idle breathing (0 = off), scales the torso length slightly.
 var _breath: float = 0.0
+var _pose_ready: bool = false
 
 @onready var fighter: Fighter = get_parent() as Fighter
 
@@ -286,6 +293,7 @@ func _ready() -> void:
 		&"palm_windup": _palm_windup, &"palm_strike": _palm_strike, &"spin_windup": _spin_windup,
 		&"spin_kick": _spin_kick, &"knee_windup": _knee_windup, &"knee": _knee, &"slumped": _slumped,
 		&"tornado_windup": _tornado_windup, &"tornado_chamber": _tornado_chamber, &"tornado_kick": _tornado_kick,
+		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare,
 	}
 	_moves = {
 		CombatData.AttackType.LIGHT: [
@@ -385,7 +393,11 @@ func _process(delta: float) -> void:
 	_apply_impulses()
 	var target := _target_pose(t)
 	var dt := minf(delta, 1.0 / 30.0)
-	if fighter.state == Fighter.State.ATTACK:
+	if not _pose_ready:
+		# First frame: start in the target pose instead of springing into it.
+		_pose_ready = true
+		_pose = target.duplicate()
+	elif fighter.state == Fighter.State.ATTACK:
 		# Attack timelines are continuous (they start from _swing_from), so follow
 		# them exactly, but record joint velocity: if the attack is interrupted,
 		# that momentum carries into the reaction.
@@ -642,6 +654,12 @@ func _update_down_amount(t: float) -> void:
 # --- Pose selection -----------------------------------------------------------
 
 func _target_pose(t: float) -> PackedFloat32Array:
+	if fighter.prefight_pose != &"" and (fighter.state == Fighter.State.IDLE or fighter.state == Fighter.State.WALK):
+		# Before the fight: the springs carry the body between these poses, so
+		# relaxed -> gesture -> stance guard all blend smoothly.
+		var pre: PackedFloat32Array = _pose_library.get(fighter.prefight_pose, _guard).duplicate()
+		pre[HIP_X] += sin(_time * TAU * 0.3) * 1.5  # settling weight, feet planted
+		return pre
 	match fighter.state:
 		Fighter.State.WALK:
 			return _walk_pose()

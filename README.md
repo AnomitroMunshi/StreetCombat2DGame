@@ -20,6 +20,23 @@ From a terminal:
 & "D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64.exe" --path D:\firstGame
 ```
 
+## Match flow
+
+1. **Pre-match:** the dojo, both fighters standing relaxed and a **START MATCH**
+   button. Nobody can move or attack yet. Press **Q** here to pick your stance.
+2. **Start:** click the button or press **Enter**. Both fighters walk to their
+   marks. The player salutes (fist in palm, small bow). The rival drops its chin
+   and glares. Then both raise their stance guard.
+3. **Countdown:** 3, 2, 1, **FIGHT!**, one second per number, with taiko cues.
+   The player's controls and the AI are unlocked on the same tick.
+4. **K.O.:** after the finisher, "K.O." stays up until the loser's body has
+   stopped moving. Then the winner appears with a **RESTART MATCH** button.
+   Enter or **R** also restarts. R works at any time.
+
+Restarting reloads the scene, so health, AI, effects and animation all reset.
+Everything in the flow is counted in simulation ticks, with no timers, so an
+old countdown can never fire into a new match.
+
 ## Controls
 
 | Key        | Action                      |
@@ -41,7 +58,8 @@ From a terminal:
 | Shift      | Hold to block               |
 | S + Shift  | Low block (needed against sweeps) |
 | Q          | Cycle your fighting stance  |
-| R          | Restart the match           |
+| Enter / click | START MATCH / RESTART MATCH button |
+| R          | Restart the match (back to the pre-match screen) |
 | F1         | Toggle developer overlay (off by default) |
 
 ## Combat rules
@@ -124,11 +142,14 @@ The full table, including hitboxes, knockback and lunge, is in
   swept fighter's feet are kicked out from under them.
 - **Blocking:** hold Shift while idle or walking. A blocked hit does no damage,
   causes blockstun and has reduced pushback. Heavy attacks are unsafe on block.
+- **Directional guard:** a raised guard does not turn around. If the opponent
+  jumps over you while you hold block, their attack hits your back. Let go of
+  Shift and block again to face them.
 - **Trades:** both fighters' hits are checked before either is applied, so
   simultaneous hits both land.
 - **KO and finishers:** a hit that would KO starts a scripted **finisher**.
   The camera zooms in, the final blow plays in slow motion, then "K.O." and the
-  winner appear. Press R to restart. Both the player and the AI get finishers.
+  winner appear. Both the player and the AI get finishers.
 
 ## Finishers
 
@@ -321,6 +342,25 @@ files.
   Grey: active but already spent.
 - Labels above each fighter, plus a panel showing tick, hitstop, each
   fighter's state and frame, buffered input, AI state and the last hit event.
+
+## Tests
+
+Headless tests live in `tests/`. Run them all, starting with an import/parse
+check:
+
+```bash
+GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe" bash tests/run_all.sh
+```
+
+| Test | Covers |
+|---|---|
+| `test_core.gd` | Frame data, combos, block / low block, cross-up guard, both facing directions, knockdown, dodge, finisher selection and choreography, audio |
+| `test_input.gd` | Real key mapping (W+L, S+L, S crouch, double-tap dodge, stance cycling) |
+| `test_flow.gd` | Start button, input lock, countdown order and timing, simultaneous unlock, button mashing, restart mid-countdown |
+| `test_match.gd` | A full scripted match against the real AI, KO, then restart |
+| `test_ai_finisher.gd` | AI finisher on a passive player; result only after the body is at rest |
+
+The V0.3 plan and audit are in `docs/V0.3_PLAN.md`.
 
 ## Known limitations
 

@@ -177,6 +177,23 @@ func _build_sfx() -> void:
 	_echo(b, 0.18, 0.3)
 	_sfx[&"finisher_sting"] = _finish(b)
 
+	# Countdown: a dry taiko beat with a short high ping (3, 2, 1).
+	b = _buffer(0.6)
+	_thump(b, 0.0, 0.4, 120.0, 62.0, 0.09, 1.0)
+	_noise(b, 0.0, 0.03, 0.006, 0.6, 0.35, rng)
+	_gong(b, 0.0, 0.5, 392.0, 0.18)
+	_sfx[&"count_tick"] = _finish(b, 0.7)
+
+	# FIGHT!: double taiko hit, bright crash and a low gong swell.
+	b = _buffer(1.6)
+	_thump(b, 0.0, 0.5, 140.0, 45.0, 0.14, 1.0)
+	_thump(b, 0.09, 0.6, 110.0, 38.0, 0.18, 0.9)
+	_noise(b, 0.0, 1.0, 0.3, 0.85, 0.5, rng)
+	_gong(b, 0.05, 1.5, 196.0, 0.45)
+	_echo(b, 0.11, 0.25)
+	_soft_clip(b, 1.5)
+	_sfx[&"fight_call"] = _finish(b)
+
 
 # --- Background music (worker thread) -------------------------------------------
 

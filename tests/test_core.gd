@@ -1,0 +1,710 @@
+extends SceneTree
+## Headless unit checks for Fighter combat logic (no rendering, no scenes).
+
+var _fails: int = 0
+
+
+func _check(cond: bool, msg: String) -> void:
+	if cond:
+		print("  ok   ", msg)
+	else:
+		_fails += 1
+		printerr("  FAIL ", msg)
+
+
+func _make_pair() -> Array[Fighter]:
+	var a := Fighter.new()
+	var b := Fighter.new()
+	root.add_child(a)
+	root.add_child(b)
+	a.position = Vector2(500, 560)
+	b.position = Vector2(580, 560)
+	a.opponent = b
+	b.opponent = a
+	a.face_opponent()
+	b.face_opponent()
+	return [a, b]
+
+
+func _intent(attack: CombatData.AttackType = CombatData.AttackType.NONE, block: bool = false, move: int = 0) -> CombatData.Intent:
+	var i := CombatData.Intent.new()
+	i.attack = attack
+	i.block = block
+	i.move = move
+	return i
+
+
+## Mimics main.gd's per-tick hit resolution for a single attacker.
+func _step(a: Fighter, b: Fighter, ia: CombatData.Intent, ib: CombatData.Intent) -> CombatData.HitResult:
+	a.push_intent(ia)
+	b.push_intent(ib)
+	a.tick()
+	b.tick()
+	if a.is_hitbox_active() and a.get_hitbox_world().intersects(b.get_hurtbox_world()):
+		var r := b.receive_hit(a.current_attack, a, a.combo_step)
+		a.confirm_hit(r)
+		return r
+	return CombatData.HitResult.WHIFF
+
+
+func _initialize() -> void:
+	print("KEY_F1 = ", KEY_F1)
+	print("InputMap actions present: ", InputMap.has_action("attack_light"), " events:", InputMap.action_get_events("attack_light").size())
+
+	print("[jab timing + single hit]")
+	var p := _make_pair()
+	var a: Fighter = p[0]
+	var b: Fighter = p[1]
+	var hits: Array[int] = []
+	var none := _intent()
+	for t in 30:
+		var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, none)
+		if r != CombatData.HitResult.WHIFF:
+			hits.append(t)
+	_check(hits.size() == 1, "jab hits exactly once (hits at ticks %s)" % [hits])
+	_check(hits.size() == 1 and hits[0] == 5, "jab connects on first active tick (5)")
+	_check(b.health == 94, "jab dealt 6 damage (hp %d)" % b.health)
+	_check(a.state == Fighter.State.IDLE, "attacker back to IDLE after recovery")
+
+	print("[3-hit combo via buffer]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var seq := {0: CombatData.AttackType.LIGHT, 3: CombatData.AttackType.LIGHT, 13: CombatData.AttackType.HEAVY, 22: CombatData.AttackType.LIGHT}
+	var steps_seen: Array[int] = []
+	var hit_count := 0
+	for t in 80:
+		var r := _step(a, b, _intent(seq.get(t, CombatData.AttackType.NONE)), none)
+		if r == CombatData.HitResult.HIT:
+			hit_count += 1
+		if a.state == Fighter.State.ATTACK and not steps_seen.has(a.combo_step):
+			steps_seen.append(a.combo_step)
+	_check(steps_seen == [1, 2, 3], "chain progressed through steps 1,2,3 (%s)" % [steps_seen])
+	_check(hit_count == 3, "all three combo hits landed (%d)" % hit_count)
+	_check(b.received_combo == 3, "defender registered a 3-hit combo (%d)" % b.received_combo)
+	_check(b.health == 100 - 6 - 6 - 13, "combo damage correct (hp %d)" % b.health)
+
+	print("[blocking]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var blocked := false
+	for t in 30:
+		var r := _step(a, b, _intent(CombatData.AttackType.HEAVY) if t == 0 else none, _intent(CombatData.AttackType.NONE, true))
+		if r == CombatData.HitResult.BLOCKED:
+			blocked = true
+			_check(b.state == Fighter.State.BLOCKSTUN, "defender in BLOCKSTUN")
+	_check(blocked, "heavy was blocked")
+	_check(b.health == 100, "no damage through block")
+
+	print("[no block / movement mid-attack]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	_step(a, b, _intent(CombatData.AttackType.KICK), none)
+	var x0 := a.position.x
+	for t in 6:
+		_step(a, b, _intent(CombatData.AttackType.NONE, true, -1), none)
+	_check(a.state == Fighter.State.ATTACK, "block/move input does not cancel attack startup")
+	_check(a.position.x >= x0, "no backwards walking during attack")
+
+	print("[KO]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	b.health = 5
+	for t in 20:
+		_step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, none)
+	_check(b.state == Fighter.State.FINISHED and b.health == 0, "lethal hit -> FINISHED (awaiting finisher) at 0 hp")
+	var again := b.receive_hit(CombatData.get_attack(CombatData.AttackType.HEAVY), a, 1)
+	_check(again == CombatData.HitResult.WHIFF and b.health == 0, "finished fighter ignores further hits")
+
+	print("KEY_SHIFT = ", KEY_SHIFT, "  block bound to shift: ",
+		(InputMap.action_get_events("block")[0] as InputEventKey).physical_keycode == KEY_SHIFT)
+
+	print("[front kick]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	hits = []
+	for t in 30:
+		var r := _step(a, b, _intent(CombatData.AttackType.FRONT_KICK) if t == 0 else none, none)
+		if r != CombatData.HitResult.WHIFF:
+			hits.append(t)
+	_check(hits == [7], "front kick hits once on tick 7 (%s)" % [hits])
+	_check(b.health == 92, "front kick dealt 8 (hp %d)" % b.health)
+	_check(b.position.x - a.position.x > 120.0, "front kick pushed defender away (gap %.0f)" % (b.position.x - a.position.x))
+
+	print("[jump arc + landing]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.position.x = 300
+	a.ground_y = 560
+	b.ground_y = 560
+	var jump := _intent()
+	jump.jump = true
+	var peak := 0.0
+	var air_ticks := 0
+	var saw_land := false
+	var landed_tick := -1
+	for t in 60:
+		_step(a, b, jump if t == 0 else none, none)
+		if a.airborne:
+			air_ticks += 1
+			peak = maxf(peak, 560.0 - a.position.y)
+		if a.state == Fighter.State.LAND:
+			saw_land = true
+		if saw_land and landed_tick < 0 and a.state == Fighter.State.IDLE:
+			landed_tick = t
+	_check(peak > 90.0 and peak < 130.0, "jump peak height ~118 px (%.0f)" % peak)
+	_check(air_ticks >= 24 and air_ticks <= 32, "airtime ~29 ticks (%d)" % air_ticks)
+	_check(saw_land and landed_tick > 0, "went through LAND recovery back to IDLE")
+	_check(is_equal_approx(a.position.y, 560.0), "back on the floor exactly")
+
+	print("[jump kick vs standing opponent]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.position.x = 430
+	a.ground_y = 560
+	b.ground_y = 560
+	var jf := _intent(CombatData.AttackType.NONE, false, 1)
+	jf.jump = true
+	var fwd := _intent(CombatData.AttackType.NONE, false, 1)
+	var jk_hits := 0
+	var extra_kicks := 0
+	for t in 70:
+		var ia := fwd
+		if t == 0:
+			ia = jf
+		elif t == 16:
+			ia = _intent(CombatData.AttackType.KICK)
+		elif t == 22:
+			ia = _intent(CombatData.AttackType.FRONT_KICK)  # second air kick must be refused
+		var r := _step(a, b, ia, none)
+		if r == CombatData.HitResult.HIT:
+			jk_hits += 1
+		if a.current_attack != null and a.current_attack.type == CombatData.AttackType.JUMP_KICK and a.swing_id > 1:
+			extra_kicks += 1
+	_check(jk_hits == 1, "jump kick hit standing opponent once (%d)" % jk_hits)
+	_check(b.health == 89, "jump kick dealt 11 (hp %d)" % b.health)
+	_check(extra_kicks == 0, "only one air attack per jump")
+	_check(not a.airborne, "attacker landed")
+
+	print("[jump punch]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.position.x = 450
+	a.ground_y = 560
+	b.ground_y = 560
+	var jp_started := false
+	var jp_hit := false
+	var jfw := _intent(CombatData.AttackType.NONE, false, 1)
+	jfw.jump = true
+	for t in 60:
+		var ia := jfw if t == 0 else (_intent(CombatData.AttackType.LIGHT) if t == 20 else _intent(CombatData.AttackType.NONE, false, 1))
+		var r := _step(a, b, ia, none)
+		if a.airborne and a.current_attack != null and a.current_attack.type == CombatData.AttackType.JUMP_PUNCH:
+			jp_started = true
+		if r == CombatData.HitResult.HIT:
+			jp_hit = true
+	_check(jp_started, "J in the air becomes a jump punch")
+	_check(jp_hit and b.health == 92, "jump punch hit late in the jump for 8 (hp %d)" % b.health)
+
+	print("[knockdown + get-up]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.ground_y = 560
+	b.ground_y = 560
+	var kseq := {0: CombatData.AttackType.LIGHT, 3: CombatData.AttackType.LIGHT, 13: CombatData.AttackType.BACKHAND}
+	var states_seen: Array[int] = []
+	var bounced_seen := false
+	var whiff_while_down := false
+	for t in 140:
+		_step(a, b, _intent(kseq.get(t, CombatData.AttackType.NONE)), none)
+		if states_seen.is_empty() or states_seen[-1] != b.state:
+			states_seen.append(b.state)
+		if b.state == Fighter.State.KNOCKDOWN and b.bounced:
+			bounced_seen = true
+		if b.state == Fighter.State.KNOCKDOWN and not whiff_while_down:
+			var hp := b.health
+			var r := b.receive_hit(CombatData.get_attack(CombatData.AttackType.HEAVY), a, 1)
+			whiff_while_down = r == CombatData.HitResult.WHIFF and b.health == hp
+	var names: Array[String] = []
+	for s in states_seen:
+		names.append(Fighter.State.keys()[s])
+	var seq_ok := names.find("KNOCKDOWN") >= 0 and names.find("GETUP") > names.find("KNOCKDOWN") and names[-1] == "IDLE"
+	_check(seq_ok, "3rd hit -> KNOCKDOWN -> GETUP -> IDLE (%s)" % [names])
+	_check(bounced_seen, "body bounced on landing")
+	_check(whiff_while_down, "cannot be hit while knocked down")
+	_check(is_equal_approx(b.position.y, 560.0) and not b.airborne, "back on feet at floor level")
+
+	print("[backhand]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	hits = []
+	for t in 30:
+		var r := _step(a, b, _intent(CombatData.AttackType.BACKHAND) if t == 0 else none, none)
+		if r != CombatData.HitResult.WHIFF:
+			hits.append(t)
+	_check(hits == [6], "backhand hits once on tick 6 (%s)" % [hits])
+	_check(b.health == 93, "backhand dealt 7 (hp %d)" % b.health)
+
+	print("[uppercut launches + juggle]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.ground_y = 560
+	b.ground_y = 560
+	b.position.x = 560
+	var launched_h := 0.0
+	var juggle := false
+	for t in 60:
+		var ia := none
+		if t == 0:
+			ia = _intent(CombatData.AttackType.UPPERCUT)
+		elif t == 10:
+			ia = _intent(CombatData.AttackType.LIGHT)  # buffered chain into a jab
+		var r := _step(a, b, ia, none)
+		if b.airborne:
+			launched_h = maxf(launched_h, 560.0 - b.position.y)
+		if r == CombatData.HitResult.HIT and a.combo_step == 2 and b.airborne:
+			juggle = true
+	_check(launched_h > 25.0, "uppercut launched defender (peak %.0f px)" % launched_h)
+	_check(juggle, "chained jab juggled the airborne defender")
+	_check(not b.airborne and b.position.y == 560.0, "defender came back down")
+
+	print("[uppercut as anti-air]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.ground_y = 560
+	b.ground_y = 560
+	b.position.x = 640
+	var jl := _intent(CombatData.AttackType.NONE, false, -1)
+	jl.jump = true
+	var aa_hit := false
+	for t in 60:
+		var ia := _intent(CombatData.AttackType.UPPERCUT) if t == 14 else none
+		var ib := jl if t == 0 else (_intent(CombatData.AttackType.NONE, false, -1) if t < 6 else none)
+		var r := _step(a, b, ia, ib)
+		if r == CombatData.HitResult.HIT and b.airborne:
+			aa_hit = true
+	_check(aa_hit, "uppercut hit a jumping opponent")
+
+	print("[blocked uppercut does not launch]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	b.position.x = 560
+	var blk := _intent(CombatData.AttackType.NONE, true)
+	var was_blocked := false
+	for t in 30:
+		var r := _step(a, b, _intent(CombatData.AttackType.UPPERCUT) if t == 0 else none, blk)
+		if r == CombatData.HitResult.BLOCKED:
+			was_blocked = true
+	_check(was_blocked and not b.airborne and b.health == 100, "blocked: no launch, no damage")
+
+	print("[finisher selection]")
+	FinisherDirector._last_played = -1
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	b.airborne = true
+	var air_n := 0
+	for i in 200:
+		FinisherDirector._last_played = -1
+		if FinisherDirector.choose(a, b, null, rng) == FinisherDirector.Kind.AIR_SMASH:
+			air_n += 1
+	_check(air_n > 110 and air_n < 170, "airborne victim -> Air Smash most of the time (%d/200)" % air_n)
+	b.airborne = false
+	FinisherDirector._last_played = -1
+	var up_n := 0
+	for i in 200:
+		FinisherDirector._last_played = -1
+		if FinisherDirector.choose(a, b, CombatData.get_attack(CombatData.AttackType.UPPERCUT), rng) == FinisherDirector.Kind.AIR_SMASH:
+			up_n += 1
+	_check(up_n > 110, "uppercut kill -> Air Smash most of the time (%d/200)" % up_n)
+	b.position.x = Fighter.ARENA_MAX_X - 60.0
+	a.position.x = b.position.x - 80.0
+	FinisherDirector._last_played = -1
+	var wall_n := 0
+	for i in 200:
+		FinisherDirector._last_played = -1
+		if FinisherDirector.choose(a, b, null, rng) == FinisherDirector.Kind.WALL_CRUSH:
+			wall_n += 1
+	_check(wall_n > 90 and wall_n < 150, "victim near wall -> Wall Crush most of the time (%d/200)" % wall_n)
+	b.position.x = 640.0
+	a.position.x = 560.0
+	FinisherDirector._last_played = -1
+	var randoms := {}
+	var repeats := 0
+	var prev := -1
+	for i in 30:
+		var k := FinisherDirector.choose(a, b, null, rng)
+		randoms[k] = true
+		if k == prev:
+			repeats += 1
+		prev = k
+	_check(repeats == 0, "never the same finisher twice in a row (%d repeats)" % repeats)
+	b.position.x = Fighter.ARENA_MAX_X - 60.0
+	a.position.x = b.position.x - 80.0
+	var wall_repeat := 0
+	var prev_w := -1
+	for i in 60:
+		var k := FinisherDirector.choose(a, b, null, rng)
+		if k == prev_w:
+			wall_repeat += 1
+		prev_w = k
+	_check(wall_repeat == 0, "near the wall, finishers still never repeat back-to-back")
+	b.position.x = 640.0
+	a.position.x = 560.0
+	_check(randoms.size() == 3 and randoms.has(FinisherDirector.Kind.PALM_FLURRY) and randoms.has(FinisherDirector.Kind.SPINNING_HEEL)
+		and randoms.has(FinisherDirector.Kind.TORNADO_KICK), "open floor -> random Palm Flurry / Spinning Heel / Tornado Kick")
+
+	for kind in [FinisherDirector.Kind.PALM_FLURRY, FinisherDirector.Kind.SPINNING_HEEL, FinisherDirector.Kind.AIR_SMASH,
+			FinisherDirector.Kind.WALL_CRUSH, FinisherDirector.Kind.TORNADO_KICK]:
+		var kname: String = FinisherDirector.DISPLAY_NAMES[kind]
+		print("[finisher %s]" % kname)
+		p = _make_pair()
+		a = p[0]
+		b = p[1]
+		a.ground_y = 560
+		b.ground_y = 560
+		if kind == FinisherDirector.Kind.WALL_CRUSH:
+			b.position.x = Fighter.ARENA_MAX_X - 120.0
+			a.position.x = b.position.x - 90.0
+		b.health = 0
+		var director := FinisherDirector.new(kind, a, b)
+		var hits_n := 0
+		var finals := 0
+		var crossed := false
+		var ticks := 0
+		while not director.done and ticks < 400:
+			var ev := director.tick()
+			a.tick()
+			b.tick()
+			if not ev.is_empty():
+				hits_n += 1
+				if ev["final"]:
+					finals += 1
+			if finals == 0 and (b.position.x - a.position.x) < 30.0:
+				crossed = true
+			ticks += 1
+		for t in 200:
+			a.tick()
+			b.tick()
+		_check(director.done and ticks < 400, "%s completes (%d ticks, %d hits)" % [kname, ticks, hits_n])
+		_check(finals == 1 and b.state == Fighter.State.KO, "%s ends in exactly one final blow -> KO" % kname)
+		_check(not b.airborne and not b.rolling and is_equal_approx(b.position.y, 560.0) and not a.airborne, "%s: both back on the floor" % kname)
+		_check(not crossed, "%s: attacker never passes through the victim" % kname)
+		_check(b.position.x <= Fighter.ARENA_MAX_X and a.position.x >= Fighter.ARENA_MIN_X, "%s: both inside the arena" % kname)
+
+	print("[blowback: tumble -> bounce -> roll -> crouch get-up]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.ground_y = 560
+	b.ground_y = 560
+	b.position.x = 600
+	b.state = Fighter.State.KNOCKDOWN
+	b.blowback(1, 9.0, -5.5, 1, true)
+	var saw_tumble := false
+	var saw_bounce := false
+	var saw_roll := false
+	var max_roll := 0.0
+	var start_x := b.position.x
+	var from_roll := false
+	for t in 200:
+		b.tick()
+		if b.airborne and b.tumble:
+			saw_tumble = true
+		if b.bounced:
+			saw_bounce = true
+		if b.rolling:
+			saw_roll = true
+			max_roll = maxf(max_roll, b.roll_distance)
+		if b.state == Fighter.State.GETUP and b.getup_from_roll:
+			from_roll = true
+		if b.state == Fighter.State.IDLE:
+			break
+	_check(saw_tumble and saw_bounce and saw_roll, "tumbled, bounced and rolled")
+	_check(max_roll >= CombatData.ROLL_DISTANCE - 1.0, "rolled a full roll (%.0f px)" % max_roll)
+	_check(from_roll and b.state == Fighter.State.IDLE, "quick get-up from the roll, back to IDLE")
+	_check(b.position.x - start_x > 250.0, "travelled far (%.0f px)" % (b.position.x - start_x))
+
+	print("[wall bounce]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	b.ground_y = 560
+	b.position.x = Fighter.ARENA_MAX_X - 80.0
+	b.state = Fighter.State.KNOCKDOWN
+	var wall_hits := [0]
+	b.wall_hit.connect(func(_f: Fighter) -> void: wall_hits[0] += 1)
+	b.blowback(1, 12.0, -8.0, 1, true)
+	var moved_back := false
+	for t in 120:
+		b.tick()
+		if wall_hits[0] > 0 and b.jump_vx < 0.0:
+			moved_back = true
+	_check(wall_hits[0] == 1, "bounced off the wall exactly once (%d)" % wall_hits[0])
+	_check(moved_back, "rebounded away from the wall")
+	_check(b.position.x <= Fighter.ARENA_MAX_X, "stayed inside the arena")
+
+	print("[block startup 2 / release 6]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	# Guard raised only 1 tick before the jab connects (tick 5): too late.
+	var late_hit := false
+	for t in 12:
+		var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, _intent(CombatData.AttackType.NONE, t >= 4))
+		if r == CombatData.HitResult.HIT:
+			late_hit = true
+	_check(late_hit, "guard raised 1 tick before impact does not block (startup 2)")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var attack_tick := -1
+	for t in 30:
+		var ib := _intent(CombatData.AttackType.NONE, t < 10)
+		if t == 10:
+			ib = _intent(CombatData.AttackType.LIGHT, false)
+		_step(a, b, none, ib)
+		if b.state == Fighter.State.ATTACK and attack_tick < 0:
+			attack_tick = t
+	_check(attack_tick >= 10 + CombatData.BLOCK_RELEASE_FRAMES, "attacking out of block waits for the guard release (attack at %d)" % attack_tick)
+
+	print("[sweep]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	a.ground_y = 560
+	b.ground_y = 560
+	var swept := false
+	for t in 30:
+		var r := _step(a, b, _intent(CombatData.AttackType.SWEEP) if t == 0 else none, none)
+		if r == CombatData.HitResult.HIT:
+			swept = b.state == Fighter.State.KNOCKDOWN and b.last_hit_low
+			_check(t == 10, "sweep connects on tick 10 (%d)" % t)
+	_check(swept, "sweep always knocks down, hit registered as low")
+	_check(b.health == 91, "sweep dealt 9 (hp %d)" % b.health)
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var low_block := _intent(CombatData.AttackType.NONE, true)
+	low_block.crouch = true
+	var sweep_blocked := false
+	for t in 30:
+		var r := _step(a, b, _intent(CombatData.AttackType.SWEEP) if t == 0 else none, low_block)
+		if r == CombatData.HitResult.BLOCKED:
+			sweep_blocked = true
+	_check(sweep_blocked and b.state != Fighter.State.KNOCKDOWN and b.health == 100, "low block (S+Shift) stops the sweep")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var stand_swept := false
+	for t in 30:
+		var r := _step(a, b, _intent(CombatData.AttackType.SWEEP) if t == 0 else none, _intent(CombatData.AttackType.NONE, true))
+		if r == CombatData.HitResult.HIT:
+			stand_swept = true
+	_check(stand_swept, "standing block does NOT stop a sweep (low attack)")
+
+	print("[crouch]")
+	var crouch_i := _intent()
+	crouch_i.crouch = true
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var hk_hit := false
+	for t in 30:
+		if _step(a, b, _intent(CombatData.AttackType.HIGH_KICK) if t == 0 else none, crouch_i) == CombatData.HitResult.HIT:
+			hk_hit = true
+	_check(b.state == Fighter.State.CROUCH and not hk_hit, "high kick whiffs over a crouching opponent")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var bh_hit := false
+	for t in 30:
+		if _step(a, b, _intent(CombatData.AttackType.BACKHAND) if t == 0 else none, crouch_i) == CombatData.HitResult.HIT:
+			bh_hit = true
+	_check(not bh_hit, "backhand whiffs over a crouching opponent")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var jab_hit := false
+	for t in 30:
+		if _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, crouch_i) == CombatData.HitResult.HIT:
+			jab_hit = true
+	_check(jab_hit, "jab still hits a crouching opponent")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var moved := false
+	var crawl := _intent(CombatData.AttackType.NONE, false, -1)
+	crawl.crouch = true
+	var crouch_x := b.position.x
+	for t in 20:
+		_step(a, b, none, crawl)
+	_check(is_equal_approx(b.position.x, crouch_x), "no walking while crouched")
+
+	print("[high kick]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	hits = []
+	for t in 30:
+		var r := _step(a, b, _intent(CombatData.AttackType.HIGH_KICK) if t == 0 else none, none)
+		if r != CombatData.HitResult.WHIFF:
+			hits.append(t)
+	_check(hits == [7], "high kick hits once on tick 7 (%s)" % [hits])
+	_check(b.health == 88, "high kick dealt 12 (hp %d)" % b.health)
+	_check(b.last_hit_high, "high kick lands at head height")
+
+	print("[dodge / step]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	# b backsteps (world -1 = away from a) right as a's jab comes out.
+	var dodge_i := _intent()
+	dodge_i.dodge = 1  # b faces left (toward a), so +1 = away from a
+	var dodge_start_x := b.position.x
+	var evaded := false
+	var got_hit := false
+	for t in 20:
+		var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 2 else none, dodge_i if t == 0 else none)
+		if a.state == Fighter.State.ATTACK and a.get_phase() == Fighter.Phase.ACTIVE and b.is_evading():
+			evaded = true
+		if r == CombatData.HitResult.HIT:
+			got_hit = true
+	_check(evaded and not got_hit, "jab during the dodge's invulnerable frames whiffs")
+	_check(b.position.x - dodge_start_x > 80.0, "backstep moved away %.0f px" % (b.position.x - dodge_start_x))
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var counter_tick := -1
+	for t in 30:
+		var ib := none
+		if t == 0:
+			ib = dodge_i
+		elif t == 6:
+			ib = _intent(CombatData.AttackType.LIGHT)  # buffered during the dodge
+		_step(a, b, none, ib)
+		if b.state == Fighter.State.ATTACK and counter_tick < 0:
+			counter_tick = t
+	_check(counter_tick == CombatData.DODGE_FRAMES, "attack buffered during the dodge fires as it ends (tick %d)" % counter_tick)
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var early_hit := false
+	for t in 12:
+		# The jab connects on tick 5; a dodge started on tick 5 is still in startup.
+		var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, dodge_i if t == 5 else none)
+		if r == CombatData.HitResult.HIT:
+			early_hit = true
+	_check(early_hit, "a dodge started too late (before its i-frames) still gets hit")
+
+	print("[stances]")
+	var srng := RandomNumberGenerator.new()
+	srng.seed = 3
+	var clash := false
+	var seen := {}
+	for player_stance in Stances.count():
+		for i in 50:
+			var ai_stance := Stances.random_except(player_stance, srng)
+			seen[ai_stance] = true
+			if ai_stance == player_stance:
+				clash = true
+	_check(not clash, "AI stance is never the player's stance")
+	_check(seen.size() == Stances.count(), "all %d stances can be picked" % Stances.count())
+
+	print("[both facing directions]")
+	var mirror_ok := true
+	for type in [CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY, CombatData.AttackType.KICK,
+			CombatData.AttackType.FRONT_KICK, CombatData.AttackType.BACKHAND, CombatData.AttackType.UPPERCUT,
+			CombatData.AttackType.HIGH_KICK, CombatData.AttackType.SWEEP]:
+		var results: Array = []
+		for side in [1, -1]:
+			p = _make_pair()
+			a = p[0]
+			b = p[1]
+			a.position.x = 640.0 - side * 40.0
+			b.position.x = 640.0 + side * 40.0
+			a.face_opponent()
+			b.face_opponent()
+			var hit_at := -1
+			var box := Rect2()
+			for t in 40:
+				if _step(a, b, _intent(type) if t == 0 else none, none) != CombatData.HitResult.WHIFF and hit_at < 0:
+					hit_at = t
+				if a.state == Fighter.State.ATTACK and a.get_phase() == Fighter.Phase.ACTIVE and box.size == Vector2.ZERO:
+					# Hitbox relative to the attacker, mirrored back to "facing right".
+					var hb := a.get_hitbox_world()
+					var rel_x := hb.position.x - a.position.x if side == 1 else a.position.x - hb.end.x
+					box = Rect2(rel_x, hb.position.y - a.position.y, hb.size.x, hb.size.y)
+			results.append([hit_at, b.health, box])
+		var same: bool = results[0][0] == results[1][0] and results[0][1] == results[1][1] \
+			and (results[0][2] as Rect2).is_equal_approx(results[1][2]) and results[0][0] >= 0
+		if not same:
+			mirror_ok = false
+			printerr("  %s right %s / left %s" % [CombatData.attack_name(type), results[0], results[1]])
+	_check(mirror_ok, "every grounded attack hits on the same tick, for the same damage, with a mirrored hitbox facing left or right")
+
+	print("[directional guard: cross-up]")
+	p = _make_pair()
+	a = p[0]
+	b = p[1]
+	var guard := _intent(CombatData.AttackType.NONE, true)
+	for t in 4:
+		_step(a, b, none, guard)
+	_check(b.state == Fighter.State.BLOCK and b.facing == -1, "defender guarding toward the attacker (left)")
+	# Attacker crosses to the defender's back (as after a jump over them).
+	a.position.x = b.position.x + 70.0
+	a.face_opponent()
+	var cross_result := CombatData.HitResult.WHIFF
+	for t in 20:
+		var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, guard)
+		if r != CombatData.HitResult.WHIFF:
+			cross_result = r
+	_check(cross_result == CombatData.HitResult.HIT and b.health == 94, "a held guard does not turn: an attack from behind hits (%s)" % CombatData.HitResult.keys()[cross_result])
+	# Re-raising the guard after turning blocks again.
+	for t in 30:
+		_step(a, b, none, none)
+	for t in 4:
+		_step(a, b, none, guard)
+	var front_result := CombatData.HitResult.WHIFF
+	for t in 20:
+		var r := _step(a, b, _intent(CombatData.AttackType.LIGHT) if t == 0 else none, guard)
+		if r != CombatData.HitResult.WHIFF:
+			front_result = r
+	_check(front_result == CombatData.HitResult.BLOCKED, "after turning and re-raising the guard, the same attack is blocked")
+
+	print("[procedural audio]")
+	var audio := GameAudio.new()
+	root.add_child(audio)
+	await process_frame  # _ready runs once the tree processes
+	var all_sfx := true
+	for snd in [&"whoosh_light", &"whoosh_heavy", &"jump", &"hit_light", &"hit_heavy", &"block", &"land",
+			&"body_fall", &"wall_hit", &"roll", &"ko_boom", &"finisher_sting", &"count_tick", &"fight_call"]:
+		if not audio.has_sound(snd):
+			all_sfx = false
+			printerr("missing sound ", snd)
+	_check(all_sfx, "all 14 sound effects synthesized")
+	var t0 := Time.get_ticks_msec()
+	while not audio.is_bgm_playing() and Time.get_ticks_msec() - t0 < 20000:
+		await process_frame
+	var bgm_ms := Time.get_ticks_msec() - t0
+	_check(audio.is_bgm_playing(), "background music rendered and playing (%d ms)" % bgm_ms)
+	var expected_len := GameAudio.BGM_BARS * 4.0 * 60.0 / GameAudio.BGM_BPM
+	_check(absf(audio.get_bgm_length() - expected_len) < 0.1, "fight music loop: 16 bars at 140 BPM = %.2f s (%.2f s)" % [expected_len, audio.get_bgm_length()])
+	audio.queue_free()
+
+	print("RESULT: %s (%d failures)" % ["PASS" if _fails == 0 else "FAIL", _fails])
+	quit(1 if _fails > 0 else 0)

@@ -142,6 +142,9 @@ var script_flip: bool = false
 var script_spin_rate: float = 0.0
 ## Increments on every blocked hit; visuals use it to jolt the guard.
 var block_counter: int = 0
+## Pre-match presentation: a named pose shown instead of the stance guard while
+## idle or walking (&"" = normal guard). Set by main.gd before the fight starts.
+var prefight_pose: StringName = &""
 
 
 func _ready() -> void:
@@ -259,8 +262,9 @@ func _tick_neutral() -> void:
 ## The guard takes BLOCK_STARTUP_FRAMES to come up. Letting go, or wanting to
 ## attack or jump, drops it through GUARD_RELEASE first (the buffered attack
 ## survives the release and fires right after).
+## A raised guard does not turn around: an opponent who crosses over (jumps
+## behind) hits the unguarded back until the guard is dropped and re-raised.
 func _tick_block() -> void:
-	face_opponent()
 	var wants_out := not block_held or buffered_attack != CombatData.AttackType.NONE or jump_buffer_frames > 0
 	if wants_out:
 		_enter_state(State.GUARD_RELEASE)

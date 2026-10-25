@@ -7,14 +7,37 @@ extends Node2D
 ## KO and restart. A lethal hit starts a scripted finisher (FinisherDirector).
 ## Presentation (FxLayer effects, GameAudio sound, camera, HUD) never affects
 ## combat.
+##
+## Match flow (all tick-driven, no timers, so a restart cannot leave stale
+## callbacks behind; restarting reloads the scene):
+##   PRE_MATCH    fighters stand relaxed, START MATCH button shown, no control.
+##   STANCE_PREP  both walk to their marks, salute / glare, raise their guard.
+##   COUNTDOWN    3, 2, 1 (one second each). Input and AI stay locked.
+##   FIGHTING     unlocked for both on the same tick ("FIGHT!").
+##   FINISHER     a lethal hit plays a scripted finisher.
+##   KO           "K.O." until every knocked-out body has come to rest.
+##   RESULT       winner shown with a RESTART MATCH button (R also restarts).
 
-enum RoundState { FIGHTING, FINISHER, OVER }
+enum RoundState { PRE_MATCH, STANCE_PREP, COUNTDOWN, FIGHTING, FINISHER, KO, RESULT }
 
 const FLOOR_Y: float = 560.0
 const PLAYER_START_X: float = 440.0
 const ENEMY_START_X: float = 840.0
-const INTRO_FRAMES: int = 50
-const RESULT_DELAY_FRAMES: int = 50
+## Pre-match positions: the fighters walk from here to their start marks.
+const PLAYER_PRE_X: float = 370.0
+const ENEMY_PRE_X: float = 910.0
+## STANCE_PREP timeline (ticks): walk in, gesture, raise the guard.
+const PREP_GESTURE_TICK: int = 34
+const PREP_GUARD_TICK: int = 66
+const PREP_TICKS: int = 100
+const COUNT_NUMBER_TICKS: int = 60
+const FIGHT_TEXT_TICKS: int = 45
+## "K.O." is shown at least this long, and until the loser is at rest.
+const KO_MIN_TICKS: int = 50
+## Pre-fight camera: steady, centred and a little closer.
+const PREFIGHT_ZOOM: float = 1.12
+const PREFIGHT_FOCUS_Y: float = 440.0
+const PREFIGHT_BGM_DUCK_DB: float = -10.0
 ## Pushboxes only collide when the fighters' feet are this close vertically,
 ## so a high enough jump can cross over the opponent.
 const PUSH_VERTICAL_RANGE: float = 90.0
@@ -39,10 +62,11 @@ const KO_COLOR := Color(1.0, 0.55, 0.4)
 @onready var fx: FxLayer = $Effects
 @onready var audio: GameAudio = $Audio
 
-var _round_state: RoundState = RoundState.FIGHTING
+var _round_state: RoundState = RoundState.PRE_MATCH
+## Ticks since the round state last changed.
+var _state_tick: int = 0
 var _tick: int = 0
 var _hitstop: int = 0
-var _over_frames: int = 0
 var _result_text: String = ""
 var _shake_frames: int = 0
 var _shake_total: int = 1
@@ -69,8 +93,8 @@ func _ready() -> void:
 	Engine.time_scale = 1.0
 	# The camera is moved in _process, so it must not be physics-interpolated.
 	camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
-	player.position = Vector2(PLAYER_START_X, FLOOR_Y)
-	enemy.position = Vector2(ENEMY_START_X, FLOOR_Y)
+	player.position = Vector2(PLAYER_PRE_X, FLOOR_Y)
+	enemy.position = Vector2(ENEMY_PRE_X, FLOOR_Y)
 	player.ground_y = FLOOR_Y
 	enemy.ground_y = FLOOR_Y
 	player.opponent = enemy
@@ -95,28 +119,30 @@ func _ready() -> void:
 	enemy.stance = Stances.random_except(player.stance, _stance_rng)
 	enemy_ai.setup(enemy, player)
 	hud.setup(player, enemy)
-	hud.set_message("FIGHT", "")
+	hud.start_pressed.connect(start_match)
+	hud.restart_pressed.connect(restart_match)
 	overlay.draw.connect(_draw_overlay)
+	_enter_pre_match()
 
 
 func _physics_process(_delta: float) -> void:
 	if Input.is_action_just_pressed("restart"):
-		Engine.time_scale = 1.0
-		get_tree().reload_current_scene()
+		restart_match()
 		return
 	if Input.is_action_just_pressed("toggle_debug"):
 		_debug_visible = not _debug_visible
-	if Input.is_action_just_pressed("cycle_stance"):
+	if Input.is_action_just_pressed("cycle_stance") and _round_state <= RoundState.FIGHTING:
 		_cycle_player_stance()
 
 	_tick += 1
-	if _tick == INTRO_FRAMES and _round_state == RoundState.FIGHTING:
-		hud.set_message("", "")
+	_state_tick += 1
 	_update_shake()
+	# May unlock the fight this tick, before either side reads its controls.
+	_tick_match_flow()
 
 	var fighting := _round_state == RoundState.FIGHTING
 	# Player input is buffered even during hitstop so combos feel responsive.
-	player.push_intent(_read_player_intent() if fighting else CombatData.Intent.new())
+	player.push_intent(_read_player_intent() if fighting else _prefight_intent(player, PLAYER_START_X))
 
 	if _hitstop > 0:
 		_hitstop -= 1
@@ -128,13 +154,13 @@ func _physics_process(_delta: float) -> void:
 		if _finisher.done:
 			_end_round()
 	else:
-		enemy.push_intent(enemy_ai.compute_intent() if fighting else CombatData.Intent.new())
+		enemy.push_intent(enemy_ai.compute_intent() if fighting else _prefight_intent(enemy, ENEMY_START_X))
 		player.tick()
 		enemy.tick()
 		_resolve_pushboxes()
 		if _round_state == RoundState.FIGHTING:
 			_resolve_hits()
-		else:
+		elif _round_state == RoundState.KO:
 			_tick_round_over()
 	_tick_slowmo()
 	_trail_rolling_dust()
@@ -145,6 +171,109 @@ func _physics_process(_delta: float) -> void:
 	for f: Fighter in [player, enemy]:
 		f.z_index = 1 if f.state == Fighter.State.ATTACK or f.state == Fighter.State.FINISHER else 0
 	_refresh_presentation()
+
+
+# --- Match flow -----------------------------------------------------------------
+
+func _set_round_state(new_state: RoundState) -> void:
+	_round_state = new_state
+	_state_tick = 0
+
+
+func get_round_state_name() -> String:
+	return RoundState.keys()[_round_state]
+
+
+func _enter_pre_match() -> void:
+	_set_round_state(RoundState.PRE_MATCH)
+	for f: Fighter in [player, enemy]:
+		f.prefight_pose = &"relaxed"
+	hud.set_message("STREET COMBAT", "Q  choose stance    ·    ENTER or click to start")
+	hud.show_button(&"start")
+	audio.duck_bgm(PREFIGHT_BGM_DUCK_DB)
+
+
+## START MATCH. Only acts once, from PRE_MATCH. `skip_intro` jumps straight to
+## the fight (tests).
+func start_match(skip_intro: bool = false) -> void:
+	if _round_state != RoundState.PRE_MATCH:
+		return
+	hud.show_button(&"")
+	hud.set_message("", "")
+	if skip_intro:
+		player.position.x = PLAYER_START_X
+		enemy.position.x = ENEMY_START_X
+		for f: Fighter in [player, enemy]:
+			f.face_opponent()
+			f.reset_physics_interpolation()
+		_begin_fight()
+		return
+	_set_round_state(RoundState.STANCE_PREP)
+
+
+## Restart: always back to a fresh pre-match state. The scene reload resets
+## health, AI, effects, animation and any countdown in progress.
+func restart_match() -> void:
+	Engine.time_scale = 1.0
+	get_tree().reload_current_scene()
+
+
+func _tick_match_flow() -> void:
+	match _round_state:
+		RoundState.STANCE_PREP:
+			# Walk in relaxed, gesture, then raise the stance guard.
+			if _state_tick == PREP_GESTURE_TICK:
+				player.prefight_pose = &"salute"
+				enemy.prefight_pose = &"glare"
+			elif _state_tick == PREP_GUARD_TICK:
+				player.prefight_pose = &""
+				enemy.prefight_pose = &""
+			elif _state_tick >= PREP_TICKS:
+				_set_round_state(RoundState.COUNTDOWN)
+				_show_count(3)
+		RoundState.COUNTDOWN:
+			if _state_tick % COUNT_NUMBER_TICKS == 0:
+				var left := 3 - _state_tick / COUNT_NUMBER_TICKS
+				if left > 0:
+					_show_count(left)
+				else:
+					_begin_fight()
+		RoundState.FIGHTING:
+			if _state_tick == FIGHT_TEXT_TICKS:
+				hud.set_countdown("")
+
+
+func _show_count(n: int) -> void:
+	hud.set_countdown(str(n))
+	audio.play(&"count_tick", 0.0, 0.0)
+
+
+## Unlocks both fighters on the same tick: the player's controls and the AI
+## both start reading this tick (the AI is re-seeded, so it gets no head start).
+func _begin_fight() -> void:
+	_set_round_state(RoundState.FIGHTING)
+	for f: Fighter in [player, enemy]:
+		f.prefight_pose = &""
+		f.stop_combat()
+	enemy_ai.setup(enemy, player)
+	hud.set_countdown("FIGHT!")
+	hud.flash(0.25)
+	audio.play(&"fight_call", 0.0, 0.0)
+	audio.duck_bgm(0.0)
+
+
+## Before the fight: walk to the start mark (real walking, so the feet step),
+## otherwise stand still. Never attacks, blocks or jumps.
+func _prefight_intent(f: Fighter, mark_x: float) -> CombatData.Intent:
+	var intent := CombatData.Intent.new()
+	if _round_state != RoundState.STANCE_PREP:
+		return intent
+	var dx := mark_x - f.position.x
+	if absf(dx) > f.walk_speed:
+		intent.move = 1 if dx > 0.0 else -1
+	elif not is_zero_approx(dx):
+		f.position.x = mark_x
+	return intent
 
 
 func _read_player_intent() -> CombatData.Intent:
@@ -293,7 +422,7 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 # --- Finisher -----------------------------------------------------------------
 
 func _start_finisher(attacker: Fighter, victim: Fighter, kind: FinisherDirector.Kind) -> void:
-	_round_state = RoundState.FINISHER
+	_set_round_state(RoundState.FINISHER)
 	_finisher = FinisherDirector.new(kind, attacker, victim)
 	last_finisher_name = _finisher.get_display_name()
 	hud.set_message("", "")
@@ -340,7 +469,7 @@ func _tick_slowmo() -> void:
 
 
 func _end_round() -> void:
-	_round_state = RoundState.OVER
+	_set_round_state(RoundState.KO)
 	Engine.time_scale = 1.0
 	_slowmo_ticks = 0
 	player.stop_combat()
@@ -353,16 +482,28 @@ func _end_round() -> void:
 		_result_text = "%s WINS" % player.fighter_name
 	else:
 		_result_text = "%s WINS" % enemy.fighter_name
+	hud.set_countdown("")
 	hud.set_message("K.O.", "")
 
 
+## The result only appears once every knocked-out body has stopped moving
+## (no flight, roll or slide left) and K.O. has been on screen for a moment.
 func _tick_round_over() -> void:
-	_over_frames += 1
-	if _over_frames == RESULT_DELAY_FRAMES:
-		hud.set_banner("", Color.WHITE)
-		hud.set_letterbox(false)
-		hud.set_message(_result_text, "Press R to restart")
-		audio.duck_bgm(-6.0)
+	if _state_tick < KO_MIN_TICKS or not _bodies_at_rest():
+		return
+	_set_round_state(RoundState.RESULT)
+	hud.set_banner("", Color.WHITE)
+	hud.set_letterbox(false)
+	hud.set_message(_result_text, "ENTER, click or R to restart")
+	hud.show_button(&"restart")
+	audio.duck_bgm(-6.0)
+
+
+func _bodies_at_rest() -> bool:
+	for f: Fighter in [player, enemy]:
+		if f.state == Fighter.State.KO and (f.airborne or f.rolling or f.settling):
+			return false
+	return true
 
 
 # --- Fighter event feedback (presentation only) -------------------------------
@@ -463,7 +604,11 @@ func _process(delta: float) -> void:
 	var real_delta := delta / maxf(Engine.time_scale, 0.01)
 	var target_zoom := 1.0
 	var target_pos := Vector2(640.0, 360.0)
-	if _finisher != null:
+	if _round_state <= RoundState.COUNTDOWN:
+		# Steady, centred pre-fight framing, a little closer for the silhouettes.
+		target_zoom = PREFIGHT_ZOOM
+		target_pos = Vector2((player.position.x + enemy.position.x) * 0.5, PREFIGHT_FOCUS_Y)
+	elif _finisher != null:
 		var attacker := _finisher.attacker
 		var victim := _finisher.victim
 		var mid := (attacker.position + victim.position) * 0.5
