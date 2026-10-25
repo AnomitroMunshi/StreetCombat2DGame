@@ -207,6 +207,38 @@ var _gazelle_hit := PackedFloat32Array([-0.05, 0.0, 2.0, 2.5, 0.85, 3.0, 0.55, -
 # through the spin, then the rear leg lashes out at head height.
 var _t540_load := PackedFloat32Array([0.3, 0.3, 1.0, 2.8, 0.8, 2.8, 1.8, -0.6, 1.4, -1.2, 0.0, 0.0])
 var _t540_hit := PackedFloat32Array([0.65, 0.5, 1.3, 2.6, 0.5, 2.4, 1.6, -0.4, -2.3, -2.2, -4.0, 0.0])
+# --- Muay Thai ------------------------------------------------------------------
+# Elbow: the rear forearm folds back and the point of the elbow leads, the
+# shoulders turning hard through.
+var _elbow_load := PackedFloat32Array([0.15, 0.15, 0.95, 2.95, 0.9, 3.0, 0.55, -0.15, -0.5, -0.45, -4.0, 0.0, 0.0, 15.0])
+var _elbow_hit := PackedFloat32Array([0.4, 0.1, 0.9, 2.9, 1.7, 4.3, 0.75, 0.1, -0.7, -0.55, 12.0, 0.0, 0.5, -10.0])
+# Roundhouses: hips open (spread), the shin swings through low or at the ribs,
+# the torso leaning away as counter-balance.
+var _lowrh_load := PackedFloat32Array([0.0, 0.1, 1.0, 2.8, 0.7, 2.9, 0.7, -0.4, -0.5, -0.3, -4.0, 0.0, 0.0, 16.0])
+var _lowrh_hit := PackedFloat32Array([-0.35, 0.25, 1.1, 2.6, 0.4, 2.6, 1.05, 1.3, -0.4, -0.25, 6.0, 0.0, 0.8, 2.0])
+var _bodyrh_load := PackedFloat32Array([0.0, 0.1, 1.0, 2.8, 0.7, 2.9, 1.2, -0.6, -0.5, -0.3, -4.0, 0.0, 0.0, 16.0])
+var _bodyrh_hit := PackedFloat32Array([-0.5, 0.35, 1.2, 2.5, 0.3, 2.4, 1.5, 1.75, -0.35, -0.2, 8.0, 0.0, 0.8, 2.0])
+# Flying knee (airborne): hands reaching to grab the head, knee driven up.
+var _fknee_load := PackedFloat32Array([0.1, 0.1, 1.5, 2.4, 1.4, 2.3, 1.2, -0.8, -0.3, -0.6, 0.0, 0.0])
+var _fknee_hit := PackedFloat32Array([0.35, -0.05, 1.7, 2.6, 1.6, 2.5, 2.1, -0.5, -0.6, -0.4, 8.0, 0.0])
+# --- Karate ----------------------------------------------------------------------
+# Gyaku-zuki: long low stance, rear fist chambered at the hip, then the hips
+# snap square as the rear fist drives straight out, rear heel turning.
+var _gyaku_load := PackedFloat32Array([0.1, 0.15, 1.2, 2.0, 0.3, 2.4, 0.9, -0.25, -0.85, -0.35, -8.0, 0.0, 0.0, 16.0])
+var _gyaku_hit := PackedFloat32Array([0.25, 0.05, 0.6, 2.4, 1.57, 1.57, 1.0, -0.25, -0.95, -0.4, 18.0, 0.0, 0.9, -10.0])
+# Knife hand: the blade of the lead hand raised beside the head, chopping down.
+var _knife_load := PackedFloat32Array([0.05, 0.15, 2.7, 3.7, 0.9, 3.0, 0.6, -0.15, -0.6, -0.3, -2.0, 0.0, 0.0, 14.0])
+var _knife_hit := PackedFloat32Array([0.3, 0.1, 1.6, 1.25, 0.9, 3.0, 0.7, -0.1, -0.65, -0.35, 8.0, 0.0, 0.3, 6.0])
+# Rising punch / rising palm: a straight arm driving upward from a dip.
+var _rpunch_hit := PackedFloat32Array([-0.05, -0.1, 0.7, 2.8, 2.2, 2.5, 0.5, 0.05, -0.45, -0.15, 8.0, 0.0, 0.4, -6.0])
+var _rpalm_hit := PackedFloat32Array([-0.05, -0.1, 0.8, 2.8, 2.1, 2.9, 0.5, 0.05, -0.45, -0.15, 8.0, 0.0, 0.4, -6.0])
+# Spinning counter kick (turned away): the heel snaps back at chest height.
+var _scounter_load := PackedFloat32Array([0.45, 0.4, 1.0, 2.8, 0.9, 2.9, 0.4, -0.3, 0.6, -1.4, -2.0, 0.0, 0.0, 6.0])
+var _scounter_hit := PackedFloat32Array([0.7, 0.5, 1.2, 2.6, 0.6, 2.4, 0.3, -0.05, -1.8, -1.7, -6.0, 0.0, 0.0, 4.0])
+# --- Kung Fu -----------------------------------------------------------------------
+# Low side kick: a stamping side kick at knee height from a sunk stance.
+var _lowside_load := PackedFloat32Array([-0.2, 0.25, 1.1, 2.6, 0.7, 2.9, 1.3, -1.2, -0.3, -0.2, -4.0, 4.0, 0.6, 10.0])
+var _lowside_hit := PackedFloat32Array([-0.45, 0.35, 1.2, 2.3, 0.7, 2.8, 1.25, 1.45, -0.35, -0.15, 8.0, 2.0, 0.9, 12.0])
 # --- Taekwondo ------------------------------------------------------------------
 # Axe kick: the straight leg swings up past the head, then chops down.
 var _axe_raise := PackedFloat32Array([-0.25, 0.3, 1.1, 2.4, 0.6, 2.8, 2.8, 2.9, -0.3, -0.2, -4.0, 0.0, 0.3, 10.0])
@@ -391,6 +423,10 @@ func _ready() -> void:
 		&"overhand_hit": _overhand_hit, &"slip_dip": _slip_dip, &"uppercut_windup": _uppercut_windup,
 		&"heavy_windup": _heavy_windup, &"front_extend": _front_extend, &"high_extend": _high_extend,
 		&"shook_load": _shook_load, &"shook_hit": _shook_hit, &"axe_raise": _axe_raise, &"axe_chop": _axe_chop,
+		&"elbow_load": _elbow_load, &"elbow_hit": _elbow_hit, &"lowrh_hit": _lowrh_hit, &"bodyrh_hit": _bodyrh_hit,
+		&"fknee_hit": _fknee_hit, &"gyaku_load": _gyaku_load, &"gyaku_hit": _gyaku_hit, &"knife_hit": _knife_hit,
+		&"rpalm_hit": _rpalm_hit, &"lowside_hit": _lowside_hit, &"sweep_load": _sweep_load, &"sweep_extend": _sweep_extend,
+		&"back_extend": _back_extend, &"jrh_hit": _jrh_hit, &"deflect": _deflect,
 	}
 	_moves = {
 		CombatData.AttackType.LIGHT: [
@@ -451,6 +487,54 @@ func _ready() -> void:
 		CombatData.AttackType.JUMP_ROUNDHOUSE: [
 			[S, 0.5, _jrh_load, EASE_SMOOTH], [A, 0.0, _jrh_hit, EASE_IN],
 			[A, 1.0, _jrh_hit, EASE_LINEAR], [R, 0.5, _jrh_load, EASE_OUT]],
+		CombatData.AttackType.ELBOW: [
+			[S, 0.5, _elbow_load, EASE_SMOOTH], [A, 0.0, _elbow_hit, EASE_IN],
+			[A, 1.0, _over(_elbow_hit, _elbow_load), EASE_LINEAR], [R, 0.3, _elbow_hit, EASE_LINEAR]],
+		CombatData.AttackType.KNEE: [
+			[S, 0.5, _knee_windup, EASE_SMOOTH], [A, 0.0, _knee, EASE_IN],
+			[A, 1.0, _over(_knee, _knee_windup), EASE_LINEAR], [R, 0.35, _knee, EASE_LINEAR]],
+		CombatData.AttackType.LOW_ROUNDHOUSE: [
+			[S, 0.55, _lowrh_load, EASE_SMOOTH], [A, 0.0, _lowrh_hit, EASE_IN],
+			[A, 1.0, _over(_lowrh_hit, _lowrh_load), EASE_LINEAR], [R, 0.4, _lowrh_load, EASE_OUT]],
+		CombatData.AttackType.BODY_ROUNDHOUSE: [
+			[S, 0.55, _bodyrh_load, EASE_SMOOTH], [A, 0.0, _bodyrh_hit, EASE_IN],
+			[A, 1.0, _over(_bodyrh_hit, _bodyrh_load), EASE_LINEAR], [R, 0.4, _bodyrh_load, EASE_OUT]],
+		CombatData.AttackType.FLYING_KNEE: [
+			[S, 0.35, _jump_squat, EASE_SMOOTH], [S, 0.85, _fknee_load, EASE_SMOOTH],
+			[A, 0.0, _fknee_hit, EASE_IN], [A, 1.0, _fknee_hit, EASE_LINEAR], [R, 0.5, _fknee_load, EASE_OUT]],
+		CombatData.AttackType.REVERSE_PUNCH: [
+			[S, 0.55, _gyaku_load, EASE_SMOOTH], [A, 0.0, _gyaku_hit, EASE_IN],
+			[A, 1.0, _over(_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.35, _gyaku_hit, EASE_LINEAR]],
+		CombatData.AttackType.PERFECT_GYAKU: [
+			[S, 0.55, _gyaku_load, EASE_SMOOTH], [S, 0.9, _gyaku_load, EASE_LINEAR], [A, 0.0, _gyaku_hit, EASE_IN],
+			[A, 1.0, _over(_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.45, _gyaku_hit, EASE_LINEAR]],
+		CombatData.AttackType.KNIFE_HAND: [
+			[S, 0.55, _knife_load, EASE_SMOOTH], [A, 0.0, _knife_hit, EASE_IN],
+			[A, 1.0, _over(_knife_hit, _knife_load), EASE_LINEAR], [R, 0.35, _knife_hit, EASE_LINEAR]],
+		CombatData.AttackType.RISING_PUNCH: [
+			[S, 0.55, _uppercut_windup, EASE_SMOOTH], [A, 0.0, _rpunch_hit, EASE_IN],
+			[A, 1.0, _over(_rpunch_hit, _uppercut_windup), EASE_LINEAR], [R, 0.25, _rpunch_hit, EASE_LINEAR]],
+		CombatData.AttackType.SPIN_COUNTER_KICK: [
+			[S, 0.7, _scounter_load, EASE_SMOOTH], [A, 0.0, _scounter_hit, EASE_IN],
+			[A, 1.0, _over(_scounter_hit, _scounter_load), EASE_LINEAR], [R, 0.35, _scounter_load, EASE_OUT]],
+		CombatData.AttackType.STRAIGHT_PALM: [
+			[S, 0.45, _jab_windup, EASE_SMOOTH], [A, 0.0, _palm_lead, EASE_IN],
+			[A, 1.0, _over(_palm_lead, _jab_windup), EASE_LINEAR], [R, 0.45, null, EASE_OUT]],
+		CombatData.AttackType.DOUBLE_PALM: [
+			[S, 0.6, _palm_windup, EASE_SMOOTH], [A, 0.0, _palm_strike, EASE_IN],
+			[A, 1.0, _over(_palm_strike, _palm_windup), EASE_LINEAR], [R, 0.3, _palm_strike, EASE_LINEAR]],
+		CombatData.AttackType.LOW_SIDE_KICK: [
+			[S, 0.55, _lowside_load, EASE_SMOOTH], [A, 0.0, _lowside_hit, EASE_IN],
+			[A, 1.0, _over(_lowside_hit, _lowside_load), EASE_LINEAR], [R, 0.4, _lowside_load, EASE_OUT]],
+		CombatData.AttackType.RISING_PALM: [
+			[S, 0.55, _uppercut_windup, EASE_SMOOTH], [A, 0.0, _rpalm_hit, EASE_IN],
+			[A, 1.0, _over(_rpalm_hit, _uppercut_windup), EASE_LINEAR], [R, 0.25, _rpalm_hit, EASE_LINEAR]],
+		CombatData.AttackType.CHAIN_PALMS: [
+			[S, 0.6, _jab_windup, EASE_SMOOTH], [A, 0.0, _palm_lead, EASE_IN], [A, 0.33, _palm_rear, EASE_IN],
+			[A, 0.66, _palm_lead, EASE_IN], [A, 1.0, _palm_rear, EASE_IN], [R, 0.4, _palm_rear, EASE_LINEAR]],
+		CombatData.AttackType.DEFLECT_COUNTER: [
+			[S, 0.35, _deflect, EASE_SMOOTH], [S, 0.8, _deflect, EASE_LINEAR], [A, 0.0, _palm_rear, EASE_IN],
+			[A, 1.0, _over(_palm_rear, _deflect), EASE_LINEAR], [R, 0.3, _palm_rear, EASE_LINEAR]],
 		CombatData.AttackType.GAZELLE_HOOK: [
 			[S, 0.45, _gazelle_load, EASE_SMOOTH], [S, 0.8, _gazelle_load, EASE_LINEAR],
 			[A, 0.0, _gazelle_hit, EASE_IN], [A, 1.0, _over(_gazelle_hit, _gazelle_load), EASE_LINEAR],
@@ -1476,13 +1560,21 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 	match type:
 		CombatData.AttackType.KICK, CombatData.AttackType.FRONT_KICK, CombatData.AttackType.JUMP_KICK, \
 				CombatData.AttackType.SWEEP, CombatData.AttackType.HIGH_KICK, CombatData.AttackType.AXE_KICK, \
-				CombatData.AttackType.JUMP_ROUNDHOUSE:
+				CombatData.AttackType.JUMP_ROUNDHOUSE, CombatData.AttackType.LOW_ROUNDHOUSE, \
+				CombatData.AttackType.BODY_ROUNDHOUSE, CombatData.AttackType.LOW_SIDE_KICK:
 			return J_FOOT_F
+		CombatData.AttackType.KNEE, CombatData.AttackType.FLYING_KNEE:
+			return J_KNEE_F
+		CombatData.AttackType.ELBOW:
+			return J_ELBOW_B
+		CombatData.AttackType.REVERSE_PUNCH, CombatData.AttackType.PERFECT_GYAKU, CombatData.AttackType.RISING_PUNCH, \
+				CombatData.AttackType.RISING_PALM, CombatData.AttackType.DEFLECT_COUNTER:
+			return J_HAND_B
 		CombatData.AttackType.HEAVY, CombatData.AttackType.UPPERCUT, CombatData.AttackType.REAR_HOOK, \
 				CombatData.AttackType.OVERHAND, CombatData.AttackType.SLIP_COUNTER:
 			return J_HAND_B
 		CombatData.AttackType.BACK_KICK, CombatData.AttackType.SPIN_HOOK_KICK, CombatData.AttackType.JUMP_SPIN_KICK, \
-				CombatData.AttackType.TORNADO_540:
+				CombatData.AttackType.TORNADO_540, CombatData.AttackType.SPIN_COUNTER_KICK:
 			return J_FOOT_B
 	return J_HAND_F
 
@@ -1537,8 +1629,18 @@ func _striking_joint() -> int:
 		return _attack_joint(attack.type)
 	if fighter.state == Fighter.State.FINISHER:
 		var pose_name := String(fighter.script_pose)
-		if pose_name == "shook_hit":
+		if pose_name in ["shook_hit", "back_extend"]:
 			return J_FOOT_B
+		if pose_name in ["elbow_hit"]:
+			return J_ELBOW_B
+		if pose_name in ["fknee_hit"]:
+			return J_KNEE_F
+		if pose_name in ["lowrh_hit", "bodyrh_hit", "lowside_hit", "sweep_extend", "jrh_hit"]:
+			return J_FOOT_F
+		if pose_name in ["gyaku_hit", "rpalm_hit"]:
+			return J_HAND_B
+		if pose_name in ["knife_hit"]:
+			return J_HAND_F
 		if pose_name.contains("kick") or pose_name == "knee" or pose_name.ends_with("_extend") or pose_name == "axe_chop":
 			return J_FOOT_F if pose_name != "knee" else J_KNEE_F
 		if pose_name in ["rhook_hit", "overhand_hit", "uppercut_strike"]:

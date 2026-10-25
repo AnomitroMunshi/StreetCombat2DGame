@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="MartialArtStyle" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/martial_art_style.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+id = &"kung_fu"
+order = 4
+display_name = "Kung Fu"
+description = "Flowing counters. Low stances, open-hand palms in long chains, hands that turn strikes aside and sweeps that take the legs."
+category = &"hybrid"
+difficulty = 4
+strengths = PackedStringArray("Longest palm chains", "Deflection counter turns aside any non-low strike", "Sweeps and low kicks")
+weaknesses = PackedStringArray("Palms do little damage each", "Short reach", "Deflection is whiffable")
+stance = 5
+input_map = {
+&"down_heavy": &"deflect_counter",
+&"down_kick": &"sweep",
+&"front": &"chain_palms",
+&"heavy": &"double_palm",
+&"kick": &"low_side_kick",
+&"lead": &"backhand",
+&"light": &"straight_palm",
+&"rising": &"rising_palm"
+}
+air_map = {
+&"heavy": &"jump_punch",
+&"kick": &"jump_kick",
+&"lead": &"jump_punch",
+&"light": &"jump_punch",
+&"rising": &"jump_punch",
+&"front": &"jump_punch"
+}
+chains = {
+&"backhand": [&"straight_palm", &"double_palm", &"rising_palm"],
+&"chain_palms": [&"double_palm", &"sweep"],
+&"deflect_counter": [&"chain_palms", &"double_palm"],
+&"low_side_kick": [&"straight_palm", &"sweep"],
+&"rising_palm": [&"straight_palm", &"backhand"],
+&"straight_palm": [&"straight_palm", &"backhand", &"chain_palms", &"double_palm", &"low_side_kick", &"sweep"]
+}
+ai_close_plans = [[&"straight_palm", &"straight_palm", &"double_palm"], [&"chain_palms", &"double_palm"], [&"backhand", &"rising_palm"], [&"straight_palm", &"sweep"], [&"deflect_counter", &"chain_palms"], [&"low_side_kick", &"sweep"]]
+ai_far_plans = [[&"low_side_kick"], [&"straight_palm", &"low_side_kick"], [&"double_palm"]]
+signature = &"palm_barrage"
+finishers = PackedStringArray("hundred_palms", "dragons_descent")
+ai_preferred_range = 85.0

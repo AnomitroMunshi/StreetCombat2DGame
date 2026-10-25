@@ -52,10 +52,22 @@ The attack buttons (J K U O I L, plus W or S) do different things in each
 style. **A style can never use a move outside its own set**, whether through a
 key, the AI, a combo or a jump. The style screen lists every move with its key.
 
-| Style | Identity | Moves |
-|---|---|---|
-| **Boxing** | Pressure and counterpunching. No kicks or sweeps at all. | J jab · K cross · U lead hook · I rear hook · O uppercut · L body hook · W+K overhand · S+K slip counter (head-height strikes miss during the slip) · air: jump punch |
-| **Taekwondo** | Long-range kicking, with only two basic punches. | J jab · K cross · L side kick · I front kick · W+L high roundhouse · S+L axe kick · U spinning hook kick · away+L back kick · air: jump roundhouse (L/I), jumping spin kick (U, W+L), jump punch (J/K) |
+Each style has its own moves, combos, signature (F at full Focus) and two
+finishers:
+
+| Style | Identity | Moves | Signature (F) | Finishers |
+|---|---|---|---|---|
+| **Boxing** | Pressure and counterpunching. No kicks or sweeps. | J jab · K cross · U lead hook · I rear hook · O uppercut · L body hook · W+K overhand · S+K slip counter | Gazelle Hook | The Final Bell · Eight-Count |
+| **Muay Thai** | Eight limbs. Upright, heavy weight transfer. | J jab · K cross · U elbow · O knee · I teep · L body kick · S+L low kick · W+L high kick | Flying Knee | Eight Limbs · Iron Knee |
+| **Karate** | Precision and distance, sharp counters. | J straight punch · K reverse punch (gyaku-zuki) · U knife hand · O rising punch · I front kick · L side kick · W+L spinning counter kick (slips head strikes) · away+L back kick | Perfect Gyaku-Zuki | One-Inch Verdict · Crimson Crescent |
+| **Kung Fu** | Flowing counters, palm chains and sweeps. | J straight palm · K double palm · U backfist · O rising palm · I chain palms (three hits) · L low side kick · S+L sweep · S+K deflection counter (turns aside any strike that isn't low) | Flowing Palm Barrage (three palms into a double palm) | Hundred Palms · Dragon's Descent |
+| **Taekwondo** | Long-range kicking; two basic punches. | J jab · K cross · L side kick · I front kick · W+L high roundhouse · S+L axe kick · U spinning hook kick · away+L back kick · air: jump roundhouse, jumping spin kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
+| **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | J jab · K cross · U hook · O uppercut · L body kick · S+L low kick · W+L high kick · away+L spinning back kick | Breaker Combination (jab, cross, low kick, high kick) | Last Combination · Knockout Rhythm |
+
+Low kicks (Muay Thai and Kickboxing low kick, Kung Fu low side kick) must be
+blocked low with S+Shift. Multi-strike signatures play their strikes one after
+another, each with its own contact window. A hit interrupts them, and only
+the last strike can knock down.
 
 **Focus meter and signature (F).** The thin gold bar under posture is
 **Focus**. It fills as you fight well:
@@ -85,8 +97,9 @@ finishers:
 
 Air Smash and Wall Crush are shared by all styles and still take priority.
 
-Muay Thai, Karate, Kung Fu and Kickboxing come next, each with its own
-signature and two finishers. Styles are data
+The AI rival also punishes you when you're stuck in an attack's recovery
+within its reach. That keeps short-range styles (Boxing, Kung Fu)
+dangerous. Styles are data
 files in `styles/`; see `docs/ADDING_A_STYLE.md` and
 `docs/M6.5_ARCHITECTURE.md`.
 

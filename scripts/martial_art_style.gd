@@ -144,6 +144,10 @@ func validate() -> PackedStringArray:
 		var st := CombatData.type_for_id(signature)
 		if st == CombatData.AttackType.NONE or not CombatData.get_attack(st).signature:
 			errors.append("signature %s is not a signature technique" % signature)
+		else:
+			for sub in CombatData.get_attack(st).sequence:
+				if CombatData.type_for_id(sub) == CombatData.AttackType.NONE:
+					errors.append("signature sequence uses unknown move %s" % sub)
 	for m in moves():
 		var mt := CombatData.type_for_id(m)
 		if mt != CombatData.AttackType.NONE and CombatData.get_attack(mt).signature:

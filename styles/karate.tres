@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="MartialArtStyle" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/martial_art_style.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+id = &"karate"
+order = 3
+display_name = "Karate"
+description = "Precision and distance. Explosive straight-line entries, clean single techniques and sharp counters from a bladed stance."
+category = &"striking"
+difficulty = 3
+strengths = PackedStringArray("Reverse punch closes distance fast", "Counter kick slips head strikes", "Strong guard pressure")
+weaknesses = PackedStringArray("Short, precise combos only", "No hooks or sweeps", "Committed entries are punishable")
+stance = 4
+input_map = {
+&"back_kick": &"back_kick",
+&"front": &"front_kick",
+&"heavy": &"reverse_punch",
+&"kick": &"side_kick",
+&"lead": &"knife_hand",
+&"light": &"jab",
+&"rising": &"rising_punch",
+&"up_kick": &"spin_counter_kick"
+}
+air_map = {
+&"heavy": &"jump_punch",
+&"kick": &"jump_kick",
+&"lead": &"jump_punch",
+&"light": &"jump_punch",
+&"rising": &"jump_punch",
+&"front": &"jump_kick"
+}
+chains = {
+&"front_kick": [&"reverse_punch", &"side_kick"],
+&"jab": [&"reverse_punch", &"front_kick", &"side_kick", &"knife_hand"],
+&"knife_hand": [&"reverse_punch", &"rising_punch"],
+&"reverse_punch": [&"front_kick", &"side_kick"],
+&"rising_punch": [&"jab"],
+&"side_kick": [&"back_kick"]
+}
+ai_close_plans = [[&"jab", &"reverse_punch"], [&"knife_hand", &"reverse_punch"], [&"reverse_punch", &"front_kick"], [&"rising_punch"], [&"spin_counter_kick"]]
+ai_far_plans = [[&"front_kick", &"reverse_punch"], [&"side_kick", &"back_kick"], [&"reverse_punch"], [&"side_kick"]]
+signature = &"perfect_gyaku"
+finishers = PackedStringArray("one_inch_verdict", "crimson_crescent")
+ai_preferred_range = 110.0

@@ -15,7 +15,9 @@ extends RefCounted
 
 ## APPEND-ONLY (style files refer to finishers by the ids in IDS).
 enum Kind { PALM_FLURRY, SPINNING_HEEL, AIR_SMASH, WALL_CRUSH, TORNADO_KICK,
-	FINAL_BELL, EIGHT_COUNT, CYCLONE_360, HEAVENS_HEEL }
+	FINAL_BELL, EIGHT_COUNT, CYCLONE_360, HEAVENS_HEEL,
+	EIGHT_LIMBS, IRON_KNEE, ONE_INCH_VERDICT, CRIMSON_CRESCENT,
+	HUNDRED_PALMS, DRAGONS_DESCENT, LAST_COMBINATION, KNOCKOUT_RHYTHM }
 
 const DISPLAY_NAMES: Dictionary = {
 	Kind.PALM_FLURRY: "PALM FLURRY",
@@ -27,12 +29,24 @@ const DISPLAY_NAMES: Dictionary = {
 	Kind.EIGHT_COUNT: "EIGHT-COUNT",
 	Kind.CYCLONE_360: "CYCLONE 360",
 	Kind.HEAVENS_HEEL: "HEAVEN'S HEEL",
+	Kind.EIGHT_LIMBS: "EIGHT LIMBS",
+	Kind.IRON_KNEE: "IRON KNEE",
+	Kind.ONE_INCH_VERDICT: "ONE-INCH VERDICT",
+	Kind.CRIMSON_CRESCENT: "CRIMSON CRESCENT",
+	Kind.HUNDRED_PALMS: "HUNDRED PALMS",
+	Kind.DRAGONS_DESCENT: "DRAGON'S DESCENT",
+	Kind.LAST_COMBINATION: "LAST COMBINATION",
+	Kind.KNOCKOUT_RHYTHM: "KNOCKOUT RHYTHM",
 }
 ## Permanent finisher ids (used by MartialArtStyle.finishers).
 const IDS: Dictionary = {
 	Kind.PALM_FLURRY: &"palm_flurry", Kind.SPINNING_HEEL: &"spinning_heel", Kind.AIR_SMASH: &"air_smash",
 	Kind.WALL_CRUSH: &"wall_crush", Kind.TORNADO_KICK: &"tornado_kick", Kind.FINAL_BELL: &"final_bell",
 	Kind.EIGHT_COUNT: &"eight_count", Kind.CYCLONE_360: &"cyclone_360", Kind.HEAVENS_HEEL: &"heavens_heel",
+	Kind.EIGHT_LIMBS: &"eight_limbs", Kind.IRON_KNEE: &"iron_knee", Kind.ONE_INCH_VERDICT: &"one_inch_verdict",
+	Kind.CRIMSON_CRESCENT: &"crimson_crescent", Kind.HUNDRED_PALMS: &"hundred_palms",
+	Kind.DRAGONS_DESCENT: &"dragons_descent", Kind.LAST_COMBINATION: &"last_combination",
+	Kind.KNOCKOUT_RHYTHM: &"knockout_rhythm",
 }
 ## Environmental finishers: shared by every style, chosen by situation.
 const ENVIRONMENTAL: Array[Kind] = [Kind.AIR_SMASH, Kind.WALL_CRUSH]
@@ -185,6 +199,101 @@ func _build(k: Kind) -> Array[Dictionary]:
 	# Every finisher ends with a short final-blow hold and then a follow-through
 	# beat, so the attacker recovers naturally while the victim is still flying.
 	match k:
+		Kind.EIGHT_LIMBS:
+			# Muay Thai: elbow, knee, elbow, knee, then a high roundhouse.
+			return [
+				{"ticks": 6, "atk": &"elbow_load", "def": &"stagger"},
+				{"ticks": 6, "atk": &"elbow_hit", "def": &"hitstun", "hit": true, "atk_move": 1.0, "def_move": 0.8},
+				{"ticks": 7, "atk": &"knee", "def": &"hitstun_body", "hit": true, "high": false, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 6, "atk": &"elbow_hit", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 7, "atk": &"knee", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "atk_move": 0.8, "def_move": 1.2},
+				{"ticks": 10, "atk": &"knee_windup", "def": &"stagger"},
+				{"ticks": 18, "atk": &"high_extend", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -11.0, "ko_drift": 14.0, "ko_rolls": 1, "ko_tumble": true},
+				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.IRON_KNEE:
+			# Muay Thai: step in, two knees to the body, then a jumping knee.
+			return [
+				{"ticks": 8, "atk": &"guard", "def": &"stagger", "atk_move": 2.5},
+				{"ticks": 7, "atk": &"knee", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "def_move": 1.0},
+				{"ticks": 6, "atk": &"knee_windup", "def": &"hitstun_body"},
+				{"ticks": 7, "atk": &"knee", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "def_move": 1.0},
+				{"ticks": 8, "atk": &"jump_rise", "def": &"stagger", "atk_vy": -11.0, "atk_move": 2.0},
+				{"ticks": 16, "atk": &"fknee_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -12.0, "ko_drift": 11.0, "ko_rolls": 0, "ko_tumble": false},
+				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
+			]
+		Kind.ONE_INCH_VERDICT:
+			# Karate: deflect, reverse punch, a held breath, then one explosive
+			# close-range punch.
+			return [
+				{"ticks": 8, "atk": &"deflect", "def": &"stagger"},
+				{"ticks": 8, "atk": &"gyaku_hit", "def": &"hitstun_body", "hit": true, "power": 2, "atk_move": 1.5, "def_move": 0.5},
+				{"ticks": 18, "atk": &"gyaku_load", "def": &"stagger"},
+				{"ticks": 18, "atk": &"gyaku_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -8.0, "ko_drift": 17.0, "ko_rolls": 2, "ko_tumble": true},
+				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.CRIMSON_CRESCENT:
+			# Karate: front kick, advancing reverse punch, spinning high kick.
+			return [
+				{"ticks": 7, "atk": &"front_extend", "def": &"hitstun_body", "hit": true, "high": false, "atk_move": 1.0, "def_move": 1.5},
+				{"ticks": 8, "atk": &"gyaku_hit", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 2.0, "def_move": 0.8},
+				{"ticks": 10, "atk": &"spin_windup", "def": &"stagger", "atk_spin": 0.5},
+				{"ticks": 4, "atk": &"spin_kick", "def": &"stagger", "atk_spin": 0.5},
+				{"ticks": 18, "atk": &"spin_kick", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -13.0, "ko_drift": 13.0, "ko_rolls": 2, "ko_tumble": true},
+				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.HUNDRED_PALMS:
+			# Kung Fu: a storm of palms, a stagger, then the double palm.
+			var beats: Array[Dictionary] = [{"ticks": 6, "atk": &"palm_windup", "def": &"stagger"}]
+			for i in 6:
+				beats.append({"ticks": 4, "atk": &"palm_lead" if i % 2 == 0 else &"palm_rear",
+					"def": &"hitstun" if i % 2 == 0 else &"hitstun_body", "hit": true, "high": i % 2 == 0,
+					"atk_move": 0.8, "def_move": 0.8})
+			beats.append({"ticks": 10, "atk": &"palm_windup", "def": &"stagger"})
+			beats.append({"ticks": 20, "atk": &"palm_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+				"ko_vy": -10.0, "ko_drift": 17.0, "ko_rolls": 0, "ko_tumble": true})
+			beats.append({"ticks": 55, "atk": &"guard", "def": &"knock_fly"})
+			return beats
+		Kind.DRAGONS_DESCENT:
+			# Kung Fu: sweep the legs, a rising palm lifts them, leap after
+			# them and drive them down into the floor.
+			return [
+				{"ticks": 9, "atk": &"sweep_load", "def": &"stagger"},
+				{"ticks": 7, "atk": &"sweep_extend", "def": &"knock_fly", "hit": true, "high": false, "def_vy": -6.0},
+				{"ticks": 8, "atk": &"rpalm_hit", "def": &"knock_fly", "hit": true, "power": 2, "def_vy": -10.0},
+				{"ticks": 9, "atk": &"jump_rise", "def": &"knock_fly", "atk_vy": -13.0, "atk_move": 1.0},
+				{"ticks": 16, "atk": &"palm_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": 16.0, "ko_drift": 2.0, "ko_rolls": 0, "ko_tumble": false},
+				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
+			]
+		Kind.LAST_COMBINATION:
+			# Kickboxing: jab, cross, body kick, head kick, spinning back kick.
+			return [
+				{"ticks": 5, "atk": &"jab_strike", "def": &"hitstun", "hit": true, "atk_move": 1.0, "def_move": 0.8},
+				{"ticks": 6, "atk": &"heavy_strike", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 1.0, "def_move": 0.8},
+				{"ticks": 7, "atk": &"bodyrh_hit", "def": &"hitstun_body", "hit": true, "high": false, "def_move": 1.0},
+				{"ticks": 8, "atk": &"high_extend", "def": &"hitstun", "hit": true, "power": 2, "def_move": 1.0},
+				{"ticks": 10, "atk": &"spin_windup", "def": &"stagger", "atk_spin": 0.5},
+				{"ticks": 18, "atk": &"back_extend", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -10.0, "ko_drift": 17.0, "ko_rolls": 2, "ko_tumble": true, "atk_spin": 0.5},
+				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.KNOCKOUT_RHYTHM:
+			# Kickboxing: punch, kick, punch, kick, then a jumping roundhouse.
+			return [
+				{"ticks": 5, "atk": &"jab_strike", "def": &"hitstun", "hit": true, "atk_move": 1.0, "def_move": 0.8},
+				{"ticks": 7, "atk": &"lowrh_hit", "def": &"hitstun_body", "hit": true, "high": false, "def_move": 0.8},
+				{"ticks": 5, "atk": &"heavy_strike", "def": &"hitstun", "hit": true, "atk_move": 1.0, "def_move": 0.8},
+				{"ticks": 7, "atk": &"bodyrh_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "def_move": 1.0},
+				{"ticks": 8, "atk": &"jump_rise", "def": &"stagger", "atk_vy": -11.0, "atk_move": 2.0},
+				{"ticks": 16, "atk": &"jrh_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -12.0, "ko_drift": 14.0, "ko_rolls": 1, "ko_tumble": true},
+				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
+			]
 		Kind.FINAL_BELL:
 			# Boxing: dig a body hook, a second body shot, then a rising uppercut
 			# that lifts them off their feet and drops them on their back.

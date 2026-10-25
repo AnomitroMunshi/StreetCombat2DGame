@@ -545,7 +545,8 @@ func _resolve_hits() -> void:
 		# Focus: one award per hit event, only while fighting.
 		match result:
 			CombatData.HitResult.HIT:
-				attacker.add_focus(CombatData.focus_for_hit(attack, defender.last_hit_counter))
+				if not attacker.in_signature:
+					attacker.add_focus(CombatData.focus_for_hit(attack, defender.last_hit_counter))
 			CombatData.HitResult.BLOCKED:
 				defender.add_block_focus()
 		if result == CombatData.HitResult.KO:

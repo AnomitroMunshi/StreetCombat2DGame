@@ -37,6 +37,9 @@ class Driver extends Node:
 		var e: Fighter = main.get_node("Enemy")
 		var ai: EnemyAI = main.get_node("EnemyAI")
 		if phase == "fight" and main.call("get_round_state_name") in ["STYLE_SELECT", "PRE_MATCH"]:
+			# Fixed styles so the match is reproducible: the rival is otherwise random.
+			main.call("select_style", &"kickboxing")
+			e.set_style(StyleRegistry.by_id(&"boxing"))
 			main.call("start_match", true)
 		ai_states_seen[ai.get_state_name().get_slice(" ", 0)] = true
 

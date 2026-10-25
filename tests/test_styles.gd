@@ -315,16 +315,134 @@ func _initialize() -> void:
 	_check(sig_res in [CombatData.HitResult.BLOCKED, CombatData.HitResult.GUARD_BREAK] and guard_b.health == 100,
 		"a signature can be blocked (%s, no damage)" % CombatData.HitResult.keys()[sig_res])
 
+	print("[all six styles]")
+	_check(StyleRegistry.count() == 6, "six styles registered (%d)" % StyleRegistry.count())
+	_check(StyleRegistry.default_style().id == &"kickboxing", "kickboxing is the default all-rounder")
+	var sig_ids := {}
+	var fin_ids := {}
+	for st in StyleRegistry.all():
+		var fins_ok := st.finishers.size() == 2
+		for fid in st.finishers:
+			if fin_ids.has(fid):
+				fins_ok = false
+			fin_ids[fid] = true
+		_check(fins_ok, "%s has two finishers of its own (%s)" % [st.id, st.finishers])
+		_check(st.signature != &"" and not sig_ids.has(st.signature), "%s has its own signature (%s)" % [st.id, st.signature])
+		sig_ids[st.signature] = true
+		# The signature starts and spends Focus.
+		p = _pair(st, 300.0)
+		a = p[0]
+		a.focus = CombatData.FOCUS_MAX
+		var fi := CombatData.Intent.new()
+		fi.signature = true
+		a.push_intent(fi)
+		a.tick()
+		_check(a.state == Fighter.State.ATTACK and a.focus == 0.0 and a.in_signature, "%s: signature starts on F at full focus" % st.id)
+	_check(not StyleRegistry.by_id(&"kung_fu").allows(CombatData.AttackType.HIGH_KICK) and not StyleRegistry.by_id(&"karate").allows(CombatData.AttackType.SWEEP)
+		and not StyleRegistry.by_id(&"kickboxing").allows(CombatData.AttackType.ELBOW) and StyleRegistry.by_id(&"muay_thai").allows(CombatData.AttackType.ELBOW),
+		"movesets stay distinct (no high kick in kung fu, no sweep in karate, elbows only in muay thai)")
+
+	print("[sequences, multi-hit, deflection]")
+	# Breaker Combination: four distinct strikes land; mid-sequence hits never knock down.
+	p = _pair(StyleRegistry.by_id(&"kickboxing"), 75.0)
+	a = p[0]
+	var tgt: Fighter = p[1]
+	a.focus = CombatData.FOCUS_MAX
+	var fsg := CombatData.Intent.new()
+	fsg.signature = true
+	a.push_intent(fsg)
+	var landed: Array = []
+	var down_early := false
+	for t in 120:
+		a.tick()
+		tgt.tick()
+		if a.is_hitbox_active() and a.get_hitbox_world().intersects(tgt.get_hurtbox_world()):
+			var r := tgt.receive_hit(a.current_attack, a, a.combo_step)
+			a.confirm_hit(r)
+			if r == CombatData.HitResult.HIT:
+				landed.append(a.current_attack.display_name)
+				if tgt.state == Fighter.State.KNOCKDOWN and landed.size() < 4:
+					down_early = true
+	_check(landed == ["Jab", "Cross", "Low Kick", "High Kick"], "Breaker Combination: jab, cross, low kick, high kick all land (%s)" % [landed])
+	_check(not down_early, "no knockdown before the final strike of the sequence")
+	# Interrupted: hit mid-sequence and the rest is dropped.
+	p = _pair(StyleRegistry.by_id(&"kickboxing"), 75.0)
+	a = p[0]
+	a.focus = CombatData.FOCUS_MAX
+	a.push_intent(fsg)
+	for t in 4:
+		a.tick()
+	a.receive_hit(CombatData.get_attack(CombatData.AttackType.LIGHT), p[1], 1)
+	for t in 40:
+		a.tick()
+	_check(not a.is_mid_sequence() and not a.in_signature and a.state != Fighter.State.ATTACK, "a signature sequence is interrupted by a hit")
+	# Chain palms land several times in one move.
+	p = _pair(null, 75.0)
+	a = p[0]
+	var cp_t: Fighter = p[1]
+	a.push_intent(_attack(CombatData.AttackType.CHAIN_PALMS))
+	var cp_hits := 0
+	for t in 40:
+		a.tick()
+		cp_t.tick()
+		if a.is_hitbox_active() and a.get_hitbox_world().intersects(cp_t.get_hurtbox_world()):
+			if cp_t.receive_hit(a.current_attack, a, a.combo_step) == CombatData.HitResult.HIT:
+				cp_hits += 1
+			a.confirm_hit(CombatData.HitResult.HIT)
+	_check(cp_hits == 3, "chain palms hit three times in one move (%d)" % cp_hits)
+	# Deflection counter turns aside a body-height strike; a low one still lands.
+	p = _pair(null, 80.0)
+	a = p[0]
+	var att: Fighter = p[1]
+	a.push_intent(_attack(CombatData.AttackType.DEFLECT_COUNTER))
+	a.tick()
+	a.tick()
+	_check(a.receive_hit(CombatData.get_attack(CombatData.AttackType.BODY_HOOK), att, 1) == CombatData.HitResult.WHIFF, "deflection counter turns aside a body hook")
+	_check(a.receive_hit(CombatData.get_attack(CombatData.AttackType.LOW_SIDE_KICK), att, 1) != CombatData.HitResult.WHIFF, "...but not a low kick")
+	# Low kicks must be blocked low.
+	p = _pair(null, 80.0)
+	a = p[0]
+	var lb: Fighter = p[1]
+	var hold_hi := CombatData.Intent.new()
+	hold_hi.block = true
+	for t in 4:
+		lb.push_intent(hold_hi)
+		lb.tick()
+	_check(lb.receive_hit(CombatData.get_attack(CombatData.AttackType.LOW_ROUNDHOUSE), a, 1) == CombatData.HitResult.HIT, "a standing guard does not stop a low kick")
+
+	print("[new moves: one hit, both directions]")
+	for t_new in [CombatData.AttackType.ELBOW, CombatData.AttackType.KNEE, CombatData.AttackType.LOW_ROUNDHOUSE,
+			CombatData.AttackType.BODY_ROUNDHOUSE, CombatData.AttackType.REVERSE_PUNCH, CombatData.AttackType.KNIFE_HAND,
+			CombatData.AttackType.RISING_PUNCH, CombatData.AttackType.SPIN_COUNTER_KICK, CombatData.AttackType.STRAIGHT_PALM,
+			CombatData.AttackType.DOUBLE_PALM, CombatData.AttackType.LOW_SIDE_KICK, CombatData.AttackType.RISING_PALM,
+			CombatData.AttackType.DEFLECT_COUNTER, CombatData.AttackType.PERFECT_GYAKU, CombatData.AttackType.FLYING_KNEE]:
+		var res2: Array = []
+		for side in [1, -1]:
+			p = _pair(null, 80.0, side)
+			a = p[0]
+			var b3: Fighter = p[1]
+			a.push_intent(_attack(t_new))
+			var hits2 := 0
+			for t in 60:
+				a.tick()
+				b3.tick()
+				if a.is_hitbox_active() and a.get_hitbox_world().intersects(b3.get_hurtbox_world()):
+					if b3.receive_hit(a.current_attack, a, a.combo_step) == CombatData.HitResult.HIT:
+						hits2 += 1
+					a.confirm_hit(CombatData.HitResult.HIT)
+			res2.append([hits2, b3.health])
+		_check(res2[0][0] == 1 and res2[0] == res2[1], "%s hits exactly once, same both ways (%s)" % [CombatData.attack_name(t_new), res2])
+
 	# AI rivals of each style never start an illegal move.
 	print("[AI rivals stay in style]")
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
 	current_scene = main
 	await process_frame
-	for rival_id in [&"boxing", &"taekwondo"]:
+	for rival_id in [&"boxing", &"taekwondo", &"muay_thai", &"karate", &"kung_fu", &"kickboxing"]:
 		var pl: Fighter = main.get_node("Player")
 		var en: Fighter = main.get_node("Enemy")
-		main.call("select_style", &"taekwondo" if rival_id == &"boxing" else &"boxing")
+		main.call("select_style", &"taekwondo" if rival_id != &"taekwondo" else &"boxing")
 		en.set_style(StyleRegistry.by_id(rival_id))
 		main.call("start_match", true)
 		var seen := {}

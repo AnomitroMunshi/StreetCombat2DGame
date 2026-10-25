@@ -12,7 +12,11 @@ extends RefCounted
 enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP_KICK, JUMP_PUNCH, SWEEP, HIGH_KICK, BACK_KICK,
 	LEAD_HOOK, REAR_HOOK, BODY_HOOK, OVERHAND, SLIP_COUNTER,
 	AXE_KICK, SPIN_HOOK_KICK, JUMP_ROUNDHOUSE, JUMP_SPIN_KICK,
-	GAZELLE_HOOK, TORNADO_540 }
+	GAZELLE_HOOK, TORNADO_540,
+	ELBOW, KNEE, LOW_ROUNDHOUSE, BODY_ROUNDHOUSE, FLYING_KNEE,
+	REVERSE_PUNCH, KNIFE_HAND, RISING_PUNCH, SPIN_COUNTER_KICK, PERFECT_GYAKU,
+	STRAIGHT_PALM, DOUBLE_PALM, LOW_SIDE_KICK, RISING_PALM, CHAIN_PALMS, DEFLECT_COUNTER, PALM_BARRAGE,
+	BREAKER_COMBO }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 
 const TICK_RATE: int = 60
@@ -152,6 +156,9 @@ const FOCUS_BLOCK: float = 3.0
 const FOCUS_BLOCK_COOLDOWN: int = 30
 ## F stays valid this long while the fighter cannot act yet.
 const SIGNATURE_BUFFER_FRAMES: int = 8
+## Sequence moves: the next strike starts this many ticks after the previous
+## strike's active frames end.
+const SEQUENCE_GAP: int = 3
 ## Two taps of the same direction within this many ticks = dodge.
 const DOUBLE_TAP_WINDOW: int = 12
 const LANDING_FRAMES: int = 3
@@ -198,6 +205,12 @@ const AIR_HIT_POP_VELOCITY: float = -3.5
 ##   id: permanent move id used by style data (MartialArtStyle) and saves.
 ##   slip (optional): ticks of startup during which head-height strikes whiff
 ##                    (the head is moved off the line: slip counters).
+##   rehit (optional): the hitbox re-arms every N active ticks (multi-hit).
+##   deflect (optional, with slip): every strike that is not low whiffs during
+##                    the slip window (hand deflections), not only head strikes.
+##   sequence (optional): this move is a series of other moves (by id), each
+##                    with its own frame data and contact window; started one
+##                    after another automatically, interrupted by being hit.
 ##   air (optional): airborne-only move. spin (optional): the body turns its
 ##                   back through the move (visual turn, like the back kick).
 ##   launch (optional): upward velocity given to a grounded opponent on hit.
@@ -403,6 +416,165 @@ const ATTACK_TABLE: Dictionary = {
 		"knockback": 7.0, "lunge": 0.0, "hitstop": 8,
 		"hitbox": Rect2(22.0, -122.0, 74.0, 52.0),
 	},
+	# --- Muay Thai -------------------------------------------------------------
+	# Elbow: short, sharp, rear elbow turning through. Close range only.
+	AttackType.ELBOW: {
+		"id": &"elbow", "name": "Elbow", "posture": 14.0,
+		"startup": 6, "active": 3, "recovery": 14, "cancel_window": 8,
+		"damage": 11, "hitstun": 20, "blockstun": 13,
+		"knockback": 4.0, "lunge": 1.2, "hitstop": 7,
+		"hitbox": Rect2(14.0, -166.0, 46.0, 42.0),
+	},
+	# Knee: driven up into the body.
+	AttackType.KNEE: {
+		"id": &"knee", "name": "Knee", "posture": 16.0,
+		"startup": 8, "active": 3, "recovery": 16, "cancel_window": 7,
+		"damage": 12, "hitstun": 22, "blockstun": 14,
+		"knockback": 5.5, "lunge": 1.5, "hitstop": 7,
+		"hitbox": Rect2(16.0, -126.0, 48.0, 50.0),
+	},
+	# Low roundhouse: shin into the thigh. A low attack (block it low).
+	AttackType.LOW_ROUNDHOUSE: {
+		"id": &"low_roundhouse", "name": "Low Kick", "posture": 14.0, "low": true,
+		"startup": 8, "active": 3, "recovery": 16, "cancel_window": 7,
+		"damage": 9, "hitstun": 18, "blockstun": 12,
+		"knockback": 3.5, "lunge": 0.8, "hitstop": 6,
+		"hitbox": Rect2(30.0, -72.0, 64.0, 42.0),
+	},
+	# Body roundhouse: shin into the ribs, hips turned over.
+	AttackType.BODY_ROUNDHOUSE: {
+		"id": &"body_roundhouse", "name": "Body Kick", "posture": 18.0,
+		"startup": 9, "active": 3, "recovery": 18, "cancel_window": 7,
+		"damage": 12, "hitstun": 20, "blockstun": 14,
+		"knockback": 6.5, "lunge": 0.8, "hitstop": 7,
+		"blowback_chance": 0.2, "blowback_vx": 7.0, "blowback_vy": -6.0, "blowback_rolls": 1,
+		"hitbox": Rect2(32.0, -132.0, 66.0, 42.0),
+	},
+	# Signature: Flying Knee. Leap in, knee to the head.
+	AttackType.FLYING_KNEE: {
+		"id": &"flying_knee", "name": "Flying Knee", "posture": 34.0, "signature": true,
+		"leap": -10.0, "land_lag": 16,
+		"startup": 11, "active": 5, "recovery": 24, "cancel_window": 0,
+		"damage": 24, "hitstun": 30, "blockstun": 18,
+		"knockback": 9.0, "lunge": 3.0, "hitstop": 12,
+		"blowback_chance": 1.0, "blowback_vx": 9.0, "blowback_vy": -9.0, "blowback_rolls": 1,
+		# Relative to the feet at the top of the leap (~50 px up).
+		"hitbox": Rect2(14.0, -112.0, 60.0, 62.0),
+	},
+
+	# --- Karate ----------------------------------------------------------------
+	# Reverse punch (gyaku-zuki): rear hand, long stance, hips snap through.
+	AttackType.REVERSE_PUNCH: {
+		"id": &"reverse_punch", "name": "Reverse Punch", "posture": 14.0,
+		"startup": 9, "active": 3, "recovery": 17, "cancel_window": 8,
+		"damage": 12, "hitstun": 21, "blockstun": 14,
+		"knockback": 6.0, "lunge": 2.5, "hitstop": 7,
+		"hitbox": Rect2(36.0, -154.0, 64.0, 30.0),
+	},
+	# Knife-hand strike: the blade of the lead hand chops down to the neck.
+	AttackType.KNIFE_HAND: {
+		"id": &"knife_hand", "name": "Knife Hand", "posture": 10.0,
+		"startup": 7, "active": 3, "recovery": 14, "cancel_window": 8,
+		"damage": 9, "hitstun": 18, "blockstun": 12,
+		"knockback": 3.5, "lunge": 1.0, "hitstop": 6,
+		"hitbox": Rect2(26.0, -166.0, 54.0, 42.0),
+	},
+	# Rising punch: a straight-armed punch driving upward (launches).
+	AttackType.RISING_PUNCH: {
+		"id": &"rising_punch", "name": "Rising Punch", "posture": 12.0,
+		"startup": 8, "active": 3, "recovery": 17, "cancel_window": 6,
+		"damage": 11, "hitstun": 22, "blockstun": 13,
+		"knockback": 2.5, "lunge": 1.5, "hitstop": 7, "launch": 7.0,
+		"hitbox": Rect2(18.0, -198.0, 44.0, 78.0),
+	},
+	# Spinning counter kick: turning away slips head strikes, then the heel.
+	AttackType.SPIN_COUNTER_KICK: {
+		"id": &"spin_counter_kick", "name": "Spinning Counter Kick", "posture": 14.0, "spin": true, "slip": 7,
+		"startup": 10, "active": 3, "recovery": 20, "cancel_window": 0,
+		"damage": 13, "hitstun": 22, "blockstun": 14,
+		"knockback": 7.0, "lunge": 0.8, "hitstop": 8,
+		"blowback_chance": 0.3, "blowback_vx": 8.0, "blowback_vy": -6.0, "blowback_rolls": 1,
+		"hitbox": Rect2(30.0, -152.0, 70.0, 42.0),
+	},
+	# Signature: Perfect Gyaku-Zuki. Rooted stance, heel drive, hip snap.
+	AttackType.PERFECT_GYAKU: {
+		"id": &"perfect_gyaku", "name": "Perfect Gyaku-Zuki", "posture": 45.0, "signature": true,
+		"startup": 14, "active": 3, "recovery": 26, "cancel_window": 0,
+		"damage": 22, "hitstun": 30, "blockstun": 20,
+		"knockback": 10.0, "lunge": 3.0, "hitstop": 14,
+		"blowback_chance": 1.0, "blowback_vx": 10.0, "blowback_vy": -6.0, "blowback_rolls": 1,
+		"hitbox": Rect2(34.0, -158.0, 70.0, 36.0),
+	},
+
+	# --- Kung Fu ----------------------------------------------------------------
+	AttackType.STRAIGHT_PALM: {
+		"id": &"straight_palm", "name": "Straight Palm", "posture": 7.0,
+		"startup": 5, "active": 3, "recovery": 12, "cancel_window": 9,
+		"damage": 6, "hitstun": 16, "blockstun": 10,
+		"knockback": 3.0, "lunge": 1.0, "hitstop": 4,
+		"hitbox": Rect2(28.0, -154.0, 54.0, 32.0),
+	},
+	AttackType.DOUBLE_PALM: {
+		"id": &"double_palm", "name": "Double Palm", "posture": 18.0,
+		"startup": 11, "active": 4, "recovery": 20, "cancel_window": 0,
+		"damage": 12, "hitstun": 22, "blockstun": 15,
+		"knockback": 9.0, "lunge": 2.0, "hitstop": 8,
+		"blowback_chance": 0.35, "blowback_vx": 9.0, "blowback_vy": -5.0, "blowback_rolls": 1,
+		"hitbox": Rect2(28.0, -152.0, 58.0, 52.0),
+	},
+	# Low side kick: stamping side kick to the knee (block it low).
+	AttackType.LOW_SIDE_KICK: {
+		"id": &"low_side_kick", "name": "Low Side Kick", "posture": 12.0, "low": true,
+		"startup": 8, "active": 3, "recovery": 16, "cancel_window": 7,
+		"damage": 9, "hitstun": 18, "blockstun": 12,
+		"knockback": 5.0, "lunge": 0.8, "hitstop": 6,
+		"hitbox": Rect2(36.0, -64.0, 66.0, 36.0),
+	},
+	AttackType.RISING_PALM: {
+		"id": &"rising_palm", "name": "Rising Palm", "posture": 12.0,
+		"startup": 9, "active": 3, "recovery": 18, "cancel_window": 6,
+		"damage": 11, "hitstun": 22, "blockstun": 13,
+		"knockback": 2.5, "lunge": 1.5, "hitstop": 7, "launch": 7.5,
+		"hitbox": Rect2(18.0, -198.0, 44.0, 78.0),
+	},
+	# Chain palms: three quick alternating palms in one move (each can land).
+	AttackType.CHAIN_PALMS: {
+		"id": &"chain_palms", "name": "Chain Palms", "posture": 5.0, "rehit": 3,
+		"startup": 6, "active": 9, "recovery": 14, "cancel_window": 6,
+		"damage": 4, "hitstun": 14, "blockstun": 8,
+		"knockback": 1.5, "lunge": 1.2, "hitstop": 3,
+		"hitbox": Rect2(26.0, -154.0, 54.0, 36.0),
+	},
+	# Deflection counter: the lead forearm turns aside any strike that is not
+	# low during the first 8 ticks, then the rear palm answers.
+	AttackType.DEFLECT_COUNTER: {
+		"id": &"deflect_counter", "name": "Deflection Counter", "posture": 12.0, "slip": 8, "deflect": true,
+		"startup": 10, "active": 3, "recovery": 16, "cancel_window": 6,
+		"damage": 11, "hitstun": 22, "blockstun": 13,
+		"knockback": 5.5, "lunge": 1.5, "hitstop": 7,
+		"hitbox": Rect2(30.0, -152.0, 58.0, 38.0),
+	},
+	# Signature: Flowing Palm Barrage. Three palms flowing into a double palm.
+	# A sequence: each strike is its own move with its own contact window.
+	AttackType.PALM_BARRAGE: {
+		"id": &"palm_barrage", "name": "Flowing Palm Barrage", "posture": 0.0, "signature": true,
+		"sequence": [&"straight_palm", &"straight_palm", &"straight_palm", &"double_palm"],
+		"startup": 5, "active": 3, "recovery": 12, "cancel_window": 0,
+		"damage": 0, "hitstun": 0, "blockstun": 0,
+		"knockback": 0.0, "lunge": 1.0, "hitstop": 0,
+		"hitbox": Rect2(28.0, -154.0, 54.0, 32.0),
+	},
+
+	# --- Kickboxing --------------------------------------------------------------
+	# Signature: Breaker Combination. Jab, cross, low kick, high roundhouse.
+	AttackType.BREAKER_COMBO: {
+		"id": &"breaker_combo", "name": "Breaker Combination", "posture": 0.0, "signature": true,
+		"sequence": [&"jab", &"cross", &"low_roundhouse", &"high_kick"],
+		"startup": 5, "active": 3, "recovery": 11, "cancel_window": 0,
+		"damage": 0, "hitstun": 0, "blockstun": 0,
+		"knockback": 0.0, "lunge": 0.8, "hitstop": 0,
+		"hitbox": Rect2(28.0, -150.0, 52.0, 26.0),
+	},
 }
 
 
@@ -467,6 +639,10 @@ class Attack extends RefCounted:
 	var leap_vy: float = 0.0
 	## Landing recovery for a leaping move (0 = the normal air-attack landing).
 	var land_lag: int = 0
+	var rehit: int = 0
+	var deflect: bool = false
+	## Sub-moves (ids) for sequence moves; empty for ordinary moves.
+	var sequence: Array = []
 
 	func total_frames() -> int:
 		return startup + active + recovery
@@ -528,6 +704,9 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.signature = row.get("signature", false)
 	attack.leap_vy = row.get("leap", 0.0)
 	attack.land_lag = row.get("land_lag", 0)
+	attack.rehit = row.get("rehit", 0)
+	attack.deflect = row.get("deflect", false)
+	attack.sequence = row.get("sequence", [])
 	_attack_cache[type] = attack
 	return attack
 

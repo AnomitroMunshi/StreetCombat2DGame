@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="MartialArtStyle" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/martial_art_style.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+id = &"kickboxing"
+order = 6
+display_name = "Kickboxing"
+description = "The balanced striker. Punches flow into kicks and back: jab-cross into a low kick, finish high. The all-rounder."
+category = &"hybrid"
+difficulty = 2
+strengths = PackedStringArray("Punch-kick combinations at every range", "Low kick, body kick and high kick", "Spinning back kick from standing")
+weaknesses = PackedStringArray("No specialist tools", "No elbows, knees or sweeps", "Spinning kick is slow")
+stance = 9
+input_map = {
+&"back_kick": &"back_kick",
+&"down_kick": &"low_roundhouse",
+&"heavy": &"cross",
+&"kick": &"body_roundhouse",
+&"lead": &"lead_hook",
+&"light": &"jab",
+&"rising": &"uppercut",
+&"up_kick": &"high_kick"
+}
+air_map = {
+&"heavy": &"jump_punch",
+&"kick": &"jump_kick",
+&"lead": &"jump_punch",
+&"light": &"jump_punch",
+&"rising": &"jump_punch",
+&"front": &"jump_kick"
+}
+chains = {
+&"body_roundhouse": [&"cross", &"high_kick"],
+&"cross": [&"lead_hook", &"low_roundhouse", &"body_roundhouse", &"high_kick", &"uppercut"],
+&"high_kick": [&"back_kick"],
+&"jab": [&"cross", &"lead_hook", &"low_roundhouse", &"body_roundhouse", &"high_kick"],
+&"lead_hook": [&"cross", &"low_roundhouse", &"body_roundhouse"],
+&"low_roundhouse": [&"jab", &"cross", &"high_kick"],
+&"uppercut": [&"lead_hook", &"high_kick"]
+}
+ai_close_plans = [[&"jab", &"cross", &"low_roundhouse"], [&"jab", &"lead_hook", &"body_roundhouse"], [&"cross", &"uppercut", &"high_kick"], [&"lead_hook", &"cross"], [&"jab", &"cross", &"high_kick"]]
+ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"back_kick"], [&"jab", &"body_roundhouse"]]
+signature = &"breaker_combo"
+finishers = PackedStringArray("last_combination", "knockout_rhythm")
+ai_preferred_range = 100.0

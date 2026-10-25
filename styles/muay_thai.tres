@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="MartialArtStyle" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/martial_art_style.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+id = &"muay_thai"
+order = 2
+display_name = "Muay Thai"
+description = "The art of eight limbs. Upright and heavy: punches, elbows, knees and shin kicks, every strike with full weight transfer."
+category = &"striking"
+difficulty = 3
+strengths = PackedStringArray("Elbows and knees wreck posture up close", "Low kick and body kick punish from mid range", "Most damaging clinch-range strikes")
+weaknesses = PackedStringArray("Slow, measured footwork", "Few aerial options", "Kicks are committal")
+stance = 3
+input_map = {
+&"down_kick": &"low_roundhouse",
+&"front": &"front_kick",
+&"heavy": &"cross",
+&"kick": &"body_roundhouse",
+&"lead": &"elbow",
+&"light": &"jab",
+&"rising": &"knee",
+&"up_kick": &"high_kick"
+}
+air_map = {
+&"heavy": &"jump_punch",
+&"kick": &"jump_kick",
+&"lead": &"jump_punch",
+&"light": &"jump_punch",
+&"rising": &"jump_kick",
+&"front": &"jump_kick"
+}
+chains = {
+&"body_roundhouse": [&"jab", &"cross"],
+&"cross": [&"elbow", &"knee", &"low_roundhouse", &"body_roundhouse", &"high_kick"],
+&"elbow": [&"knee", &"cross"],
+&"front_kick": [&"body_roundhouse", &"high_kick", &"low_roundhouse"],
+&"jab": [&"cross", &"elbow", &"knee", &"body_roundhouse", &"low_roundhouse", &"front_kick"],
+&"knee": [&"elbow"],
+&"low_roundhouse": [&"jab", &"cross", &"high_kick"]
+}
+ai_close_plans = [[&"jab", &"cross", &"elbow"], [&"elbow", &"knee"], [&"knee", &"elbow"], [&"jab", &"knee"], [&"cross", &"low_roundhouse"], [&"jab", &"body_roundhouse"]]
+ai_far_plans = [[&"front_kick", &"body_roundhouse"], [&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"front_kick"]]
+signature = &"flying_knee"
+finishers = PackedStringArray("eight_limbs", "iron_knee")
+ai_preferred_range = 90.0

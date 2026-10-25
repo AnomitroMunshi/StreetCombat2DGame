@@ -76,6 +76,7 @@ var _block_low: bool = false
 ## Target's state_frame at which to press block for a timed parry (-1 = none).
 var _parry_at: int = -1
 var _punish_checked_swing: int = -1
+var _recovery_checked_swing: int = -1
 # Side changes (the player crossed over / rolled through): a human-like pause
 # before the AI turns and acts on it. It never predicts the landing spot.
 var _last_side: int = 0
@@ -185,6 +186,17 @@ func compute_intent() -> CombatData.Intent:
 			_plan_index = 0
 			_last_pressed_swing = _me.swing_id
 			_parry_at = -1
+			_enter(AIState.ATTACK, 60)
+
+	# Recovery punish: the opponent is visibly stuck in the recovery of an attack
+	# within reach. One roll per swing (observable state, no input reading).
+	if _target.get_phase() == Fighter.Phase.RECOVERY and _recovery_checked_swing != _target.swing_id \
+			and _state != AIState.ATTACK and _me.can_act() and dist < preferred_range + 25.0:
+		_recovery_checked_swing = _target.swing_id
+		if _rng.randf() < punish_chance * 0.5:
+			_plan = _style_plan(true, [CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY])
+			_plan_index = 0
+			_last_pressed_swing = _me.swing_id
 			_enter(AIState.ATTACK, 60)
 
 	# Timed parry in progress: press block (a fresh press) on the chosen tick.

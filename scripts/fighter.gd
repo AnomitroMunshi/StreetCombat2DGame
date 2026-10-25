@@ -204,6 +204,10 @@ var rejected_attacks: int = 0
 var focus: float = 0.0
 var signature_buffer: int = 0
 var _block_focus_cd: int = 0
+## Strikes of the current signature (or other sequence move) still to come.
+var _sequence: Array = []
+## The current strike belongs to a signature technique (earns no Focus).
+var in_signature: bool = false
 
 # Presentation data: read by visuals/HUD, never used for combat decisions.
 var hitstop_frames: int = 0
@@ -460,6 +464,13 @@ func _tick_attack() -> void:
 		velocity_y = attack.leap_vy
 		jump_vx = facing * 2.5
 		jumped.emit(self)
+	if attack.rehit > 0 and state_frame > attack.startup and state_frame < strike_end \
+			and (state_frame - attack.startup) % attack.rehit == 0:
+		swing_has_hit = false  # multi-hit: the hitbox re-arms
+	if not _sequence.is_empty() and state_frame >= strike_end + CombatData.SEQUENCE_GAP:
+		# Next strike of the sequence, whether the last one landed or not.
+		_start_attack(_sequence.pop_front(), combo_step, false)
+		return
 	if state_frame < strike_end:
 		position.x += attack.lunge * facing
 	elif combo_step < CombatData.MAX_COMBO_CHAIN and state_frame - strike_end < attack.cancel_window 			and swing_has_hit and _can_chain(attack.type, buffered_attack):
@@ -541,6 +552,7 @@ func _land() -> void:
 		if current_attack != null and current_attack.land_lag > 0:
 			lag = current_attack.land_lag
 		current_attack = null
+		_clear_sequence()
 		combo_step = 0
 		_enter_state(State.LAND)
 		stun_frames = lag
@@ -580,6 +592,7 @@ func add_posture(amount: float, can_break: bool = true) -> bool:
 ## Guard broken: defenceless for POSTURE_BREAK_FRAMES, then posture is empty and
 ## locked for POSTURE_LOCK_FRAMES.
 func _break_posture(push_dir: int) -> void:
+	_clear_sequence()
 	current_attack = null
 	combo_step = 0
 	parry_window = 0
@@ -634,7 +647,7 @@ func _try_signature() -> bool:
 	buffered_attack = CombatData.AttackType.NONE
 	buffer_frames = 0
 	_start_attack(type, 1, true)
-	signature_started.emit(self, current_attack)
+	signature_started.emit(self, CombatData.get_attack(type))
 	return true
 
 
@@ -812,7 +825,17 @@ func _consume_jump() -> bool:
 func _start_attack(type: CombatData.AttackType, step: int, turn_to_opponent: bool) -> void:
 	if turn_to_opponent:
 		face_opponent()
-	current_attack = CombatData.get_attack(type)
+	var chosen := CombatData.get_attack(type)
+	if not chosen.sequence.is_empty():
+		# A sequence: queue its strikes and start the first one.
+		_sequence.clear()
+		for m in chosen.sequence:
+			_sequence.append(CombatData.type_for_id(m))
+		in_signature = chosen.signature
+		chosen = CombatData.get_attack(_sequence.pop_front())
+	elif _sequence.is_empty():
+		in_signature = chosen.signature
+	current_attack = chosen
 	combo_step = step
 	swing_id += 1
 	swing_has_hit = false
@@ -873,7 +896,19 @@ func _enter_getup(from_roll: bool) -> void:
 func _end_attack() -> void:
 	current_attack = null
 	combo_step = 0
+	_clear_sequence()
 	_enter_state(State.IDLE)
+
+
+## Drops any remaining sequence strikes (interrupted or finished).
+func _clear_sequence() -> void:
+	_sequence.clear()
+	in_signature = false
+
+
+## True while more strikes of a sequence are still to come.
+func is_mid_sequence() -> bool:
+	return not _sequence.is_empty()
 
 
 func _enter_state(new_state: State) -> void:
@@ -897,6 +932,8 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 		var slip_y := attacker.position.y + attack.hitbox.get_center().y
 		if slip_y < position.y - 125.0:
 			return CombatData.HitResult.WHIFF  # slipped: the head was off the line
+		if current_attack.deflect and not attack.low:
+			return CombatData.HitResult.WHIFF  # turned aside by the hands
 	var facing_attacker := facing == -push_dir
 	# Low attacks (sweeps) must be blocked (or parried) low: S + Shift.
 	var right_height := not attack.low or crouch_held
@@ -932,6 +969,7 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	last_hit_heavy = attack.damage >= 10
 	current_attack = null
 	combo_step = 0
+	_clear_sequence()
 	velocity_x = push_dir * knockback
 	if health == 0:
 		# main.gd plays a finisher (or calls finish_ko directly on a double KO).
@@ -942,7 +980,12 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 			velocity_y = minf(velocity_y, 0.0)
 		return CombatData.HitResult.KO
 	var blown := attack.blowback_chance > 0.0 and _rng.randf() < attack.blowback_chance
-	if received_combo >= CombatData.KNOCKDOWN_COMBO_HITS or blown or attack.knockdown:
+	# Mid-sequence strikes never knock down: the whole sequence gets to land
+	# (the final strike can).
+	var mid_sequence := attacker.is_mid_sequence()
+	if mid_sequence and not attack.knockdown:
+		blown = false
+	if (received_combo >= CombatData.KNOCKDOWN_COMBO_HITS and not mid_sequence) or blown or attack.knockdown:
 		_enter_state(State.KNOCKDOWN)
 		if attack.blowback_vx > 0.0:
 			blowback(push_dir, attack.blowback_vx, attack.blowback_vy, attack.blowback_rolls, attack.blowback_rolls > 0)
@@ -981,6 +1024,7 @@ func _parry(attacker: Fighter, push_dir: int, attack: CombatData.Attack) -> Comb
 
 ## Thrown off balance by a parry: the swing is lost and the fighter reels.
 func stagger(push_dir: int) -> void:
+	_clear_sequence()
 	current_attack = null
 	combo_step = 0
 	_enter_state(State.STAGGER)
