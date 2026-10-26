@@ -2483,131 +2483,191 @@ static func _across(a: Vector2, b: Vector2) -> Vector2:
 ## Shorts, jacket skirts, ankle supports, trouser hems: per leg, in the body
 ## pass (so the far leg's stay behind the body).
 func _leg_extras(hip: Vector2, knee: Vector2, ankle: Vector2) -> void:
-	var tx := _across(hip, knee)
-	var sx := _across(knee, ankle)
 	match _kit:
 		&"muay_thai":
 			# Wide, short satin Thai shorts with a contrasting hem; ankle supports.
 			var hem := hip.lerp(knee, 0.45)
 			_capsule(hip, hem, 13.5, 13.0, _ccol("shorts"))
-			draw_line(hem - tx * 12.5, hem + tx * 12.5, _ccol("trim"), 3.0, true)
+			_limb_band(hip, knee, 0.45, 12.6, _ccol("trim"), 3.0)
 			_capsule(knee.lerp(ankle, 0.72), ankle, 6.6, 6.0, _ccol("support"))
+			_limb_band(knee, ankle, 0.74, 6.2, _ccol("support").darkened(0.15), 1.2)
 		&"karate", &"taekwondo":
 			# The jacket skirt over the top of the thigh; trouser hem at the ankle.
 			var skirt := hip.lerp(knee, 0.3)
 			_capsule(hip, skirt, 13.5, 13.0, _ccol("gi"))
-			draw_line(skirt - tx * 12.5, skirt + tx * 12.5, _ccol("gi").darkened(0.2), 1.6, true)
-			var cuff := knee.lerp(ankle, 0.93)
-			draw_line(cuff - sx * 9.0, cuff + sx * 9.0, _ccol("gi").darkened(0.25), 1.8, true)
+			_limb_band(hip, knee, 0.3, 12.6, _ccol("gi").darkened(0.18), 1.4)
+			_limb_band(knee, ankle, 0.93, _profile_width(SHIN_FRONT, 0.93) + _pb(P_SHIN), _ccol("gi").darkened(0.22), 1.6)
 			if not _far:
 				_draw_belt()
 		&"kung_fu":
 			# Loose trousers gathered at the ankle.
-			var band := knee.lerp(ankle, 0.88)
-			draw_line(band - sx * 8.0, band + sx * 8.0, _ccol("pants").lightened(0.15), 3.0, true)
+			_limb_band(knee, ankle, 0.88, _profile_width(SHIN_FRONT, 0.88) + _pb(P_SHIN) - 0.5, _ccol("pants").lightened(0.15), 3.0)
 		&"bangla_maar":
 			# Lungi folded up to the knee: a checked tube over the thigh.
 			var fold := hip.lerp(knee, 0.9)
 			_capsule(hip, fold, 14.0, 12.5, _ccol("lungi"))
 			for k in 3:
-				var at := hip.lerp(fold, 0.25 + k * 0.28)
-				draw_line(at - tx * 12.0, at + tx * 12.0, _ccol("check"), 1.6, true)
-			draw_line(hip, fold, _ccol("check"), 1.6, true)
-			draw_line(fold - tx * 12.5, fold + tx * 12.5, _ccol("lungi").darkened(0.25), 3.0, true)
+				_limb_band(hip, fold, 0.25 + k * 0.28, 13.2 - k * 0.5, _ccol("check"), 1.5)
+			_ribbon(hip, fold, 1.6, 1.6, _ccol("check"))
+			_limb_band(hip, fold, 0.98, 12.4, _ccol("lungi").darkened(0.25), 3.0)
 		&"kickboxing":
 			# Satin trousers with a side stripe, flared over taped ankles.
-			draw_line(hip.lerp(knee, 0.1), knee, _ccol("trim"), 2.2, true)
-			draw_line(knee, knee.lerp(ankle, 0.85), _ccol("trim"), 2.2, true)
-			var flare := knee.lerp(ankle, 0.9)
-			draw_line(flare - sx * 10.0, flare + sx * 10.0, _ccol("pants").darkened(0.2), 2.0, true)
-			draw_line(ankle - sx * 5.5 - (ankle - knee).normalized() * 2.0, ankle + sx * 5.5 - (ankle - knee).normalized() * 2.0,
-				_ccol("tape"), 3.0, true)
+			_ribbon(hip.lerp(knee, 0.1), knee, 2.2, 2.0, _ccol("trim"))
+			_ribbon(knee, knee.lerp(ankle, 0.85), 2.0, 1.8, _ccol("trim"))
+			_limb_band(knee, ankle, 0.9, _profile_width(SHIN_FRONT, 0.9) + _pb(P_SHIN), _ccol("pants").darkened(0.2), 2.0)
+			_limb_band(knee, ankle, 0.97, 5.0, _ccol("tape"), 3.0)
 
 
-## A wide black belt round the waist (edged, so it reads on a black gi too),
-## knotted at the front with two tails hanging over the jacket.
+## A black belt wrapped round the waist (following the jacket's contour, edged
+## so it reads on a black gi too), a knot at the front and two tapered tails.
 func _draw_belt() -> void:
 	if _belt_at.is_empty():
 		return
-	var waist: Vector2 = _belt_at[0]
-	var n: Vector2 = _belt_at[1]
-	var sway: float = _belt_at[2]
-	draw_line(waist - n * 15.0, waist + n * 15.0, _cols["belt_edge"], 10.5, true)
-	draw_line(waist - n * 14.5, waist + n * 14.5, _cols["belt"], 8.0, true)
-	var knot := waist + n * 12.0
-	draw_circle(knot, 5.0, _cols["belt_edge"], true, -1.0, true)
-	draw_circle(knot, 4.0, _cols["belt"], true, -1.0, true)
-	for tail in [Vector2(n.x * 3.0, 20.0 + sway), Vector2(n.x * 9.0, 17.0 - sway)]:
-		draw_line(knot, knot + tail, _cols["belt_edge"], 5.6, true)
-		draw_line(knot, knot + tail, _cols["belt"], 4.0, true)
+	var hip: Vector2 = _belt_at[0]
+	var axis: Vector2 = _belt_at[1]
+	var length: float = _belt_at[2]
+	var n: Vector2 = _belt_at[3]
+	var sway: float = _belt_at[4]
+	_waist_band(hip, axis, length, n, 4.0, 12.0, _cols["belt"], _cols["belt_edge"])
+	var edge := _torso_edge(8.0 / length)
+	var knot := hip + axis * 8.0 + n * (edge.x + _pb(P_TORSO) + 1.0)
+	_capsule(knot - axis * 2.5, knot + axis * 2.5, 4.4, 4.4, _cols["belt_edge"])
+	_capsule(knot - axis * 2.0, knot + axis * 2.0, 3.4, 3.4, _cols["belt"])
+	for tail in [Vector2(n.x * 2.5, 17.0 + sway), Vector2(n.x * 6.5, 14.0 - sway)]:
+		_ribbon(knot, knot + tail, 5.6, 4.2, _cols["belt_edge"])
+		_ribbon(knot, knot + tail, 4.2, 2.8, _cols["belt"])
+
+
+## A band round the waist that follows the torso's own contour (front and back
+## edges from TORSO_PROFILE), bowing down a little round the side like a real
+## belt. from / to: px above the hip.
+func _waist_band(hip: Vector2, axis: Vector2, length: float, n: Vector2, from: float, to: float, color: Color,
+		edge_color: Color = Color.TRANSPARENT) -> void:
+	var top := PackedVector2Array()
+	var bottom := PackedVector2Array()
+	var grow := _pb(P_TORSO) + 0.6
+	for i in 7:
+		var u := float(i) / 6.0
+		var sag := sin(PI * u) * 1.6
+		top.append(_band_point(hip, axis, length, n, to, sag, grow, u))
+		bottom.append(_band_point(hip, axis, length, n, from, sag, grow, u))
+	var band := top.duplicate()
+	var rev := bottom.duplicate()
+	rev.reverse()
+	band.append_array(rev)
+	draw_colored_polygon(band, color)
+	if edge_color.a > 0.0:
+		draw_polyline(top, edge_color, 1.4, true)
+		draw_polyline(bottom, edge_color, 1.4, true)
+
+
+## A point across the torso at height h (u: 0 front edge .. 1 back edge).
+func _band_point(hip: Vector2, axis: Vector2, length: float, n: Vector2, h: float, sag: float, grow: float, u: float) -> Vector2:
+	var e := _torso_edge(h / length)
+	return hip + axis * (h - sag) + n * lerpf(e.x + grow, -(e.y + grow), u)
+
+
+## Front / back half-widths of the torso at t (0 hip .. 1 neck).
+func _torso_edge(t: float) -> Vector2:
+	for i in range(1, TORSO_PROFILE.size()):
+		var a := TORSO_PROFILE[i - 1]
+		var b := TORSO_PROFILE[i]
+		if t <= b.x:
+			var k := clampf((t - a.x) / maxf(b.x - a.x, 0.001), 0.0, 1.0)
+			return Vector2(lerpf(a.y, b.y, k), lerpf(a.z, b.z, k))
+	return Vector2(TORSO_PROFILE[-1].y, TORSO_PROFILE[-1].z)
+
+
+## A hem / cuff / band wrapped round a limb at t along a -> b: exactly as wide
+## as the limb there (`half`), bowed a little along the limb so it reads as
+## going round it, with rounded ends.
+func _limb_band(a: Vector2, b: Vector2, t: float, half: float, color: Color, width: float) -> void:
+	var d := b - a
+	if d.length_squared() < 0.01:
+		return
+	var along := d.normalized()
+	var across := Vector2(-along.y, along.x)
+	var c := a.lerp(b, t)
+	var pts := PackedVector2Array()
+	for i in 5:
+		var u := float(i) / 4.0 * 2.0 - 1.0
+		pts.append(c + across * half * u + along * (1.0 - u * u) * 1.8)
+	draw_polyline(pts, color, width, true)
+	draw_circle(pts[0], width * 0.5, color, true, -1.0, true)
+	draw_circle(pts[4], width * 0.5, color, true, -1.0, true)
+
+
+## A tapered strip with rounded ends (lapels, collars, belt tails, ribbons).
+func _ribbon(p0: Vector2, p1: Vector2, w0: float, w1: float, color: Color) -> void:
+	_capsule(p0, p1, w0 * 0.5, w1 * 0.5, color)
 
 
 ## Armbands, sleeve hems, silk cuffs: per arm, before the hand is drawn.
 func _arm_extras(shoulder: Vector2, elbow: Vector2, hand: Vector2) -> void:
-	var ux := _across(shoulder, elbow)
-	var fx_ := _across(elbow, hand)
 	match _kit:
 		&"muay_thai":
 			# Prajioud: a cloth band tied round the upper arm, a short tail.
-			var p := shoulder.lerp(elbow, 0.45)
-			draw_line(p - ux * 8.5, p + ux * 8.5, _ccol("shorts"), 5.0, true)
-			draw_line(p + ux * 7.0, p + ux * 9.0 + (elbow - shoulder).normalized() * 9.0, _ccol("shorts"), 2.5, true)
+			var half := _profile_width(UPPER_ARM_FRONT, 0.45) + 0.8
+			_limb_band(shoulder, elbow, 0.45, half, _ccol("shorts"), 4.5)
+			var p := shoulder.lerp(elbow, 0.45) + _across(shoulder, elbow) * half
+			_ribbon(p, p + (elbow - shoulder).normalized() * 9.0 + _across(shoulder, elbow) * 2.0, 3.0, 1.8, _ccol("shorts"))
 		&"karate", &"taekwondo":
-			var hem := elbow.lerp(hand, 0.86)
-			draw_line(hem - fx_ * 8.5, hem + fx_ * 8.5, _ccol("gi").darkened(0.25), 1.8, true)
+			_limb_band(elbow, hand, 0.86, _profile_width(FOREARM_FRONT, 0.86) + _pb(P_FOREARM), _ccol("gi").darkened(0.22), 1.6)
 		&"kung_fu":
 			# Turned-back white cuffs on the silk sleeves.
 			_capsule(elbow.lerp(hand, 0.74), elbow.lerp(hand, 0.95), 8.5, 9.0, _ccol("cuff"))
+			_limb_band(elbow, hand, 0.74, 8.3, _ccol("cuff").darkened(0.18), 1.2)
 
 
 ## Lapels, belts, sashes, collars, frog buttons, waistbands.
 func _torso_extras(j: PackedVector2Array, hip: Vector2, axis: Vector2, length: float, n: Vector2) -> void:
 	var neck_base := hip + axis * length * 0.86
-	var waist := hip + axis * 8.0
 	var sway := sin(_time * 6.0) * 1.5
+	var grow := _pb(P_TORSO)
 	match _kit:
 		&"karate", &"taekwondo":
-			# Crossed jacket front (the dobok's is a black V collar), then the belt.
-			var wide := 2.5 if _kit == &"karate" else 5.0
-			draw_line(neck_base + n * 3.0, hip + axis * length * 0.38 + n * 11.0, _cols["lapel"], wide, true)
-			draw_line(neck_base - n * 2.0, hip + axis * length * 0.55 + n * 8.0, _cols["lapel"], wide * 0.8, true)
-			# The belt itself is drawn over the near leg (_draw_belt), so the jacket
-			# skirt never hides it.
-			_belt_at = [waist, n, sway]
+			# Crossed jacket front: two tapering lapels meeting at the belt (the
+			# dobok's is a black V collar). The belt is drawn over the near leg
+			# (_draw_belt), so the jacket skirt never hides it.
+			var wide := 3.2 if _kit == &"karate" else 6.0
+			var low := hip + axis * length * 0.3 + n * (_torso_edge(0.3).x + grow - 1.0)
+			_ribbon(neck_base + n * 4.0, low, wide, wide * 0.4, _cols["lapel"])
+			_ribbon(neck_base - n * 2.0, hip + axis * length * 0.5 + n * (_torso_edge(0.5).x + grow - 3.0), wide * 0.8, wide * 0.3, _cols["lapel"])
+			_belt_at = [hip, axis, length, n, sway]
 		&"kung_fu":
-			# Mandarin collar, frog buttons down the front, a wide sash.
-			draw_line(neck_base - n * 4.0, neck_base + n * 6.0, _cols["silk"].darkened(0.35), 4.5, true)
+			# Mandarin collar, frog buttons down the front, a wide sash tied at the back.
+			_ribbon(neck_base - n * 4.0, neck_base + n * 6.0, 5.0, 5.0, _cols["silk"].darkened(0.35))
 			for k in 3:
-				var at := hip + axis * length * (0.5 + k * 0.12) + n * 10.0
-				draw_line(at - n * 3.0, at + n * 3.5, _cols["frog"], 2.2, true)
-			draw_line(waist - n * 14.0, waist + n * 14.0, _cols["sash"], 7.5, true)
-			var tie := waist - n * 11.0
-			draw_line(tie, tie + Vector2(-n.x * 4.0, 22.0 + sway), _cols["sash"], 4.0, true)
-			draw_line(tie, tie + Vector2(-n.x * 9.0, 18.0 - sway), _cols["sash"].darkened(0.15), 3.5, true)
+				var t := 0.5 + k * 0.12
+				var at := hip + axis * length * t + n * (_torso_edge(t).x + grow - 3.5)
+				_ribbon(at - n * 3.0, at + n * 3.0, 2.4, 2.4, _cols["frog"])
+				draw_circle(at + n * 3.0, 1.5, _cols["frog"].darkened(0.3), true, -1.0, true)
+			_waist_band(hip, axis, length, n, 3.0, 13.0, _cols["sash"], _cols["sash"].darkened(0.25))
+			var tie := hip + axis * 8.0 - n * (_torso_edge(0.12).y + grow)
+			_ribbon(tie, tie + Vector2(-n.x * 4.0, 22.0 + sway), 5.0, 3.0, _cols["sash"])
+			_ribbon(tie, tie + Vector2(-n.x * 9.0, 18.0 - sway), 4.4, 2.6, _cols["sash"].darkened(0.15))
 		&"muay_thai":
 			# Shorts over the pelvis with a wide contrasting waistband.
 			_capsule(j[J_HIP_F], j[J_HIP_B], 12.5, 12.5, _cols["shorts"])
-			var band := hip + axis * 9.0
-			draw_line(band - n * 13.5, band + n * 13.5, _cols["trim"], 5.5, true)
+			_waist_band(hip, axis, length, n, 5.0, 12.5, _cols["trim"])
 			for k in 3:
-				var at := band + n * (-6.0 + k * 5.0)
-				draw_line(at - axis * 1.2, at + axis * 1.2, _cols["shorts"].darkened(0.3), 2.0, true)
+				var at := hip + axis * 9.0 + n * (-5.0 + k * 5.0)
+				_ribbon(at - axis * 1.2, at + axis * 1.2, 2.0, 2.0, _cols["shorts"].darkened(0.3))
 		&"bangla_maar":
 			# Vest neckline, the lungi round the waist with its tucked knot, and a
 			# gamchha thrown over the near shoulder.
 			draw_circle(neck_base + n * 4.0 - axis * 2.0, 6.0, _skin, true, -1.0, true)
 			_capsule(j[J_HIP_F], j[J_HIP_B], 13.0, 13.0, _cols["lungi"])
-			var roll := hip + axis * 10.0
-			draw_line(roll - n * 14.0, roll + n * 14.0, _cols["lungi"].darkened(0.2), 5.0, true)
-			draw_circle(roll + n * 12.0, 5.0, _cols["lungi"].darkened(0.1), true, -1.0, true)
-			var towel := PackedVector2Array([neck_base + n * 5.0, j[J_SHOULDER_F] + axis * 4.0, neck_base - n * 9.0,
-				hip + axis * length * 0.42 - n * 12.0])
-			draw_polyline(towel, _cols["gamchha"], 6.0, true)
-			draw_line(towel[2], towel[3], Color(0.97, 0.95, 0.9), 1.5, true)
+			_waist_band(hip, axis, length, n, 6.0, 14.0, _cols["lungi"].darkened(0.2))
+			draw_circle(hip + axis * 10.0 + n * (_torso_edge(0.15).x + grow + 1.5), 5.0, _cols["lungi"].darkened(0.1), true, -1.0, true)
+			var towel := [neck_base + n * 5.0, j[J_SHOULDER_F] + axis * 4.0, neck_base - n * 9.0,
+				hip + axis * length * 0.42 - n * 12.0]
+			for k in 3:
+				_ribbon(towel[k], towel[k + 1], 6.5, 6.0 if k < 2 else 5.0, _cols["gamchha"])
+			_ribbon(towel[2], towel[3], 1.5, 1.2, Color(0.97, 0.95, 0.9))
 		&"kickboxing":
 			_capsule(j[J_HIP_F], j[J_HIP_B], 12.5, 12.5, _cols["pants"])
-			var band2 := hip + axis * 9.0
-			draw_line(band2 - n * 13.5, band2 + n * 13.5, _cols["pants"].lightened(0.3), 5.0, true)
+			_waist_band(hip, axis, length, n, 5.0, 12.0, _cols["pants"].lightened(0.3))
 
 
 ## Hair and headwear (the Muay Thai mongkol).
@@ -2616,21 +2676,23 @@ func _head_extras(head: Vector2, up: Vector2, face: Vector2) -> void:
 	for dir in [up.slerp(face, 0.4), up.slerp(face, 0.15), up, up.slerp(-face, 0.5), -face, (-face).slerp(-up, 0.3)]:
 		cap.append(head + (dir as Vector2).normalized() * (HEAD_R - 2.0))
 	draw_polyline(cap, _cols["hair"], 6.0 if _kit != &"muay_thai" else 4.0, true)
+	draw_circle(cap[0], 3.0 if _kit != &"muay_thai" else 2.0, _cols["hair"], true, -1.0, true)
+	draw_circle(cap[-1], 3.0 if _kit != &"muay_thai" else 2.0, _cols["hair"], true, -1.0, true)
 	if _kit == &"kung_fu":
 		draw_circle(head + up * (HEAD_R + 1.5) - face * 5.0, 5.0, _cols["hair"], true, -1.0, true)  # topknot
 	elif _kit == &"bangla_maar":
 		# A thick moustache and an untidy tuft of hair.
-		draw_line(head + face * HEAD_R * 0.45 - up * 4.5, head + face * HEAD_R * 1.05 - up * 3.5, _cols["hair"], 3.4, true)
-		draw_line(head + up * (HEAD_R - 1.0), head + up * (HEAD_R + 4.0) + face * 3.0, _cols["hair"], 3.0, true)
+		_ribbon(head + face * HEAD_R * 0.45 - up * 4.5, head + face * HEAD_R * 1.05 - up * 3.5, 3.8, 2.4, _cols["hair"])
+		_ribbon(head + up * (HEAD_R - 1.0), head + up * (HEAD_R + 4.0) + face * 3.0, 3.2, 1.6, _cols["hair"])
 	elif _kit == &"muay_thai":
 		# Mongkol: a stiff rope ring round the head with a tail at the back.
 		var front := head + face * HEAD_R * 0.9 + up * 5.0
 		var back := head - face * HEAD_R * 0.95 + up * 6.0
-		draw_line(front, back, _cols["mongkol"], 5.0, true)
+		_ribbon(front, back, 5.2, 5.2, _cols["mongkol"])
 		for k in 4:
 			var at := front.lerp(back, 0.15 + k * 0.23)
-			draw_line(at - up * 2.0, at + up * 2.0 + face * 1.5, _cols["shorts"] if _cols.has("shorts") else Color.RED, 1.6, true)
-		draw_line(back, back - face * 12.0 + up * 3.0, _cols["mongkol"], 3.5, true)
+			_ribbon(at - up * 2.0, at + up * 2.0 + face * 1.5, 1.6, 1.6, _cols["shorts"] if _cols.has("shorts") else Color.RED)
+		_ribbon(back, back - face * 12.0 + up * 3.0, 3.8, 2.4, _cols["mongkol"])
 
 
 ## Boxer: trunks with a waistband and boot cuffs (no belt or headband); the
