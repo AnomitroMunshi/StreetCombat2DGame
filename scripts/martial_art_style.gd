@@ -43,6 +43,11 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 ## Outfit drawn over the body: &"gi" (belt, headband, wrist wraps) or
 ## &"boxing" (gloves, trunks, boots). Presentation only.
 @export var kit: StringName = &"gi"
+## Footwork: scales how far this style's strikes step in (CombatData.STEP_IN).
+@export var step_scale: float = 1.0
+## Rival AI tuning for this style (EnemyAI property -> value), e.g. a boxer's
+## pressure and head movement. Applied on top of the AI's defaults.
+@export var ai_tuning: Dictionary = {}
 ## slot -> move id, on the ground and in the air.
 @export var input_map: Dictionary = {}
 @export var air_map: Dictionary = {}

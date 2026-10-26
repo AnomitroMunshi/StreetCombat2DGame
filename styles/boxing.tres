@@ -14,6 +14,12 @@ strengths = PackedStringArray("Fastest punches and longest punch combos", "Slip 
 weaknesses = PackedStringArray("No kicks or sweeps at all", "Short reach: must get close", "No low attacks")
 stance = 2
 kit = &"boxing"
+step_scale = 1.7
+ai_tuning = {
+"aggression": 0.75,
+"dodge_chance": 0.28,
+"parry_chance": 0.28
+}
 input_map = {
 &"down_heavy": &"slip_counter",
 &"front": &"rear_hook",

@@ -47,6 +47,10 @@ const FAR_PLANS: Array = [
 @export var preferred_range: float = 95.0
 ## Extra px a strike is assumed to reach (the target's body half-width).
 const REACH_SLACK: float = 14.0
+## Properties a style may tune (MartialArtStyle.ai_tuning).
+const TUNABLE: Array[String] = ["aggression", "block_chance", "dodge_chance", "parry_chance", "punish_chance",
+	"jump_in_chance", "anti_air_chance"]
+var _defaults: Dictionary = {}
 ## Chance to pick a jump-in when at mid range.
 @export_range(0.0, 1.0) var jump_in_chance: float = 0.15
 ## Chance to backstep (dodge) a noticed attack instead of blocking it.
@@ -92,8 +96,18 @@ func setup(me: Fighter, target: Fighter) -> void:
 	_me = me
 	_target = target
 	_rng.seed = rng_seed
+	# Style tuning on top of this AI's own defaults (remembered once, so a
+	# re-setup with another style never inherits the previous one's tuning).
+	if _defaults.is_empty():
+		for key in TUNABLE:
+			_defaults[key] = get(key)
+	for key in _defaults:
+		set(key, _defaults[key])
 	if _me != null and _me.style != null:
 		preferred_range = _me.style.ai_preferred_range
+		for key in _me.style.ai_tuning:
+			if String(key) in TUNABLE:
+				set(String(key), _me.style.ai_tuning[key])
 	# Forget everything from a previous setup (restart / unlock at FIGHT).
 	_plan.clear()
 	_plan_index = 0
@@ -385,7 +399,7 @@ func _can_reach(type: CombatData.AttackType, dist: float) -> bool:
 	if type == CombatData.AttackType.NONE or not CombatData.ATTACK_TABLE.has(type):
 		return true
 	var a := CombatData.get_attack(type)
-	var travel := a.lunge * float(a.startup + a.active) + a.step
+	var travel := a.lunge * float(a.startup + a.active) + a.step * _me.step_scale()
 	return dist <= a.hitbox.end.x + travel + REACH_SLACK
 
 
