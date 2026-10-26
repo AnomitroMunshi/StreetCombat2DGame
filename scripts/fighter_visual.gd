@@ -605,6 +605,22 @@ var _aim_chest := Vector2.INF
 var _aim_chin_offset := Vector2.ZERO
 ## Shoe colour on the fill pass (transparent = body colour).
 var _shoe := Color.TRANSPARENT
+# Style outfits: body parts that are cloth (part -> [near colour, far colour,
+# extra bulk]); everything else is skin. Details (belts, collars, armbands,
+# hair) are drawn in the same body pass, so depth order stays right.
+enum { P_UPPER_ARM, P_FOREARM, P_TORSO, P_THIGH, P_SHIN, P_FOOT }
+const OUTFIT_KITS: Array[StringName] = [&"muay_thai", &"karate", &"kung_fu", &"taekwondo", &"kickboxing"]
+const GLOVED_KITS: Array[StringName] = [&"boxing", &"muay_thai", &"kickboxing"]
+const GI_WHITE := Color(0.95, 0.94, 0.9)
+const GI_BLACK := Color(0.14, 0.14, 0.16)
+const CLOTH_FAR_DARKEN: float = 0.18
+var _outfit: Dictionary = {}
+var _cols: Dictionary = {}
+## Drawing a far-side limb (outfit colours are darkened like the skin).
+var _far: bool = false
+## Extra thickness of the limb segment being drawn (cloth bulk).
+var _grow: float = 0.0
+var _skin := SKIN_LIGHT
 
 @onready var fighter: Fighter = get_parent() as Fighter
 
@@ -865,6 +881,7 @@ func _sync_stance() -> void:
 	_seen_stance = fighter.stance
 	_guard = Stances.pose(fighter.stance)
 	_kit = fighter.style.kit if fighter.style != null else &"gi"
+	_build_outfit()
 	# The stance's own crouch (the boxer's duck), else the default.
 	for pair in [[false, "_crouch", _crouch_default], [true, "_crouch_block", _crouch_block_default]]:
 		var own := Stances.crouch_pose(fighter.stance, pair[0])
@@ -1897,11 +1914,12 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 	var target := Vector2(_toe_point_for(j[J_FOOT_F]), _toe_point_for(j[J_FOOT_B]))
 	_foot_point = _foot_point.lerp(target, 1.0 - exp(-FOOT_POINT_RATE * _last_delta))
 	var rim := fighter.outline_color
-	_shade = _kit == &"boxing"
+	_shade = _kit == &"boxing" or _kit in OUTFIT_KITS
 	_shoe = BOOT_COLOR if _kit == &"boxing" else Color.TRANSPARENT
-	if _kit == &"boxing":
-		# Boxers are drawn with skin, the outfit carries the fighter's colours.
+	if _shade:
+		# Characters are drawn with skin, the outfit carries the fighter's colours.
 		var skin := SKIN_LIGHT if fighter.body_color.get_luminance() > 0.4 else SKIN_DARK
+		_skin = skin
 		if fighter.flash_frames > 0:
 			skin = skin.lerp(Color.WHITE, 0.6)
 		front = skin
@@ -1933,8 +1951,10 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 ## The body as solid shapes. `pad` grows every shape (outline / glow passes).
 ## Far-side limbs use `far`, everything else `near`.
 func _silhouette(j: PackedVector2Array, forward: Vector2, back_toe: Vector2, pad: float, far: Color, near: Color) -> void:
+	_far = true
 	_leg(j[J_HIP_B], j[J_KNEE_B], j[J_FOOT_B], back_toe, pad, far, _heel_draw.y * _plant, _foot_point.y)
 	_arm(j[J_SHOULDER_B], j[J_ELBOW_B], j[J_HAND_B], pad, far, _glove_color(false, pad))
+	_far = false
 	_torso(j, forward, pad, near)
 	_head(j, forward, pad, near)
 	_leg(j[J_HIP_F], j[J_KNEE_F], j[J_FOOT_F], forward, pad, near, _heel_draw.x * _plant, _foot_point.x)
@@ -1967,6 +1987,8 @@ static func _profile_width(profile: Array[Vector2], t: float) -> float:
 ## the bone the front profile is drawn on. Rounded at both joints.
 func _muscle(a: Vector2, b: Vector2, front: Vector2, front_profile: Array[Vector2], back_profile: Array[Vector2],
 		pad: float, color: Color) -> void:
+	var fill_pass := pad == 0.0
+	pad += _grow
 	var d := b - a
 	if d.length_squared() < 0.01:
 		draw_circle(a, front_profile[0].y + pad, color)
@@ -1985,7 +2007,7 @@ func _muscle(a: Vector2, b: Vector2, front: Vector2, front_profile: Array[Vector
 	draw_colored_polygon(front_side + back_side, color)
 	draw_circle(a, (front_profile[0].y + back_profile[0].y) * 0.5 + pad, color, true, -1.0, true)
 	draw_circle(b, (front_profile[-1].y + back_profile[-1].y) * 0.5 + pad, color, true, -1.0, true)
-	if _shade and pad == 0.0:
+	if _shade and fill_pass:
 		_shade_limb(a, d, n, front_profile, back_profile, color)
 
 
@@ -2052,9 +2074,14 @@ func _leg(hip: Vector2, knee: Vector2, ankle: Vector2, toe_dir: Vector2, pad: fl
 		point: float = 0.0) -> void:
 	# The kneecap faces the outside of the bend (the toes' way when straight).
 	var out := _bend_out(hip, knee, ankle, toe_dir)
-	_muscle(hip, knee, out, THIGH_FRONT, THIGH_BACK, pad, color)
-	_muscle(knee, ankle, out, SHIN_FRONT, SHIN_BACK, pad, color)
-	draw_circle(knee + out * 2.5, 5.0 + pad, color, true, -1.0, true)  # kneecap
+	_grow = _pb(P_THIGH)
+	_muscle(hip, knee, out, THIGH_FRONT, THIGH_BACK, pad, _pc(P_THIGH, color, pad))
+	_grow = _pb(P_SHIN)
+	_muscle(knee, ankle, out, SHIN_FRONT, SHIN_BACK, pad, _pc(P_SHIN, color, pad))
+	_grow = 0.0
+	draw_circle(knee + out * 2.5, 5.0 + pad + _pb(P_SHIN), _pc(P_SHIN, color, pad), true, -1.0, true)  # kneecap
+	if pad == 0.0 and _kit in OUTFIT_KITS:
+		_leg_extras(hip, knee, ankle)
 	# Shoe: square to the shin, toes toward toe_dir, rolled toward pointing
 	# along the shin for a pointed (lifted) foot.
 	var shin := (ankle - knee).normalized()
@@ -2074,13 +2101,16 @@ func _leg(hip: Vector2, knee: Vector2, ankle: Vector2, toe_dir: Vector2, pad: fl
 		_capsule(sole - toe * 3.5, sole + toe * 13.0, 4.8, 3.6, _shoe)
 		_capsule(sole - toe * 3.0 + shin * 3.2, sole + toe * 12.5 + shin * 3.2, 1.6, 1.4, SOLE_COLOR)
 	else:
-		_capsule(sole - toe * 3.5, sole + toe * 13.0, 4.8 + pad, 3.6 + pad, color)
+		_capsule(sole - toe * 3.5, sole + toe * 13.0, 4.8 + pad, 3.6 + pad, _pc(P_FOOT, color, pad))
+		if pad == 0.0 and _kit == &"kung_fu":
+			# Cloth shoes: a white sole under the black slipper.
+			_capsule(sole - toe * 3.0 + shin * 3.2, sole + toe * 12.5 + shin * 3.2, 1.6, 1.4, GI_WHITE.darkened(0.15 if _far else 0.0))
 
 
 ## Boxing glove fill (only on the body fill pass; outlines and glows keep
 ## their colour). Transparent = draw the hand in the body colour.
 func _glove_color(near: bool, pad: float) -> Color:
-	if _kit != &"boxing" or pad != 0.0:
+	if not _kit in GLOVED_KITS or pad != 0.0:
 		return Color.TRANSPARENT
 	var c := fighter.accent_color
 	return c if near else c.darkened(0.25)
@@ -2091,12 +2121,17 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 	# Biceps on the inside of the bend, forearm swelling below the elbow and
 	# tapering to the wrist.
 	var inside := -_bend_out(shoulder, elbow, hand, Vector2.UP)
-	_muscle(shoulder, elbow, inside, UPPER_ARM_FRONT, UPPER_ARM_BACK, pad, color)
-	_muscle(elbow, hand, inside, FOREARM_FRONT, FOREARM_BACK, pad, color)
+	_grow = _pb(P_UPPER_ARM)
+	_muscle(shoulder, elbow, inside, UPPER_ARM_FRONT, UPPER_ARM_BACK, pad, _pc(P_UPPER_ARM, color, pad))
+	_grow = _pb(P_FOREARM)
+	_muscle(elbow, hand, inside, FOREARM_FRONT, FOREARM_BACK, pad, _pc(P_FOREARM, color, pad))
+	_grow = 0.0
+	if pad == 0.0 and _kit in OUTFIT_KITS:
+		_arm_extras(shoulder, elbow, hand)
 	# Glove: longer than wide along the forearm, so the knuckles visibly lead
 	# a punch (a round ball reads as a hammer fist).
 	var along := (hand - elbow).normalized() if hand.distance_squared_to(elbow) > 1.0 else Vector2.RIGHT
-	var g := GLOVE_SCALE if _kit == &"boxing" else 1.0
+	var g := GLOVE_SCALE if _kit in GLOVED_KITS else 1.0
 	var fill := glove if glove.a > 0.0 else color
 	if glove.a > 0.0:
 		# Boxing glove cuff at the wrist.
@@ -2113,13 +2148,17 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 
 
 ## Side-profile torso: hips, narrower waist, chest out in front, shoulders.
-func _torso(j: PackedVector2Array, forward: Vector2, pad: float, color: Color) -> void:
+func _torso(j: PackedVector2Array, forward: Vector2, pad: float, skin_color: Color) -> void:
 	var hip := j[J_HIP]
 	var neck := j[J_NECK]
 	var axis := neck - hip
 	var length := axis.length()
 	if length < 0.01:
 		return
+	# The neck is skin; the torso may be clothed (gi, dobok, silk jacket).
+	var color := _pc(P_TORSO, skin_color, pad)
+	var fill_pass := pad == 0.0
+	pad += _pb(P_TORSO)
 	axis /= length
 	var n := Vector2(-axis.y, axis.x)
 	if n.dot(forward) < 0.0:
@@ -2136,8 +2175,8 @@ func _torso(j: PackedVector2Array, forward: Vector2, pad: float, color: Color) -
 	draw_circle(j[J_SHOULDER_F], 8.5 + pad, color, true, -1.0, true)  # deltoids
 	draw_circle(j[J_SHOULDER_B], 8.5 + pad, color, true, -1.0, true)
 	_capsule(j[J_HIP_F], j[J_HIP_B], 10.0 + pad, 10.0 + pad, color)  # pelvis
-	_capsule(neck, neck + axis * 8.0, 5.0 + pad, 4.5 + pad, color)  # neck
-	if _shade and pad == 0.0:
+	_capsule(neck, neck + axis * 8.0, 5.0 + pad - _pb(P_TORSO), 4.5 + pad - _pb(P_TORSO), skin_color)  # neck
+	if _shade and fill_pass:
 		# Back of the torso in shadow, a pec / ab highlight on the chest.
 		var shadow := PackedVector2Array()
 		var spine := PackedVector2Array()
@@ -2150,6 +2189,8 @@ func _torso(j: PackedVector2Array, forward: Vector2, pad: float, color: Color) -
 		var h := color.lightened(0.35)
 		h.a = HIGHLIGHT_ALPHA
 		draw_arc(hip + axis * length * 0.72 + n * 5.0, 7.0, -PI * 0.6, PI * 0.6, 8, h, 2.0, true)
+	if fill_pass and _kit in OUTFIT_KITS:
+		_torso_extras(j, hip, axis, length, n)
 
 
 ## Head with a jaw / chin profile toward the front.
@@ -2158,6 +2199,8 @@ func _head(j: PackedVector2Array, forward: Vector2, pad: float, color: Color) ->
 	var up := (head - j[J_NECK]).normalized()
 	draw_circle(head, HEAD_R + pad, color, true, -1.0, true)
 	draw_circle(head + forward * 4.5 - up * 5.5, 8.5 + pad, color, true, -1.0, true)
+	if pad == 0.0 and _kit in OUTFIT_KITS:
+		_head_extras(head, up, forward)
 
 
 ## Belt with a hanging knot, headband with trailing tails, wrist wraps.
@@ -2165,6 +2208,8 @@ func _draw_kit(j: PackedVector2Array, accent: Color, forward: Vector2) -> void:
 	if _kit == &"boxing":
 		_draw_boxing_kit(j, accent)
 		return
+	if _kit in OUTFIT_KITS:
+		return  # drawn with the body (_leg / _arm / _torso / _head extras)
 	var hip := j[J_HIP]
 	var axis := (j[J_NECK] - hip).normalized()
 	var n := Vector2(-axis.y, axis.x)
@@ -2192,6 +2237,189 @@ func _draw_kit(j: PackedVector2Array, accent: Color, forward: Vector2) -> void:
 			var c := e.lerp(h, 0.7 + k * 0.1)
 			var half := _profile_width(FOREARM_FRONT, 0.7 + k * 0.1) + 0.6
 			draw_line(c - across * half, c + across * half, accent.darkened(0.15), 3.2, true)
+
+
+## Outfit colours for this fighter's style (light fighters get the light
+## version: a white gi, a light-skinned character).
+func _build_outfit() -> void:
+	_outfit = {}
+	_cols = {}
+	if not _kit in OUTFIT_KITS:
+		return
+	var light := fighter.body_color.get_luminance() > 0.4
+	var acc := fighter.accent_color
+	var gi := GI_WHITE if light else GI_BLACK
+	_cols["hair"] = Color(0.2, 0.13, 0.09) if light else Color(0.07, 0.06, 0.06)
+	match _kit:
+		&"karate", &"taekwondo":
+			_cloth([P_TORSO], gi, 1.5)
+			_cloth([P_UPPER_ARM, P_FOREARM, P_THIGH, P_SHIN], gi, 2.5)
+			_cols["gi"] = gi
+			_cols["belt"] = Color(0.07, 0.07, 0.08) if light else acc
+			_cols["lapel"] = gi.darkened(0.3) if _kit == &"karate" else (Color(0.07, 0.07, 0.08) if light else acc)
+		&"kung_fu":
+			var silk := acc.darkened(0.45)
+			_cloth([P_TORSO], silk, 1.5)
+			_cloth([P_UPPER_ARM, P_FOREARM], silk, 3.0)
+			_cloth([P_THIGH, P_SHIN], Color(0.1, 0.1, 0.12), 3.0)
+			_cloth([P_FOOT], Color(0.07, 0.07, 0.08), 0.0)
+			_cols["silk"] = silk
+			_cols["pants"] = Color(0.1, 0.1, 0.12)
+			_cols["sash"] = acc.lightened(0.05)
+			_cols["cuff"] = GI_WHITE
+			_cols["frog"] = Color(0.96, 0.9, 0.72)
+		&"muay_thai":
+			_cols["shorts"] = acc
+			_cols["trim"] = GI_WHITE
+			_cols["support"] = Color(0.92, 0.91, 0.87)
+			_cols["mongkol"] = GI_WHITE
+		&"kickboxing":
+			var pants := acc.darkened(0.15)
+			_cloth([P_THIGH, P_SHIN], pants, 3.0)
+			_cols["pants"] = pants
+			_cols["trim"] = GI_WHITE
+			_cols["tape"] = Color(0.92, 0.91, 0.87)
+
+
+func _cloth(parts: Array, color: Color, bulk: float) -> void:
+	for p in parts:
+		_outfit[p] = [color, color.darkened(CLOTH_FAR_DARKEN), bulk]
+
+
+## Fill colour of a body part: its cloth (near / far, flashing on a hit) or,
+## for bare skin and for outline / glow passes, the colour passed in.
+func _pc(part: int, color: Color, pad: float) -> Color:
+	if pad != 0.0 or not _outfit.has(part):
+		return color
+	var c: Color = _outfit[part][1 if _far else 0]
+	if fighter.flash_frames > 0:
+		c = c.lerp(Color.WHITE, 0.6)
+	return c
+
+
+## Extra thickness of a clothed part (loose sleeves and trousers).
+func _pb(part: int) -> float:
+	return _outfit[part][2] if _outfit.has(part) else 0.0
+
+
+func _ccol(role: String) -> Color:
+	var c: Color = _cols.get(role, Color.MAGENTA)
+	return c.darkened(CLOTH_FAR_DARKEN) if _far else c
+
+
+static func _across(a: Vector2, b: Vector2) -> Vector2:
+	var d := b - a
+	return Vector2(-d.y, d.x).normalized() if d.length_squared() > 0.01 else Vector2.RIGHT
+
+
+## Shorts, jacket skirts, ankle supports, trouser hems: per leg, in the body
+## pass (so the far leg's stay behind the body).
+func _leg_extras(hip: Vector2, knee: Vector2, ankle: Vector2) -> void:
+	var tx := _across(hip, knee)
+	var sx := _across(knee, ankle)
+	match _kit:
+		&"muay_thai":
+			# Wide, short satin Thai shorts with a contrasting hem; ankle supports.
+			var hem := hip.lerp(knee, 0.45)
+			_capsule(hip, hem, 13.5, 13.0, _ccol("shorts"))
+			draw_line(hem - tx * 12.5, hem + tx * 12.5, _ccol("trim"), 3.0, true)
+			_capsule(knee.lerp(ankle, 0.72), ankle, 6.6, 6.0, _ccol("support"))
+		&"karate", &"taekwondo":
+			# The jacket skirt over the top of the thigh; trouser hem at the ankle.
+			var skirt := hip.lerp(knee, 0.3)
+			_capsule(hip, skirt, 13.5, 13.0, _ccol("gi"))
+			draw_line(skirt - tx * 12.5, skirt + tx * 12.5, _ccol("gi").darkened(0.2), 1.6, true)
+			var cuff := knee.lerp(ankle, 0.93)
+			draw_line(cuff - sx * 9.0, cuff + sx * 9.0, _ccol("gi").darkened(0.25), 1.8, true)
+		&"kung_fu":
+			# Loose trousers gathered at the ankle.
+			var band := knee.lerp(ankle, 0.88)
+			draw_line(band - sx * 8.0, band + sx * 8.0, _ccol("pants").lightened(0.15), 3.0, true)
+		&"kickboxing":
+			# Satin trousers with a side stripe, flared over taped ankles.
+			draw_line(hip.lerp(knee, 0.1), knee, _ccol("trim"), 2.2, true)
+			draw_line(knee, knee.lerp(ankle, 0.85), _ccol("trim"), 2.2, true)
+			var flare := knee.lerp(ankle, 0.9)
+			draw_line(flare - sx * 10.0, flare + sx * 10.0, _ccol("pants").darkened(0.2), 2.0, true)
+			draw_line(ankle - sx * 5.5 - (ankle - knee).normalized() * 2.0, ankle + sx * 5.5 - (ankle - knee).normalized() * 2.0,
+				_ccol("tape"), 3.0, true)
+
+
+## Armbands, sleeve hems, silk cuffs: per arm, before the hand is drawn.
+func _arm_extras(shoulder: Vector2, elbow: Vector2, hand: Vector2) -> void:
+	var ux := _across(shoulder, elbow)
+	var fx_ := _across(elbow, hand)
+	match _kit:
+		&"muay_thai":
+			# Prajioud: a cloth band tied round the upper arm, a short tail.
+			var p := shoulder.lerp(elbow, 0.45)
+			draw_line(p - ux * 8.5, p + ux * 8.5, _ccol("shorts"), 5.0, true)
+			draw_line(p + ux * 7.0, p + ux * 9.0 + (elbow - shoulder).normalized() * 9.0, _ccol("shorts"), 2.5, true)
+		&"karate", &"taekwondo":
+			var hem := elbow.lerp(hand, 0.86)
+			draw_line(hem - fx_ * 8.5, hem + fx_ * 8.5, _ccol("gi").darkened(0.25), 1.8, true)
+		&"kung_fu":
+			# Turned-back white cuffs on the silk sleeves.
+			_capsule(elbow.lerp(hand, 0.74), elbow.lerp(hand, 0.95), 8.5, 9.0, _ccol("cuff"))
+
+
+## Lapels, belts, sashes, collars, frog buttons, waistbands.
+func _torso_extras(j: PackedVector2Array, hip: Vector2, axis: Vector2, length: float, n: Vector2) -> void:
+	var neck_base := hip + axis * length * 0.86
+	var waist := hip + axis * 8.0
+	var sway := sin(_time * 6.0) * 1.5
+	match _kit:
+		&"karate", &"taekwondo":
+			# Crossed jacket front (the dobok's is a black V collar), then the belt.
+			var wide := 2.5 if _kit == &"karate" else 5.0
+			draw_line(neck_base + n * 3.0, hip + axis * length * 0.38 + n * 11.0, _cols["lapel"], wide, true)
+			draw_line(neck_base - n * 2.0, hip + axis * length * 0.55 + n * 8.0, _cols["lapel"], wide * 0.8, true)
+			draw_line(waist - n * 13.5, waist + n * 13.5, _cols["belt"], 6.0, true)
+			var knot := waist + n * 10.0
+			draw_circle(knot, 3.8, _cols["belt"], true, -1.0, true)
+			draw_line(knot, knot + Vector2(n.x * 3.0, 15.0 + sway), _cols["belt"], 3.2, true)
+			draw_line(knot, knot + Vector2(n.x * 7.0, 13.0 - sway), _cols["belt"], 3.2, true)
+		&"kung_fu":
+			# Mandarin collar, frog buttons down the front, a wide sash.
+			draw_line(neck_base - n * 4.0, neck_base + n * 6.0, _cols["silk"].darkened(0.35), 4.5, true)
+			for k in 3:
+				var at := hip + axis * length * (0.5 + k * 0.12) + n * 10.0
+				draw_line(at - n * 3.0, at + n * 3.5, _cols["frog"], 2.2, true)
+			draw_line(waist - n * 14.0, waist + n * 14.0, _cols["sash"], 7.5, true)
+			var tie := waist - n * 11.0
+			draw_line(tie, tie + Vector2(-n.x * 4.0, 22.0 + sway), _cols["sash"], 4.0, true)
+			draw_line(tie, tie + Vector2(-n.x * 9.0, 18.0 - sway), _cols["sash"].darkened(0.15), 3.5, true)
+		&"muay_thai":
+			# Shorts over the pelvis with a wide contrasting waistband.
+			_capsule(j[J_HIP_F], j[J_HIP_B], 12.5, 12.5, _cols["shorts"])
+			var band := hip + axis * 9.0
+			draw_line(band - n * 13.5, band + n * 13.5, _cols["trim"], 5.5, true)
+			for k in 3:
+				var at := band + n * (-6.0 + k * 5.0)
+				draw_line(at - axis * 1.2, at + axis * 1.2, _cols["shorts"].darkened(0.3), 2.0, true)
+		&"kickboxing":
+			_capsule(j[J_HIP_F], j[J_HIP_B], 12.5, 12.5, _cols["pants"])
+			var band2 := hip + axis * 9.0
+			draw_line(band2 - n * 13.5, band2 + n * 13.5, _cols["pants"].lightened(0.3), 5.0, true)
+
+
+## Hair and headwear (the Muay Thai mongkol).
+func _head_extras(head: Vector2, up: Vector2, face: Vector2) -> void:
+	var cap := PackedVector2Array()
+	for dir in [up.slerp(face, 0.4), up.slerp(face, 0.15), up, up.slerp(-face, 0.5), -face, (-face).slerp(-up, 0.3)]:
+		cap.append(head + (dir as Vector2).normalized() * (HEAD_R - 2.0))
+	draw_polyline(cap, _cols["hair"], 6.0 if _kit != &"muay_thai" else 4.0, true)
+	if _kit == &"kung_fu":
+		draw_circle(head + up * (HEAD_R + 1.5) - face * 5.0, 5.0, _cols["hair"], true, -1.0, true)  # topknot
+	elif _kit == &"muay_thai":
+		# Mongkol: a stiff rope ring round the head with a tail at the back.
+		var front := head + face * HEAD_R * 0.9 + up * 5.0
+		var back := head - face * HEAD_R * 0.95 + up * 6.0
+		draw_line(front, back, _cols["mongkol"], 5.0, true)
+		for k in 4:
+			var at := front.lerp(back, 0.15 + k * 0.23)
+			draw_line(at - up * 2.0, at + up * 2.0 + face * 1.5, _cols["shorts"] if _cols.has("shorts") else Color.RED, 1.6, true)
+		draw_line(back, back - face * 12.0 + up * 3.0, _cols["mongkol"], 3.5, true)
 
 
 ## Boxer: trunks with a waistband and boot cuffs (no belt or headband); the

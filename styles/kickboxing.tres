@@ -13,6 +13,7 @@ difficulty = 2
 strengths = PackedStringArray("Punch-kick combinations at every range", "Low kick, body kick and high kick", "Uppercut and body hook up close")
 weaknesses = PackedStringArray("No specialist tools", "No elbows, knees or sweeps", "Kicks are punishable on block")
 stance = 9
+kit = &"kickboxing"
 move_names = {
 &"body_roundhouse": "Body Roundhouse"
 }

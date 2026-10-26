@@ -13,6 +13,7 @@ difficulty = 4
 strengths = PackedStringArray("Longest reach in the game", "Kick chains and aerial kicks", "Axe kick crushes guards")
 weaknesses = PackedStringArray("Few punches up close", "Kicks are slow and punishable up close", "No sweeps or hooks")
 stance = 8
+kit = &"taekwondo"
 step_scale = 1.6
 ai_tuning = {
 "aggression": 0.76,

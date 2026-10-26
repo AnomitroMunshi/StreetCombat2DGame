@@ -45,8 +45,9 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 @export var weaknesses: PackedStringArray = PackedStringArray()
 ## Guard / idle / footwork: an index into Stances.Kind.
 @export var stance: int = 0
-## Outfit drawn over the body: &"gi" (belt, headband, wrist wraps) or
-## &"boxing" (gloves, trunks, boots). Presentation only.
+## Character outfit (FighterVisual): &"boxing", &"muay_thai", &"karate",
+## &"kung_fu", &"taekwondo", &"kickboxing", or the plain &"gi" silhouette
+## (belt, headband, wrist wraps). Presentation only.
 @export var kit: StringName = &"gi"
 ## Footwork: scales how far this style's strikes step in (CombatData.STEP_IN).
 @export var step_scale: float = 1.0

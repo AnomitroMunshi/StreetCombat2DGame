@@ -13,6 +13,7 @@ difficulty = 3
 strengths = PackedStringArray("Reverse punch closes distance fast", "Low side kick and high roundhouse at range", "Strong guard pressure")
 weaknesses = PackedStringArray("Short, precise combos only", "No hooks or sweeps", "Committed entries are punishable")
 stance = 4
+kit = &"karate"
 step_scale = 1.4
 ai_tuning = {
 "parry_chance": 0.3,

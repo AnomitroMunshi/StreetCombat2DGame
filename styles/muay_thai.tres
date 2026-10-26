@@ -13,6 +13,7 @@ difficulty = 3
 strengths = PackedStringArray("Elbows and rising elbows wreck posture up close", "Low kick and body kick punish from mid range", "Most damaging clinch-range strikes")
 weaknesses = PackedStringArray("Slow, measured footwork", "Few aerial options", "Kicks are committal")
 stance = 3
+kit = &"muay_thai"
 step_scale = 1.9
 ai_tuning = {
 "aggression": 0.82,

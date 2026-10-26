@@ -13,6 +13,7 @@ difficulty = 4
 strengths = PackedStringArray("Longest palm chains", "Deflection counter turns aside any non-low strike", "Low palm and sweep attack the base")
 weaknesses = PackedStringArray("Palms do little damage each", "Short reach", "Deflection is whiffable")
 stance = 5
+kit = &"kung_fu"
 step_scale = 1.3
 ai_tuning = {
 "aggression": 0.68,

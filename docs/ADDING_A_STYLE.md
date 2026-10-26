@@ -18,7 +18,7 @@ Styles are data. The match code never checks a style's name.
      Short-range styles need more footwork to get inside long-range ones.
    - `ai_tuning` (optional): rival AI overrides for the style, from
      `EnemyAI.TUNABLE`, for example `{"aggression": 0.8, "parry_chance": 0.3}`.
-   - `kit` (optional): outfit, `&"gi"` (default) or `&"boxing"`.
+   - `kit` (optional): the character outfit, one of `&"boxing"`, `&"muay_thai"`, `&"karate"`, `&"kung_fu"`, `&"taekwondo"`, `&"kickboxing"`, or the plain `&"gi"` silhouette (default). A new outfit is a colour table in `FighterVisual._build_outfit` (which body parts are cloth) plus its details in the `_leg_extras` / `_arm_extras` / `_torso_extras` / `_head_extras` hooks.
    - Balance the new style by running AI-vs-AI matches against every style
      (both sides AI, several seeds). The current styles sit between about
      45% and 60%.
