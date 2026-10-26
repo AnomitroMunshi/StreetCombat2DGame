@@ -62,7 +62,7 @@ func _initialize() -> void:
 	var bad := MartialArtStyle.new()
 	bad.id = &"broken"
 	bad.display_name = "Broken"
-	bad.input_map = {&"light": &"no_such_move", &"kick": &"jump_kick"}
+	bad.input_map = {&"light": &"no_such_move", &"heavy": &"jump_kick", &"kick": &"jab"}
 	bad.chains = {&"jab": [&"cross"]}
 	var errs := bad.validate()
 	_check(errs.size() >= 3, "malformed style data is reported (%d problems: %s)" % [errs.size(), ", ".join(errs)])
@@ -79,15 +79,16 @@ func _initialize() -> void:
 			if boxing.resolve(slot, air) in KICKS:
 				slots_ok = false
 	_check(slots_ok, "every button, on the ground and in the air, gives a boxer a punch (or nothing)")
-	_check(boxing.resolve(&"kick", false) == CombatData.AttackType.BODY_HOOK, "boxing L = body hook")
+	_check(boxing.resolve(&"down_light", false) == CombatData.AttackType.BODY_HOOK, "boxing S+J = body hook")
+	_check(boxing.resolve(&"technique", false) == CombatData.AttackType.BOB_WEAVE, "boxing L = bob and weave")
 	var p := _pair(boxing)
 	var a: Fighter = p[0]
 	a.push_intent(_attack(CombatData.AttackType.KICK))
 	a.tick()
 	_check(a.state != Fighter.State.ATTACK and a.rejected_attacks == 1, "an AI/legacy kick intent is refused for a boxer")
-	a.push_intent(_slot(&"down_kick"))
+	a.push_intent(_slot(&"down_heavy"))
 	a.tick()
-	_check(a.current_attack != null and a.current_attack.type == CombatData.AttackType.BODY_HOOK, "S+L for a boxer is a body hook, never a sweep")
+	_check(a.current_attack != null and a.current_attack.type == CombatData.AttackType.SLIP_COUNTER, "S+K for a boxer is a slip counter, never a low kick")
 
 	print("[taekwondo has no boxing combos]")
 	var shared := 0
@@ -102,8 +103,8 @@ func _initialize() -> void:
 	_check(only_box.size() >= 6 and only_tkd.size() >= 7, "movesets genuinely differ (boxing-only %d, taekwondo-only %d)" % [only_box.size(), only_tkd.size()])
 
 	print("[air attacks follow the style]")
-	for case in [[boxing, &"kick", CombatData.AttackType.JUMP_PUNCH], [tkd, &"kick", CombatData.AttackType.JUMP_ROUNDHOUSE],
-			[tkd, &"lead", CombatData.AttackType.JUMP_SPIN_KICK], [tkd, &"light", CombatData.AttackType.JUMP_PUNCH]]:
+	for case in [[boxing, &"heavy", CombatData.AttackType.JUMP_PUNCH], [tkd, &"heavy", CombatData.AttackType.JUMP_ROUNDHOUSE],
+			[tkd, &"technique", CombatData.AttackType.JUMP_SPIN_KICK], [tkd, &"light", CombatData.AttackType.JUMP_PUNCH]]:
 		p = _pair(case[0], 300.0)
 		a = p[0]
 		a.push_intent(_slot(&"none"))
@@ -120,7 +121,7 @@ func _initialize() -> void:
 		_check(started == case[2], "%s in the air, %s -> %s (%s)" % [case[0].id, case[1], CombatData.attack_name(case[2]), CombatData.attack_name(started)])
 
 	print("[combos follow the style graph]")
-	for case in [[boxing, CombatData.AttackType.LIGHT, &"kick", true], [tkd, CombatData.AttackType.KICK, &"up_kick", true],
+	for case in [[boxing, CombatData.AttackType.LIGHT, &"down_light", true], [tkd, CombatData.AttackType.KICK, &"up_heavy", true],
 			[tkd, CombatData.AttackType.LIGHT, &"light", false]]:
 		p = _pair(case[0], 80.0)
 		a = p[0]

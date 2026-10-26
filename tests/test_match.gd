@@ -24,7 +24,7 @@ class Driver extends Node:
 		printerr("  FAIL ", msg)
 
 	func release_all() -> void:
-		for a in ["move_left", "move_right", "attack_light", "attack_heavy", "attack_kick", "attack_front_kick", "attack_backhand", "attack_uppercut", "mod_up", "mod_down", "jump", "block", "restart"]:
+		for a in ["move_left", "move_right", "attack_light", "attack_heavy", "attack_technique", "mod_up", "mod_down", "jump", "block", "restart"]:
 			Input.action_release(a)
 
 	func _physics_process(_d: float) -> void:
@@ -76,14 +76,18 @@ class Driver extends Node:
 			elif cycle >= 60 and cycle < 80:
 				Input.action_press("block")
 			elif cycle == 0 or cycle == 9 or cycle == 18:
-				Input.action_press(["attack_light", "attack_backhand", "attack_uppercut"][cycle / 9])
+				# J, K, then S + J (jab, cross, body hook).
+				if cycle == 18:
+					Input.action_press("mod_down")
+				Input.action_press(["attack_light", "attack_heavy", "attack_light"][cycle / 9])
 			elif cycle == 35:
-				Input.action_press("attack_front_kick")
+				Input.action_press("mod_up")
+				Input.action_press("attack_heavy")
 			elif cycle == 44:
 				Input.action_press("jump")
 				Input.action_press("move_right" if e.position.x > p.position.x else "move_left")
 			elif cycle == 58:
-				Input.action_press("attack_kick")
+				Input.action_press("attack_technique")
 			if frame > 7200:
 				fail("no KO within 2 minutes of play")
 				phase = "done"

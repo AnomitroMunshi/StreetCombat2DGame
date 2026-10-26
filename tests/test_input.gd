@@ -24,35 +24,44 @@ class Driver extends Node:
 			main.call("start_match", true)
 		# Godot reports a scripted press as "just pressed" on the next physics
 		# frame, so: press on frame N, check on N + 1, release on N + 2.
-		if frame % 4 == 0 and frame < 255:
-			for a in ["attack_kick", "mod_up", "mod_down", "jump", "move_left", "move_right", "cycle_stance"]:
+		if frame % 4 == 0 and frame < 255 and frame != 260:
+			for a in ["attack_light", "attack_heavy", "attack_technique", "mod_up", "mod_down", "jump",
+					"move_left", "move_right", "cycle_stance"]:
 				Input.action_release(a)
-		match frame:
-			2:
-				Input.action_press("attack_kick")
-			6:
-				Input.action_press("mod_up")
-				Input.action_press("attack_kick")
-			10:
-				Input.action_press("mod_down")
-				Input.action_press("attack_kick")
-			14:
-				Input.action_press("mod_down")
-			18:
-				Input.action_press("mod_up")
+		# Each mapping check: keys pressed on frame N, read on N + 1.
+		var cases := {
+			2: [["attack_light"], &"light", "J alone -> light"],
+			6: [["attack_heavy"], &"heavy", "K alone -> heavy"],
+			10: [["attack_technique"], &"technique", "L alone -> technique"],
+			14: [["mod_up", "attack_light"], &"up_light", "W + J -> up_light"],
+			18: [["mod_up", "attack_heavy"], &"up_heavy", "W + K -> up_heavy"],
+			22: [["mod_down", "attack_light"], &"down_light", "S + J -> down_light"],
+			26: [["mod_down", "attack_heavy"], &"down_heavy", "S + K -> down_heavy"],
+			30: [["move_left", "attack_light"], &"light", "A + J -> light (A is never a modifier)"],
+			34: [["move_right", "attack_heavy"], &"heavy", "D + K -> heavy (D is never a modifier)"],
+			38: [["mod_up", "mod_down", "attack_light"], &"up_light", "W + S + J -> up_light (W wins)"],
+			42: [["mod_up", "attack_technique"], &"technique", "W + L -> technique (L has no variants)"],
+			46: [["mod_down"], &"", "S alone -> crouch (no attack)"],
+			50: [["mod_up"], &"", "W alone does nothing (no jump)"],
+		}
+		if cases.has(frame):
+			for a in cases[frame][0]:
+				Input.action_press(a)
 		# Only read input ourselves on the mapping-check frames; elsewhere the
 		# game is the only reader (reading twice would double-count taps).
 		var intent := CombatData.Intent.new()
-		if frame <= 19:
+		if frame <= 51:
 			intent = main.call("_read_player_intent")
+		if cases.has(frame - 1):
+			var c: Array = cases[frame - 1]
+			check(intent.slot == c[1], "%s (%s)" % [c[2], intent.slot])
+			if frame == 47:
+				check(intent.crouch, "S alone crouches")
+			if frame == 51:
+				check(not intent.jump, "W alone is not a jump")
+		if frame == 1:
+			check(p0_e0_differ(main), "player and rival have different martial arts")
 		match frame:
-			1: check(p0_e0_differ(main), "player and rival have different martial arts")
-			3: check(intent.slot == &"kick", "L alone -> kick slot (%s)" % intent.slot)
-			7: check(intent.slot == &"up_kick", "W + L -> up_kick slot (%s)" % intent.slot)
-			11: check(intent.slot == &"down_kick", "S + L -> down_kick slot (%s)" % intent.slot)
-			15:
-				check(intent.slot == &"" and intent.crouch, "S alone -> crouch (no attack)")
-			19: check(not intent.jump and intent.slot == &"", "W alone does nothing (no jump)")
 			100:
 				Input.action_press("move_right")  # first tap
 			104:
@@ -103,25 +112,29 @@ class Driver extends Node:
 				p.position.y = p.ground_y
 				p.call("_enter_state", Fighter.State.IDLE)
 			260:
-				# Standing still, then away (A) + L together: back kick.
+				# Standing still, then away (A) + K together: still the plain K move.
 				Input.action_press("move_left")
-				Input.action_press("attack_kick")
+				Input.action_press("attack_heavy")
 			261:
 				Input.action_press("move_left")
 			262:
-				check(p.current_attack != null and p.current_attack.type == CombatData.AttackType.BACK_KICK,
-					"standing + away + L -> back kick (%s)" % p.get_debug_label())
-				Input.action_release("move_left")
-				Input.action_release("attack_kick")
-			300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310:
-				# Retreating for a while, then L: stays a side kick.
-				Input.action_press("move_left")
-				if frame == 309:
-					Input.action_press("attack_kick")
-			311:
 				check(p.current_attack != null and p.current_attack.type == CombatData.AttackType.KICK,
-					"retreating + L -> side kick, not a back kick (%s)" % p.get_debug_label())
+					"standing + away + K -> side kick, no back kick (%s)" % p.get_debug_label())
 				Input.action_release("move_left")
+				Input.action_release("attack_heavy")
+			300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310:
+				# Walking toward while pressing W + K: the high variant, not a toward move.
+				Input.action_press("move_right" if p.facing > 0 else "move_left")
+				if frame == 309:
+					Input.action_press("mod_up")
+					Input.action_press("attack_heavy")
+			311:
+				check(p.current_attack != null and p.current_attack.type == CombatData.AttackType.HIGH_KICK,
+					"walking toward + W + K -> high roundhouse (%s)" % p.get_debug_label())
+				Input.action_release("move_left")
+				Input.action_release("move_right")
+				Input.action_release("mod_up")
+				Input.action_release("attack_heavy")
 			340, 341, 342:
 				Input.action_press("block")
 				if p.state == Fighter.State.BLOCK:

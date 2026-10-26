@@ -7,10 +7,10 @@ script = ExtResource("1_style")
 id = &"boxing"
 order = 1
 display_name = "Boxing"
-description = "Pressure and counterpunching. Fast hands, tight guard and head movement: walk them down, slip their shots and punish with hooks."
+description = "Pressure and counterpunching. Fast hands, tight guard and head movement: walk them down, slip and weave under their shots and punish to the body and chin."
 category = &"striking"
 difficulty = 2
-strengths = PackedStringArray("Fastest punches and longest punch combos", "Slip counter dodges head strikes", "Body hook breaks guards")
+strengths = PackedStringArray("Fastest punches and longest punch combos", "Bob and weave and slip counter dodge head strikes", "Body hook breaks guards")
 weaknesses = PackedStringArray("No kicks or sweeps at all", "Short reach: must get close", "No low attacks")
 stance = 2
 kit = &"boxing"
@@ -22,32 +22,27 @@ ai_tuning = {
 }
 input_map = {
 &"down_heavy": &"slip_counter",
-&"front": &"rear_hook",
+&"down_light": &"body_hook",
 &"heavy": &"cross",
-&"kick": &"body_hook",
-&"lead": &"lead_hook",
 &"light": &"jab",
-&"rising": &"uppercut",
-&"up_heavy": &"overhand"
+&"technique": &"bob_weave",
+&"up_heavy": &"overhand",
+&"up_light": &"uppercut"
 }
 air_map = {
 &"heavy": &"jump_punch",
-&"kick": &"jump_punch",
-&"lead": &"jump_punch",
 &"light": &"jump_punch",
-&"rising": &"jump_punch",
-&"front": &"jump_punch"
+&"technique": &"jump_punch"
 }
 chains = {
-&"body_hook": [&"lead_hook", &"uppercut", &"cross"],
-&"cross": [&"lead_hook", &"body_hook", &"uppercut"],
-&"jab": [&"jab", &"cross", &"lead_hook", &"rear_hook", &"body_hook", &"uppercut", &"overhand"],
-&"lead_hook": [&"cross", &"rear_hook", &"body_hook", &"uppercut"],
-&"rear_hook": [&"lead_hook", &"body_hook"],
-&"slip_counter": [&"lead_hook", &"body_hook", &"uppercut"],
-&"uppercut": [&"lead_hook", &"rear_hook", &"jab"]
+&"bob_weave": [&"body_hook", &"uppercut", &"overhand", &"cross"],
+&"body_hook": [&"uppercut", &"cross", &"jab"],
+&"cross": [&"jab", &"body_hook", &"uppercut", &"bob_weave"],
+&"jab": [&"jab", &"cross", &"body_hook", &"uppercut", &"overhand", &"bob_weave"],
+&"slip_counter": [&"body_hook", &"uppercut", &"cross"],
+&"uppercut": [&"cross", &"body_hook", &"jab"]
 }
-ai_close_plans = [[&"jab"], [&"jab", &"jab", &"cross"], [&"jab", &"cross", &"lead_hook"], [&"lead_hook", &"body_hook"], [&"body_hook", &"uppercut"], [&"jab", &"rear_hook"], [&"jab", &"overhand"], [&"slip_counter", &"lead_hook"], [&"cross", &"body_hook", &"uppercut"]]
+ai_close_plans = [[&"jab"], [&"jab", &"jab", &"cross"], [&"jab", &"cross", &"body_hook"], [&"body_hook", &"uppercut"], [&"jab", &"overhand"], [&"slip_counter", &"body_hook"], [&"cross", &"body_hook", &"uppercut"], [&"bob_weave", &"uppercut"], [&"bob_weave", &"body_hook"]]
 ai_far_plans = [[&"jab", &"cross"], [&"overhand"], [&"jab", &"jab"]]
 wall_entry = PackedStringArray("heavy_windup", "rhook_hit", "heavy_strike", "heavy_windup", "overhand_hit")
 signature = &"gazelle_hook"

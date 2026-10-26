@@ -457,7 +457,7 @@ func _air_move_for(ground: CombatData.AttackType, slot: StringName) -> CombatDat
 	if style != null:
 		if slot != &"":
 			return style.resolve(slot, true)
-		return style.resolve(&"kick" if kick else &"light", true)
+		return style.resolve(&"heavy" if kick else &"light", true)
 	return CombatData.AttackType.JUMP_KICK if kick else CombatData.AttackType.JUMP_PUNCH
 
 
@@ -486,8 +486,9 @@ func _tick_attack() -> void:
 			var s := float(attack.startup)
 			var k := smoothstep(CombatData.STEP_IN_START, 1.0, (state_frame + 1) / s) 				- smoothstep(CombatData.STEP_IN_START, 1.0, state_frame / s)
 			position.x += attack.step * step_scale() * k * facing
-	elif combo_step < CombatData.MAX_COMBO_CHAIN and state_frame - strike_end < attack.cancel_window 			and swing_has_hit and _can_chain(attack.type, buffered_attack):
-		# Chains need contact and a listed branch (CombatData.CHAINS).
+	elif combo_step < CombatData.MAX_COMBO_CHAIN and state_frame - strike_end < attack.cancel_window 			and (swing_has_hit or attack.no_strike) and _can_chain(attack.type, buffered_attack):
+		# Chains need contact (a weave / feint has nothing to land) and a listed
+		# branch (CombatData.CHAINS / the style's chains).
 		if _consume_buffered_attack(combo_step + 1):
 			return
 	if state_frame >= attack.total_frames():
@@ -1157,7 +1158,7 @@ func get_phase() -> Phase:
 
 
 func is_hitbox_active() -> bool:
-	return get_phase() == Phase.ACTIVE and not swing_has_hit
+	return get_phase() == Phase.ACTIVE and not swing_has_hit and not current_attack.no_strike
 
 
 func get_hitbox_world() -> Rect2:

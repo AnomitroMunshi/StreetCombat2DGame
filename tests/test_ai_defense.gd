@@ -27,7 +27,7 @@ class Driver extends Node:
 			# This test is about defensive choices: a patient rival, so most kicks
 			# meet a guard (or a parry) rather than a trade.
 			(main.get_node("EnemyAI") as EnemyAI).aggression = 0.2
-		for a in ["attack_kick", "move_left", "move_right"]:
+		for a in ["attack_heavy", "move_left", "move_right"]:
 			Input.action_release(a)
 		var p: Fighter = main.get_node("Player")
 		var e: Fighter = main.get_node("Enemy")
@@ -38,7 +38,7 @@ class Driver extends Node:
 		if dist > 115.0:
 			Input.action_press("move_right" if e.position.x > p.position.x else "move_left")
 		elif frame % 45 == 0 and p.can_act():
-			Input.action_press("attack_kick")
+			Input.action_press("attack_heavy")  # K: taekwondo side kick
 			kicks += 1
 		if e.state != prev_enemy_state:
 			if e.state == Fighter.State.PARRY:

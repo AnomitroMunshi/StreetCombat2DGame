@@ -10,38 +10,36 @@ display_name = "Kickboxing"
 description = "The balanced striker. Punches flow into kicks and back: jab-cross into a low kick, finish high. The all-rounder."
 category = &"hybrid"
 difficulty = 2
-strengths = PackedStringArray("Punch-kick combinations at every range", "Low kick, body kick and high kick", "Spinning back kick from standing")
-weaknesses = PackedStringArray("No specialist tools", "No elbows, knees or sweeps", "Spinning kick is slow")
+strengths = PackedStringArray("Punch-kick combinations at every range", "Low kick, body kick and high kick", "Uppercut and body hook up close")
+weaknesses = PackedStringArray("No specialist tools", "No elbows, knees or sweeps", "Kicks are punishable on block")
 stance = 9
+move_names = {
+&"body_roundhouse": "Body Roundhouse"
+}
 input_map = {
-&"back_kick": &"back_kick",
-&"down_kick": &"low_roundhouse",
+&"down_heavy": &"low_roundhouse",
+&"down_light": &"body_hook",
 &"heavy": &"cross",
-&"kick": &"body_roundhouse",
-&"lead": &"lead_hook",
 &"light": &"jab",
-&"rising": &"uppercut",
-&"up_kick": &"high_kick"
+&"technique": &"body_roundhouse",
+&"up_heavy": &"high_kick",
+&"up_light": &"uppercut"
 }
 air_map = {
-&"heavy": &"jump_punch",
-&"kick": &"jump_kick",
-&"lead": &"jump_punch",
+&"heavy": &"jump_kick",
 &"light": &"jump_punch",
-&"rising": &"jump_punch",
-&"front": &"jump_kick"
+&"technique": &"jump_kick"
 }
 chains = {
+&"body_hook": [&"cross", &"uppercut", &"body_roundhouse", &"high_kick"],
 &"body_roundhouse": [&"cross", &"high_kick"],
-&"cross": [&"lead_hook", &"low_roundhouse", &"body_roundhouse", &"high_kick", &"uppercut"],
-&"high_kick": [&"back_kick"],
-&"jab": [&"cross", &"lead_hook", &"low_roundhouse", &"body_roundhouse", &"high_kick"],
-&"lead_hook": [&"cross", &"low_roundhouse", &"body_roundhouse"],
+&"cross": [&"body_hook", &"uppercut", &"low_roundhouse", &"body_roundhouse", &"high_kick"],
+&"jab": [&"cross", &"body_hook", &"low_roundhouse", &"body_roundhouse", &"high_kick"],
 &"low_roundhouse": [&"jab", &"cross", &"high_kick"],
-&"uppercut": [&"lead_hook", &"high_kick"]
+&"uppercut": [&"body_hook", &"high_kick"]
 }
-ai_close_plans = [[&"jab", &"cross", &"low_roundhouse"], [&"jab", &"lead_hook", &"body_roundhouse"], [&"cross", &"uppercut", &"high_kick"], [&"lead_hook", &"cross"], [&"jab", &"cross", &"high_kick"]]
-ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"back_kick"], [&"jab", &"body_roundhouse"]]
+ai_close_plans = [[&"jab", &"cross", &"low_roundhouse"], [&"jab", &"body_hook", &"body_roundhouse"], [&"cross", &"uppercut", &"high_kick"], [&"body_hook", &"cross"], [&"jab", &"cross", &"high_kick"]]
+ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"jab", &"body_roundhouse"]]
 wall_entry = PackedStringArray("knee_windup", "bodyrh_hit", "heavy_strike", "heavy_windup", "high_extend")
 signature = &"breaker_combo"
 finishers = PackedStringArray("last_combination", "knockout_rhythm")

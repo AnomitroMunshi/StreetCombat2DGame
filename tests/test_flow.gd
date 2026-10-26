@@ -5,8 +5,8 @@ extends SceneTree
 ## cannot start a second countdown, and that restarting mid-countdown returns to
 ## a clean pre-match with no stale countdown.
 
-const ATTACK_KEYS: Array[String] = ["attack_light", "attack_heavy", "attack_kick", "attack_front_kick",
-	"attack_backhand", "attack_uppercut", "jump", "block", "move_right", "move_left"]
+const ATTACK_KEYS: Array[String] = ["attack_light", "attack_heavy", "attack_technique", "mod_up", "mod_down",
+	"signature", "jump", "block", "move_right", "move_left"]
 
 
 class Driver extends Node:

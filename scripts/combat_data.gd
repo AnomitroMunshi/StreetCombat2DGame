@@ -16,7 +16,8 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	ELBOW, KNEE, LOW_ROUNDHOUSE, BODY_ROUNDHOUSE, FLYING_KNEE,
 	REVERSE_PUNCH, KNIFE_HAND, RISING_PUNCH, SPIN_COUNTER_KICK, PERFECT_GYAKU,
 	STRAIGHT_PALM, DOUBLE_PALM, LOW_SIDE_KICK, RISING_PALM, CHAIN_PALMS, DEFLECT_COUNTER, PALM_BARRAGE,
-	BREAKER_COMBO }
+	BREAKER_COMBO,
+	BOB_WEAVE, RISING_ELBOW, BODY_STRAIGHT, BODY_PUNCH, LOW_PALM, LEG_FEINT }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
 ## part): strikes travel into range like real footwork instead of being thrown
@@ -29,6 +30,7 @@ const STEP_IN: Dictionary = {
 	&"perfect_gyaku": 32.0, &"straight_palm": 18.0, &"double_palm": 22.0, &"rising_palm": 8.0,
 	&"chain_palms": 10.0, &"side_kick": 14.0, &"front_kick": 12.0, &"high_kick": 6.0,
 	&"body_roundhouse": 8.0, &"low_roundhouse": 6.0, &"low_side_kick": 12.0, &"axe_kick": 8.0,
+	&"rising_elbow": 8.0, &"body_straight": 14.0, &"body_punch": 20.0, &"low_palm": 14.0,
 }
 ## A grounded strike stops travelling (step-in and lunge) once the opponent is
 ## within the move's own reach plus this margin, so the limb arrives extended
@@ -130,11 +132,6 @@ const DODGE_MOVE_FRAMES: int = 10
 const DODGE_BACK_SPEED: float = 8.5
 const DODGE_FORWARD_SPEED: float = 7.0
 const DODGE_BUFFER_FRAMES: int = 4
-## Back kick: away + L from standing. Away must be pressed at most
-## BACK_KICK_PRESS_WINDOW ticks before L, after at least BACK_KICK_STILL_TICKS
-## without moving, so a retreating fighter's L stays a side kick.
-const BACK_KICK_PRESS_WINDOW: int = 3
-const BACK_KICK_STILL_TICKS: int = 6
 ## Slip past: a forward dodge (double-tap toward) started within
 ## SLIP_PAST_RANGE of a standing opponent slips through to their other side,
 ## landing SLIP_PAST_BEYOND px past their centre. Same frames and i-frames as
@@ -180,7 +177,7 @@ const SIGNATURE_BUFFER_FRAMES: int = 8
 ## Sequence moves: the next strike starts this many ticks after the previous
 ## strike's active frames end.
 const SEQUENCE_GAP: int = 3
-## Two taps of the same direction within this many ticks = dodge.
+## Two taps of the same direction (A A / D D) within this many ticks = dash.
 const DOUBLE_TAP_WINDOW: int = 12
 const LANDING_FRAMES: int = 3
 const LANDING_FRAMES_AFTER_AIR_ATTACK: int = 7
@@ -229,6 +226,8 @@ const AIR_HIT_POP_VELOCITY: float = -3.5
 ##   rehit (optional): the hitbox re-arms every N active ticks (multi-hit).
 ##   deflect (optional, with slip): every strike that is not low whiffs during
 ##                    the slip window (hand deflections), not only head strikes.
+##   no_strike (optional): a technique with no hitbox of its own (a weave, a
+##                    feint); it cancels into its chains without needing contact.
 ##   sequence (optional): this move is a series of other moves (by id), each
 ##                    with its own frame data and contact window; started one
 ##                    after another automatically, interrupted by being hit.
@@ -596,6 +595,60 @@ const ATTACK_TABLE: Dictionary = {
 		"knockback": 0.0, "lunge": 0.8, "hitstop": 0,
 		"hitbox": Rect2(28.0, -150.0, 52.0, 26.0),
 	},
+
+	# --- Style techniques (L) and level-changing strikes (S + J) ----------------
+	# Bob and weave (Boxing L): sink at the knees and roll the head under in a
+	# U; head-height strikes pass over the whole dip. No strike of its own: it
+	# flows straight into a counter (its chains) as the head comes back up.
+	AttackType.BOB_WEAVE: {
+		"id": &"bob_weave", "name": "Bob and Weave", "posture": 0.0, "no_strike": true, "slip": 18,
+		"startup": 6, "active": 10, "recovery": 8, "cancel_window": 12,
+		"damage": 0, "hitstun": 0, "blockstun": 0,
+		"knockback": 0.0, "lunge": 0.4, "hitstop": 0,
+		"hitbox": Rect2(20.0, -120.0, 40.0, 30.0),
+	},
+	# Lead-leg feint (Taekwondo L): the lead knee snaps up as if to kick and
+	# drops back. No strike; it flows into a real kick (its chains) at once.
+	AttackType.LEG_FEINT: {
+		"id": &"lead_leg_feint", "name": "Lead-Leg Feint", "posture": 0.0, "no_strike": true,
+		"startup": 5, "active": 6, "recovery": 8, "cancel_window": 12,
+		"damage": 0, "hitstun": 0, "blockstun": 0,
+		"knockback": 0.0, "lunge": 0.0, "hitstop": 0,
+		"hitbox": Rect2(30.0, -120.0, 50.0, 30.0),
+	},
+	# Rising elbow (Muay Thai W + J): the rear elbow driven up through the chin.
+	AttackType.RISING_ELBOW: {
+		"id": &"rising_elbow", "name": "Rising Elbow", "posture": 14.0,
+		"startup": 8, "active": 3, "recovery": 17, "cancel_window": 6,
+		"damage": 12, "hitstun": 22, "blockstun": 14,
+		"knockback": 3.0, "lunge": 1.2, "hitstop": 7, "launch": 6.5,
+		"hitbox": Rect2(14.0, -196.0, 46.0, 70.0),
+	},
+	# Body straight (Muay Thai S + J): level change, rear hand straight to the body.
+	AttackType.BODY_STRAIGHT: {
+		"id": &"body_straight", "name": "Body Straight", "posture": 14.0,
+		"startup": 8, "active": 3, "recovery": 16, "cancel_window": 7,
+		"damage": 10, "hitstun": 20, "blockstun": 13,
+		"knockback": 5.5, "lunge": 1.5, "hitstop": 6,
+		"hitbox": Rect2(34.0, -118.0, 60.0, 28.0),
+	},
+	# Body punch (Karate / Taekwondo S + J): chudan gyaku-zuki, a reverse punch
+	# from a deep front stance into the solar plexus.
+	AttackType.BODY_PUNCH: {
+		"id": &"body_punch", "name": "Body Punch", "posture": 12.0,
+		"startup": 8, "active": 3, "recovery": 16, "cancel_window": 7,
+		"damage": 10, "hitstun": 20, "blockstun": 13,
+		"knockback": 5.0, "lunge": 2.0, "hitstop": 6,
+		"hitbox": Rect2(36.0, -122.0, 62.0, 28.0),
+	},
+	# Low palm (Kung Fu S + J): sink into a horse stance, lead palm to the belly.
+	AttackType.LOW_PALM: {
+		"id": &"low_palm", "name": "Low Palm", "posture": 10.0,
+		"startup": 7, "active": 3, "recovery": 15, "cancel_window": 8,
+		"damage": 8, "hitstun": 18, "blockstun": 12,
+		"knockback": 4.5, "lunge": 1.2, "hitstop": 5,
+		"hitbox": Rect2(30.0, -116.0, 56.0, 30.0),
+	},
 }
 
 
@@ -666,6 +719,8 @@ class Attack extends RefCounted:
 	var deflect: bool = false
 	## Sub-moves (ids) for sequence moves; empty for ordinary moves.
 	var sequence: Array = []
+	## No hitbox (a weave, a feint): chains out without contact.
+	var no_strike: bool = false
 
 	func total_frames() -> int:
 		return startup + active + recovery
@@ -731,6 +786,7 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.rehit = row.get("rehit", 0)
 	attack.deflect = row.get("deflect", false)
 	attack.sequence = row.get("sequence", [])
+	attack.no_strike = row.get("no_strike", false)
 	_attack_cache[type] = attack
 	return attack
 
@@ -767,7 +823,8 @@ static func impact_kind(type: AttackType) -> ImpactKind:
 	match type:
 		AttackType.LEAD_HOOK, AttackType.REAR_HOOK, AttackType.BODY_HOOK, AttackType.BACKHAND, 				AttackType.KNIFE_HAND, AttackType.ELBOW, AttackType.HIGH_KICK, AttackType.BODY_ROUNDHOUSE, 				AttackType.LOW_ROUNDHOUSE, AttackType.SPIN_HOOK_KICK, AttackType.JUMP_ROUNDHOUSE, 				AttackType.JUMP_SPIN_KICK, AttackType.TORNADO_540, AttackType.SPIN_COUNTER_KICK, AttackType.GAZELLE_HOOK:
 			return ImpactKind.HOOK
-		AttackType.UPPERCUT, AttackType.RISING_PUNCH, AttackType.RISING_PALM, AttackType.KNEE, AttackType.FLYING_KNEE:
+		AttackType.UPPERCUT, AttackType.RISING_PUNCH, AttackType.RISING_PALM, AttackType.KNEE, AttackType.FLYING_KNEE, \
+				AttackType.RISING_ELBOW:
 			return ImpactKind.RISING
 		AttackType.AXE_KICK, AttackType.OVERHAND, AttackType.JUMP_PUNCH:
 			return ImpactKind.DOWNWARD

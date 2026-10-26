@@ -138,12 +138,6 @@ var _skid_prev_x: Dictionary = {}
 ## the drawn fist / foot to the contact point at impact, -1 if unknown).
 var _contacts: Array[Dictionary] = []
 const CONTACT_SHOW_TICKS: int = 45
-# Back kick detection: when the current movement started and how long the
-# player stood still before it.
-var _move_prev: int = 0
-var _move_start_tick: int = -1000
-var _still_since_tick: int = 0
-var _still_before_move: int = 0
 var _stance_rng := RandomNumberGenerator.new()
 ## Name of the finisher played this round ("" if none). Read by tests/HUD.
 var last_finisher_name: String = ""
@@ -592,23 +586,18 @@ func _read_player_intent() -> CombatData.Intent:
 	var intent := CombatData.Intent.new()
 	var axis := Input.get_axis("move_left", "move_right")
 	intent.move = 0 if is_zero_approx(axis) else (1 if axis > 0.0 else -1)
-	if intent.move != _move_prev:
-		if _move_prev == 0:
-			_move_start_tick = _tick
-			_still_before_move = _tick - _still_since_tick
-		if intent.move == 0:
-			_still_since_tick = _tick
-		_move_prev = intent.move
 	intent.block = Input.is_action_pressed("block")
 	# A fresh Shift press is a parry attempt; holding it is a normal block. The
 	# press is the held-state edge, so it always lands on the tick the guard rises.
 	intent.parry = intent.block and not _block_was_held
 	_block_was_held = intent.block
-	# S: crouch (S + Shift = low block). S + L is read below as the sweep.
+	# S: crouch (S + Shift = low block). S + J / S + K are read below.
 	intent.crouch = Input.is_action_pressed("mod_down")
 	intent.signature = Input.is_action_just_pressed("signature")
 	intent.jump = Input.is_action_just_pressed("jump")
-	# Double-tap A or D within the window = dodge in that direction.
+	# Double-tap A or D within the window = dash (dodge) in the tapped screen
+	# direction. Only fresh presses count, so holding a key never repeats it,
+	# and a dash uses up both taps (a third tap starts a new pair).
 	for dir in [-1, 1]:
 		if Input.is_action_just_pressed("move_left" if dir < 0 else "move_right"):
 			if _tick - _last_tap[dir] <= CombatData.DOUBLE_TAP_WINDOW:
@@ -618,38 +607,24 @@ func _read_player_intent() -> CombatData.Intent:
 				_last_tap[dir] = _tick
 	# Attack buttons produce a slot; the fighter's martial art decides the move
 	# (and refuses anything its style does not have).
-	if Input.is_action_just_pressed("attack_light"):
-		intent.slot = &"light"
-	elif Input.is_action_just_pressed("attack_heavy"):
-		if Input.is_action_pressed("mod_up"):
-			intent.slot = &"up_heavy"
-		elif Input.is_action_pressed("mod_down"):
-			intent.slot = &"down_heavy"
-		else:
-			intent.slot = &"heavy"
-	elif Input.is_action_just_pressed("attack_kick"):
-		if Input.is_action_pressed("mod_up"):
-			intent.slot = &"up_kick"
-		elif Input.is_action_pressed("mod_down"):
-			intent.slot = &"down_kick"
-		elif _is_back_kick_input(intent.move):
-			intent.slot = &"back_kick"
-		else:
-			intent.slot = &"kick"
-	elif Input.is_action_just_pressed("attack_front_kick"):
-		intent.slot = &"front"
-	elif Input.is_action_just_pressed("attack_backhand"):
-		intent.slot = &"lead"
-	elif Input.is_action_just_pressed("attack_uppercut"):
-		intent.slot = &"rising"
+	intent.slot = attack_slot(Input.is_action_just_pressed("attack_light"),
+		Input.is_action_just_pressed("attack_heavy"), Input.is_action_just_pressed("attack_technique"),
+		Input.is_action_pressed("mod_up"), Input.is_action_pressed("mod_down"))
 	return intent
 
 
-## Away + L from standing: away pressed together with L (within a few ticks)
-## after standing still. Retreating (already moving away) keeps the side kick.
-func _is_back_kick_input(move: int) -> bool:
-	return move == -player.facing and _tick - _move_start_tick <= CombatData.BACK_KICK_PRESS_WINDOW \
-		and _still_before_move >= CombatData.BACK_KICK_STILL_TICKS
+## The input slot for this tick's attack presses. W / S held at the moment J or
+## K is pressed pick the variant (W wins if both are held); A / D never do.
+## One press per tick: J, then K, then L.
+static func attack_slot(j: bool, k: bool, l: bool, up: bool, down: bool) -> StringName:
+	if j or k:
+		var base := "light" if j else "heavy"
+		if up:
+			return StringName("up_" + base)
+		if down:
+			return StringName("down_" + base)
+		return StringName(base)
+	return &"technique" if l else &""
 
 
 # --- Combat resolution --------------------------------------------------------

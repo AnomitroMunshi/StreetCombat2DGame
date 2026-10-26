@@ -302,7 +302,7 @@ func compute_intent() -> CombatData.Intent:
 				# Kick (or sometimes punch) from just before the peak so it is
 				# still active on the way down.
 				# A slot, so the style picks its own air attack (or none).
-				intent.slot = &"kick" if _rng.randf() < 0.65 else &"light"
+				intent.slot = &"heavy" if _rng.randf() < 0.65 else &"light"
 				_kick_pressed = true
 			elif not _me.airborne and _me.state != Fighter.State.JUMP:
 				_enter(AIState.IDLE, _rng.randi_range(2, 6))

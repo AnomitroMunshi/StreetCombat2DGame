@@ -10,7 +10,7 @@ display_name = "Muay Thai"
 description = "The art of eight limbs. Upright and heavy: punches, elbows, knees and shin kicks, every strike with full weight transfer."
 category = &"striking"
 difficulty = 3
-strengths = PackedStringArray("Elbows and knees wreck posture up close", "Low kick and body kick punish from mid range", "Most damaging clinch-range strikes")
+strengths = PackedStringArray("Elbows and rising elbows wreck posture up close", "Low kick and body kick punish from mid range", "Most damaging clinch-range strikes")
 weaknesses = PackedStringArray("Slow, measured footwork", "Few aerial options", "Kicks are committal")
 stance = 3
 step_scale = 1.9
@@ -20,35 +20,34 @@ ai_tuning = {
 "parry_chance": 0.22,
 "punish_chance": 0.95
 }
+move_names = {
+&"body_roundhouse": "Body Roundhouse",
+&"high_kick": "High Roundhouse"
+}
 input_map = {
-&"down_kick": &"low_roundhouse",
-&"front": &"front_kick",
-&"heavy": &"cross",
-&"kick": &"body_roundhouse",
-&"lead": &"elbow",
+&"down_heavy": &"low_roundhouse",
+&"down_light": &"body_straight",
+&"heavy": &"body_roundhouse",
 &"light": &"jab",
-&"rising": &"knee",
-&"up_kick": &"high_kick"
+&"technique": &"elbow",
+&"up_heavy": &"high_kick",
+&"up_light": &"rising_elbow"
 }
 air_map = {
-&"heavy": &"jump_punch",
-&"kick": &"jump_kick",
-&"lead": &"jump_punch",
+&"heavy": &"jump_kick",
 &"light": &"jump_punch",
-&"rising": &"jump_kick",
-&"front": &"jump_kick"
+&"technique": &"jump_punch"
 }
 chains = {
-&"body_roundhouse": [&"jab", &"cross"],
-&"cross": [&"elbow", &"knee", &"low_roundhouse", &"body_roundhouse", &"high_kick"],
-&"elbow": [&"knee", &"cross"],
-&"front_kick": [&"body_roundhouse", &"high_kick", &"low_roundhouse"],
-&"jab": [&"cross", &"elbow", &"knee", &"body_roundhouse", &"low_roundhouse", &"front_kick"],
-&"knee": [&"elbow"],
-&"low_roundhouse": [&"jab", &"cross", &"high_kick"]
+&"body_roundhouse": [&"jab"],
+&"body_straight": [&"elbow", &"rising_elbow", &"low_roundhouse", &"high_kick"],
+&"elbow": [&"rising_elbow", &"body_straight"],
+&"jab": [&"body_straight", &"elbow", &"rising_elbow", &"body_roundhouse", &"low_roundhouse", &"high_kick"],
+&"low_roundhouse": [&"jab", &"body_straight", &"high_kick"],
+&"rising_elbow": [&"elbow"]
 }
-ai_close_plans = [[&"jab", &"cross", &"elbow"], [&"elbow", &"knee"], [&"knee", &"elbow"], [&"jab", &"knee"], [&"cross", &"low_roundhouse"], [&"jab", &"body_roundhouse"]]
-ai_far_plans = [[&"front_kick", &"body_roundhouse"], [&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"front_kick"]]
+ai_close_plans = [[&"jab", &"body_straight", &"elbow"], [&"elbow", &"rising_elbow"], [&"rising_elbow", &"elbow"], [&"jab", &"elbow"], [&"body_straight", &"low_roundhouse"], [&"jab", &"body_roundhouse"]]
+ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"jab", &"body_roundhouse"], [&"high_kick"]]
 signature = &"flying_knee"
 finishers = PackedStringArray("eight_limbs", "iron_knee")
 ai_preferred_range = 110.0

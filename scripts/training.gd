@@ -143,7 +143,7 @@ func dummy_intent() -> CombatData.Intent:
 
 func on_attack_started(attack: CombatData.Attack) -> void:
 	last_move = attack
-	last_result = "WHIFF"
+	last_result = "NO STRIKE" if attack.no_strike else "WHIFF"
 	advantage_text = ""
 	_measuring = false
 

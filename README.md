@@ -48,23 +48,28 @@ The rival always gets a different style. Styles are **locked** once the match
 starts. After a match, **REMATCH** (or **R**) keeps your style, and
 **CHANGE STYLE** returns to the selection screen.
 
-The attack buttons (J K U O I L, plus W or S) do different things in each
-style. **A style can never use a move outside its own set**, whether through a
+Every style uses the same seven attack keys (J, K, L, and W or S held with J
+or K), but each key does something different in each style. **A style can never use a move outside its own set**, whether through a
 key, the AI, a combo or a jump. The style screen lists every move with its key.
 
 Each style has its own moves, combos, signature (F at full Focus) and two
 finishers:
 
-| Style | Identity | Moves | Signature (F) | Finishers |
-|---|---|---|---|---|
-| **Boxing** | Pressure and counterpunching. No kicks or sweeps. | J jab · K cross · U lead hook · I rear hook · O uppercut · L body hook · W+K overhand · S+K slip counter | Gazelle Hook | The Final Bell · Eight-Count |
-| **Muay Thai** | Eight limbs. Upright, heavy weight transfer. | J jab · K cross · U elbow · O knee · I teep · L body kick · S+L low kick · W+L high kick | Flying Knee | Eight Limbs · Iron Knee |
-| **Karate** | Precision and distance, sharp counters. | J straight punch · K reverse punch (gyaku-zuki) · U knife hand · O rising punch · I front kick · L side kick · W+L spinning counter kick (slips head strikes) · away+L back kick | Perfect Gyaku-Zuki | One-Inch Verdict · Crimson Crescent |
-| **Kung Fu** | Flowing counters, palm chains and sweeps. | J straight palm · K double palm · U backfist · O rising palm · I chain palms (three hits) · L low side kick · S+L sweep · S+K deflection counter (turns aside any strike that isn't low) | Flowing Palm Barrage (three palms into a double palm) | Hundred Palms · Dragon's Descent |
-| **Taekwondo** | Long-range kicking; two basic punches. | J jab · K cross · L side kick · I front kick · W+L high roundhouse · S+L axe kick · U spinning hook kick · away+L back kick · air: jump roundhouse, jumping spin kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
-| **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | J jab · K cross · U hook · O uppercut · L body kick · S+L low kick · W+L high kick · away+L spinning back kick | Breaker Combination (jab, cross, low kick, high kick) | Last Combination · Knockout Rhythm |
+| Style | Identity | J · K · L | W+J · W+K | S+J · S+K | Signature (F) | Finishers |
+|---|---|---|---|---|---|---|
+| **Boxing** | Pressure and counterpunching. No kicks or sweeps. | Jab · Cross · Bob and Weave | Uppercut · Overhand | Body Hook · Slip Counter | Gazelle Hook | The Final Bell · Eight-Count |
+| **Muay Thai** | Eight limbs. Upright, heavy weight transfer. | Jab · Body Roundhouse · Elbow | Rising Elbow · High Roundhouse | Body Straight · Low Kick | Flying Knee | Eight Limbs · Iron Knee |
+| **Karate** | Precision and distance, sharp counters. | Straight Punch · Reverse Punch · Knife-Hand | Rising Punch · High Roundhouse | Body Punch · Low Side Kick | Perfect Gyaku-Zuki | One-Inch Verdict · Crimson Crescent |
+| **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Deflect | Rising Palm · High Backfist | Low Palm · Leg Sweep | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
+| **Taekwondo** | Long-range kicking. | Jab · Side Kick · Lead-Leg Feint | Rising Punch · High Roundhouse | Body Punch · Axe Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
+| **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Breaker Combination | Last Combination · Knockout Rhythm |
 
-Low kicks (Muay Thai and Kickboxing low kick, Kung Fu low side kick) must be
+Two L techniques have no strike of their own. **Bob and Weave** ducks under
+head-height strikes, and **Lead-Leg Feint** fakes a kick. Each flows straight
+into its follow-ups (for example Bob and Weave into Uppercut, or the feint
+into Side Kick) without having to land first.
+
+Low kicks (the Muay Thai and Kickboxing Low Kick) and the Leg Sweep must be
 blocked low with S+Shift. Multi-strike signatures play their strikes one after
 another, each with its own contact window. A hit interrupts them, and only
 the last strike can knock down.
@@ -140,26 +145,21 @@ The panels show:
 
 | Key        | Action                      |
 |------------|-----------------------------|
-| A / D      | Move (backing up is slower) |
-| Space      | Jump (hold A/D to jump in that direction) |
-| A A / D D (double-tap) | Dodge: backstep sway (away) or slip-in (toward), with invulnerability. **Very close (within 80 px), toward the opponent: slip past behind them** |
+| A / D      | Move (backing up is slower). A and D never change an attack |
+| A A / D D (double-tap within 12 ticks) | **Dash** in the tapped direction, with invulnerability: a slip-in toward the opponent or a backstep away. **Very close (within 80 px), toward the opponent: slip past behind them.** Holding the key never dashes again |
 | Hold S + double-tap A/D | **Evasive roll:** forward rolls through the opponent to their other side; backward rolls retreat |
-| Space + toward | Jump; a jump from normal range clears the opponent and lands behind them (cross-up) |
-| J          | Jab (light punch)           |
-| K          | Cross (heavy punch)         |
-| U          | Backhand (lead-hand backfist) |
-| O          | Uppercut (launcher / anti-air) |
-| L          | Side kick                   |
-| W + L      | High kick (face level)      |
-| A/D (away) + L from standing | Spinning back kick: turn, heel thrust (slow, strongest push). Retreating then L stays a side kick |
-| S + L      | Sweep (low, always knocks down) |
-| I          | Front kick (push kick)      |
-| L or I in the air | Jump kick (one per jump) |
-| J / K / U / O in the air | Jump punch: flying forward punch (one air attack per jump) |
+| Space      | Jump (hold A/D to jump in that direction); a jump from normal range can cross over the opponent |
+| J          | Light attack (your style's jab or palm) |
+| K          | Heavy attack (your style's main power strike) |
+| L          | Style technique (Bob and Weave, Elbow, Knife-Hand, Deflect, Lead-Leg Feint, Body Roundhouse) |
+| W + J / W + K | Rising / high attacks |
+| S + J / S + K | Body / low attacks (S + K is Boxing's Slip Counter) |
+| J / K / L in the air | Your style's air attack (one per jump) |
+| F          | Signature technique (needs full Focus) |
 | S (hold)   | Crouch: head-level strikes pass over you |
 | Shift      | Tap just before a hit to **parry**; hold to block |
-| S + Shift  | Low block (needed against sweeps) |
-| Q          | Cycle your fighting stance  |
+| S + Shift  | Low block (needed against low kicks and sweeps) |
+| Q          | Next martial art (on the style screen) |
 | Enter / click | START MATCH / RESTART MATCH button |
 | R          | Restart the match (back to the pre-match screen) |
 | F1         | Toggle developer overlay (off by default) |
@@ -194,19 +194,20 @@ The full table, including hitboxes, knockback and lunge, is in
 - **Combos:** during the first few ticks of recovery (`cancel_window`), a
   buffered attack chains into the next swing, up to 3 swings. Two conditions:
   the swing must have **connected** (hit or blocked), and the branch must be
-  listed in `CombatData.CHAINS`. A whiffed attack always plays out its full
-  recovery.
+  listed in your style's `chains` (in `styles/*.tres`). A whiffed attack
+  always plays out its full recovery. Bob and Weave and Lead-Leg Feint are
+  the exceptions: they have nothing to land, so they always chain. For
+  example, Boxing:
 
   | From | Can chain into |
   |---|---|
-  | Jab (J) | anything |
-  | Backhand (U) | J, K, O, L, W+L |
-  | Cross (K) | L, I, W+L, O, S+L |
-  | Uppercut (O) | J, U, W+L (juggle) |
-  | Side kick (L) | J, U, K |
-  | Front kick (I) | L, W+L |
-  | High kick (W+L) | J, K |
-  | Sweep, air attacks | nothing |
+  | Jab (J) | J, K, W+J, W+K, S+J, L |
+  | Cross (K) | J, W+J, S+J, L |
+  | Body Hook (S+J) | J, K, W+J |
+  | Uppercut (W+J) | J, K, S+J |
+  | Slip Counter (S+K) | K, W+J, S+J |
+  | Bob and Weave (L) | K, W+J, W+K, S+J |
+  | Overhand (W+K), air attacks | nothing |
 
   Heavy enders never repeat (no cross→cross). The 3rd swing is a finisher
   with extra knockback and stun. Juggles end with a knockdown on the 3rd hit.
@@ -218,13 +219,13 @@ The full table, including hitboxes, knockback and lunge, is in
 - **Jumping:** 2 ticks of squat, then about 28 ticks in the air, peaking near
   110 px. Falling uses stronger gravity than rising, so the arc is snappy rather
   than floaty. Your direction at takeoff sets your momentum. Holding a direction
-  in the air steers slightly, and releasing it keeps your momentum. Punches can't be used in the air.
-  A kick button gives one jump kick per jump. If you get hit in the air you pop
+  in the air steers slightly, and releasing it keeps your momentum. J, K or L in the air gives
+  your style's air attack, one per jump. If you get hit in the air you pop
   up slightly, which allows juggles. A high enough jump can cross over the
   opponent, because pushboxes only collide when both fighters are close in
   height.
-- **Backhand:** a quick snap to the head with a little more reach than the jab.
-  Good in the middle of a chain, e.g. J-U-K.
+- **High Backfist (Kung Fu W+K):** a quick snap to the head with a little
+  more reach than the jab.
 - **Uppercut:** short reach, but its hitbox extends well above the head, so it
   works as an anti-air against jump-ins. On hit it launches the opponent about
   45 px into the air, and the next attacks in the chain can juggle them. When
@@ -236,32 +237,23 @@ The full table, including hitboxes, knockback and lunge, is in
 - **Juggle limit:** from the 4th hit of a combo onward, each hit stuns 3 ticks
   less (minimum 6). Long juggles and restarted chains always end, but normal
   3-hit chains are unaffected.
-- **Front kick:** a fast push kick. It shoves the opponent about 55 px away,
-  which makes it a spacing tool, and its pushback leaves you fairly safe if
-  it's blocked.
 - **Block timing:** the guard takes 2 ticks to come up, so it must be raised
   before the hit. Dropping it, or attacking or jumping out of it, costs 6 ticks
   of guard release. An attack buffered during the release fires right after.
-- **Dodge / step:** double-tap A or D. Away from the opponent is a backstep
+- **Dash:** double-tap A or D. Away from the opponent is a backstep
   sway (about 93 px), toward them is a slip-in (about 77 px). Frames 2-10 of 16
   are invulnerable and show blue afterimages. An attack pressed during the
   dodge is held and fires the moment it ends, which is your counter. The AI
   sometimes backsteps attacks instead of blocking them.
-- **High kick (W + L):** fast for a kick, lands at head height, unsafe on block.
+- **High kick / High Roundhouse (W + K):** fast for a kick, lands at head
+  height, unsafe on block.
 - **Crouch (hold S):** a low squat with the guard up and a shorter hurtbox.
-  The high kick and backhand whiff over you, but the jab, cross and mid kicks
+  The high kick and high backfist whiff over you, but the jab, cross and mid kicks
   still hit. You can't walk while crouched, but you can attack, jump or dodge
   straight out of it.
-- **Low block (S + Shift):** sweeps are low attacks, so a standing block does
+- **Low block (S + Shift):** sweeps and low kicks are low attacks, so a standing block does
   not stop them. Only a low block does. The low block also blocks everything
   else. The AI low-blocks when it sees a sweep coming.
-- **Back kick (away + L from standing):** a spinning back kick. The fighter
-  turns its back on the opponent and thrusts the heel straight into them.
-  - 13 damage, the biggest push in the game, and a good chance to send the
-    opponent flying.
-  - Slow (11-tick startup) and very unsafe if blocked or missed. It never chains.
-  - Press away and L together after standing still. If you've been walking
-    backwards, L stays a side kick.
 - **Changing sides:** there are three ways to get behind the opponent.
   - **Jump** over them from normal range. A forward jump clears them once your
     feet are 60 px up and your centre passes theirs.

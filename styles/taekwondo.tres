@@ -11,38 +11,37 @@ description = "Long-range kicking. Keep them at the end of your leg, chain kicks
 category = &"kicking"
 difficulty = 4
 strengths = PackedStringArray("Longest reach in the game", "Kick chains and aerial kicks", "Axe kick crushes guards")
-weaknesses = PackedStringArray("Only two basic punches up close", "Spinning kicks are slow and punishable", "No sweeps or hooks")
+weaknesses = PackedStringArray("Few punches up close", "Kicks are slow and punishable up close", "No sweeps or hooks")
 stance = 8
 ai_tuning = {
 "aggression": 0.55
 }
+move_names = {
+&"high_kick": "High Roundhouse"
+}
 input_map = {
-&"back_kick": &"back_kick",
-&"down_kick": &"axe_kick",
-&"front": &"front_kick",
-&"heavy": &"cross",
-&"kick": &"side_kick",
-&"lead": &"spin_hook_kick",
+&"down_heavy": &"axe_kick",
+&"down_light": &"body_punch",
+&"heavy": &"side_kick",
 &"light": &"jab",
-&"up_kick": &"high_kick"
+&"technique": &"lead_leg_feint",
+&"up_heavy": &"high_kick",
+&"up_light": &"rising_punch"
 }
 air_map = {
-&"front": &"jump_roundhouse",
-&"heavy": &"jump_punch",
-&"kick": &"jump_roundhouse",
-&"lead": &"jump_spin_kick",
+&"heavy": &"jump_roundhouse",
 &"light": &"jump_punch",
-&"up_kick": &"jump_spin_kick"
+&"technique": &"jump_spin_kick"
 }
 chains = {
-&"cross": [&"side_kick", &"high_kick", &"back_kick"],
-&"front_kick": [&"side_kick", &"high_kick", &"spin_hook_kick"],
-&"high_kick": [&"back_kick", &"spin_hook_kick"],
-&"jab": [&"cross", &"side_kick", &"high_kick", &"front_kick"],
-&"side_kick": [&"high_kick", &"back_kick", &"spin_hook_kick"]
+&"body_punch": [&"high_kick", &"side_kick"],
+&"jab": [&"side_kick", &"high_kick", &"body_punch", &"lead_leg_feint", &"axe_kick"],
+&"lead_leg_feint": [&"side_kick", &"high_kick", &"axe_kick"],
+&"rising_punch": [&"jab", &"high_kick"],
+&"side_kick": [&"high_kick"]
 }
-ai_close_plans = [[&"jab", &"side_kick"], [&"jab", &"cross", &"high_kick"], [&"front_kick", &"high_kick"], [&"axe_kick"], [&"side_kick", &"back_kick"], [&"jab", &"front_kick"]]
-ai_far_plans = [[&"side_kick"], [&"front_kick", &"side_kick"], [&"back_kick"], [&"spin_hook_kick"], [&"high_kick", &"spin_hook_kick"]]
+ai_close_plans = [[&"jab", &"side_kick"], [&"jab", &"body_punch", &"high_kick"], [&"axe_kick"], [&"lead_leg_feint", &"high_kick"], [&"rising_punch", &"high_kick"], [&"jab", &"lead_leg_feint", &"side_kick"]]
+ai_far_plans = [[&"side_kick"], [&"lead_leg_feint", &"side_kick"], [&"high_kick"], [&"lead_leg_feint", &"axe_kick"]]
 wall_entry = PackedStringArray("knee_windup", "front_extend", "heavy_strike", "shook_load", "high_extend")
 signature = &"tornado_540"
 finishers = PackedStringArray("cyclone_360", "heavens_heel")

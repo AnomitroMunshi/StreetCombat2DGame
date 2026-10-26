@@ -24,7 +24,7 @@ class Driver extends Node:
 				print("       ", l)
 
 	func release_all() -> void:
-		for a in ["move_left", "move_right", "jump", "mod_down", "attack_light", "attack_kick", "block"]:
+		for a in ["move_left", "move_right", "jump", "mod_down", "attack_light", "attack_technique", "block"]:
 			Input.action_release(a)
 
 	## Scenario: [name, player x, enemy x, setup Callable(frame) -> void, length, verify Callable]

@@ -270,6 +270,29 @@ var _overhand_hit := PackedFloat32Array([0.6, 0.1, 0.8, 2.6, 1.9, 1.35, 0.9, 0.3
 # Slip counter: the head slips down and off the line, then a straight rear hand.
 var _slip_dip := PackedFloat32Array([0.5, 0.45, 1.0, 3.0, 0.85, 3.0, 0.9, -0.6, -0.45, -0.9, -6.0, 0.0, 0.0, 4.0])
 var _slip_hit := PackedFloat32Array([0.35, 0.1, 0.75, 2.8, 1.57, 1.6, 0.8, 0.2, -0.75, -0.6, 14.0, 0.0, 0.5, -8.0])
+# Bob and weave: sink at the knees with the chin tucked behind the gloves, the
+# head rolling down and under the line (the bottom of the U), then back up.
+var _weave_in := PackedFloat32Array([0.55, 0.45, 1.05, 3.05, 0.8, 3.1, 1.05, -0.55, -0.45, -1.15, -6.0, 0.0, 0.0, 8.0])
+var _weave_low := PackedFloat32Array([0.8, 0.5, 1.1, 3.1, 0.85, 3.1, 1.15, -0.65, -0.45, -1.15, 2.0, 0.0, 0.2, 2.0])
+var _weave_out := PackedFloat32Array([0.45, 0.35, 1.0, 3.0, 0.75, 3.05, 1.0, -0.45, -0.4, -1.0, 8.0, 0.0, 0.3, 6.0])
+# Lead-leg feint: the lead knee snaps up into a kick chamber, then sets down.
+var _feint_lift := PackedFloat32Array([-0.15, 0.2, 1.1, 2.4, 0.55, 2.95, 1.45, -0.95, -0.25, -0.15, -2.0, 0.0, 0.4])
+var _feint_top := PackedFloat32Array([-0.25, 0.25, 1.15, 2.3, 0.55, 2.95, 1.8, -1.05, -0.25, -0.15, -3.0, 0.0, 0.6])
+# Rising elbow: sink with the rear elbow low, then drive it up through the chin
+# (forearm folded to the ear) as the legs extend.
+var _relbow_load := PackedFloat32Array([0.35, 0.2, 0.95, 2.95, 0.3, 2.9, 0.95, -0.5, -0.5, -0.95, -4.0, 0.0, 0.0, 14.0])
+var _relbow_hit := PackedFloat32Array([0.25, -0.05, 0.95, 2.95, 2.2, 4.65, 0.7, -0.2, -0.5, -0.55, 8.0, 0.0, 0.8, -12.0])
+# Body straight: drop the level on bent knees, then the rear hand straight to the stomach.
+var _bstraight_load := PackedFloat32Array([0.45, 0.25, 0.95, 2.95, 0.4, 2.7, 1.05, -0.55, -0.45, -1.0, -4.0, 0.0, 0.0, 12.0])
+var _bstraight_hit := PackedFloat32Array([0.55, 0.3, 0.95, 2.95, 1.35, 1.35, 1.05, -0.45, -0.55, -0.95, 14.0, 0.0, 0.8, -14.0])
+# Body punch (chudan gyaku-zuki): deep front stance, the rear fist chambered at
+# the hip, then driven straight into the solar plexus with the torso upright.
+var _chudan_load := PackedFloat32Array([0.1, 0.15, 1.2, 2.0, 0.3, 2.4, 1.1, -0.45, -0.85, -0.55, -8.0, 0.0, 0.0, 16.0])
+var _chudan_hit := PackedFloat32Array([0.2, 0.05, 0.6, 2.4, 1.42, 1.42, 1.2, -0.5, -0.95, -0.6, 18.0, 0.0, 0.9, -10.0])
+# Low palm: sink into a horse stance (rear palm chambered at the hip), then the
+# lead palm drives low into the belly.
+var _lpalm_load := PackedFloat32Array([0.25, 0.2, 1.0, 2.6, 0.2, 1.9, 1.25, -0.75, -0.75, -1.05, -6.0, 0.0, 0.0, 10.0])
+var _lpalm_hit := PackedFloat32Array([0.45, 0.2, 1.3, 1.25, 0.3, 2.2, 1.2, -0.6, -0.8, -1.0, 10.0, 0.0, 0.3, 6.0])
 # --- Signatures -------------------------------------------------------------------
 # Gazelle Hook: sink into a deep crouch, then spring up and forward into a
 # rising lead hook (the whole body drives up through the fist).
@@ -649,6 +672,24 @@ func _ready() -> void:
 		CombatData.AttackType.JUMP_SPIN_KICK: [
 			[S, 0.6, _jspin_load, EASE_SMOOTH], [A, 0.0, _jspin_hit, EASE_IN],
 			[A, 1.0, _jspin_hit, EASE_LINEAR], [R, 0.5, _jspin_load, EASE_OUT]],
+		CombatData.AttackType.BOB_WEAVE: [
+			[S, 1.0, _weave_in, EASE_SMOOTH], [A, 0.5, _weave_low, EASE_SMOOTH],
+			[A, 1.0, _weave_out, EASE_SMOOTH], [R, 0.7, null, EASE_OUT]],
+		CombatData.AttackType.LEG_FEINT: [
+			[S, 1.0, _feint_lift, EASE_OUT], [A, 0.4, _feint_top, EASE_OUT],
+			[A, 1.0, _feint_lift, EASE_LINEAR], [R, 0.6, null, EASE_SMOOTH]],
+		CombatData.AttackType.RISING_ELBOW: [
+			[S, 0.55, _relbow_load, EASE_SMOOTH], [A, 0.0, _relbow_hit, EASE_IN],
+			[A, 1.0, _over(_relbow_hit, _relbow_load), EASE_LINEAR], [R, 0.3, _relbow_hit, EASE_LINEAR]],
+		CombatData.AttackType.BODY_STRAIGHT: [
+			[S, 0.55, _bstraight_load, EASE_SMOOTH], [A, 0.0, _bstraight_hit, EASE_IN],
+			[A, 1.0, _over(_bstraight_hit, _bstraight_load), EASE_LINEAR], [R, 0.35, _bstraight_load, EASE_OUT]],
+		CombatData.AttackType.BODY_PUNCH: [
+			[S, 0.55, _chudan_load, EASE_SMOOTH], [A, 0.0, _chudan_hit, EASE_IN],
+			[A, 1.0, _over(_chudan_hit, _chudan_load), EASE_LINEAR], [R, 0.35, _chudan_hit, EASE_LINEAR]],
+		CombatData.AttackType.LOW_PALM: [
+			[S, 0.55, _lpalm_load, EASE_SMOOTH], [A, 0.0, _lpalm_hit, EASE_IN],
+			[A, 1.0, _over(_lpalm_hit, _lpalm_load), EASE_LINEAR], [R, 0.35, _lpalm_load, EASE_OUT]],
 	}
 	_build_light_reactions()
 	_crouch_default = _crouch.duplicate()
@@ -1314,7 +1355,7 @@ static func _drive(t: float, attack: CombatData.Attack) -> float:
 ## their own full-body keys and are left alone.
 func _mechanics(pose: PackedFloat32Array, t: float) -> PackedFloat32Array:
 	var attack := fighter.current_attack
-	if fighter.airborne or attack.spin or attack.leap_vy != 0.0 or not attack.sequence.is_empty():
+	if fighter.airborne or attack.spin or attack.leap_vy != 0.0 or not attack.sequence.is_empty() or attack.no_strike:
 		return pose
 	var gains: Dictionary = MECH_GAINS.get(_mech_kind(attack.type), {})
 	if gains.is_empty():
@@ -1415,7 +1456,8 @@ func _aim_arm(pose: PackedFloat32Array, shoulder_joint: int, ua: int, la: int, h
 
 
 static func _mech_kind(type: CombatData.AttackType) -> int:
-	if type in [CombatData.AttackType.UPPERCUT, CombatData.AttackType.RISING_PUNCH, CombatData.AttackType.RISING_PALM]:
+	if type in [CombatData.AttackType.UPPERCUT, CombatData.AttackType.RISING_PUNCH, CombatData.AttackType.RISING_PALM,
+			CombatData.AttackType.RISING_ELBOW]:
 		return MECH_RISING
 	if type in [CombatData.AttackType.LEAD_HOOK, CombatData.AttackType.BODY_HOOK]:
 		return MECH_HOOK_LEAD
@@ -2157,10 +2199,13 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 			return J_FOOT_F
 		CombatData.AttackType.KNEE, CombatData.AttackType.FLYING_KNEE:
 			return J_KNEE_F
-		CombatData.AttackType.ELBOW:
+		CombatData.AttackType.ELBOW, CombatData.AttackType.RISING_ELBOW:
 			return J_ELBOW_B
+		CombatData.AttackType.LEG_FEINT:
+			return J_FOOT_F
 		CombatData.AttackType.REVERSE_PUNCH, CombatData.AttackType.PERFECT_GYAKU, CombatData.AttackType.RISING_PUNCH, \
-				CombatData.AttackType.RISING_PALM, CombatData.AttackType.DEFLECT_COUNTER:
+				CombatData.AttackType.RISING_PALM, CombatData.AttackType.DEFLECT_COUNTER, \
+				CombatData.AttackType.BODY_STRAIGHT, CombatData.AttackType.BODY_PUNCH:
 			return J_HAND_B
 		CombatData.AttackType.HEAVY, CombatData.AttackType.UPPERCUT, CombatData.AttackType.REAR_HOOK, \
 				CombatData.AttackType.OVERHAND, CombatData.AttackType.SLIP_COUNTER:
@@ -2177,7 +2222,7 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 ## or a strike through a dodge, still passes freely).
 func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 	var opp := fighter.opponent
-	if opp == null or fighter.current_attack == null:
+	if opp == null or fighter.current_attack == null or fighter.current_attack.no_strike:
 		return pose
 	# A knockdown blow still lands on the body: limit while the hit freezes.
 	var down := opp.is_down() and opp.hitstop_frames <= 0

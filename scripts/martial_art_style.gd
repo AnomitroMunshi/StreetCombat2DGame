@@ -7,22 +7,23 @@ extends Resource
 ## intents, combos and air attacks alike).
 ##
 ## Input slots (keyboard -> slot; the style maps slot -> move id):
-##   light J · heavy K · lead U · rising O · front I · kick L
-##   up_kick W+L · down_kick S+L · back_kick away+L (from standing)
-##   up_heavy W+K · down_heavy S+K
+##   light J · heavy K · technique L
+##   up_light W+J · up_heavy W+K · down_light S+J · down_heavy S+K
+## W / S are read at the moment J / K is pressed. A and D only move and dash:
+## they never change which attack a button performs.
 ## A variant slot with no entry falls back to its base slot (SLOT_FALLBACK).
 ## `air_map` uses the same slots for attacks started in the air.
 
-const SLOTS: Array[StringName] = [&"light", &"heavy", &"lead", &"rising", &"front", &"kick",
-	&"up_kick", &"down_kick", &"back_kick", &"up_heavy", &"down_heavy"]
+const SLOTS: Array[StringName] = [&"light", &"heavy", &"technique",
+	&"up_light", &"up_heavy", &"down_light", &"down_heavy"]
 const SLOT_FALLBACK: Dictionary = {
-	&"up_kick": &"kick", &"down_kick": &"kick", &"back_kick": &"kick",
+	&"up_light": &"light", &"down_light": &"light",
 	&"up_heavy": &"heavy", &"down_heavy": &"heavy",
 }
 ## Key labels for each slot (move lists in the UI).
 const SLOT_KEYS: Dictionary = {
-	&"light": "J", &"heavy": "K", &"lead": "U", &"rising": "O", &"front": "I", &"kick": "L",
-	&"up_kick": "W+L", &"down_kick": "S+L", &"back_kick": "away+L", &"up_heavy": "W+K", &"down_heavy": "S+K",
+	&"light": "J", &"heavy": "K", &"technique": "L",
+	&"up_light": "W+J", &"up_heavy": "W+K", &"down_light": "S+J", &"down_heavy": "S+K",
 }
 ## Known combat categories (metadata for the roster and future subsystems).
 const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"clinching",
@@ -48,6 +49,9 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 ## Rival AI tuning for this style (EnemyAI property -> value), e.g. a boxer's
 ## pressure and head movement. Applied on top of the AI's defaults.
 @export var ai_tuning: Dictionary = {}
+## Display names for this style's moves where it calls a shared move something
+## else (move id -> name, e.g. karate's jab is its "Straight Punch").
+@export var move_names: Dictionary = {}
 ## slot -> move id, on the ground and in the air.
 @export var input_map: Dictionary = {}
 @export var air_map: Dictionary = {}
@@ -181,20 +185,27 @@ func validate() -> PackedStringArray:
 	return errors
 
 
+## A move's name in this style (its own name for a shared move, if it has one).
+func move_name(move_id: StringName) -> String:
+	if move_names.has(move_id):
+		return move_names[move_id]
+	return CombatData.get_attack(CombatData.type_for_id(move_id)).display_name
+
+
 ## Move list for the UI: [key label, move name] per mapped slot.
 func move_list() -> Array:
 	var out: Array = []
 	for slot in SLOTS:
 		if input_map.has(slot):
-			out.append([SLOT_KEYS[slot], CombatData.get_attack(CombatData.type_for_id(input_map[slot])).display_name])
-	# Air moves grouped by move: "air J/K/U" -> Jump Punch.
+			out.append([SLOT_KEYS[slot], move_name(input_map[slot])])
+	# Air moves grouped by move: "air J/K/L" -> Jump Punch.
 	var air_keys: Dictionary = {}
 	for slot in SLOTS:
 		if air_map.has(slot):
-			var move_name := CombatData.get_attack(CombatData.type_for_id(air_map[slot])).display_name
-			if not air_keys.has(move_name):
-				air_keys[move_name] = []
-			air_keys[move_name].append(SLOT_KEYS[slot])
-	for move_name in air_keys:
-		out.append(["air " + "/".join(air_keys[move_name]), move_name])
+			var label := move_name(air_map[slot])
+			if not air_keys.has(label):
+				air_keys[label] = []
+			air_keys[label].append(SLOT_KEYS[slot])
+	for label in air_keys:
+		out.append(["air " + "/".join(air_keys[label]), label])
 	return out

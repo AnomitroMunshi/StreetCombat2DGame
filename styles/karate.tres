@@ -10,7 +10,7 @@ display_name = "Karate"
 description = "Precision and distance. Explosive straight-line entries, clean single techniques and sharp counters from a bladed stance."
 category = &"striking"
 difficulty = 3
-strengths = PackedStringArray("Reverse punch closes distance fast", "Counter kick slips head strikes", "Strong guard pressure")
+strengths = PackedStringArray("Reverse punch closes distance fast", "Low side kick and high roundhouse at range", "Strong guard pressure")
 weaknesses = PackedStringArray("Short, precise combos only", "No hooks or sweeps", "Committed entries are punishable")
 stance = 4
 step_scale = 1.4
@@ -19,34 +19,34 @@ ai_tuning = {
 "punish_chance": 0.95,
 "aggression": 0.66
 }
+move_names = {
+&"high_kick": "High Roundhouse",
+&"jab": "Straight Punch"
+}
 input_map = {
-&"back_kick": &"back_kick",
-&"front": &"front_kick",
+&"down_heavy": &"low_side_kick",
+&"down_light": &"body_punch",
 &"heavy": &"reverse_punch",
-&"kick": &"side_kick",
-&"lead": &"knife_hand",
 &"light": &"jab",
-&"rising": &"rising_punch",
-&"up_kick": &"spin_counter_kick"
+&"technique": &"knife_hand",
+&"up_heavy": &"high_kick",
+&"up_light": &"rising_punch"
 }
 air_map = {
-&"heavy": &"jump_punch",
-&"kick": &"jump_kick",
-&"lead": &"jump_punch",
+&"heavy": &"jump_kick",
 &"light": &"jump_punch",
-&"rising": &"jump_punch",
-&"front": &"jump_kick"
+&"technique": &"jump_punch"
 }
 chains = {
-&"front_kick": [&"reverse_punch", &"side_kick"],
-&"jab": [&"reverse_punch", &"front_kick", &"side_kick", &"knife_hand"],
+&"body_punch": [&"reverse_punch", &"high_kick"],
+&"jab": [&"reverse_punch", &"knife_hand", &"body_punch", &"high_kick", &"low_side_kick"],
 &"knife_hand": [&"reverse_punch", &"rising_punch"],
-&"reverse_punch": [&"front_kick", &"side_kick"],
-&"rising_punch": [&"jab"],
-&"side_kick": [&"back_kick"]
+&"low_side_kick": [&"reverse_punch", &"high_kick"],
+&"reverse_punch": [&"high_kick", &"low_side_kick"],
+&"rising_punch": [&"jab"]
 }
-ai_close_plans = [[&"jab", &"reverse_punch"], [&"knife_hand", &"reverse_punch"], [&"reverse_punch", &"front_kick"], [&"rising_punch"], [&"spin_counter_kick"]]
-ai_far_plans = [[&"front_kick", &"reverse_punch"], [&"side_kick", &"back_kick"], [&"reverse_punch"], [&"side_kick"]]
+ai_close_plans = [[&"jab", &"reverse_punch"], [&"knife_hand", &"reverse_punch"], [&"reverse_punch", &"high_kick"], [&"rising_punch"], [&"body_punch", &"reverse_punch"], [&"jab", &"body_punch", &"high_kick"]]
+ai_far_plans = [[&"low_side_kick", &"reverse_punch"], [&"high_kick"], [&"reverse_punch"], [&"jab", &"reverse_punch"]]
 wall_entry = PackedStringArray("gyaku_load", "gyaku_hit", "knife_hit", "gyaku_load", "gyaku_hit")
 signature = &"perfect_gyaku"
 finishers = PackedStringArray("one_inch_verdict", "crimson_crescent")
