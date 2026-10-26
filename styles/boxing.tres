@@ -45,7 +45,7 @@ chains = {
 &"uppercut": [&"cross", &"body_hook", &"jab"]
 }
 ai_close_plans = [[&"jab"], [&"jab", &"jab", &"cross"], [&"jab", &"cross", &"body_hook"], [&"body_hook", &"uppercut"], [&"jab", &"overhand"], [&"slip_counter", &"body_hook"], [&"cross", &"body_hook", &"uppercut"], [&"bob_weave", &"uppercut"], [&"bob_weave", &"body_hook"], [&"power_uppercut"], [&"body_hook", &"power_uppercut"]]
-ai_far_plans = [[&"jab", &"cross"], [&"overhand"], [&"jab", &"jab"], [&"superman_punch"]]
+ai_far_plans = [[&"jab", &"cross"], [&"overhand"], [&"jab", &"jab"], [&"superman_punch"], [&"superman_punch"]]
 wall_entry = PackedStringArray("heavy_windup", "rhook_hit", "heavy_strike", "heavy_windup", "overhand_hit")
 signature = &"gazelle_hook"
 finishers = PackedStringArray("final_bell", "eight_count")

@@ -16,6 +16,11 @@ stance = 9
 move_names = {
 &"body_roundhouse": "Body Roundhouse"
 }
+ai_tuning = {
+"aggression": 0.56,
+"block_chance": 0.4,
+"punish_chance": 0.55
+}
 input_map = {
 &"power_heavy": &"leaping_roundhouse",
 &"power_light": &"superman_punch",
@@ -41,7 +46,7 @@ chains = {
 &"uppercut": [&"body_hook", &"high_kick"]
 }
 ai_close_plans = [[&"jab", &"cross", &"low_roundhouse"], [&"jab", &"body_hook", &"body_roundhouse"], [&"cross", &"uppercut", &"high_kick"], [&"body_hook", &"cross"], [&"jab", &"cross", &"high_kick"]]
-ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"jab", &"body_roundhouse"], [&"superman_punch"], [&"leaping_roundhouse"]]
+ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"jab", &"body_roundhouse"], [&"jab", &"cross"], [&"superman_punch"]]
 wall_entry = PackedStringArray("knee_windup", "bodyrh_hit", "heavy_strike", "heavy_windup", "high_extend")
 signature = &"breaker_combo"
 finishers = PackedStringArray("last_combination", "knockout_rhythm")
