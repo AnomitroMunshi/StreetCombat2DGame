@@ -64,6 +64,10 @@ var _cine_focus := Vector2(640.0, 360.0)
 var _vignette: GradientTexture2D = null
 var _line_seed: int = 0
 var _line_clock: float = 0.0
+## Impact frame (s left): a couple of frames of black with stark white
+## focus lines the instant the knockout blow lands.
+var _impact: float = 0.0
+const IMPACT_TIME: float = 0.09
 var _letterbox_target: float = 0.0
 var _debug_visible: bool = true
 var _debug_lines: PackedStringArray = PackedStringArray()
@@ -483,6 +487,10 @@ func flash(strength: float) -> void:
 
 
 ## Cinematic black bars (finishers).
+func impact_frame() -> void:
+	_impact = IMPACT_TIME
+
+
 func set_cinematic(amount: float, lines: float, focus: Vector2) -> void:
 	_cine_target = amount
 	_cine_lines = lines
@@ -511,6 +519,7 @@ func _process(delta: float) -> void:
 	_count_age += real_delta
 	_letterbox = move_toward(_letterbox, _letterbox_target, real_delta * 4.0)
 	_cine = move_toward(_cine, _cine_target, real_delta * 2.5)
+	_impact = maxf(_impact - real_delta, 0.0)
 	_line_clock += real_delta
 	if _line_clock > 0.05:
 		_line_clock = 0.0
@@ -551,7 +560,7 @@ func _draw_vignette(amount: float) -> void:
 
 
 ## Manga focus lines from the frame edges converging on the knockout blow.
-func _draw_focus_lines(amount: float) -> void:
+func _draw_focus_lines(amount: float, width: float = 1.0) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _line_seed
 	var centre := _cine_focus
@@ -560,7 +569,7 @@ func _draw_focus_lines(amount: float) -> void:
 		var dir := Vector2.from_angle(a)
 		var outer := centre + dir * 1500.0
 		var inner := centre + dir * rng.randf_range(150.0, 260.0)
-		var w := rng.randf_range(1.0, 4.5)
+		var w := rng.randf_range(1.0, 4.5) * width
 		var c := Color(1.0, 1.0, 1.0, rng.randf_range(0.25, 0.7) * amount)
 		var side := Vector2(-dir.y, dir.x) * w
 		_canvas.draw_colored_polygon(PackedVector2Array([outer + side, outer - side, inner]), c)
@@ -573,6 +582,12 @@ func _on_canvas_draw() -> void:
 		_draw_vignette(_cine)
 	if _cine_lines > 0.0:
 		_draw_focus_lines(_cine_lines)
+	if _impact > 0.0:
+		# Impact frame: the world drops to black, the blow's centre burns white.
+		_canvas.draw_rect(Rect2(0.0, 0.0, SCREEN_W, 720.0), Color(0.0, 0.0, 0.0, 0.82))
+		_draw_focus_lines(1.0, 3.0)
+		_canvas.draw_circle(_cine_focus, 70.0, Color(1.0, 1.0, 1.0, 0.9))
+		_canvas.draw_circle(_cine_focus, 110.0, Color(1.0, 0.92, 0.75, 0.35))
 	if _letterbox > 0.0:
 		var h := LETTERBOX_HEIGHT * smoothstep(0.0, 1.0, _letterbox)
 		_canvas.draw_rect(Rect2(0.0, 0.0, SCREEN_W, h), Color.BLACK)

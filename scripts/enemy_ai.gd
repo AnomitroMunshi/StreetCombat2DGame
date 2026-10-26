@@ -45,6 +45,8 @@ const FAR_PLANS: Array = [
 ## Ticks after the player's attack begins before the AI can react to it.
 @export var reaction_frames: int = 6
 @export var preferred_range: float = 95.0
+## Extra px a strike is assumed to reach (the target's body half-width).
+const REACH_SLACK: float = 14.0
 ## Chance to pick a jump-in when at mid range.
 @export_range(0.0, 1.0) var jump_in_chance: float = 0.15
 ## Chance to backstep (dodge) a noticed attack instead of blocking it.
@@ -66,6 +68,8 @@ var _state: AIState = AIState.IDLE
 var _timer: int = 0
 var _plan: Array = []
 var _plan_index: int = 0
+## The plan waits while the fighter walks into range for its first strike.
+var _plan_pending: bool = false
 var _last_pressed_swing: int = -1
 var _was_stunned: bool = false
 var _jump_pressed: bool = false
@@ -93,6 +97,7 @@ func setup(me: Fighter, target: Fighter) -> void:
 	# Forget everything from a previous setup (restart / unlock at FIGHT).
 	_plan.clear()
 	_plan_index = 0
+	_plan_pending = false
 	_last_side = 0
 	_side_wait = 0
 	_parry_at = -1
@@ -239,7 +244,18 @@ func compute_intent() -> CombatData.Intent:
 				_think(dist)
 		AIState.APPROACH:
 			intent.move = toward
-			if dist <= preferred_range or _timer <= 0:
+			if _plan_pending:
+				# Walking into range for a planned combo: throw it on arrival.
+				if _can_reach(_plan[0], dist) and _me.can_act():
+					_plan_pending = false
+					_plan_index = 0
+					_last_pressed_swing = _me.swing_id
+					_enter(AIState.ATTACK, 150)
+				elif _timer <= 0:
+					_plan_pending = false
+					_plan.clear()
+					_think(dist)
+			elif dist <= preferred_range or _timer <= 0:
 				_think(dist)
 		AIState.SPACING:
 			# Pressure: close in steadily, only give ground when crowded.
@@ -330,6 +346,11 @@ func _think(dist: float) -> void:
 		return
 	if roll < aggression:
 		_start_plan(dist)
+		if not _plan.is_empty() and not _can_reach(_plan[0], dist):
+			# The opening strike cannot land from here: close the distance
+			# first, then throw it (a whiffed opener is a free punish).
+			_plan_pending = true
+			_enter(AIState.APPROACH, _rng.randi_range(30, 50))
 	elif roll < aggression + 0.15:
 		_enter(AIState.BLOCK, _rng.randi_range(20, 40))
 	elif roll < aggression + 0.21:
@@ -357,6 +378,17 @@ func _style_plan(close: bool, fallback: Array) -> Array:
 	return (pool[_rng.randi_range(0, pool.size() - 1)] as Array).duplicate() if not pool.is_empty() else []
 
 
+## Whether `type` thrown now could reach an opponent `dist` px away: its
+## hitbox, plus the ground it covers (lunge through the startup and active
+## frames, step-in), plus a little for the target's body.
+func _can_reach(type: CombatData.AttackType, dist: float) -> bool:
+	if type == CombatData.AttackType.NONE or not CombatData.ATTACK_TABLE.has(type):
+		return true
+	var a := CombatData.get_attack(type)
+	var travel := a.lunge * float(a.startup + a.active) + a.step
+	return dist <= a.hitbox.end.x + travel + REACH_SLACK
+
+
 ## The first of `candidates` this fighter's style allows (NONE if none).
 func _first_legal(candidates: Array) -> CombatData.AttackType:
 	for c in candidates:
@@ -376,5 +408,7 @@ func _after_stun() -> void:
 
 
 func _enter(new_state: AIState, duration: int) -> void:
+	if new_state != AIState.APPROACH:
+		_plan_pending = false  # interrupted (blocked, hit, dodged...)
 	_state = new_state
 	_timer = duration

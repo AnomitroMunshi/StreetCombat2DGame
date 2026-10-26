@@ -64,16 +64,17 @@ const DEFAULT_WALL_ENTRY: Array[StringName] = [&"knee_windup", &"knee", &"heavy_
 ## The attacker never steps closer than this to the victim.
 const MIN_GAP: float = 88.0
 ## Cinematic playback speed (shared by every finisher; a beat may set its own
-## "speed"): set-up beats, strikes, the knockout blow (first KO_SLOW_TICKS
+## "speed"): set-up beats and strikes near full speed (the hits carry the
+## impact), one short hard slow-down on the knockout blow (KO_SLOW_TICKS),
 ## ticks), the start of the fall, wall impacts, then a smooth return to 1x
 ## over SETTLE_TICKS after the knockout.
-const SPEED_SETUP: float = 0.75
-const SPEED_STRIKE: float = 0.55
-const SPEED_KO: float = 0.22
-const SPEED_FALL: float = 0.38
-const SPEED_WALL: float = 0.3
-const KO_SLOW_TICKS: int = 8
-const SETTLE_TICKS: int = 30
+const SPEED_SETUP: float = 1.0
+const SPEED_STRIKE: float = 0.9
+const SPEED_KO: float = 0.25
+const SPEED_WALL: float = 0.6
+const KO_SLOW_TICKS: int = 7
+## Ticks the knockout blow eases out of its slow motion.
+const KO_EASE_TICKS: float = 10.0
 ## How each striking pose drives the victim (reaction pose and impact direction);
 ## anything not listed is a straight blow.
 const POSE_KIND: Dictionary = {
@@ -211,10 +212,10 @@ func playback_speed() -> float:
 	if beat.get("final", false):
 		if _beat_tick < KO_SLOW_TICKS:
 			return SPEED_KO
-		var u := float(_beat_tick - KO_SLOW_TICKS) / maxf(float(beat["ticks"]) - KO_SLOW_TICKS, 1.0)
-		return lerpf(SPEED_KO, SPEED_FALL, smoothstep(0.0, 1.0, u))
+		var u := float(_beat_tick - KO_SLOW_TICKS) / KO_EASE_TICKS
+		return lerpf(SPEED_KO, 1.0, smoothstep(0.0, 1.0, u))
 	if _index > 0 and _beats[_index - 1].get("final", false):
-		return lerpf(SPEED_FALL, 1.0, smoothstep(0.0, 1.0, float(_beat_tick) / SETTLE_TICKS))
+		return 1.0
 	if beat.get("hit", false):
 		return SPEED_WALL if beat.get("wall", false) else SPEED_STRIKE
 	return SPEED_SETUP

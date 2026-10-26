@@ -122,6 +122,8 @@ var _finisher: FinisherDirector = null
 var _follow_victim: bool = false
 ## Where the knockout blow landed (world), for the KO shot.
 var _ko_focus := Vector2.INF
+## The next camera update hard-cuts to the knockout shot (no easing).
+var _ko_cut: bool = false
 var _slowmo_ticks: int = 0
 # Double-tap detection for dodges: tick of the last A / D tap.
 var _last_tap := {-1: -1000, 1: -1000}
@@ -920,6 +922,8 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_camera_punch += 0.12
 		_follow_victim = true
 		_ko_focus = pos
+		_ko_cut = true
+		hud.impact_frame()
 	else:
 		_hitstop = maxi(_hitstop, 1 + power)
 		_shake(4 + power * 3, 2.0 + power * 2.0)
@@ -1313,6 +1317,11 @@ func _process(delta: float) -> void:
 		kz = k
 	camera.rotation = lerp_angle(camera.rotation, target_rot, k)
 	_update_cinematic_overlay()
+	if _ko_cut:
+		# Cut, not a move: the knockout shot is on screen the same frame.
+		_ko_cut = false
+		k = 1.0
+		kz = 1.0
 	camera.zoom = camera.zoom.lerp(Vector2.ONE * target_zoom, kz) + Vector2.ONE * (_camera_punch * k)
 	camera.position = camera.position.lerp(target_pos, k)
 	camera.offset = _shake_offset + _camera_kick
