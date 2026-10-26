@@ -14,9 +14,12 @@ strengths = PackedStringArray("Fast slaps that chain into everything", "Shove an
 weaknesses = PackedStringArray("No guard at all until Shift", "Short reach", "Belly Bomb is a huge gamble")
 stance = 10
 kit = &"bangla_maar"
-step_scale = 1.4
+step_scale = 1.7
 ai_tuning = {
-"aggression": 0.7
+"aggression": 0.78,
+"block_chance": 0.58,
+"dodge_chance": 0.2,
+"punish_chance": 0.9
 }
 input_map = {
 &"power_heavy": &"flying_chest_kick",
@@ -40,7 +43,7 @@ chains = {
 &"light_slap": [&"light_slap", &"stomach_shot", &"thrust_kick", &"head_elbow", &"double_push"],
 &"stomach_shot": [&"light_slap", &"head_elbow", &"leg_kick"]
 }
-ai_close_plans = [[&"light_slap"], [&"light_slap", &"light_slap", &"stomach_shot"], [&"stomach_shot", &"head_elbow"], [&"light_slap", &"head_elbow"], [&"leg_kick", &"light_slap"], [&"hammer_fist"], [&"light_slap", &"double_push"]]
+ai_close_plans = [[&"light_slap", &"light_slap", &"stomach_shot"], [&"light_slap", &"head_elbow"], [&"stomach_shot", &"head_elbow"], [&"light_slap", &"stomach_shot", &"leg_kick"], [&"leg_kick", &"light_slap"], [&"hammer_fist"], [&"light_slap", &"double_push"], [&"head_elbow", &"light_slap"]]
 ai_far_plans = [[&"thrust_kick"], [&"leg_kick"], [&"flying_slap"], [&"flying_chest_kick"], [&"light_slap", &"thrust_kick"]]
 wall_entry = PackedStringArray("push_load", "push_hit", "stomach_hit", "hammer_raise", "hammer_hit")
 quotes = {
