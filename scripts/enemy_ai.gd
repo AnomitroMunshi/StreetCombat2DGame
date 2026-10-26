@@ -143,7 +143,7 @@ func compute_intent() -> CombatData.Intent:
 
 	if _me.state == Fighter.State.HITSTUN or _me.state == Fighter.State.BLOCKSTUN \
 			or _me.state == Fighter.State.KNOCKDOWN or _me.state == Fighter.State.GETUP \
-			or _me.state == Fighter.State.STAGGER or _me.state == Fighter.State.BROKEN:
+			or _me.state == Fighter.State.STAGGER or _me.state == Fighter.State.BROKEN or _me.state == Fighter.State.DIZZY:
 		if not _was_stunned:
 			_was_stunned = true
 			_plan.clear()
@@ -187,14 +187,15 @@ func compute_intent() -> CombatData.Intent:
 
 	# Punish: the opponent was parried (staggering) or guard-broken. A broken
 	# guard is always punished; a stagger is one roll per parried swing.
-	if _target.state == Fighter.State.BROKEN and _state != AIState.ATTACK and dist < 140.0 and _me.can_act():
+	var helpless := _target.state == Fighter.State.BROKEN or _target.state == Fighter.State.DIZZY
+	if helpless and _state != AIState.ATTACK and dist < 140.0 and _me.can_act():
 		_plan = _style_plan(dist < 100.0, [CombatData.AttackType.LIGHT, CombatData.AttackType.LIGHT, CombatData.AttackType.HEAVY] if dist < 100.0 \
 			else [CombatData.AttackType.FRONT_KICK])
 		_plan_index = 0
 		_last_pressed_swing = _me.swing_id
 		_parry_at = -1
 		_enter(AIState.ATTACK, 60)
-	elif _target.state == Fighter.State.BROKEN and _state != AIState.ATTACK and _me.can_act():
+	elif helpless and _state != AIState.ATTACK and _me.can_act():
 		_enter(AIState.APPROACH, 30)
 	if _target.state == Fighter.State.STAGGER and _punish_checked_swing != _target.swing_id \
 			and dist < 130.0 and (_me.can_act() or _me.state == Fighter.State.PARRY):

@@ -77,6 +77,10 @@ const SLOWMO_PARRY := Vector2(6.0, 0.4)
 const SLOWMO_PERFECT_DODGE := Vector2(6.0, 0.45)
 const SLOWMO_COUNTER := Vector2(4.0, 0.5)
 const SLOWMO_GUARD_BREAK := Vector2(8.0, 0.35)
+const SLOWMO_DIZZY := Vector2(6.0, 0.45)
+## Dizzy birdsong repeats this often (ticks) while a fighter is stunned.
+const DIZZY_CHIRP_TICKS: int = 40
+const DIZZY_COLOR := Color(1.0, 0.86, 0.3)
 const VIEW_MIN := Vector2(-200.0, -200.0)
 const VIEW_MAX := Vector2(1480.0, 920.0)
 const HIT_COLOR := Color(1.0, 0.9, 0.6)
@@ -173,6 +177,8 @@ func _ready() -> void:
 		f.dodged.connect(_on_fighter_dodged)
 		f.perfect_evaded.connect(_on_fighter_perfect_evaded)
 		f.posture_broken.connect(_on_fighter_posture_broken)
+		f.dizzied.connect(_on_fighter_dizzied)
+		f.dizzy_recovered.connect(_on_fighter_dizzy_recovered)
 		f.signature_started.connect(_on_signature_started)
 		f.parried.connect(_on_fighter_parried)
 	fx.decals_changed.connect(queue_redraw)
@@ -216,6 +222,8 @@ func _physics_process(_delta: float) -> void:
 	_update_shake()
 	# May unlock the fight this tick, before either side reads its controls.
 	_tick_match_flow()
+	_tick_dizzy_audio()
+	_tick_celebration()
 
 	var fighting := _round_state == RoundState.FIGHTING
 	# Player input is buffered even during hitstop so combos feel responsive.
@@ -389,6 +397,9 @@ func _reset_training() -> void:
 		f.end_scripted()
 		f.airborne = false
 		f.rolling = false
+		f.celebration = &""
+		f.dizzy_left = 0
+		f.dizzy_immunity = 0
 		f.spiked = false
 		f.jump_vx = 0.0
 		f.velocity_x = 0.0
@@ -1146,6 +1157,47 @@ func _on_fighter_posture_broken(fighter: Fighter) -> void:
 	_slowmo(SLOWMO_GUARD_BREAK)
 
 
+## A stun move landed: a bell ring and a dazed warble, a burst of stars at
+## the head, a short slow-motion beat. The stars circling the head and the
+## sway are drawn by FighterVisual while the fighter is DIZZY.
+func _on_fighter_dizzied(fighter: Fighter) -> void:
+	audio.play(&"dizzy", -2.0, 0.0)
+	fx.hit(fighter.position + Vector2(0.0, -160.0), Vector2.UP, 2, DIZZY_COLOR, CombatData.ImpactKind.RISING, false)
+	hud.popup(fighter, "DIZZY!", DIZZY_COLOR)
+	_shake(8, 4.0)
+	_camera_punch += 0.04
+	_slowmo(SLOWMO_DIZZY)
+
+
+func _on_fighter_dizzy_recovered(fighter: Fighter) -> void:
+	audio.play(&"shake_off", -6.0, 0.08)
+
+
+## Dazed birdsong while either fighter is stunned.
+func _tick_dizzy_audio() -> void:
+	for f: Fighter in [player, enemy]:
+		if f.state == Fighter.State.DIZZY and f.dizzy_left > CombatData.DIZZY_RECOVER_FRAMES \
+				and f.state_frame % DIZZY_CHIRP_TICKS == DIZZY_CHIRP_TICKS - 1:
+			audio.play(&"dizzy_chirp", -9.0, 0.1)
+
+
+## The winner celebrates in their style once they are back on their feet.
+func _tick_celebration() -> void:
+	if _round_state != RoundState.RESULT:
+		return
+	for f: Fighter in [player, enemy]:
+		var won := f.state != Fighter.State.KO and (f == player and enemy.state == Fighter.State.KO \
+			or f == enemy and player.state == Fighter.State.KO)
+		if not won or f.celebration != &"" or f.style == null:
+			continue
+		if f.state in [Fighter.State.IDLE, Fighter.State.WALK, Fighter.State.LAND, Fighter.State.FINISHER, Fighter.State.ATTACK] \
+				and not f.airborne:
+			if f.state != Fighter.State.IDLE:
+				f.call("_enter_state", Fighter.State.IDLE)
+			f.face_opponent()
+			f.celebration = f.style.id
+
+
 func _on_fighter_perfect_evaded(fighter: Fighter) -> void:
 	if _round_state == RoundState.FIGHTING:
 		fighter.add_focus(CombatData.FOCUS_PERFECT_DODGE)
@@ -1200,7 +1252,11 @@ func _trail_rolling_dust() -> void:
 	if _tick % 4 != 0:
 		return
 	for f: Fighter in [player, enemy]:
-		if f.rolling or f.is_rolling_through():
+		if f.rolling:
+			# Dust where the ball meets the floor, thinning as the roll slows.
+			if f.roll_speed > 2.5:
+				fx.dust(Vector2(f.position.x, FLOOR_Y), 0.25 + f.roll_speed * 0.06)
+		elif f.is_rolling_through():
 			fx.dust(Vector2(f.position.x, FLOOR_Y), 0.7)
 		elif f.skidding:
 			# Body sliding along the floor: a dust trail that thins as it slows,

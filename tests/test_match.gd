@@ -18,6 +18,7 @@ class Driver extends Node:
 	var prev_enemy_state: int = 0
 	var ai_states_seen: Dictionary = {}
 	var overlap_reported: bool = false
+	var result_frames: int = 0
 
 	func fail(msg: String) -> void:
 		fails += 1
@@ -96,7 +97,17 @@ class Driver extends Node:
 			Input.action_press("attack_light" if frame % 2 == 0 else "attack_heavy")
 			if [p.health, e.health] != hp_at_ko:
 				fail("health changed after KO")
-			if frame - ko_frame == 120:
+			var at_result: bool = main.call("get_round_state_name") == "RESULT"
+			result_frames = result_frames + 1 if at_result else 0
+			if frame - ko_frame >= 120 and (result_frames > 5 or frame - ko_frame > 600):
+				var winner: Fighter = p if e.state == Fighter.State.KO else e
+				if winner.state != Fighter.State.KO:
+					if not at_result:
+						fail("no result screen 10 s after the KO")
+					elif winner.celebration != winner.style.id:
+						fail("winner does not celebrate (%s, state %s air %s, loser %s, style %s)" % [winner.celebration, winner.get_state_name(), winner.airborne, (p if winner == e else e).get_state_name(), winner.style])
+					else:
+						print("  winner celebrates: %s" % winner.celebration)
 				Input.action_press("restart")
 				restart_frame = frame
 				phase = "restarted"

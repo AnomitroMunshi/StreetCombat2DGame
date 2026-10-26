@@ -296,6 +296,30 @@ func _build_sfx() -> void:
 	_soft_clip(b, 1.5)
 	_sfx[&"fight_call"] = _finish(b)
 
+	# Dizzy: a bright bell ring, a falling dazed "bwoing", and birdsong.
+	b = _buffer(1.3)
+	_gong(b, 0.0, 0.9, 1320.0, 0.28)
+	_thump(b, 0.02, 0.7, 720.0, 170.0, 0.3, 0.35)
+	for i in 5:
+		var at := 0.25 + i * 0.17
+		_pluck(b, at, 2500.0 + (i % 2) * 450.0, 0.08, 0.12, rng)
+		_pluck(b, at + 0.05, 3100.0 + (i % 2) * 300.0, 0.07, 0.09, rng)
+	_echo(b, 0.12, 0.25)
+	_sfx[&"dizzy"] = _finish(b, 0.75)
+
+	# Birdsong loop while still dizzy.
+	b = _buffer(0.5)
+	for i in 3:
+		_pluck(b, i * 0.13, 2600.0 + (i % 2) * 500.0, 0.07, 0.11, rng)
+		_pluck(b, i * 0.13 + 0.045, 3200.0, 0.06, 0.08, rng)
+	_sfx[&"dizzy_chirp"] = _finish(b, 0.6)
+
+	# Shaking it off: two quick head-shake whooshes.
+	b = _buffer(0.35)
+	_whoosh(b, 0.0, 0.12, 0.05, 0.45, 0.4, rng)
+	_whoosh(b, 0.13, 0.12, 0.05, 0.45, 0.35, rng)
+	_sfx[&"shake_off"] = _finish(b, 0.6)
+
 
 # --- Background music (worker thread) -------------------------------------------
 

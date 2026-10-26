@@ -59,7 +59,7 @@ const MAX_LINEAR_SPEED: float = 400.0
 ## Lying / getting up.
 const FALL_FRAMES: float = 14.0
 ## Breakfall roll: curled ball rolling without slipping (angle = distance / radius).
-const ROLL_RADIUS: float = CombatData.ROLL_DISTANCE / TAU
+const ROLL_RADIUS: float = CombatData.BALL_RADIUS
 const TUMBLE_SPIN: float = 13.0
 const TUCK_PIVOT := Vector2(12.0, -50.0)
 const TUCK_HIP := Vector2(-34.0, -32.0)
@@ -342,6 +342,49 @@ var _jshk_hit := PackedFloat32Array([0.75, 0.5, 1.2, 2.6, 0.6, 2.4, 1.5, -1.2, -
 # at head height with the body leaning away and the rear arm swinging down.
 var _lrh_load := PackedFloat32Array([0.1, 0.15, 1.0, 2.8, 0.4, 2.7, 1.9, -1.2, 1.3, -1.5, -2.0, 0.0, 0.6, 8.0])
 var _lrh_hit := PackedFloat32Array([-0.5, 0.45, 1.2, 2.2, -0.5, 0.4, 2.0, 2.0, 0.9, -1.4, 8.0, 0.0, 1.0, -6.0])
+# Leaping spinning backfist: dip with the rear shoulder turning down (coil),
+# knees tucked as the body turns its back in the air, then the rear fist whips
+# round at head height (the body is still turned, so the rear arm leads).
+var _lsb_coil := PackedFloat32Array([0.4, 0.25, 1.0, 2.8, 0.5, 3.1, 1.1, -0.6, -0.45, -1.1, -4.0, 0.0, 0.0, 16.0])
+var _lsb_turn := PackedFloat32Array([0.15, 0.2, 1.2, 3.0, 0.9, 3.3, 1.7, -0.9, 0.9, -1.4, 0.0, 0.0, 0.0, 6.0])
+var _lsb_hit := PackedFloat32Array([-0.25, -0.1, 1.2, 3.0, -1.45, -1.65, 1.5, -0.7, 0.3, -1.2, -4.0, 0.0, 0.0, 4.0])
+var _lsb_land := PackedFloat32Array([0.3, 0.2, 1.0, 2.8, 0.6, 2.9, 1.0, -0.5, -0.4, -1.0, 0.0, 0.0, 0.0, 6.0])
+# Flying axe kick: step in and rise, chamber the kicking knee high with the
+# torso tall, the leg straight up at the apex, then the heel chops down.
+var _fax_chamber := PackedFloat32Array([-0.15, 0.2, 1.2, 2.6, 0.5, 2.8, 2.3, -1.1, 0.9, -1.4, -2.0, 0.0, 0.5])
+var _fax_apex := PackedFloat32Array([-0.5, 0.4, 1.5, 2.2, 0.0, 2.4, 2.65, 2.7, 0.6, -1.2, 0.0, 0.0, 0.7])
+var _fax_chop := PackedFloat32Array([0.25, 0.15, 1.1, 2.6, 0.6, 2.8, 1.85, 1.7, 0.2, -1.3, 8.0, 0.0, 0.8])
+var _fax_follow := PackedFloat32Array([0.4, 0.2, 1.0, 2.7, 0.6, 2.8, 1.45, 1.1, 0.1, -1.3, 10.0, 0.0, 0.8])
+var _fax_land := PackedFloat32Array([0.35, 0.2, 1.0, 2.8, 0.6, 2.9, 1.1, -0.6, -0.45, -1.1, 2.0, 0.0, 0.3])
+# Dizzy: guard dropped, knees soft, head lolling (wobbled in _dizzy_pose).
+var _dizzy := PackedFloat32Array([0.28, 0.5, 0.45, 1.1, 0.35, 0.9, 0.75, -0.35, -0.45, -0.75, -3.0, 0.0, 0.0, 2.0])
+# --- Victory routines (by style; see _victory_pose) ------------------------------
+# Boxing: both gloves thrust overhead, a glove tap, then gloves up again.
+var _win_box_raise := PackedFloat32Array([-0.08, -0.3, 2.7, 2.95, 3.55, 3.45, 0.3, 0.0, -0.25, -0.35, 0.0, 0.0, 0.0, 4.0])
+var _win_box_tap := PackedFloat32Array([0.1, 0.1, 1.45, 2.3, 1.4, 2.3, 0.3, 0.0, -0.25, -0.35, 0.0, 0.0, 0.0, 4.0])
+# Muay Thai: the wai, palms pressed together at the chest, head bowed.
+var _win_wai := PackedFloat32Array([0.45, 0.6, 0.55, 2.95, 0.6, 2.9, 0.18, 0.0, -0.18, -0.24, 0.0, 0.0, 0.0, 2.0])
+var _win_wai_up := PackedFloat32Array([0.04, 0.12, 0.55, 2.95, 0.6, 2.9, 0.18, 0.0, -0.18, -0.24, 0.0, 0.0, 0.0, 2.0])
+# Karate: ready stance (fists before the belt), the rei bow, back to ready.
+var _win_rei_ready := PackedFloat32Array([0.0, 0.05, 0.3, 0.75, 0.3, 0.75, 0.14, 0.0, -0.14, -0.16, 0.0, 0.0, 0.0, 1.0])
+var _win_rei_bow := PackedFloat32Array([0.55, 0.35, 0.12, 0.12, 0.12, 0.12, 0.14, 0.0, -0.14, -0.16, -4.0, 0.0, 0.0, 1.0])
+# Kung Fu: fist-and-palm salute in front of the chest, with a small bow.
+var _win_kf_salute := PackedFloat32Array([0.04, 0.1, 1.55, 2.15, 1.6, 2.05, 0.15, 0.0, -0.15, -0.15, 0.0, 0.0, 0.0, 2.0])
+var _win_kf_bow := PackedFloat32Array([0.35, 0.35, 1.45, 2.1, 1.5, 2.0, 0.15, 0.0, -0.15, -0.15, -2.0, 0.0, 0.0, 2.0])
+# Taekwondo: the ready stance (chunbi, fists before the belt), the bow
+# (kyungye) with the fists held, then the fighting guard raised high.
+var _win_tkd_ready := PackedFloat32Array([0.0, 0.05, 0.4, 1.1, 0.4, 1.1, 0.12, 0.0, -0.12, -0.12, 0.0, 0.0, 0.0, 1.0])
+var _win_tkd_bow := PackedFloat32Array([0.5, 0.35, 0.3, 0.9, 0.3, 0.9, 0.12, 0.0, -0.12, -0.12, -4.0, 0.0, 0.0, 1.0])
+var _win_tkd_fists := PackedFloat32Array([-0.05, -0.15, 2.0, 3.3, 1.9, 3.2, 0.12, 0.0, -0.12, -0.12, 0.0, 0.0, 0.0, 1.0])
+# Kickboxing: fist pumps, then both fists up.
+var _win_kb_pump := PackedFloat32Array([0.08, -0.2, 2.95, 3.05, 1.0, 2.5, 0.3, -0.05, -0.3, -0.4, 0.0, 0.0, 0.0, 4.0])
+var _win_kb_chest := PackedFloat32Array([0.15, 0.05, 1.3, 2.6, 1.0, 2.5, 0.3, -0.05, -0.3, -0.4, 0.0, 0.0, 0.0, 4.0])
+var _win_kb_both := PackedFloat32Array([-0.1, -0.3, 2.75, 2.95, 3.55, 3.45, 0.3, -0.05, -0.3, -0.4, 0.0, 0.0, 0.0, 4.0])
+## Victory routines: style id -> [[tick, pose], ...]; poses are blended
+## between keys and the last one is held with a breathing sway.
+var _victory: Dictionary = {}
+var _victory_seen: StringName = &""
+var _victory_t0: float = 0.0
 # --- Signatures -------------------------------------------------------------------
 # Gazelle Hook: sink into a deep crouch, then spring up and forward into a
 # rising lead hook (the whole body drives up through the fist).
@@ -438,7 +481,9 @@ var _knock_fly := PackedFloat32Array([-0.3, -0.5, 2.2, 2.6, 1.8, 2.4, 0.6, 0.3, 
 var _ko := PackedFloat32Array([-1.5, 0.15, -1.3, -1.6, 1.3, 1.5, 1.48, 1.55, 1.42, 1.5, 0.0, 6.0])
 var _getup_sit := PackedFloat32Array([0.25, 0.1, 0.9, 2.2, -0.5, -0.2, 1.45, 1.55, 1.4, 1.5, 0.0, 6.0])
 var _getup_crouch := PackedFloat32Array([0.5, 0.1, 0.85, 2.4, 0.5, 2.5, 1.45, -0.55, 1.15, -0.85, -4.0, 14.0])
-var _tuck := PackedFloat32Array([1.15, 0.6, 1.2, 4.26, 1.0, 4.1, 2.3, -0.64, 2.1, -0.7, 0.0, 0.0])
+# Tucked ball (knockdown / evasive rolls): chin down, knees pulled to the
+# chest, heels to the seat and the forearms wrapped round the shins.
+var _tuck := PackedFloat32Array([1.3, 1.1, 2.2, 4.5, 2.0, 4.4, 2.55, -0.45, 2.4, -0.5, 0.0, 0.0])
 
 # Finisher poses.
 # Palm Flurry: alternating open-hand strikes from a rooted lunge.
@@ -754,6 +799,13 @@ func _ready() -> void:
 		CombatData.AttackType.LEAPING_ROUNDHOUSE: [
 			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _lrh_load, EASE_SMOOTH], [A, 0.0, _lrh_hit, EASE_IN],
 			[A, 1.0, _lrh_hit, EASE_LINEAR], [R, 0.45, _lrh_load, EASE_OUT]],
+		CombatData.AttackType.LEAPING_SPIN_BACKFIST: [
+			[S, 0.35, _lsb_coil, EASE_SMOOTH], [S, 0.75, _lsb_turn, EASE_SMOOTH], [A, 0.0, _lsb_hit, EASE_IN],
+			[A, 1.0, _lsb_hit, EASE_LINEAR], [R, 0.45, _lsb_land, EASE_SMOOTH]],
+		CombatData.AttackType.FLYING_AXE_KICK: [
+			[S, 0.25, _jump_squat, EASE_SMOOTH], [S, 0.45, _fax_chamber, EASE_SMOOTH], [S, 0.7, _fax_apex, EASE_OUT],
+			[S, 0.9, _fax_apex, EASE_LINEAR],
+			[A, 0.0, _fax_chop, EASE_IN], [A, 1.0, _fax_follow, EASE_IN], [R, 0.4, _fax_land, EASE_SMOOTH]],
 		CombatData.AttackType.BOB_WEAVE: [
 			[S, 1.0, _weave_in, EASE_SMOOTH], [A, 0.5, _weave_low, EASE_SMOOTH],
 			[A, 1.0, _weave_out, EASE_SMOOTH], [R, 0.7, null, EASE_OUT]],
@@ -772,6 +824,19 @@ func _ready() -> void:
 		CombatData.AttackType.LOW_PALM: [
 			[S, 0.55, _lpalm_load, EASE_SMOOTH], [A, 0.0, _lpalm_hit, EASE_IN],
 			[A, 1.0, _over(_lpalm_hit, _lpalm_load), EASE_LINEAR], [R, 0.35, _lpalm_load, EASE_OUT]],
+	}
+	_victory = {
+		&"boxing": [[0, null], [12, _win_box_raise], [40, _win_box_raise], [50, _win_box_tap], [58, _win_box_tap],
+			[68, _win_box_raise]],
+		&"muay_thai": [[0, null], [16, _win_wai], [60, _win_wai], [80, _win_wai_up]],
+		&"karate": [[0, null], [14, _win_rei_ready], [32, _win_rei_ready], [46, _win_rei_bow], [64, _win_rei_bow],
+			[80, _win_rei_ready]],
+		&"kung_fu": [[0, null], [16, _win_kf_salute], [32, _win_kf_salute], [44, _win_kf_bow], [60, _win_kf_bow],
+			[74, _win_kf_salute]],
+		&"taekwondo": [[0, null], [14, _win_tkd_ready], [30, _win_tkd_ready], [44, _win_tkd_bow], [62, _win_tkd_bow],
+			[76, _win_tkd_ready], [92, _win_tkd_fists]],
+		&"kickboxing": [[0, null], [10, _win_kb_pump], [20, _win_kb_chest], [28, _win_kb_pump], [38, _win_kb_chest],
+			[50, _win_kb_both]],
 	}
 	_build_light_reactions()
 	_crouch_default = _crouch.duplicate()
@@ -1076,7 +1141,7 @@ func _spring_params() -> Vector2:
 	if _is_balled():
 		return SPRING_FAST
 	match fighter.state:
-		Fighter.State.HITSTUN, Fighter.State.FINISHED, Fighter.State.STAGGER, Fighter.State.BROKEN:
+		Fighter.State.HITSTUN, Fighter.State.FINISHED, Fighter.State.STAGGER, Fighter.State.BROKEN, Fighter.State.DIZZY:
 			return SPRING_HITSTUN
 		Fighter.State.KNOCKDOWN, Fighter.State.KO:
 			return SPRING_LIMP
@@ -1153,6 +1218,10 @@ func _update_down_amount(t: float) -> void:
 # --- Pose selection -----------------------------------------------------------
 
 func _target_pose(t: float) -> PackedFloat32Array:
+	if fighter.celebration != &"" and fighter.state == Fighter.State.IDLE:
+		return _victory_pose()
+	if fighter.state == Fighter.State.DIZZY:
+		return _dizzy_pose()
 	if fighter.prefight_pose != &"" and (fighter.state == Fighter.State.IDLE or fighter.state == Fighter.State.WALK):
 		# Before the fight: the springs carry the body between these poses, so
 		# relaxed -> gesture -> stance guard all blend smoothly.
@@ -1234,6 +1303,56 @@ func _target_pose(t: float) -> PackedFloat32Array:
 ## over planted feet, see _plant_feet), weight shifts between the feet, heel
 ## lifts, shoulder roll, torso sway with a level head and small guard
 ## adjustments. Each fighter has its own tempo and phase (Fighter.idle_*).
+## Dizzy: the body sways round in a slow circle, the head lolls the other way
+## and the knees buckle in turn. In the shake-off (the last
+## DIZZY_RECOVER_FRAMES) the head shakes hard and the guard comes back up.
+func _dizzy_pose() -> PackedFloat32Array:
+	var phase := _time * TAU * 0.85
+	var p := _dizzy.duplicate()
+	p[TORSO] += sin(phase) * 0.13
+	p[HEAD] += cos(phase) * 0.25
+	p[HIP_X] += sin(phase) * 8.0
+	p[TH_F] += maxf(sin(phase * 0.5), 0.0) * 0.22
+	p[SH_F] -= maxf(sin(phase * 0.5), 0.0) * 0.3
+	p[TH_B] -= maxf(-sin(phase * 0.5), 0.0) * 0.15
+	p[SH_B] -= maxf(-sin(phase * 0.5), 0.0) * 0.3
+	p[UA_F] += sin(phase + 1.0) * 0.12
+	p[UA_B] += sin(phase + 2.0) * 0.12
+	var recover := 1.0 - float(fighter.dizzy_left) / CombatData.DIZZY_RECOVER_FRAMES
+	if recover > 0.0:
+		var shake := sin(_time * TAU * 7.0) * 0.28 * (1.0 - recover)
+		p = _blend(p, _guard, smoothstep(0.25, 1.0, recover))
+		p[HEAD] += shake
+	return p
+
+
+## The winner's style routine: keys blended in time, the last one held with
+## a slow breathing sway.
+func _victory_pose() -> PackedFloat32Array:
+	if fighter.celebration != _victory_seen:
+		_victory_seen = fighter.celebration
+		_victory_t0 = _time
+	var keys: Array = _victory.get(fighter.celebration, [[0, null]])
+	var t := (_time - _victory_t0) * 60.0
+	var pose: PackedFloat32Array = _key_pose(keys[-1])
+	for i in range(1, keys.size()):
+		if t < float(keys[i][0]):
+			var u: float = (t - float(keys[i - 1][0])) / maxf(float(keys[i][0] - keys[i - 1][0]), 1.0)
+			pose = _blend(_key_pose(keys[i - 1]), _key_pose(keys[i]), smoothstep(0.0, 1.0, u))
+			break
+	var out := pose.duplicate()
+	while out.size() < CHANNELS:
+		out.append(DEFAULT_SPREAD if out.size() == SPREAD else 0.0)
+	out[TORSO] += sin(_time * TAU * 0.4) * 0.025
+	out[HIP_X] += sin(_time * TAU * 0.4) * 1.5
+	return out
+
+
+## A routine key's pose (null = the fighter's own stance guard).
+func _key_pose(key: Array) -> PackedFloat32Array:
+	return key[1] if key[1] != null else _guard
+
+
 func _active_idle() -> PackedFloat32Array:
 	var st := Stances.active_idle(fighter.stance)
 	var idle := _guard.duplicate()
@@ -1312,7 +1431,7 @@ static func _idle_wave(shape: String, phase: float) -> float:
 
 
 func _update_idle_amount(delta: float) -> void:
-	var idle_ok := fighter.state == Fighter.State.IDLE and fighter.prefight_pose == &""
+	var idle_ok := fighter.state == Fighter.State.IDLE and fighter.prefight_pose == &"" and fighter.celebration == &""
 	var target := 1.0 if idle_ok else 0.0
 	target *= 1.0 - IDLE_POSTURE_DAMP * smoothstep(0.5, 1.0, fighter.posture / CombatData.POSTURE_MAX)
 	var rate := IDLE_FADE_IN if target > _idle_amount else IDLE_FADE_OUT
@@ -1638,6 +1757,7 @@ func _solve_joints(p: PackedFloat32Array) -> PackedVector2Array:
 	var knee_f := hip_f + _limb_dir(p[TH_F]) * THIGH
 	var knee_b := hip_b + _limb_dir(p[TH_B]) * THIGH
 	var torso_len := TORSO_LEN * (1.0 + 0.03 * _breath)  # chest rises with each breath
+	torso_len *= 1.0 - 0.22 * _tuck_amount  # a curled back is shorter seen from the side
 	var neck := hip + torso_dir * torso_len
 	var shoulder := hip + torso_dir * (torso_len - 6.0)
 	var shoulder_f := shoulder + across * spread * 0.5
@@ -1684,13 +1804,24 @@ func _draw() -> void:
 		Vector2(shadow_x, 2.0 + _height)))
 	draw_circle(Vector2.ZERO, 38.0, Color(0.0, 0.0, 0.0, 0.35 * shadow_scale))
 
-	# Breakfall roll: rotate the curled body around its centre.
-	var body := Transform2D(0.0, Vector2.ONE, 0.0, TUCK_PIVOT) \
+	# Rolls: the curled body turns about its own centre, which is held one
+	# ball radius above the floor (so it rolls without slipping or bobbing).
+	var joints := _solve_joints(_pose)
+	var pivot := TUCK_PIVOT
+	var centre := TUCK_PIVOT
+	if _tuck_amount > 0.0:
+		var box := Rect2(joints[0], Vector2.ZERO)
+		for q in joints:
+			box = box.expand(q)
+		pivot = box.get_center()
+		centre = pivot.lerp(Vector2(pivot.x, -_height - CombatData.BALL_RADIUS) if fighter.airborne else Vector2(pivot.x, -CombatData.BALL_RADIUS), smoothstep(0.0, 1.0, _tuck_amount))
+		if fighter.airborne:
+			centre = pivot  # tumbling in flight: just spin about the centre
+	var body := Transform2D(0.0, Vector2.ONE, 0.0, centre) \
 		* Transform2D(_body_rot, Vector2.ONE, 0.0, Vector2.ZERO) \
-		* Transform2D(0.0, Vector2.ONE, 0.0, -TUCK_PIVOT)
+		* Transform2D(0.0, Vector2.ONE, 0.0, -pivot)
 	var xform := mirror * body
 	var to_world := get_global_transform() * xform
-	var joints := _solve_joints(_pose)
 	_fk_world = to_world * joints
 
 	# Choose the skeleton to draw: animated, ragdoll, or blending between them.
@@ -1727,6 +1858,27 @@ func _draw() -> void:
 	_last_root = global_position
 	_last_facing = fighter.facing
 	draw_set_transform_matrix(Transform2D.IDENTITY)
+	if fighter.state == Fighter.State.DIZZY:
+		_draw_dizzy_stars(to_local(world_joints[J_HEAD]))
+
+
+## Stars circling above a dizzy fighter's head (fading out in the shake-off).
+func _draw_dizzy_stars(head: Vector2) -> void:
+	var fade := clampf(float(fighter.dizzy_left) / CombatData.DIZZY_RECOVER_FRAMES, 0.0, 1.0)
+	var centre := head + Vector2(0.0, -HEAD_R - 14.0)
+	for i in 3:
+		var a := _time * TAU * 1.1 + TAU * i / 3.0
+		var pos := centre + Vector2(cos(a) * 28.0, sin(a) * 8.0)
+		var near := (sin(a) + 1.0) * 0.5  # front of the orbit: bigger, brighter
+		var r := lerpf(6.0, 10.0, near)
+		var pts := PackedVector2Array()
+		for k in 10:
+			var ang := -PI / 2.0 + TAU * k / 10.0 + _time * 3.0
+			pts.append(pos + Vector2(cos(ang), sin(ang)) * (r if k % 2 == 0 else r * 0.45))
+		var c := Color(1.0, 0.86, 0.25, lerpf(0.55, 1.0, near) * fade)
+		draw_colored_polygon(pts, c)
+		pts.append(pts[0])
+		draw_polyline(pts, Color(0.35, 0.2, 0.0, 0.8 * fade), 1.2, true)
 
 
 func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color, forward: Vector2, southpaw: bool = false) -> void:
@@ -2285,12 +2437,13 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 			return J_ELBOW_B
 		CombatData.AttackType.FLYING_KNEE_FACE:
 			return J_KNEE_B
-		CombatData.AttackType.LEG_FEINT, CombatData.AttackType.FLYING_SIDE_KICK, CombatData.AttackType.LEAPING_ROUNDHOUSE:
+		CombatData.AttackType.LEG_FEINT, CombatData.AttackType.FLYING_SIDE_KICK, CombatData.AttackType.LEAPING_ROUNDHOUSE, \
+				CombatData.AttackType.FLYING_AXE_KICK:
 			return J_FOOT_F
 		CombatData.AttackType.JUMPING_SPIN_HOOK:
 			return J_FOOT_B
 		CombatData.AttackType.POWER_UPPERCUT, CombatData.AttackType.SUPERMAN_PUNCH, \
-				CombatData.AttackType.JUMPING_REVERSE_PUNCH:
+				CombatData.AttackType.JUMPING_REVERSE_PUNCH, CombatData.AttackType.LEAPING_SPIN_BACKFIST:
 			return J_HAND_B
 		CombatData.AttackType.REVERSE_PUNCH, CombatData.AttackType.PERFECT_GYAKU, CombatData.AttackType.RISING_PUNCH, \
 				CombatData.AttackType.RISING_PALM, CombatData.AttackType.DEFLECT_COUNTER, \

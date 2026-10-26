@@ -21,7 +21,7 @@ const SPEC: Dictionary = {
 		&"power_light": &"jumping_reverse_punch", &"power_heavy": &"flying_side_kick"},
 	&"kung_fu": {&"light": &"straight_palm", &"heavy": &"double_palm", &"technique": &"deflect_counter",
 		&"up_light": &"rising_palm", &"up_heavy": &"backhand", &"down_light": &"low_palm", &"down_heavy": &"sweep",
-		&"F": &"palm_barrage", &"power_light": &"leaping_palm", &"power_heavy": &"flying_double_palm"},
+		&"F": &"palm_barrage", &"power_light": &"leaping_spin_backfist", &"power_heavy": &"flying_axe_kick"},
 	&"taekwondo": {&"light": &"jab", &"heavy": &"side_kick", &"technique": &"lead_leg_feint", &"up_light": &"rising_punch",
 		&"up_heavy": &"high_kick", &"down_light": &"body_punch", &"down_heavy": &"axe_kick", &"F": &"tornado_540",
 		&"power_light": &"jumping_backfist", &"power_heavy": &"jumping_spin_hook"},
@@ -274,7 +274,7 @@ func _power_chords() -> void:
 	print("[power chords: Space + J / Space + K]")
 	const POWER := {
 		&"boxing": [&"power_uppercut", &"superman_punch"], &"muay_thai": [&"jumping_elbow", &"flying_knee_face"],
-		&"karate": [&"jumping_reverse_punch", &"flying_side_kick"], &"kung_fu": [&"leaping_palm", &"flying_double_palm"],
+		&"karate": [&"jumping_reverse_punch", &"flying_side_kick"], &"kung_fu": [&"leaping_spin_backfist", &"flying_axe_kick"],
 		&"taekwondo": [&"jumping_backfist", &"jumping_spin_hook"], &"kickboxing": [&"superman_punch", &"leaping_roundhouse"],
 	}
 	var w := CombatData.POWER_CHORD_WINDOW

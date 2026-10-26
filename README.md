@@ -60,7 +60,7 @@ finishers:
 | **Boxing** | Pressure and counterpunching. No kicks or sweeps. | Jab · Cross · Bob and Weave | Uppercut · Overhand | Body Hook · Slip Counter | Crouching Power Uppercut · Superman Punch | Gazelle Hook | The Final Bell · Eight-Count |
 | **Muay Thai** | Eight limbs. Upright, heavy weight transfer. | Jab · Body Roundhouse · Elbow | Rising Elbow · High Roundhouse | Body Straight · Low Kick | Jumping Downward Elbow · Flying Knee to Face | Flying Knee | Eight Limbs · Iron Knee |
 | **Karate** | Precision and distance, sharp counters. | Straight Punch · Reverse Punch · Knife-Hand | Rising Punch · High Roundhouse | Body Punch · Low Side Kick | Jumping Reverse Punch · Flying Side Kick | Perfect Gyaku-Zuki | One-Inch Verdict · Crimson Crescent |
-| **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Deflect | Rising Palm · High Backfist | Low Palm · Leg Sweep | Leaping Palm Strike · Flying Double-Palm Strike | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
+| **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Deflect | Rising Palm · High Backfist | Low Palm · Leg Sweep | Leaping Spinning Backfist · Flying Axe Kick | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
 | **Taekwondo** | Long-range kicking. | Jab · Side Kick · Lead-Leg Feint | Rising Punch · High Roundhouse | Body Punch · Axe Kick | Jumping Backfist · Jumping Spinning Hook Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
 | **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Superman Punch · Jumping Roundhouse Kick | Breaker Combination | Last Combination · Knockout Rhythm |
 
@@ -77,8 +77,7 @@ Each Space press makes at most one power move. Space on its own is a normal
 jump that leaves the ground once the window has passed. W/S + J/K are never
 power moves.
 
-Most power moves leap: they take off, strike at head height (the palms at
-chest height), land, then recover. Boxing's Crouching Power Uppercut stays on
+Most power moves leap: they take off, strike at head height, land, then recover. Boxing's Crouching Power Uppercut stays on
 the ground and launches on hit. One power move per leap. Every power move
 hits at most once, and you can't jump again until the landing recovery
 ends.
@@ -91,8 +90,8 @@ ends.
 | Flying Knee to Face | 12 | 5 | 25 | 16 | head |
 | Jumping Reverse Punch | 10 | 4 | 22 | 12 | head |
 | Flying Side Kick | 11 | 5 | 23 | 14 | head |
-| Leaping Palm Strike | 8 | 4 | 19 | 10 | chest |
-| Flying Double-Palm Strike | 12 | 4 | 24 | 14 | chest |
+| Leaping Spinning Backfist | 9 | 3 | 19 | 12 | head (full turn in the air) |
+| Flying Axe Kick | 12 | 5 | 25 | 17 | heel chops down onto the head; heavy guard damage |
 | Jumping Backfist | 9 | 3 | 21 | 11 | head |
 | Jumping Spinning Hook Kick | 15 | 5 | 27 | 17 | head |
 | Jumping Roundhouse Kick | 11 | 4 | 24 | 15 | head |
@@ -111,6 +110,39 @@ Low kicks (the Muay Thai and Kickboxing Low Kick) and the Leg Sweep must be
 blocked low with S+Shift. Multi-strike signatures play their strikes one after
 another, each with its own contact window. A hit interrupts them, and only
 the last strike can knock down.
+
+**Stun (dizzy).** Each style has two stunning moves:
+
+| Style | Stunning moves |
+|---|---|
+| Boxing | Overhand, Superman Punch |
+| Muay Thai | Jumping Downward Elbow, Flying Knee to Face |
+| Karate | Jumping Reverse Punch, Flying Side Kick |
+| Kung Fu | Leaping Spinning Backfist, Flying Axe Kick |
+| Taekwondo | Axe Kick, Jumping Spinning Hook Kick |
+| Kickboxing | Superman Punch, Jumping Roundhouse Kick |
+
+- A clean hit from one of them leaves the opponent dizzy for 1 to 1.7 s
+  after the hit reaction. Blocked or parried hits never stun.
+- **While dizzy:** the fighter sways with the guard down and stars circling
+  the head, and can't act or guard, so every hit lands. Each hit taken
+  drains part of the stun, and a third combo hit still knocks down.
+- **Recovery:** the stun ends with a head-shake as the guard comes back up,
+  followed by a few seconds of immunity so stuns can't be chained.
+- **Mashing:** a dizzy player can mash buttons to shake it off sooner.
+- Tune it with each move's `stun` ticks and `CombatData.DIZZY_*`.
+
+**Knockdown rolls.** A blown-back fighter tucks into a tight ball that rolls
+along the floor without slipping. It decelerates from the landing speed and
+stops on a full turn, then rises from a crouch.
+
+**Victory.** Once the K.O. settles, the winner celebrates in their style:
+- Boxing: gloves overhead and a glove tap.
+- Muay Thai: the wai.
+- Karate: the rei bow.
+- Kung Fu: the fist-and-palm salute.
+- Taekwondo: the bow from the ready stance (chunbi), then fists up.
+- Kickboxing: fist pumps.
 
 **Focus meter and signature (F).** The thin gold bar under posture is
 **Focus**. It fills as you fight well:

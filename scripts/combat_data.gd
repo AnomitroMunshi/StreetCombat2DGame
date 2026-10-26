@@ -19,7 +19,8 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	BREAKER_COMBO,
 	BOB_WEAVE, RISING_ELBOW, BODY_STRAIGHT, BODY_PUNCH, LOW_PALM, LEG_FEINT,
 	POWER_UPPERCUT, SUPERMAN_PUNCH, JUMPING_ELBOW, FLYING_KNEE_FACE, JUMPING_REVERSE_PUNCH, FLYING_SIDE_KICK,
-	LEAPING_PALM, FLYING_DOUBLE_PALM, JUMPING_BACKFIST, JUMPING_SPIN_HOOK, LEAPING_ROUNDHOUSE }
+	LEAPING_PALM, FLYING_DOUBLE_PALM, JUMPING_BACKFIST, JUMPING_SPIN_HOOK, LEAPING_ROUNDHOUSE,
+	LEAPING_SPIN_BACKFIST, FLYING_AXE_KICK }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
 ## part): strikes travel into range like real footwork instead of being thrown
@@ -120,6 +121,16 @@ const JUMP_SQUAT_FRAMES: int = 2
 ## stays in its squat until the window has passed, so a chord never starts
 ## as a normal jump; J or K pressed first converts while still in startup.
 const POWER_CHORD_WINDOW: int = 6
+## Dizzy (stun): a clean hit from a move with `stun` leaves the opponent dizzy
+## for that many ticks after its hit reaction (1-2 s). Dizzy fighters cannot
+## act or guard; each hit taken while dizzy drains DIZZY_HIT_DRAIN ticks; the
+## last DIZZY_RECOVER_FRAMES are the shake-off. A player can mash buttons to
+## recover sooner (DIZZY_MASH per press, never below the shake-off). After
+## recovering, no new stun for DIZZY_IMMUNITY_FRAMES.
+const DIZZY_RECOVER_FRAMES: int = 22
+const DIZZY_HIT_DRAIN: int = 18
+const DIZZY_MASH: int = 3
+const DIZZY_IMMUNITY_FRAMES: int = 180
 const JUMP_VELOCITY: float = -15.0
 const GRAVITY_RISE: float = 0.95
 const GRAVITY_FALL: float = 1.35
@@ -199,10 +210,15 @@ const GETUP_FRAMES: int = 26
 
 ## Blowback physics: strong hits can launch the opponent into a tumbling flight,
 ## off the wall, and into backward rolls along the floor.
-## One roll covers this much floor (2 * PI * tucked body radius).
-const ROLL_DISTANCE: float = 200.0
+## Radius of the tucked (balled) body: the drawing rolls about its centre
+## without slipping, so one roll covers 2 * PI * this much floor.
+const BALL_RADIUS: float = 32.0
+const ROLL_DISTANCE: float = TAU * BALL_RADIUS
 const ROLL_MIN_SPEED: float = 3.5
-const ROLL_FRICTION: float = 0.97
+## A knockdown roll starts at least this fast and decelerates evenly to rest
+## on a whole revolution (it never crawls at a constant speed).
+const ROLL_START_SPEED: float = 7.5
+const ROLL_END_SPEED: float = 1.2
 ## Rolling ends in a crouch, so the get-up is quicker than from lying flat.
 const GETUP_FRAMES_AFTER_ROLL: int = 16
 ## A flying body hitting the arena wall faster than this bounces off it.
@@ -237,6 +253,7 @@ const AIR_HIT_POP_VELOCITY: float = -3.5
 ##                    leap_at (default 2) with vertical speed `leap` and
 ##                    forward speed leap_vx (default 2.5) px/tick. Landing ends
 ##                    it, followed by land_lag ticks of landing recovery.
+##   stun (optional): ticks of dizzy on a clean hit (see DIZZY_*).
 ##   no_strike (optional): a technique with no hitbox of its own (a weave, a
 ##                    feint); it cancels into its chains without needing contact.
 ##   sequence (optional): this move is a series of other moves (by id), each
@@ -371,7 +388,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Overhand: looping rear hand over the top. Slow, big, an ender.
 	AttackType.OVERHAND: {
-		"id": &"overhand", "name": "Overhand", "posture": 18.0,
+		"id": &"overhand", "name": "Overhand", "stun": 75, "posture": 18.0,
 		"startup": 13, "active": 3, "recovery": 22, "cancel_window": 0,
 		"damage": 15, "hitstun": 24, "blockstun": 16,
 		"knockback": 9.0, "lunge": 2.2, "hitstop": 9,
@@ -416,7 +433,7 @@ const ATTACK_TABLE: Dictionary = {
 	# --- Taekwondo ------------------------------------------------------------
 	# Axe kick: the straight leg rises high and chops down onto the head/guard.
 	AttackType.AXE_KICK: {
-		"id": &"axe_kick", "name": "Axe Kick", "posture": 20.0,
+		"id": &"axe_kick", "name": "Axe Kick", "stun": 75, "posture": 20.0,
 		"startup": 12, "active": 3, "recovery": 20, "cancel_window": 0,
 		"damage": 14, "hitstun": 22, "blockstun": 15,
 		"knockback": 4.0, "lunge": 0.8, "hitstop": 8,
@@ -678,7 +695,7 @@ const ATTACK_TABLE: Dictionary = {
 	# Superman punch (Boxing / Kickboxing Space + K): rear knee feints a kick,
 	# the leg snaps back and the body flies forward behind a rear straight.
 	AttackType.SUPERMAN_PUNCH: {
-		"id": &"superman_punch", "name": "Superman Punch", "posture": 16.0,
+		"id": &"superman_punch", "name": "Superman Punch", "stun": 60, "posture": 16.0,
 		"leap": -7.0, "leap_at": 4, "leap_vx": 6.5,
 		"startup": 10, "active": 4, "recovery": 21, "cancel_window": 0,
 		"damage": 13, "hitstun": 22, "blockstun": 15,
@@ -688,7 +705,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Jumping elbow (Muay Thai Space + J): leap in, rear elbow chops down on the head.
 	AttackType.JUMPING_ELBOW: {
-		"id": &"jumping_elbow", "name": "Jumping Downward Elbow", "posture": 20.0,
+		"id": &"jumping_elbow", "name": "Jumping Downward Elbow", "stun": 80, "posture": 20.0,
 		"leap": -9.0, "leap_at": 3, "leap_vx": 5.0,
 		"startup": 9, "active": 4, "recovery": 23, "cancel_window": 0,
 		"damage": 14, "hitstun": 24, "blockstun": 16,
@@ -698,7 +715,7 @@ const ATTACK_TABLE: Dictionary = {
 	# Flying knee to the face (Muay Thai Space + K): hands reach for the head,
 	# the rear knee drives up into the face.
 	AttackType.FLYING_KNEE_FACE: {
-		"id": &"flying_knee_face", "name": "Flying Knee to Face", "posture": 22.0,
+		"id": &"flying_knee_face", "name": "Flying Knee to Face", "stun": 70, "posture": 22.0,
 		"leap": -10.0, "leap_at": 4, "leap_vx": 5.0,
 		"startup": 12, "active": 5, "recovery": 25, "cancel_window": 0,
 		"damage": 16, "hitstun": 26, "blockstun": 16,
@@ -709,7 +726,7 @@ const ATTACK_TABLE: Dictionary = {
 	# Jumping reverse punch (Karate Space + J): tucked leap, rear fist driven
 	# straight to the head with the lead fist pulled back to the hip.
 	AttackType.JUMPING_REVERSE_PUNCH: {
-		"id": &"jumping_reverse_punch", "name": "Jumping Reverse Punch", "posture": 14.0,
+		"id": &"jumping_reverse_punch", "name": "Jumping Reverse Punch", "stun": 60, "posture": 14.0,
 		"leap": -8.0, "leap_at": 3, "leap_vx": 4.5,
 		"startup": 10, "active": 4, "recovery": 22, "cancel_window": 0,
 		"damage": 12, "hitstun": 22, "blockstun": 14,
@@ -719,7 +736,7 @@ const ATTACK_TABLE: Dictionary = {
 	# Flying side kick (Karate Space + K): tight chamber, then the lead heel
 	# spears out level at head height with the body laid back behind it.
 	AttackType.FLYING_SIDE_KICK: {
-		"id": &"flying_side_kick", "name": "Flying Side Kick", "posture": 20.0,
+		"id": &"flying_side_kick", "name": "Flying Side Kick", "stun": 70, "posture": 20.0,
 		"leap": -10.0, "leap_at": 3, "leap_vx": 6.0,
 		"startup": 11, "active": 5, "recovery": 23, "cancel_window": 0,
 		"damage": 14, "hitstop": 9, "hitstun": 24, "blockstun": 16,
@@ -747,6 +764,28 @@ const ATTACK_TABLE: Dictionary = {
 		"blowback_chance": 0.45, "blowback_vx": 9.5, "blowback_vy": -5.5, "blowback_rolls": 1,
 		"hitbox": Rect2(50.0, -121.0, 58.0, 46.0),
 	},
+	# Leaping spinning backfist (Kung Fu Space + J): dip and coil, a small leap
+	# turning the back, the rear fist whips round at head height, then the
+	# rotation completes into a controlled landing.
+	AttackType.LEAPING_SPIN_BACKFIST: {
+		"id": &"leaping_spin_backfist", "name": "Leaping Spinning Backfist", "stun": 60, "posture": 12.0, "spin": true,
+		"leap": -7.0, "leap_at": 3, "leap_vx": 4.0,
+		"startup": 9, "active": 3, "recovery": 19, "cancel_window": 0,
+		"damage": 12, "hitstun": 22, "blockstun": 14,
+		"knockback": 5.5, "lunge": 0.0, "hitstop": 8,
+		"hitbox": Rect2(36.0, -157.0, 56.0, 44.0),
+	},
+	# Flying axe kick (Kung Fu Space + K): leap up, chamber the knee, the leg
+	# rises straight at the apex and the heel chops down onto the head.
+	# Heavy guard damage; long landing recovery.
+	AttackType.FLYING_AXE_KICK: {
+		"id": &"flying_axe_kick", "name": "Flying Axe Kick", "stun": 100, "posture": 32.0,
+		"leap": -10.0, "leap_at": 4, "leap_vx": 4.5,
+		"startup": 12, "active": 5, "recovery": 25, "cancel_window": 0,
+		"damage": 17, "hitstun": 26, "blockstun": 18,
+		"knockback": 5.0, "lunge": 0.0, "hitstop": 11,
+		"hitbox": Rect2(52.0, -126.0, 58.0, 50.0),
+	},
 	# Jumping backfist (Taekwondo Space + J): lead fist folded across the chest
 	# on the way up, whipped out to the temple at the top.
 	AttackType.JUMPING_BACKFIST: {
@@ -760,7 +799,7 @@ const ATTACK_TABLE: Dictionary = {
 	# Jumping spinning hook kick (Taekwondo Space + K): leap and turn the back,
 	# the rear heel whips across at head height.
 	AttackType.JUMPING_SPIN_HOOK: {
-		"id": &"jumping_spin_hook", "name": "Jumping Spinning Hook Kick", "posture": 22.0, "spin": true,
+		"id": &"jumping_spin_hook", "name": "Jumping Spinning Hook Kick", "stun": 80, "posture": 22.0, "spin": true,
 		"leap": -9.5, "leap_at": 3, "leap_vx": 3.0,
 		"startup": 15, "active": 5, "recovery": 27, "cancel_window": 0,
 		"damage": 17, "hitstun": 26, "blockstun": 17,
@@ -771,7 +810,7 @@ const ATTACK_TABLE: Dictionary = {
 	# Jumping roundhouse (Kickboxing Space + K): knees tucked on the way up,
 	# then the shin whips round at head height with the body leaning away.
 	AttackType.LEAPING_ROUNDHOUSE: {
-		"id": &"leaping_roundhouse", "name": "Jumping Roundhouse Kick", "posture": 20.0,
+		"id": &"leaping_roundhouse", "name": "Jumping Roundhouse Kick", "stun": 75, "posture": 20.0,
 		"leap": -9.0, "leap_at": 3, "leap_vx": 4.5,
 		"startup": 11, "active": 4, "recovery": 24, "cancel_window": 0,
 		"damage": 15, "hitstun": 24, "blockstun": 16,
@@ -854,6 +893,8 @@ class Attack extends RefCounted:
 	var sequence: Array = []
 	## No hitbox (a weave, a feint): chains out without contact.
 	var no_strike: bool = false
+	## Dizzy ticks on a clean hit (0 = this move never stuns).
+	var stun: int = 0
 
 	func total_frames() -> int:
 		return startup + active + recovery
@@ -922,6 +963,7 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.deflect = row.get("deflect", false)
 	attack.sequence = row.get("sequence", [])
 	attack.no_strike = row.get("no_strike", false)
+	attack.stun = row.get("stun", 0)
 	_attack_cache[type] = attack
 	return attack
 
@@ -961,9 +1003,11 @@ static func impact_kind(type: AttackType) -> ImpactKind:
 		AttackType.UPPERCUT, AttackType.RISING_PUNCH, AttackType.RISING_PALM, AttackType.KNEE, AttackType.FLYING_KNEE, \
 				AttackType.RISING_ELBOW, AttackType.POWER_UPPERCUT, AttackType.FLYING_KNEE_FACE:
 			return ImpactKind.RISING
-		AttackType.AXE_KICK, AttackType.OVERHAND, AttackType.JUMP_PUNCH, AttackType.JUMPING_ELBOW:
+		AttackType.AXE_KICK, AttackType.OVERHAND, AttackType.JUMP_PUNCH, AttackType.JUMPING_ELBOW, \
+				AttackType.FLYING_AXE_KICK:
 			return ImpactKind.DOWNWARD
-		AttackType.JUMPING_BACKFIST, AttackType.JUMPING_SPIN_HOOK, AttackType.LEAPING_ROUNDHOUSE:
+		AttackType.JUMPING_BACKFIST, AttackType.JUMPING_SPIN_HOOK, AttackType.LEAPING_ROUNDHOUSE, \
+				AttackType.LEAPING_SPIN_BACKFIST:
 			return ImpactKind.HOOK
 	return ImpactKind.STRAIGHT
 

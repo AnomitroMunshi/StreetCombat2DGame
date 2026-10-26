@@ -66,10 +66,14 @@ signal parried(fighter: Fighter, attacker: Fighter)
 signal perfect_evaded(fighter: Fighter)
 ## Posture filled up: the guard is broken.
 signal posture_broken(fighter: Fighter)
+## A stun move landed: dizzy after the hit reaction (presentation).
+signal dizzied(fighter: Fighter)
+## Shook off the dizziness (presentation).
+signal dizzy_recovered(fighter: Fighter)
 ## The signature technique began (Focus was spent).
 signal signature_started(fighter: Fighter, attack: CombatData.Attack)
 
-enum State { IDLE, WALK, CROUCH, ATTACK, BLOCK, BLOCKSTUN, GUARD_RELEASE, HITSTUN, JUMP, LAND, DODGE, KNOCKDOWN, GETUP, FINISHER, FINISHED, KO, PARRY, STAGGER, BROKEN, EVADE_ROLL }
+enum State { IDLE, WALK, CROUCH, ATTACK, BLOCK, BLOCKSTUN, GUARD_RELEASE, HITSTUN, JUMP, LAND, DODGE, KNOCKDOWN, GETUP, FINISHER, FINISHED, KO, PARRY, STAGGER, BROKEN, EVADE_ROLL, DIZZY }
 enum Phase { NONE, STARTUP, ACTIVE, RECOVERY }
 
 ## Hurtbox relative to the feet. Symmetric, so facing does not change it.
@@ -141,6 +145,8 @@ var skid_dir: int = 1
 var roll_distance: float = 0.0
 var roll_target: float = 0.0
 var roll_speed: float = 0.0
+## Speed lost per tick so a knockdown roll stops exactly on its target.
+var roll_decel: float = 0.0
 var roll_dir: int = 1
 var getup_frames: int = CombatData.GETUP_FRAMES
 var getup_from_roll: bool = false
@@ -207,6 +213,11 @@ var attack_slot: StringName = &""
 ## Ticks since the last Space press that can still form a power chord
 ## (Space + J / K, CombatData.POWER_CHORD_WINDOW). Large = none open.
 var space_age: int = 1000
+## Dizzy ticks left (counting the shake-off); and ticks of stun immunity.
+var dizzy_left: int = 0
+var dizzy_immunity: int = 0
+## Winner's celebration (presentation): the style id once it starts.
+var celebration: StringName = &""
 ## Attacks refused because the style does not allow them (tests / debug).
 var rejected_attacks: int = 0
 ## Focus meter (CombatData.FOCUS_*): full = the style's signature on F.
@@ -257,6 +268,10 @@ func push_intent(intent: CombatData.Intent) -> void:
 	move_input = intent.move
 	block_held = intent.block
 	crouch_held = intent.crouch
+	if state == State.DIZZY:
+		# Mashing shakes the stun off sooner (never skipping the shake-off).
+		if intent.slot != &"" or intent.jump or intent.dodge != 0 or intent.parry or intent.attack != CombatData.AttackType.NONE:
+			dizzy_left = maxi(dizzy_left - CombatData.DIZZY_MASH, mini(dizzy_left, CombatData.DIZZY_RECOVER_FRAMES))
 	var slot := intent.slot
 	var jump := intent.jump
 	if jump:
@@ -335,6 +350,8 @@ func stop_combat() -> void:
 	move_input = 0
 	block_held = false
 	crouch_held = false
+	if state == State.DIZZY:
+		dizzy_left = mini(dizzy_left, CombatData.DIZZY_RECOVER_FRAMES)
 
 
 # --- Simulation ---------------------------------------------------------------
@@ -358,6 +375,8 @@ func tick() -> void:
 			_tick_dodge()
 		State.EVADE_ROLL:
 			_tick_evade_roll()
+		State.DIZZY:
+			_tick_dizzy()
 		State.JUMP:
 			_tick_jump()
 		State.PARRY:
@@ -373,6 +392,9 @@ func tick() -> void:
 					_enter_state(State.BLOCK)
 					state_frame = CombatData.BLOCK_STARTUP_FRAMES
 					parry_window = 0
+				elif dizzy_left > 0 and (state == State.HITSTUN or state == State.LAND):
+					# The hit reaction is over: the stun takes hold (or resumes).
+					_enter_state(State.DIZZY)
 				else:
 					_enter_state(State.IDLE)
 		State.KNOCKDOWN:
@@ -614,7 +636,10 @@ func _land() -> void:
 			roll_distance = 0.0
 			roll_target = pending_rolls * CombatData.ROLL_DISTANCE
 			roll_dir = (1 if jump_vx > 0.0 else -1) if not is_zero_approx(jump_vx) else -facing
-			roll_speed = maxf(absf(jump_vx), CombatData.ROLL_MIN_SPEED + 1.5)
+			roll_speed = maxf(absf(jump_vx), CombatData.ROLL_START_SPEED)
+			# Even deceleration from the landing speed to rest on the target.
+			roll_decel = (roll_speed * roll_speed - CombatData.ROLL_END_SPEED * CombatData.ROLL_END_SPEED) \
+				/ (2.0 * roll_target)
 			pending_rolls = 0
 			rolled.emit(self)
 		elif absf(jump_vx) > CombatData.SKID_MIN_SPEED:
@@ -712,6 +737,8 @@ func _tick_buffers() -> void:
 		parry_cooldown -= 1
 	if signature_buffer > 0:
 		signature_buffer -= 1
+	if dizzy_immunity > 0:
+		dizzy_immunity -= 1
 	if space_age < 1000:
 		space_age += 1
 	if _block_focus_cd > 0:
@@ -946,11 +973,11 @@ func _tick_skid() -> void:
 
 func _tick_roll() -> void:
 	var before := position.x
-	position.x += roll_dir * roll_speed
+	position.x += roll_dir * minf(roll_speed, roll_target - roll_distance)
 	clamp_to_arena()
 	var moved := absf(position.x - before)
 	roll_distance += moved
-	roll_speed = maxf(roll_speed * CombatData.ROLL_FRICTION, CombatData.ROLL_MIN_SPEED)
+	roll_speed = maxf(roll_speed - roll_decel, CombatData.ROLL_END_SPEED)
 	if roll_distance >= roll_target or moved < 0.5:
 		rolling = false
 		if state == State.KNOCKDOWN:
@@ -1005,6 +1032,25 @@ func is_mid_sequence() -> bool:
 func _enter_state(new_state: State) -> void:
 	state = new_state
 	state_frame = 0
+	if new_state in [State.KNOCKDOWN, State.KO, State.FINISHED, State.FINISHER]:
+		dizzy_left = 0  # off their feet (or the round is decided): no stun
+
+
+## Dizzy: wobbling, guard down, unable to act. Counts down (mashing speeds it
+## up); the shake-off is the last DIZZY_RECOVER_FRAMES, then a fresh stun
+## cannot land for a while.
+func _tick_dizzy() -> void:
+	dizzy_left -= 1
+	if dizzy_left <= 0:
+		dizzy_left = 0
+		dizzy_immunity = CombatData.DIZZY_IMMUNITY_FRAMES
+		dizzy_recovered.emit(self)
+		_enter_state(State.IDLE)
+
+
+## Dizzy right now (including the shake-off).
+func is_dizzy() -> bool:
+	return state == State.DIZZY
 
 
 # --- Hit handling -------------------------------------------------------------
@@ -1049,7 +1095,7 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	if last_hit_counter:
 		add_posture(attack.posture * CombatData.POSTURE_COUNTER_MULT, false)
 
-	received_combo = received_combo + 1 if state == State.HITSTUN else 1
+	received_combo = received_combo + 1 if state == State.HITSTUN or state == State.DIZZY else 1
 	combo_display_frames = COMBO_DISPLAY_FRAMES
 	health = maxi(health - attack.damage, min_health)
 	flash_frames = HIT_FLASH_FRAMES
@@ -1074,6 +1120,8 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	var blown := attack.blowback_chance > 0.0 and _rng.randf() < attack.blowback_chance
 	# Mid-sequence strikes never knock down: the whole sequence gets to land
 	# (the final strike can).
+	if attack.stun > 0 and dizzy_left <= 0 and dizzy_immunity <= 0:
+		blown = false  # a stun move stuns rather than blowing the target away
 	var mid_sequence := attacker.is_mid_sequence()
 	if mid_sequence and not attack.knockdown:
 		blown = false
@@ -1091,6 +1139,12 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 		airborne = true
 		jump_vx = 0.0
 		velocity_y = -attack.launch
+	if dizzy_left > 0:
+		# Hit while dizzy: the reaction plays, then back to dizzy for what is left.
+		dizzy_left = maxi(dizzy_left - CombatData.DIZZY_HIT_DRAIN, 0)
+	elif attack.stun > 0 and dizzy_immunity <= 0:
+		dizzy_left = attack.stun
+		dizzied.emit(self)
 	_enter_state(State.HITSTUN)
 	var base_stun := attack.hitstun + (CombatData.FINISHER_HITSTUN_BONUS if finisher else 0)
 	stun_frames = maxi(base_stun - CombatData.COMBO_HITSTUN_DECAY * maxi(received_combo - CombatData.MAX_COMBO_CHAIN, 0), CombatData.MIN_COMBO_HITSTUN)
