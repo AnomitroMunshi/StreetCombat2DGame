@@ -13,6 +13,13 @@ difficulty = 3
 strengths = PackedStringArray("Elbows and knees wreck posture up close", "Low kick and body kick punish from mid range", "Most damaging clinch-range strikes")
 weaknesses = PackedStringArray("Slow, measured footwork", "Few aerial options", "Kicks are committal")
 stance = 3
+step_scale = 1.9
+ai_tuning = {
+"aggression": 0.82,
+"block_chance": 0.62,
+"parry_chance": 0.22,
+"punish_chance": 0.95
+}
 input_map = {
 &"down_kick": &"low_roundhouse",
 &"front": &"front_kick",

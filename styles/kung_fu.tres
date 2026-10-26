@@ -13,6 +13,12 @@ difficulty = 4
 strengths = PackedStringArray("Longest palm chains", "Deflection counter turns aside any non-low strike", "Sweeps and low kicks")
 weaknesses = PackedStringArray("Palms do little damage each", "Short reach", "Deflection is whiffable")
 stance = 5
+step_scale = 1.3
+ai_tuning = {
+"aggression": 0.68,
+"dodge_chance": 0.22,
+"parry_chance": 0.38
+}
 input_map = {
 &"down_heavy": &"deflect_counter",
 &"down_kick": &"sweep",

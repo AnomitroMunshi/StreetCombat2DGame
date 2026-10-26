@@ -13,6 +13,14 @@ Styles are data. The match code never checks a style's name.
    - `input_map` and `air_map`: slot → move id. The slots are listed in `MartialArtStyle`.
    - `chains`: move id → the move ids it may cancel into on contact.
    - `ai_close_plans`, `ai_far_plans`, `ai_preferred_range`.
+   - `step_scale` (optional, default 1): how far the style's strikes step in.
+     Short-range styles need more footwork to get inside long-range ones.
+   - `ai_tuning` (optional): rival AI overrides for the style, from
+     `EnemyAI.TUNABLE`, for example `{"aggression": 0.8, "parry_chance": 0.3}`.
+   - `kit` (optional): outfit, `&"gi"` (default) or `&"boxing"`.
+   - Balance the new style by running AI-vs-AI matches against every style
+     (both sides AI, several seeds). The current styles sit between about
+     45% and 60%.
 4. **Validate.** Run `tests/run_all.sh`. `StyleRegistry` refuses a malformed file and names every problem in `StyleRegistry.rejected()`, for example:
    - an unknown move,
    - a chain that leaves the moveset,

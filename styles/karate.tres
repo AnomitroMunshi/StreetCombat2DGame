@@ -13,6 +13,12 @@ difficulty = 3
 strengths = PackedStringArray("Reverse punch closes distance fast", "Counter kick slips head strikes", "Strong guard pressure")
 weaknesses = PackedStringArray("Short, precise combos only", "No hooks or sweeps", "Committed entries are punishable")
 stance = 4
+step_scale = 1.4
+ai_tuning = {
+"parry_chance": 0.3,
+"punish_chance": 0.95,
+"aggression": 0.66
+}
 input_map = {
 &"back_kick": &"back_kick",
 &"front": &"front_kick",
