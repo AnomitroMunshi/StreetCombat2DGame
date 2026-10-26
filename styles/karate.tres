@@ -52,5 +52,6 @@ ai_close_plans = [[&"jab", &"reverse_punch"], [&"knife_hand", &"reverse_punch"],
 ai_far_plans = [[&"low_side_kick", &"reverse_punch"], [&"high_kick"], [&"reverse_punch"], [&"jab", &"reverse_punch"], [&"flying_side_kick"]]
 wall_entry = PackedStringArray("gyaku_load", "gyaku_hit", "knife_hit", "gyaku_load", "gyaku_hit")
 signature = &"perfect_gyaku"
+intro_pose = &"kt_ready"
 finishers = PackedStringArray("one_inch_verdict", "crimson_crescent")
 ai_preferred_range = 130.0

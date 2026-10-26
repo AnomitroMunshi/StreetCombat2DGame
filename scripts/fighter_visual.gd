@@ -82,6 +82,11 @@ const STEP_HEIGHT: float = 9.0
 const PLANT_RATE: float = 12.0
 ## Steps land at most this far past their stance spot.
 const STEP_LEAD_MAX: float = 18.0
+## Walking gait: fewer, longer steps with a visible knee lift, landing further
+## ahead, so the legs carry the body instead of the feet skating.
+const WALK_STEP_TIME: float = 0.13
+const WALK_STEP_HEIGHT: float = 14.0
+const WALK_STEP_LEAD_MAX: float = 30.0
 ## While walking the stance narrows by this much (front / rear foot, px).
 const WALK_NARROW_FRONT: float = 4.0
 const WALK_NARROW_REAR: float = 14.0
@@ -572,8 +577,20 @@ var _glare := PackedFloat32Array([0.22, 0.35, 0.4, 1.35, 0.32, 1.25, 0.34, -0.1,
 # lead knee high with the foot hanging, rear glove on top of the head, lead
 # glove at the chin.
 var _mt_ready := PackedFloat32Array([-0.05, 0.2, 0.35, 2.95, 3.55, 1.75, 2.05, -0.15, -0.05, -0.12, 0.0, 0.0, 0.3, 4.0])
+# Karate: deep front stance, lead knee over the foot, rear leg long behind;
+# lead arm reaching forward in an open knife-hand, rear fist chambered at the hip.
+var _kt_ready := PackedFloat32Array([0.0, 0.05, 1.65, 2.25, -0.45, 1.65, 1.05, 0.05, -0.85, -0.95, 0.0, 16.0, 0.3, 8.0])
+# Karate kicks: knee chambered first, then the snap or thrust, the torso
+# counterbalancing and both fists kept in a tight guard.
+var _kt_rh_chamber := PackedFloat32Array([-0.15, 0.2, 0.55, 2.7, 0.35, 2.9, 2.0, -0.6, -0.2, -0.15, -2.0, 0.0, 0.8, 4.0])
+var _kt_rh_hit := PackedFloat32Array([-0.35, 0.35, 0.6, 2.6, 0.45, 2.85, 2.3, 2.4, -0.2, -0.1, 10.0, 0.0, 1.0, 10.0])
+var _kt_side_chamber := PackedFloat32Array([-0.3, 0.3, 0.6, 2.6, 0.3, 2.9, 2.2, -0.9, -0.3, -0.2, -4.0, 4.0, 0.8, 12.0])
+var _kt_side_hit := PackedFloat32Array([-0.75, 0.6, 0.6, 2.6, 0.3, 2.9, 1.35, 1.4, -0.4, -0.2, 8.0, 3.0, 1.0, 14.0])
+var _kt_fsk_hit := PackedFloat32Array([-0.6, 0.5, 0.7, 2.5, 0.2, 2.8, 1.65, 1.65, 0.9, -1.5, 8.0, 0.0, 1.0])
 ## Intro poses that stand on one leg (the feet are not planted on the floor).
 const ONE_LEG_POSES: Array[StringName] = [&"mt_ready"]
+## Intro poses with an open lead hand.
+const OPEN_HAND_POSES: Array[StringName] = [&"kt_ready"]
 
 # Muay Thai roundhouses: step out, turn the hip over, lean the torso far back
 # against a straight leg that lands with the shin; the kicking-side arm swings
@@ -643,6 +660,8 @@ var _last_step_leg: int = -1
 var _step_t: float = 0.0
 var _step_from := Vector2.ZERO
 var _step_to := Vector2.ZERO
+var _step_time: float = STEP_TIME
+var _step_height: float = STEP_HEIGHT
 var _last_delta: float = 0.0
 var _last_hip_x: float = 0.0
 var _body_speed: float = 0.0
@@ -694,6 +713,8 @@ var _belt_at: Array = []
 ## Extra thickness of the limb segment being drawn (cloth bulk).
 var _grow: float = 0.0
 var _skin := SKIN_LIGHT
+## The arm being drawn ends in an open hand.
+var _open_arm: bool = false
 
 @onready var fighter: Fighter = get_parent() as Fighter
 
@@ -723,7 +744,7 @@ func _ready() -> void:
 		&"palm_windup": _palm_windup, &"palm_strike": _palm_strike, &"spin_windup": _spin_windup,
 		&"spin_kick": _spin_kick, &"knee_windup": _knee_windup, &"knee": _knee, &"slumped": _slumped,
 		&"tornado_windup": _tornado_windup, &"tornado_chamber": _tornado_chamber, &"tornado_kick": _tornado_kick,
-		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare, &"mt_ready": _mt_ready,
+		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare, &"mt_ready": _mt_ready, &"kt_ready": _kt_ready,
 		# Style finishers reuse the move poses.
 		&"lhook_hit": _lhook_hit, &"rhook_hit": _rhook_hit, &"bhook_load": _bhook_load, &"bhook_hit": _bhook_hit,
 		&"overhand_hit": _overhand_hit, &"slip_dip": _slip_dip, &"uppercut_windup": _uppercut_windup,
@@ -747,6 +768,17 @@ func _ready() -> void:
 		&"slap_hit": _slap_hit, &"bb_fly": _bb_fly,
 	}
 	_kit_moves = {
+		&"karate": {
+			CombatData.AttackType.HIGH_KICK: [
+				[S, 0.55, _kt_rh_chamber, EASE_SMOOTH], [A, 0.0, _kt_rh_hit, EASE_IN],
+				[A, 1.0, _over(_kt_rh_hit, _kt_rh_chamber), EASE_LINEAR], [R, 0.4, _kt_rh_chamber, EASE_OUT]],
+			CombatData.AttackType.LOW_SIDE_KICK: [
+				[S, 0.55, _kt_side_chamber, EASE_SMOOTH], [A, 0.0, _kt_side_hit, EASE_IN],
+				[A, 1.0, _over(_kt_side_hit, _kt_side_chamber), EASE_LINEAR], [R, 0.4, _kt_side_chamber, EASE_OUT]],
+			CombatData.AttackType.FLYING_SIDE_KICK: [
+				[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _fsk_chamber, EASE_SMOOTH], [A, 0.0, _kt_fsk_hit, EASE_IN],
+				[A, 1.0, _kt_fsk_hit, EASE_LINEAR], [R, 0.45, _fsk_chamber, EASE_OUT]],
+		},
 		&"muay_thai": {
 			CombatData.AttackType.BODY_ROUNDHOUSE: [
 				[S, 0.55, _mt_rh_load, EASE_SMOOTH], [A, 0.0, _mt_rh_body, EASE_IN],
@@ -2125,7 +2157,9 @@ func _silhouette(j: PackedVector2Array, forward: Vector2, back_toe: Vector2, pad
 	_torso(j, forward, pad, near)
 	_head(j, forward, pad, near)
 	_leg(j[J_HIP_F], j[J_KNEE_F], j[J_FOOT_F], forward, pad, near, _heel_draw.x * _plant, _foot_point.x)
+	_open_arm = fighter.prefight_pose in OPEN_HAND_POSES
 	_arm(j[J_SHOULDER_F], j[J_ELBOW_F], j[J_HAND_F], pad, near, _glove_color(true, pad))
+	_open_arm = false
 
 
 ## Tapered segment: radius ra at a, rb at b, with rounded ends.
@@ -2309,7 +2343,7 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 		var across := Vector2(-along.y, along.x)
 		var wrist := hand - along * 8.5
 		draw_line(wrist - across * 6.5, wrist + across * 6.5, Color(0.95, 0.94, 0.9), 4.0, true)
-	if _kit == &"bangla_maar":
+	if _kit == &"bangla_maar" or _open_arm:
 		_open_hand(hand, along, inside.normalized(), pad, fill)
 		return
 	_capsule(hand - along * 1.5 * g, hand + along * 5.5 * g, 7.0 * g + pad, 8.0 * g + pad, fill)
@@ -2862,7 +2896,7 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 		homes[1].x += WALK_NARROW_REAR * forward.x
 	# Advance a step in progress.
 	if _step_leg >= 0:
-		_step_t += dt / STEP_TIME
+		_step_t += dt / _step_time
 		if _step_t >= 1.0:
 			_feet[_step_leg] = _step_to
 			_step_leg = -1
@@ -2885,14 +2919,23 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 			var worst := 0 if errs[0] >= errs[1] else 1
 			if errs[worst] > STEP_THRESHOLD:
 				pick = worst
+		# A planted foot the leg can no longer reach steps now (never dragged).
+		if pick < 0 and moving:
+			for leg in 2:
+				if _feet[leg].distance_to(j[J_HIP_F if leg == 0 else J_HIP_B]) > THIGH + SHIN - 2.0:
+					pick = leg
 		if pick >= 0:
 			_step_leg = pick
 			_last_step_leg = pick
 			_step_t = 0.0
 			_step_from = _feet[pick]
+			var walking := fighter.state == Fighter.State.WALK and moving
+			_step_time = WALK_STEP_TIME if walking else STEP_TIME
+			_step_height = WALK_STEP_HEIGHT if walking else STEP_HEIGHT
 			# Land slightly ahead of home in the direction of travel (capped, so
 			# the stance never splays wide).
-			var lead := clampf(_body_speed * STEP_TIME * 1.1, -STEP_LEAD_MAX, STEP_LEAD_MAX)
+			var lead_max := WALK_STEP_LEAD_MAX if walking else STEP_LEAD_MAX
+			var lead := clampf(_body_speed * _step_time * 1.1, -lead_max, lead_max)
 			_step_to = Vector2(homes[pick].x + lead, floor_y)
 	var legs := [[J_HIP_F, J_KNEE_F, J_FOOT_F], [J_HIP_B, J_KNEE_B, J_FOOT_B]]
 	var targets: Array[Vector2] = []
@@ -2900,7 +2943,7 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 		var foot := _feet[leg]
 		if leg == _step_leg:
 			var u := smoothstep(0.0, 1.0, _step_t)
-			foot = _step_from.lerp(_step_to, u) + Vector2(0.0, -STEP_HEIGHT * sin(PI * clampf(_step_t, 0.0, 1.0)))
+			foot = _step_from.lerp(_step_to, u) + Vector2(0.0, -_step_height * sin(PI * clampf(_step_t, 0.0, 1.0)))
 		targets.append(foot)
 	# Knees never lock: if either leg would be nearly straight, settle the hips
 	# (and the whole upper body) a little lower.

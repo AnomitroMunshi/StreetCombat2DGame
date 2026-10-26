@@ -47,9 +47,9 @@ const FINISHER_ZOOM: float = 1.3
 ## Cinematic finisher camera: pushes in from FIN_ZOOM_START to FIN_ZOOM_END
 ## through the build-up, slams to FIN_ZOOM_KO on the knockout blow for
 ## FIN_KO_HOLD ticks with a tilt, then follows the flying body out.
-const FIN_ZOOM_START: float = 1.5
-const FIN_ZOOM_END: float = 2.05
-const FIN_ZOOM_KO: float = 2.5
+const FIN_ZOOM_START: float = 1.25
+const FIN_ZOOM_END: float = 1.5
+const FIN_ZOOM_KO: float = 1.75
 const FIN_KO_HOLD: int = 16
 const FIN_TILT: float = 0.06
 const FIN_FOCUS_Y: float = -118.0
@@ -618,8 +618,9 @@ func _tick_match_flow() -> void:
 				player.prefight_pose = _intro_pose(player, &"salute")
 				enemy.prefight_pose = _intro_pose(enemy, &"glare")
 			elif _state_tick == PREP_GUARD_TICK:
-				player.prefight_pose = &""
-				enemy.prefight_pose = &""
+				# Styles with their own ready pose hold it until they first act.
+				for f: Fighter in [player, enemy]:
+					f.prefight_pose = _intro_pose(f, &"")
 			elif _state_tick >= PREP_TICKS:
 				_set_round_state(RoundState.COUNTDOWN)
 				_show_count(3)
@@ -633,6 +634,9 @@ func _tick_match_flow() -> void:
 		RoundState.FIGHTING:
 			if _state_tick == FIGHT_TEXT_TICKS:
 				hud.set_countdown("")
+			for f: Fighter in [player, enemy]:
+				if f.prefight_pose != &"" and f.state != Fighter.State.IDLE:
+					f.prefight_pose = &""
 
 
 ## The style's own pre-fight gesture, or the shared one.
@@ -650,7 +654,7 @@ func _show_count(n: int) -> void:
 func _begin_fight() -> void:
 	_set_round_state(RoundState.FIGHTING)
 	for f: Fighter in [player, enemy]:
-		f.prefight_pose = &""
+		f.prefight_pose = _intro_pose(f, &"")
 		f.stop_combat()
 		say(f, "match_start")
 	enemy_ai.setup(enemy, player)
@@ -1523,7 +1527,7 @@ func _process(delta: float) -> void:
 			# Track the flying victim, widening the shot as they get thrown away.
 			focus = mid.lerp(victim.position, 0.55) + Vector2(0.0, -80.0)
 			var spread := absf(attacker.position.x - victim.position.x)
-			target_zoom = clampf(1300.0 / (spread + 650.0), 1.15, 1.7)
+			target_zoom = clampf(1300.0 / (spread + 650.0), 1.05, 1.4)
 		var half := Vector2(640.0, 360.0) / target_zoom
 		target_pos = Vector2(clampf(focus.x, VIEW_MIN.x + half.x, VIEW_MAX.x - half.x),
 			clampf(focus.y, VIEW_MIN.y + half.y, VIEW_MAX.y - half.y))
