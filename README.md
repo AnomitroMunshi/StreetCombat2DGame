@@ -55,14 +55,52 @@ key, the AI, a combo or a jump. The style screen lists every move with its key.
 Each style has its own moves, combos, signature (F at full Focus) and two
 finishers:
 
-| Style | Identity | J · K · L | W+J · W+K | S+J · S+K | Signature (F) | Finishers |
-|---|---|---|---|---|---|---|
-| **Boxing** | Pressure and counterpunching. No kicks or sweeps. | Jab · Cross · Bob and Weave | Uppercut · Overhand | Body Hook · Slip Counter | Gazelle Hook | The Final Bell · Eight-Count |
-| **Muay Thai** | Eight limbs. Upright, heavy weight transfer. | Jab · Body Roundhouse · Elbow | Rising Elbow · High Roundhouse | Body Straight · Low Kick | Flying Knee | Eight Limbs · Iron Knee |
-| **Karate** | Precision and distance, sharp counters. | Straight Punch · Reverse Punch · Knife-Hand | Rising Punch · High Roundhouse | Body Punch · Low Side Kick | Perfect Gyaku-Zuki | One-Inch Verdict · Crimson Crescent |
-| **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Deflect | Rising Palm · High Backfist | Low Palm · Leg Sweep | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
-| **Taekwondo** | Long-range kicking. | Jab · Side Kick · Lead-Leg Feint | Rising Punch · High Roundhouse | Body Punch · Axe Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
-| **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Breaker Combination | Last Combination · Knockout Rhythm |
+| Style | Identity | J · K · L | W+J · W+K | S+J · S+K | Space+J · Space+K | Signature (F) | Finishers |
+|---|---|---|---|---|---|---|---|
+| **Boxing** | Pressure and counterpunching. No kicks or sweeps. | Jab · Cross · Bob and Weave | Uppercut · Overhand | Body Hook · Slip Counter | Crouching Power Uppercut · Superman Punch | Gazelle Hook | The Final Bell · Eight-Count |
+| **Muay Thai** | Eight limbs. Upright, heavy weight transfer. | Jab · Body Roundhouse · Elbow | Rising Elbow · High Roundhouse | Body Straight · Low Kick | Jumping Downward Elbow · Flying Knee to Face | Flying Knee | Eight Limbs · Iron Knee |
+| **Karate** | Precision and distance, sharp counters. | Straight Punch · Reverse Punch · Knife-Hand | Rising Punch · High Roundhouse | Body Punch · Low Side Kick | Jumping Reverse Punch · Flying Side Kick | Perfect Gyaku-Zuki | One-Inch Verdict · Crimson Crescent |
+| **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Deflect | Rising Palm · High Backfist | Low Palm · Leg Sweep | Leaping Palm Strike · Flying Double-Palm Strike | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
+| **Taekwondo** | Long-range kicking. | Jab · Side Kick · Lead-Leg Feint | Rising Punch · High Roundhouse | Body Punch · Axe Kick | Jumping Backfist · Jumping Spinning Hook Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
+| **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Superman Punch · Jumping Roundhouse Kick | Breaker Combination | Last Combination · Knockout Rhythm |
+
+**Power moves (Space + J / Space + K).** Press Space and J (or K) together,
+or one right after the other in either order, within 6 ticks (0.1 s,
+`CombatData.POWER_CHORD_WINDOW`). It is read as one power move, never as a
+jump followed by an attack:
+- **Space first:** the jump stays in its squat for the chord window, so a
+  quick J or K turns the squat into the power move's wind-up.
+- **J or K first:** a Space press while that strike is still winding up turns
+  it into the power move.
+
+Each Space press makes at most one power move. Space on its own is a normal
+jump that leaves the ground once the window has passed. W/S + J/K are never
+power moves.
+
+Most power moves leap: they take off, strike at head height (the palms at
+chest height), land, then recover. Boxing's Crouching Power Uppercut stays on
+the ground and launches on hit. One power move per leap. Every power move
+hits at most once, and you can't jump again until the landing recovery
+ends.
+
+| Power move | Startup | Active | Recovery | Damage | Height |
+|---|---|---|---|---|---|
+| Crouching Power Uppercut | 12 | 4 | 24 | 16 | chin, launches (grounded) |
+| Superman Punch | 10 | 4 | 21 | 13 | head |
+| Jumping Downward Elbow | 9 | 4 | 23 | 14 | head |
+| Flying Knee to Face | 12 | 5 | 25 | 16 | head |
+| Jumping Reverse Punch | 10 | 4 | 22 | 12 | head |
+| Flying Side Kick | 11 | 5 | 23 | 14 | head |
+| Leaping Palm Strike | 8 | 4 | 19 | 10 | chest |
+| Flying Double-Palm Strike | 12 | 4 | 24 | 14 | chest |
+| Jumping Backfist | 9 | 3 | 21 | 11 | head |
+| Jumping Spinning Hook Kick | 15 | 5 | 27 | 17 | head |
+| Jumping Roundhouse Kick | 11 | 4 | 24 | 15 | head |
+
+For a leaping move, landing ends the strike, and the landing recovery runs
+out the rest of the move's startup + active + recovery. Tune each move in
+`CombatData.ATTACK_TABLE`. `leap` is the vertical speed, `leap_vx` the
+forward speed, and `leap_at` the tick it leaves the ground.
 
 Two L techniques have no strike of their own. **Bob and Weave** ducks under
 head-height strikes, and **Lead-Leg Feint** fakes a kick. Each flows straight
@@ -148,12 +186,13 @@ The panels show:
 | A / D      | Move (backing up is slower). A and D never change an attack |
 | A A / D D (double-tap within 12 ticks) | **Dash** in the tapped direction, with invulnerability: a slip-in toward the opponent or a backstep away. **Very close (within 80 px), toward the opponent: slip past behind them.** Holding the key never dashes again |
 | Hold S + double-tap A/D | **Evasive roll:** forward rolls through the opponent to their other side; backward rolls retreat |
-| Space      | Jump (hold A/D to jump in that direction); a jump from normal range can cross over the opponent |
+| Space      | Jump (hold A/D to jump in that direction); a jump from normal range can cross over the opponent. Takeoff waits out the 6-tick power-move window |
 | J          | Light attack (your style's jab or palm) |
 | K          | Heavy attack (your style's main power strike) |
 | L          | Style technique (Bob and Weave, Elbow, Knife-Hand, Deflect, Lead-Leg Feint, Body Roundhouse) |
 | W + J / W + K | Rising / high attacks |
 | S + J / S + K | Body / low attacks (S + K is Boxing's Slip Counter) |
+| Space + J / Space + K | **Power move** (either order, within 6 ticks): see the table above |
 | J / K / L in the air | Your style's air attack (one per jump) |
 | F          | Signature technique (needs full Focus) |
 | S (hold)   | Crouch: head-level strikes pass over you |

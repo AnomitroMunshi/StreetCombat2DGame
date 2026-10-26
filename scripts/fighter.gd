@@ -202,6 +202,11 @@ var stance: int = Stances.Kind.BLADED
 var style: MartialArtStyle = null
 ## Slot of the buffered press (for air conversion), &"" for direct attacks.
 var buffered_slot: StringName = &""
+## Slot that started the current attack (&"" for AI / direct attacks).
+var attack_slot: StringName = &""
+## Ticks since the last Space press that can still form a power chord
+## (Space + J / K, CombatData.POWER_CHORD_WINDOW). Large = none open.
+var space_age: int = 1000
 ## Attacks refused because the style does not allow them (tests / debug).
 var rejected_attacks: int = 0
 ## Focus meter (CombatData.FOCUS_*): full = the style's signature on F.
@@ -252,13 +257,27 @@ func push_intent(intent: CombatData.Intent) -> void:
 	move_input = intent.move
 	block_held = intent.block
 	crouch_held = intent.crouch
-	if intent.slot != &"":
+	var slot := intent.slot
+	var jump := intent.jump
+	if jump:
+		space_age = 0
+	# Power chord, Space first (or together): a plain J / K inside the window.
+	if slot in [&"light", &"heavy"] and space_age <= CombatData.POWER_CHORD_WINDOW and not airborne:
+		var power := StringName("power_" + slot)
+		if style != null and style.input_map.has(power):
+			slot = power
+			jump = false
+			jump_buffer_frames = 0
+			space_age = 1000  # one chord per Space press
+	elif jump and _power_chord_after_attack():
+		jump = false  # J / K first: the strike in startup became the power move
+	if slot != &"":
 		# Player press: resolved through the style (an unmapped slot does nothing).
-		var resolved := style.resolve(intent.slot, false) if style != null else CombatData.AttackType.NONE
-		var air_ok := style != null and style.resolve(intent.slot, true) != CombatData.AttackType.NONE
+		var resolved := style.resolve(slot, false) if style != null else CombatData.AttackType.NONE
+		var air_ok := style != null and style.resolve(slot, true) != CombatData.AttackType.NONE
 		if resolved != CombatData.AttackType.NONE or air_ok:
-			buffered_attack = resolved if resolved != CombatData.AttackType.NONE else style.resolve(intent.slot, true)
-			buffered_slot = intent.slot
+			buffered_attack = resolved if resolved != CombatData.AttackType.NONE else style.resolve(slot, true)
+			buffered_slot = slot
 			buffer_frames = CombatData.INPUT_BUFFER_FRAMES
 	elif intent.attack != CombatData.AttackType.NONE:
 		if style != null and not style.allows(intent.attack):
@@ -267,7 +286,7 @@ func push_intent(intent: CombatData.Intent) -> void:
 			buffered_attack = intent.attack
 			buffered_slot = &""
 			buffer_frames = CombatData.INPUT_BUFFER_FRAMES
-	if intent.jump:
+	if jump:
 		jump_buffer_frames = CombatData.JUMP_BUFFER_FRAMES
 	if intent.dodge != 0:
 		dodge_request = intent.dodge
@@ -276,6 +295,32 @@ func push_intent(intent: CombatData.Intent) -> void:
 		parry_buffer_frames = CombatData.PARRY_BUFFER_FRAMES
 	if intent.signature:
 		signature_buffer = CombatData.SIGNATURE_BUFFER_FRAMES
+
+
+## Space pressed just after a plain J / K: the press still queued, or the
+## strike still in its startup within the chord window, becomes the style's
+## power move (Space + J / K). Returns true when it did.
+func _power_chord_after_attack() -> bool:
+	if style == null or airborne:
+		return false
+	if buffered_slot in [&"light", &"heavy"] and buffer_frames >= CombatData.INPUT_BUFFER_FRAMES - CombatData.POWER_CHORD_WINDOW:
+		var queued := StringName("power_" + buffered_slot)
+		if style.input_map.has(queued):
+			buffered_attack = style.resolve(queued, false)
+			buffered_slot = queued
+			space_age = 1000
+			return true
+	if state != State.ATTACK or combo_step != 1 or not attack_slot in [&"light", &"heavy"] or in_signature:
+		return false
+	if get_phase() != Phase.STARTUP or state_frame > CombatData.POWER_CHORD_WINDOW:
+		return false
+	var power := StringName("power_" + attack_slot)
+	if not style.input_map.has(power):
+		return false
+	_start_attack(style.resolve(power, false), 1, true)
+	attack_slot = power
+	space_age = 1000
+	return true
 
 
 ## Drops any queued input. Used when the round ends.
@@ -430,7 +475,14 @@ func is_parry_active() -> bool:
 
 func _tick_jump() -> void:
 	if not airborne:
-		if state_frame >= CombatData.JUMP_SQUAT_FRAMES:
+		# Space + J / K: the squat is the power move's anticipation, no jump.
+		if buffered_slot in MartialArtStyle.POWER_SLOTS and buffered_attack != CombatData.AttackType.NONE:
+			_consume_buffered_attack(1)
+			return
+		# A style with power moves keeps a fresh jump in its squat until the
+		# chord window has passed (a chord never starts as a jump).
+		var chord_wait := CombatData.POWER_CHORD_WINDOW if style != null and style.has_power() else 0
+		if state_frame >= CombatData.JUMP_SQUAT_FRAMES and space_age >= chord_wait:
 			airborne = true
 			velocity_y = CombatData.JUMP_VELOCITY
 			jump_vx = move_input * CombatData.AIR_SPEED
@@ -464,11 +516,11 @@ func _air_move_for(ground: CombatData.AttackType, slot: StringName) -> CombatDat
 func _tick_attack() -> void:
 	var attack := current_attack
 	var strike_end := attack.startup + attack.active
-	if attack.leap_vy != 0.0 and state_frame == 2 and not airborne:
+	if attack.leap_vy != 0.0 and state_frame == attack.leap_at and not airborne:
 		airborne = true
 		air_attack_used = true
 		velocity_y = attack.leap_vy
-		jump_vx = facing * 2.5
+		jump_vx = facing * attack.leap_vx
 		jumped.emit(self)
 	if attack.rehit > 0 and state_frame > attack.startup and state_frame < strike_end \
 			and (state_frame - attack.startup) % attack.rehit == 0:
@@ -581,6 +633,10 @@ func _land() -> void:
 		var lag := CombatData.LANDING_FRAMES_AFTER_AIR_ATTACK if air_attack_used else CombatData.LANDING_FRAMES
 		if current_attack != null and current_attack.land_lag > 0:
 			lag = current_attack.land_lag
+		elif current_attack != null and current_attack.leap_vy != 0.0:
+			# A leaping move with no fixed landing lag: the landing runs out the
+			# rest of its own frame data (startup + active + recovery).
+			lag = maxi(lag, current_attack.total_frames() - state_frame)
 		current_attack = null
 		_clear_sequence()
 		combo_step = 0
@@ -656,6 +712,8 @@ func _tick_buffers() -> void:
 		parry_cooldown -= 1
 	if signature_buffer > 0:
 		signature_buffer -= 1
+	if space_age < 1000:
+		space_age += 1
 	if _block_focus_cd > 0:
 		_block_focus_cd -= 1
 
@@ -708,12 +766,14 @@ func _consume_buffered_attack(step: int) -> bool:
 	if buffered_attack == CombatData.AttackType.NONE:
 		return false
 	var type := buffered_attack
+	var slot := buffered_slot
 	buffered_attack = CombatData.AttackType.NONE
 	buffered_slot = &""
 	buffer_frames = 0
 	if CombatData.get_attack(type).air_only:
 		return false  # an air-only move pressed on the ground does nothing
 	_start_attack(type, step, true)
+	attack_slot = slot
 	return true
 
 
@@ -853,6 +913,7 @@ func _consume_jump() -> bool:
 
 
 func _start_attack(type: CombatData.AttackType, step: int, turn_to_opponent: bool) -> void:
+	attack_slot = &""
 	if turn_to_opponent:
 		face_opponent()
 	var chosen := CombatData.get_attack(type)

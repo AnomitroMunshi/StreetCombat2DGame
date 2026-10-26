@@ -11,18 +11,23 @@ var _fails: int = 0
 ## The control scheme as published (slot -> move id), per style.
 const SPEC: Dictionary = {
 	&"boxing": {&"light": &"jab", &"heavy": &"cross", &"technique": &"bob_weave", &"up_light": &"uppercut",
-		&"up_heavy": &"overhand", &"down_light": &"body_hook", &"down_heavy": &"slip_counter", &"F": &"gazelle_hook"},
+		&"up_heavy": &"overhand", &"down_light": &"body_hook", &"down_heavy": &"slip_counter", &"F": &"gazelle_hook",
+		&"power_light": &"power_uppercut", &"power_heavy": &"superman_punch"},
 	&"muay_thai": {&"light": &"jab", &"heavy": &"body_roundhouse", &"technique": &"elbow", &"up_light": &"rising_elbow",
-		&"up_heavy": &"high_kick", &"down_light": &"body_straight", &"down_heavy": &"low_roundhouse", &"F": &"flying_knee"},
+		&"up_heavy": &"high_kick", &"down_light": &"body_straight", &"down_heavy": &"low_roundhouse", &"F": &"flying_knee",
+		&"power_light": &"jumping_elbow", &"power_heavy": &"flying_knee_face"},
 	&"karate": {&"light": &"jab", &"heavy": &"reverse_punch", &"technique": &"knife_hand", &"up_light": &"rising_punch",
-		&"up_heavy": &"high_kick", &"down_light": &"body_punch", &"down_heavy": &"low_side_kick", &"F": &"perfect_gyaku"},
+		&"up_heavy": &"high_kick", &"down_light": &"body_punch", &"down_heavy": &"low_side_kick", &"F": &"perfect_gyaku",
+		&"power_light": &"jumping_reverse_punch", &"power_heavy": &"flying_side_kick"},
 	&"kung_fu": {&"light": &"straight_palm", &"heavy": &"double_palm", &"technique": &"deflect_counter",
 		&"up_light": &"rising_palm", &"up_heavy": &"backhand", &"down_light": &"low_palm", &"down_heavy": &"sweep",
-		&"F": &"palm_barrage"},
+		&"F": &"palm_barrage", &"power_light": &"leaping_palm", &"power_heavy": &"flying_double_palm"},
 	&"taekwondo": {&"light": &"jab", &"heavy": &"side_kick", &"technique": &"lead_leg_feint", &"up_light": &"rising_punch",
-		&"up_heavy": &"high_kick", &"down_light": &"body_punch", &"down_heavy": &"axe_kick", &"F": &"tornado_540"},
+		&"up_heavy": &"high_kick", &"down_light": &"body_punch", &"down_heavy": &"axe_kick", &"F": &"tornado_540",
+		&"power_light": &"jumping_backfist", &"power_heavy": &"jumping_spin_hook"},
 	&"kickboxing": {&"light": &"jab", &"heavy": &"cross", &"technique": &"body_roundhouse", &"up_light": &"uppercut",
-		&"up_heavy": &"high_kick", &"down_light": &"body_hook", &"down_heavy": &"low_roundhouse", &"F": &"breaker_combo"},
+		&"up_heavy": &"high_kick", &"down_light": &"body_hook", &"down_heavy": &"low_roundhouse", &"F": &"breaker_combo",
+		&"power_light": &"superman_punch", &"power_heavy": &"leaping_roundhouse"},
 }
 ## Names the move list must show for each style (its own name for shared moves).
 const NAMES: Dictionary = {
@@ -107,7 +112,7 @@ func _initialize() -> void:
 			_check(st.move_name(m) == NAMES[sid][m], "%s calls %s \"%s\" (%s)" % [sid, m, NAMES[sid][m], st.move_name(m)])
 		var keys_ok := true
 		for row in st.move_list():
-			for bad in ["U", "I", "O", "away", "toward"]:
+			for bad in ["U", "I", "O", "away", "toward", "L+"]:
 				if String(row[0]).split("+").has(bad) or String(row[0]).contains(bad + "+"):
 					keys_ok = false
 		_check(keys_ok, "%s move list shows only the new keys (%s)" % [sid, st.move_list()])
@@ -196,6 +201,8 @@ func _initialize() -> void:
 			_free(p)
 		_check(res[0][0] == 1 and res[0] == res[1], "%s hits exactly once, same result facing either way (%s)" % [mid, res])
 
+	_power_chords()
+
 	print("[scene: dash, movement, guard, jump, signature, restart]")
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
@@ -205,6 +212,119 @@ func _initialize() -> void:
 	d.fails = _fails
 	d.process_physics_priority = -100
 	root.add_child(d)
+
+
+## Feeds `events` ({tick: Intent}) to a fighter of `style` for `ticks` ticks
+## against a dummy `gap` px away. Returns what happened.
+func _run(style: MartialArtStyle, gap: float, side: int, events: Dictionary, ticks: int, stun_at: int = -1) -> Dictionary:
+	var p := _pair(style, gap, side)
+	var a := p[0]
+	var b := p[1]
+	var out := {"first": &"", "moves": [], "air_before": false, "air": false, "hits": 0, "land": false,
+		"rejump_in_land": false, "attack_in_stun": false}
+	var was_land := false
+	for t in ticks:
+		if t == stun_at:
+			a.call("_enter_state", Fighter.State.HITSTUN)
+			a.stun_frames = 12
+		if events.has(t):
+			a.push_intent(events[t])
+		a.tick()
+		b.tick()
+		if a.is_hitbox_active() and a.get_hitbox_world().intersects(b.get_hurtbox_world()):
+			var r := b.receive_hit(a.current_attack, a, a.combo_step)
+			a.confirm_hit(r)
+			if r == CombatData.HitResult.HIT:
+				out["hits"] += 1
+		if a.state == Fighter.State.ATTACK:
+			if out["moves"].is_empty() or out["moves"][-1] != a.current_attack.id or a.state_frame == 0:
+				out["moves"].append(a.current_attack.id)
+			if out["first"] == &"":
+				out["first"] = a.current_attack.id
+			if stun_at >= 0 and t < stun_at + 12:
+				out["attack_in_stun"] = true
+		if a.airborne:
+			out["air"] = true
+			if out["first"] == &"":
+				out["air_before"] = true
+		if a.state == Fighter.State.LAND:
+			out["land"] = true
+			was_land = true
+			if a.airborne:
+				out["rejump_in_land"] = true
+		elif was_land and a.airborne and a.state == Fighter.State.JUMP and t < 0:
+			pass
+	_free(p)
+	return out
+
+
+func _jump() -> CombatData.Intent:
+	var i := CombatData.Intent.new()
+	i.jump = true
+	return i
+
+
+func _both(slot: StringName) -> CombatData.Intent:
+	var i := _slot(slot)
+	i.jump = true
+	return i
+
+
+func _power_chords() -> void:
+	print("[power chords: Space + J / Space + K]")
+	const POWER := {
+		&"boxing": [&"power_uppercut", &"superman_punch"], &"muay_thai": [&"jumping_elbow", &"flying_knee_face"],
+		&"karate": [&"jumping_reverse_punch", &"flying_side_kick"], &"kung_fu": [&"leaping_palm", &"flying_double_palm"],
+		&"taekwondo": [&"jumping_backfist", &"jumping_spin_hook"], &"kickboxing": [&"superman_punch", &"leaping_roundhouse"],
+	}
+	var w := CombatData.POWER_CHORD_WINDOW
+	for sid in POWER:
+		var st := StyleRegistry.by_id(sid)
+		for k in 2:
+			var slot: StringName = [&"light", &"heavy"][k]
+			var want: StringName = POWER[sid][k]
+			var key := "Space+%s" % ["J", "K"][k]
+			var results := []
+			for side in [1, -1]:
+				var space_first := _run(st, 130.0, side, {2: _jump(), 2 + w - 2: _slot(slot)}, 70)
+				var attack_first := _run(st, 130.0, side, {2: _slot(slot), 4: _jump()}, 70)
+				var together := _run(st, 130.0, side, {2: _both(slot)}, 70)
+				results.append([space_first["first"], attack_first["first"], together["first"]])
+				_check(space_first["first"] == want and not space_first["air_before"],
+					"%s %s Space then %s -> %s, no jump first (facing %d, %s)" % [sid, key, ["J", "K"][k], want, side, space_first["first"]])
+				_check(attack_first["first"] == slot_move(st, slot) and attack_first["moves"].has(want) and attack_first["moves"].size() == 2,
+					"%s %s then Space -> converts to %s in startup (facing %d, %s)" % [sid, ["J", "K"][k], want, side, attack_first["moves"]])
+				_check(together["first"] == want, "%s %s same tick -> %s (facing %d)" % [sid, key, want, side])
+				_check(space_first["hits"] <= 1 and together["hits"] <= 1, "%s %s hits at most once (%d)" % [sid, want, together["hits"]])
+				if CombatData.get_attack(CombatData.type_for_id(want)).leap_vy != 0.0:
+					_check(together["air"] and together["land"] and not together["rejump_in_land"],
+						"%s %s: takes off, lands into landing recovery (facing %d)" % [sid, want, side])
+				else:
+					_check(not together["air"], "%s %s stays grounded (no jump at all)" % [sid, want])
+			_check(results[0] == results[1], "%s %s same either way (%s)" % [sid, key, results])
+	var box := StyleRegistry.by_id(&"boxing")
+	var late := _run(box, 300.0, 1, {2: _jump(), 2 + w + 2: _slot(&"light")}, 60)
+	_check(late["air_before"] and late["first"] == &"jump_punch", "Space, then J after the window -> a normal jump and an air jab (%s)" % late["first"])
+	var only_jump := _run(box, 300.0, 1, {2: _jump()}, 30)
+	_check(only_jump["air"] and only_jump["first"] == &"", "Space alone -> a normal jump")
+	var once := _run(box, 300.0, 1, {2: _both(&"light"), 4: _slot(&"light")}, 50)
+	_check(once["moves"].count(&"power_uppercut") == 1, "one Space press makes one chord (%s)" % [once["moves"]])
+	var held := _run(box, 300.0, 1, {2: _jump(), 30: _slot(&"light")}, 80)
+	_check(held["first"] == &"jump_punch" or held["first"] == &"jab", "J long after Space is never a chord (%s)" % held["first"])
+	var stunned := _run(box, 120.0, 1, {4: _both(&"heavy")}, 30, 2)
+	_check(not stunned["attack_in_stun"], "no power move out of hitstun")
+	var var_w := _run(box, 130.0, 1, {2: _jump(), 4: _slot(&"up_light")}, 60)
+	_check(var_w["first"] != &"power_uppercut", "Space + W+J is not a chord (W/S variants keep their moves) (%s)" % var_w["first"])
+	var bad := MartialArtStyle.new()
+	bad.id = &"bad_air"
+	bad.display_name = "Bad"
+	bad.input_map = {&"light": &"jab"}
+	bad.air_map = {&"power_light": &"jump_punch"}
+	_check(not bad.validate().is_empty(), "a power slot in the air map is refused")
+
+
+static func slot_move(st: MartialArtStyle, slot: StringName) -> StringName:
+	return st.input_map[slot]
 
 
 ## Starts `from` against a close dummy, presses the key for `to` during the
@@ -277,9 +397,13 @@ class Driver extends Node:
 		hold(410, 422, "mod_down")  # S held, then Shift
 		hold(414, 422, "block")
 		tap(440, ["jump"])
-		tap(447, ["attack_light"])
+		tap(452, ["attack_light"])  # after the chord window: an air attack
 		tap(500, ["signature"])
 		tap(560, ["restart"])
+		tap(592, ["jump"])
+		tap(595, ["attack_light"])  # Space, then J 3 ticks later
+		tap(640, ["attack_heavy"])
+		tap(642, ["jump"])  # K, then Space 2 ticks later
 
 	func _physics_process(_d: float) -> void:
 		frame += 1
@@ -297,7 +421,7 @@ class Driver extends Node:
 			main.call("start_match", true)
 		if frame == 3:
 			(main.get_node("EnemyAI") as EnemyAI).setup(null, null)
-		if frame in [3, 168, 208, 258, 298, 336, 376, 436, 496]:
+		if frame in [3, 168, 208, 258, 298, 336, 376, 436, 496, 580, 630]:
 			# Reset the scene for the next check: player idle at a known spot,
 			# the quiet rival out of the way.
 			var px := 500.0
@@ -355,8 +479,10 @@ class Driver extends Node:
 			420:
 				check(p.state == Fighter.State.BLOCK and p.is_crouched(), "S + Shift -> low block (%s)" % p.get_debug_label())
 			444:
-				check(p.state == Fighter.State.JUMP and p.airborne, "Space -> jump (%s)" % p.get_debug_label())
+				check(p.state == Fighter.State.JUMP and not p.airborne, "Space -> jump squat, held for the chord window (%s)" % p.get_debug_label())
 			450:
+				check(p.state == Fighter.State.JUMP and p.airborne, "then takes off (%s)" % p.get_debug_label())
+			455:
 				check(p.state == Fighter.State.ATTACK and p.current_attack.id == &"jump_punch", "J in the air -> jump punch (%s)" % p.get_debug_label())
 			497:
 				p.focus = CombatData.FOCUS_MAX
@@ -366,5 +492,15 @@ class Driver extends Node:
 			570:
 				check(main.call("get_round_state_name") != "FIGHTING" and p.health == p.max_health,
 					"R restarts the match (%s)" % main.call("get_round_state_name"))
+				main.call("start_match", true)
+			574:
+				(main.get_node("EnemyAI") as EnemyAI).setup(null, null)
+			600:
+				check(p.state == Fighter.State.ATTACK and p.current_attack.id == &"power_uppercut" and not p.airborne,
+					"keys: Space then J -> Crouching Power Uppercut, grounded (%s)" % p.get_debug_label())
+			646:
+				check(p.state == Fighter.State.ATTACK and p.current_attack.id == &"superman_punch",
+					"keys: K then Space -> Superman Punch (%s)" % p.get_debug_label())
+			680:
 				print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 				tree.quit(fails)

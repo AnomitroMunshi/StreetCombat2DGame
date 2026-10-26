@@ -25,6 +25,8 @@ move_names = {
 &"high_kick": "High Roundhouse"
 }
 input_map = {
+&"power_heavy": &"flying_knee_face",
+&"power_light": &"jumping_elbow",
 &"down_heavy": &"low_roundhouse",
 &"down_light": &"body_straight",
 &"heavy": &"body_roundhouse",
@@ -46,8 +48,8 @@ chains = {
 &"low_roundhouse": [&"jab", &"body_straight", &"high_kick"],
 &"rising_elbow": [&"elbow"]
 }
-ai_close_plans = [[&"jab", &"body_straight", &"elbow"], [&"elbow", &"rising_elbow"], [&"rising_elbow", &"elbow"], [&"jab", &"elbow"], [&"body_straight", &"low_roundhouse"], [&"jab", &"body_roundhouse"]]
-ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"jab", &"body_roundhouse"], [&"high_kick"]]
+ai_close_plans = [[&"jab", &"body_straight", &"elbow"], [&"elbow", &"rising_elbow"], [&"rising_elbow", &"elbow"], [&"jab", &"elbow"], [&"body_straight", &"low_roundhouse"], [&"jab", &"body_roundhouse"], [&"jumping_elbow"]]
+ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"jab", &"body_roundhouse"], [&"high_kick"], [&"flying_knee_face"]]
 signature = &"flying_knee"
 finishers = PackedStringArray("eight_limbs", "iron_knee")
 ai_preferred_range = 110.0

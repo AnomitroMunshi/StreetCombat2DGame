@@ -17,7 +17,9 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	REVERSE_PUNCH, KNIFE_HAND, RISING_PUNCH, SPIN_COUNTER_KICK, PERFECT_GYAKU,
 	STRAIGHT_PALM, DOUBLE_PALM, LOW_SIDE_KICK, RISING_PALM, CHAIN_PALMS, DEFLECT_COUNTER, PALM_BARRAGE,
 	BREAKER_COMBO,
-	BOB_WEAVE, RISING_ELBOW, BODY_STRAIGHT, BODY_PUNCH, LOW_PALM, LEG_FEINT }
+	BOB_WEAVE, RISING_ELBOW, BODY_STRAIGHT, BODY_PUNCH, LOW_PALM, LEG_FEINT,
+	POWER_UPPERCUT, SUPERMAN_PUNCH, JUMPING_ELBOW, FLYING_KNEE_FACE, JUMPING_REVERSE_PUNCH, FLYING_SIDE_KICK,
+	LEAPING_PALM, FLYING_DOUBLE_PALM, JUMPING_BACKFIST, JUMPING_SPIN_HOOK, LEAPING_ROUNDHOUSE }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
 ## part): strikes travel into range like real footwork instead of being thrown
@@ -113,6 +115,11 @@ const COUNTER_HITSTOP_BONUS: int = 2
 ## Jumping. Velocities in pixels per tick; gravity in pixels per tick².
 ## Falling uses stronger gravity than rising for a snappy, less floaty arc.
 const JUMP_SQUAT_FRAMES: int = 2
+## Space + J / Space + K (power chord): the two presses may come in either
+## order within this many ticks. For a style with power moves a fresh jump
+## stays in its squat until the window has passed, so a chord never starts
+## as a normal jump; J or K pressed first converts while still in startup.
+const POWER_CHORD_WINDOW: int = 6
 const JUMP_VELOCITY: float = -15.0
 const GRAVITY_RISE: float = 0.95
 const GRAVITY_FALL: float = 1.35
@@ -226,6 +233,10 @@ const AIR_HIT_POP_VELOCITY: float = -3.5
 ##   rehit (optional): the hitbox re-arms every N active ticks (multi-hit).
 ##   deflect (optional, with slip): every strike that is not low whiffs during
 ##                    the slip window (hand deflections), not only head strikes.
+##   leap / leap_at / leap_vx (optional): the move leaves the ground on tick
+##                    leap_at (default 2) with vertical speed `leap` and
+##                    forward speed leap_vx (default 2.5) px/tick. Landing ends
+##                    it, followed by land_lag ticks of landing recovery.
 ##   no_strike (optional): a technique with no hitbox of its own (a weave, a
 ##                    feint); it cancels into its chains without needing contact.
 ##   sequence (optional): this move is a series of other moves (by id), each
@@ -649,6 +660,125 @@ const ATTACK_TABLE: Dictionary = {
 		"knockback": 4.5, "lunge": 1.2, "hitstop": 5,
 		"hitbox": Rect2(30.0, -116.0, 56.0, 30.0),
 	},
+
+	# --- Power chords (Space + J / Space + K) -------------------------------------
+	# Leaping moves: hitboxes are relative to the feet at the height the fighter
+	# has reached on the first active tick (head- or body-level on a standing
+	# opponent). Landing ends the move; the landing recovery then runs out the
+	# move's own startup + active + recovery (see Fighter._land).
+	# Power uppercut (Boxing Space + J): grounded. Sit deep, rear glove dropped,
+	# then the whole body drives up through the fist. Launches on hit.
+	AttackType.POWER_UPPERCUT: {
+		"id": &"power_uppercut", "name": "Crouching Power Uppercut", "posture": 18.0,
+		"startup": 12, "active": 4, "recovery": 24, "cancel_window": 0,
+		"damage": 16, "hitstun": 26, "blockstun": 16,
+		"knockback": 3.0, "lunge": 1.6, "hitstop": 9, "launch": 10.5,
+		"hitbox": Rect2(30.0, -176.0, 48.0, 76.0),
+	},
+	# Superman punch (Boxing / Kickboxing Space + K): rear knee feints a kick,
+	# the leg snaps back and the body flies forward behind a rear straight.
+	AttackType.SUPERMAN_PUNCH: {
+		"id": &"superman_punch", "name": "Superman Punch", "posture": 16.0,
+		"leap": -7.0, "leap_at": 4, "leap_vx": 6.5,
+		"startup": 10, "active": 4, "recovery": 21, "cancel_window": 0,
+		"damage": 13, "hitstun": 22, "blockstun": 15,
+		"knockback": 7.0, "lunge": 0.0, "hitstop": 8,
+		"blowback_chance": 0.25, "blowback_vx": 8.0, "blowback_vy": -6.0, "blowback_rolls": 0,
+		"hitbox": Rect2(54.0, -150.0, 54.0, 44.0),
+	},
+	# Jumping elbow (Muay Thai Space + J): leap in, rear elbow chops down on the head.
+	AttackType.JUMPING_ELBOW: {
+		"id": &"jumping_elbow", "name": "Jumping Downward Elbow", "posture": 20.0,
+		"leap": -9.0, "leap_at": 3, "leap_vx": 5.0,
+		"startup": 9, "active": 4, "recovery": 23, "cancel_window": 0,
+		"damage": 14, "hitstun": 24, "blockstun": 16,
+		"knockback": 5.0, "lunge": 0.0, "hitstop": 9,
+		"hitbox": Rect2(27.0, -145.0, 54.0, 52.0),
+	},
+	# Flying knee to the face (Muay Thai Space + K): hands reach for the head,
+	# the rear knee drives up into the face.
+	AttackType.FLYING_KNEE_FACE: {
+		"id": &"flying_knee_face", "name": "Flying Knee to Face", "posture": 22.0,
+		"leap": -10.0, "leap_at": 4, "leap_vx": 5.0,
+		"startup": 12, "active": 5, "recovery": 25, "cancel_window": 0,
+		"damage": 16, "hitstun": 26, "blockstun": 16,
+		"knockback": 6.0, "lunge": 0.0, "hitstop": 10,
+		"blowback_chance": 0.35, "blowback_vx": 7.5, "blowback_vy": -8.0, "blowback_rolls": 1,
+		"hitbox": Rect2(4.0, -136.0, 54.0, 50.0),
+	},
+	# Jumping reverse punch (Karate Space + J): tucked leap, rear fist driven
+	# straight to the head with the lead fist pulled back to the hip.
+	AttackType.JUMPING_REVERSE_PUNCH: {
+		"id": &"jumping_reverse_punch", "name": "Jumping Reverse Punch", "posture": 14.0,
+		"leap": -8.0, "leap_at": 3, "leap_vx": 4.5,
+		"startup": 10, "active": 4, "recovery": 22, "cancel_window": 0,
+		"damage": 12, "hitstun": 22, "blockstun": 14,
+		"knockback": 6.0, "lunge": 0.0, "hitstop": 8,
+		"hitbox": Rect2(48.0, -155.0, 54.0, 44.0),
+	},
+	# Flying side kick (Karate Space + K): tight chamber, then the lead heel
+	# spears out level at head height with the body laid back behind it.
+	AttackType.FLYING_SIDE_KICK: {
+		"id": &"flying_side_kick", "name": "Flying Side Kick", "posture": 20.0,
+		"leap": -10.0, "leap_at": 3, "leap_vx": 6.0,
+		"startup": 11, "active": 5, "recovery": 23, "cancel_window": 0,
+		"damage": 14, "hitstop": 9, "hitstun": 24, "blockstun": 16,
+		"knockback": 8.0, "lunge": 0.0,
+		"blowback_chance": 0.35, "blowback_vx": 9.0, "blowback_vy": -6.5, "blowback_rolls": 1,
+		"hitbox": Rect2(40.0, -127.0, 64.0, 40.0),
+	},
+	# Leaping palm (Kung Fu Space + J): a low quick bound, lead palm to the chest.
+	AttackType.LEAPING_PALM: {
+		"id": &"leaping_palm", "name": "Leaping Palm Strike", "posture": 12.0,
+		"leap": -6.5, "leap_at": 2, "leap_vx": 5.5,
+		"startup": 8, "active": 4, "recovery": 19, "cancel_window": 0,
+		"damage": 10, "hitstun": 20, "blockstun": 13,
+		"knockback": 5.0, "lunge": 0.0, "hitstop": 6,
+		"hitbox": Rect2(41.0, -120.0, 54.0, 44.0),
+	},
+	# Flying double palm (Kung Fu Space + K): both palms drawn to the hips in
+	# the air, then driven together into the chest. Big push.
+	AttackType.FLYING_DOUBLE_PALM: {
+		"id": &"flying_double_palm", "name": "Flying Double-Palm Strike", "posture": 20.0,
+		"leap": -7.5, "leap_at": 4, "leap_vx": 5.0,
+		"startup": 12, "active": 4, "recovery": 24, "cancel_window": 0,
+		"damage": 14, "hitstun": 24, "blockstun": 16,
+		"knockback": 9.5, "lunge": 0.0, "hitstop": 9,
+		"blowback_chance": 0.45, "blowback_vx": 9.5, "blowback_vy": -5.5, "blowback_rolls": 1,
+		"hitbox": Rect2(50.0, -121.0, 58.0, 46.0),
+	},
+	# Jumping backfist (Taekwondo Space + J): lead fist folded across the chest
+	# on the way up, whipped out to the temple at the top.
+	AttackType.JUMPING_BACKFIST: {
+		"id": &"jumping_backfist", "name": "Jumping Backfist", "posture": 10.0,
+		"leap": -8.0, "leap_at": 3, "leap_vx": 4.0,
+		"startup": 9, "active": 3, "recovery": 21, "cancel_window": 0,
+		"damage": 11, "hitstun": 20, "blockstun": 13,
+		"knockback": 4.5, "lunge": 0.0, "hitstop": 7,
+		"hitbox": Rect2(41.0, -159.0, 54.0, 42.0),
+	},
+	# Jumping spinning hook kick (Taekwondo Space + K): leap and turn the back,
+	# the rear heel whips across at head height.
+	AttackType.JUMPING_SPIN_HOOK: {
+		"id": &"jumping_spin_hook", "name": "Jumping Spinning Hook Kick", "posture": 22.0, "spin": true,
+		"leap": -9.5, "leap_at": 3, "leap_vx": 3.0,
+		"startup": 15, "active": 5, "recovery": 27, "cancel_window": 0,
+		"damage": 17, "hitstun": 26, "blockstun": 17,
+		"knockback": 8.0, "lunge": 0.0, "hitstop": 10,
+		"blowback_chance": 0.4, "blowback_vx": 9.0, "blowback_vy": -7.5, "blowback_rolls": 1,
+		"hitbox": Rect2(36.0, -152.0, 66.0, 46.0),
+	},
+	# Jumping roundhouse (Kickboxing Space + K): knees tucked on the way up,
+	# then the shin whips round at head height with the body leaning away.
+	AttackType.LEAPING_ROUNDHOUSE: {
+		"id": &"leaping_roundhouse", "name": "Jumping Roundhouse Kick", "posture": 20.0,
+		"leap": -9.0, "leap_at": 3, "leap_vx": 4.5,
+		"startup": 11, "active": 4, "recovery": 24, "cancel_window": 0,
+		"damage": 15, "hitstun": 24, "blockstun": 16,
+		"knockback": 7.0, "lunge": 0.0, "hitstop": 9,
+		"blowback_chance": 0.3, "blowback_vx": 8.0, "blowback_vy": -7.0, "blowback_rolls": 1,
+		"hitbox": Rect2(36.0, -148.0, 62.0, 46.0),
+	},
 }
 
 
@@ -713,6 +843,9 @@ class Attack extends RefCounted:
 	var signature: bool = false
 	## Leaves the ground at the start of the move with this vertical velocity.
 	var leap_vy: float = 0.0
+	## Tick the leap leaves the ground, and its forward speed (px/tick).
+	var leap_at: int = 2
+	var leap_vx: float = 2.5
 	## Landing recovery for a leaping move (0 = the normal air-attack landing).
 	var land_lag: int = 0
 	var rehit: int = 0
@@ -783,6 +916,8 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.signature = row.get("signature", false)
 	attack.leap_vy = row.get("leap", 0.0)
 	attack.land_lag = row.get("land_lag", 0)
+	attack.leap_at = row.get("leap_at", 2)
+	attack.leap_vx = row.get("leap_vx", 2.5)
 	attack.rehit = row.get("rehit", 0)
 	attack.deflect = row.get("deflect", false)
 	attack.sequence = row.get("sequence", [])
@@ -824,10 +959,12 @@ static func impact_kind(type: AttackType) -> ImpactKind:
 		AttackType.LEAD_HOOK, AttackType.REAR_HOOK, AttackType.BODY_HOOK, AttackType.BACKHAND, 				AttackType.KNIFE_HAND, AttackType.ELBOW, AttackType.HIGH_KICK, AttackType.BODY_ROUNDHOUSE, 				AttackType.LOW_ROUNDHOUSE, AttackType.SPIN_HOOK_KICK, AttackType.JUMP_ROUNDHOUSE, 				AttackType.JUMP_SPIN_KICK, AttackType.TORNADO_540, AttackType.SPIN_COUNTER_KICK, AttackType.GAZELLE_HOOK:
 			return ImpactKind.HOOK
 		AttackType.UPPERCUT, AttackType.RISING_PUNCH, AttackType.RISING_PALM, AttackType.KNEE, AttackType.FLYING_KNEE, \
-				AttackType.RISING_ELBOW:
+				AttackType.RISING_ELBOW, AttackType.POWER_UPPERCUT, AttackType.FLYING_KNEE_FACE:
 			return ImpactKind.RISING
-		AttackType.AXE_KICK, AttackType.OVERHAND, AttackType.JUMP_PUNCH:
+		AttackType.AXE_KICK, AttackType.OVERHAND, AttackType.JUMP_PUNCH, AttackType.JUMPING_ELBOW:
 			return ImpactKind.DOWNWARD
+		AttackType.JUMPING_BACKFIST, AttackType.JUMPING_SPIN_HOOK, AttackType.LEAPING_ROUNDHOUSE:
+			return ImpactKind.HOOK
 	return ImpactKind.STRAIGHT
 
 

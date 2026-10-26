@@ -4,13 +4,14 @@ Styles are data. The match code never checks a style's name.
 
 1. **Moves.** Reuse rows from `CombatData.ATTACK_TABLE` where you can. For a new move:
    1. Append a value to `AttackType`. Never reorder this enum.
-   2. Add a table row with a permanent `id` and its frame data, hitbox, damage, posture and cancel window. Set `air: true` for jump-only moves and `spin: true` for moves that turn the back.
+   2. Add a table row with a permanent `id` and its frame data, hitbox, damage, posture and cancel window. Set `air: true` for jump-only moves and `spin: true` for moves that turn the back. A leaping move (for example a power move) sets `leap` (vertical speed), `leap_at` (takeoff tick) and `leap_vx` (forward speed). Its hitbox is relative to the feet at the height reached on the first active tick, so measure where the striking limb is drawn at contact and centre the hitbox there. Landing ends the move, and the landing recovery runs out the rest of startup + active + recovery. `no_strike: true` marks a technique with no hitbox (a weave or a feint) that chains without contact.
    3. Add keyframe poses and a timeline in `FighterVisual._moves`, plus the striking joint in `_attack_joint`.
 2. **Stance.** Reuse a `Stances.Kind`, or append a new one with its guard pose and active idle. Never reorder this enum either.
 3. **Style file.** Copy `styles/boxing.tres` to `styles/<id>.tres` and set:
    - `id`: permanent; saves refer to it.
    - `order`, `display_name`, `description`, `category`, `difficulty`, `strengths`, `weaknesses`, `stance`.
-   - `input_map` and `air_map`: slot → move id. The slots are listed in `MartialArtStyle`.
+   - `input_map` and `air_map`: slot → move id. The slots are listed in `MartialArtStyle`: J `light`, K `heavy`, L `technique`, `up_light` / `up_heavy` (W), `down_light` / `down_heavy` (S), and the Space chords `power_light` / `power_heavy` (ground only, never in `air_map`).
+   - `move_names` (optional): the style's own name for a shared move, for example karate's `jab` is its "Straight Punch".
    - `chains`: move id → the move ids it may cancel into on contact.
    - `ai_close_plans`, `ai_far_plans`, `ai_preferred_range`.
    - `step_scale` (optional, default 1): how far the style's strikes step in.

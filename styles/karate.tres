@@ -24,6 +24,8 @@ move_names = {
 &"jab": "Straight Punch"
 }
 input_map = {
+&"power_heavy": &"flying_side_kick",
+&"power_light": &"jumping_reverse_punch",
 &"down_heavy": &"low_side_kick",
 &"down_light": &"body_punch",
 &"heavy": &"reverse_punch",
@@ -45,8 +47,8 @@ chains = {
 &"reverse_punch": [&"high_kick", &"low_side_kick"],
 &"rising_punch": [&"jab"]
 }
-ai_close_plans = [[&"jab", &"reverse_punch"], [&"knife_hand", &"reverse_punch"], [&"reverse_punch", &"high_kick"], [&"rising_punch"], [&"body_punch", &"reverse_punch"], [&"jab", &"body_punch", &"high_kick"]]
-ai_far_plans = [[&"low_side_kick", &"reverse_punch"], [&"high_kick"], [&"reverse_punch"], [&"jab", &"reverse_punch"]]
+ai_close_plans = [[&"jab", &"reverse_punch"], [&"knife_hand", &"reverse_punch"], [&"reverse_punch", &"high_kick"], [&"rising_punch"], [&"body_punch", &"reverse_punch"], [&"jab", &"body_punch", &"high_kick"], [&"jumping_reverse_punch"]]
+ai_far_plans = [[&"low_side_kick", &"reverse_punch"], [&"high_kick"], [&"reverse_punch"], [&"jab", &"reverse_punch"], [&"flying_side_kick"]]
 wall_entry = PackedStringArray("gyaku_load", "gyaku_hit", "knife_hit", "gyaku_load", "gyaku_hit")
 signature = &"perfect_gyaku"
 finishers = PackedStringArray("one_inch_verdict", "crimson_crescent")

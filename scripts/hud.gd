@@ -610,7 +610,7 @@ func _draw_gameplay_hud() -> void:
 	_draw_combo(_player, SCREEN_W - BAR_MARGIN - BAR_WIDTH, HORIZONTAL_ALIGNMENT_RIGHT)
 	if _show_hints:
 		_canvas.draw_string(_font, Vector2(0.0, 706.0),
-			"A/D move · 2×A/D dash · S+2×A/D roll · SPACE jump · J light · K heavy · L technique · W/S + J/K high/low · F signature · SHIFT block/parry · S+SHIFT low block · R rematch",
+			"A/D move · 2×A/D dash · SPACE jump · J light · K heavy · L technique · W/S + J/K high/low · SPACE + J/K power · F signature · SHIFT block/parry · S+SHIFT low block · R rematch",
 			HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
 
 

@@ -293,6 +293,55 @@ var _chudan_hit := PackedFloat32Array([0.2, 0.05, 0.6, 2.4, 1.42, 1.42, 1.2, -0.
 # lead palm drives low into the belly.
 var _lpalm_load := PackedFloat32Array([0.25, 0.2, 1.0, 2.6, 0.2, 1.9, 1.25, -0.75, -0.75, -1.05, -6.0, 0.0, 0.0, 10.0])
 var _lpalm_hit := PackedFloat32Array([0.45, 0.2, 1.3, 1.25, 0.3, 2.2, 1.2, -0.6, -0.8, -1.0, 10.0, 0.0, 0.3, 6.0])
+# --- Power chords (Space + J / K) -------------------------------------------------
+# Channels: torso, head, ua_f, la_f, ua_b, la_b, th_f, sh_f, th_b, sh_b, hip_x, drop, pivot, spread.
+# Crouching power uppercut: sit right down, rear glove dropped below the hip,
+# then the legs, hips and shoulder drive up through the fist onto the toes.
+var _pupper_coil := PackedFloat32Array([0.5, 0.25, 0.95, 2.95, 0.05, 0.6, 0.95, -0.45, -0.35, -0.8, -6.0, 0.0, 0.4, 10.0])
+var _pupper_hit := PackedFloat32Array([-0.12, -0.2, 0.95, 2.9, 2.35, 3.35, 0.45, -0.05, -0.4, -0.3, 10.0, 0.0, 0.9, -16.0])
+# Superman punch: the rear knee lifts as if to kick (weight on the lead leg),
+# then the leg snaps back as the body flies behind a straight rear hand.
+var _sm_load := PackedFloat32Array([0.0, 0.15, 1.0, 2.8, 0.6, 2.9, 0.75, -0.3, 1.0, -1.4, -4.0, 0.0, 0.0, 10.0])
+var _sm_hit := PackedFloat32Array([0.55, 0.05, 0.35, 2.1, 1.6, 1.58, 1.0, -0.7, -0.95, -0.9, 8.0, 0.0, 0.9, -14.0])
+var _sm_land := PackedFloat32Array([0.3, 0.1, 0.9, 2.8, 1.2, 2.2, 0.8, -0.4, -0.5, -0.8, 4.0, 0.0, 0.4, -6.0])
+# Jumping downward elbow: knees up and the rear elbow raised high behind the
+# head, then the whole body folds forward to chop the elbow point down.
+var _jelbow_load := PackedFloat32Array([-0.15, -0.1, 1.6, 3.4, 3.0, 4.7, 1.7, -0.7, 0.9, -1.3, -2.0, 0.0, 0.0, 12.0])
+var _jelbow_hit := PackedFloat32Array([0.65, 0.25, 1.4, 2.9, 1.45, 4.3, 1.6, -0.3, -0.2, -0.9, 8.0, 0.0, 0.6, -10.0])
+var _jelbow_recoil := PackedFloat32Array([0.35, 0.15, 1.1, 2.9, 1.0, 3.6, 1.3, -0.6, -0.3, -1.0, 0.0, 0.0, 0.3, 0.0])
+# Flying knee to the face: both hands reach for the head as the rear knee
+# chambers, then the hands pull down while the rear knee drives up.
+var _kface_load := PackedFloat32Array([0.05, 0.05, 2.1, 2.2, 2.0, 2.1, 0.4, -0.5, 0.7, -1.4, 0.0, 0.0, 0.0, 6.0])
+var _kface_hit := PackedFloat32Array([0.15, 0.15, 1.6, 1.0, 1.5, 0.95, -0.4, -0.7, 2.2, -0.6, 8.0, 0.0, 0.6, -8.0])
+# Jumping reverse punch: knees tucked, rear fist chambered at the hip and the
+# lead hand reaching; then the rear fist fires as the lead pulls back (hikite).
+var _jrp_load := PackedFloat32Array([0.1, 0.1, 1.4, 1.5, 0.3, 2.4, 1.6, -0.9, 1.0, -1.4, -4.0, 0.0, 0.0, 14.0])
+var _jrp_hit := PackedFloat32Array([0.35, 0.05, 0.3, 2.4, 1.57, 1.57, 1.45, -0.4, -0.5, -0.9, 10.0, 0.0, 0.9, -12.0])
+var _jrp_recoil := PackedFloat32Array([0.2, 0.1, 1.0, 2.3, 0.6, 2.5, 1.0, -0.5, -0.4, -0.9, 2.0, 0.0, 0.3, 4.0])
+# Flying side kick: lead knee drawn tight to the chest, rear leg tucked, then
+# the lead heel spears out level with the body laid back behind it.
+var _fsk_chamber := PackedFloat32Array([-0.25, 0.25, 1.3, 2.3, 0.4, 2.6, 2.3, -0.9, 1.3, -1.5, -2.0, 0.0, 0.8])
+var _fsk_extend := PackedFloat32Array([-0.7, 0.5, 1.4, 1.8, -0.4, 0.2, 1.78, 1.8, 1.0, -1.6, 8.0, 0.0, 1.0])
+# Leaping palm: a low bound with the lead palm drawn back by the ear, then
+# thrust to the chest with the rear palm guarding.
+var _leap_palm_load := PackedFloat32Array([0.15, 0.15, 0.6, 3.5, 1.0, 2.6, 1.5, -0.8, 0.6, -1.3, -4.0, 0.0, 0.0, 10.0])
+var _leap_palm_hit := PackedFloat32Array([0.5, 0.15, 1.15, 1.15, 1.0, 2.6, 1.3, -0.4, -0.4, -0.9, 10.0, 0.0, 0.4, -4.0])
+# Flying double palm: both palms drawn back to the hips with the knees up,
+# then driven out together into the chest.
+var _fdp_load := PackedFloat32Array([-0.1, 0.05, -0.3, 1.2, -0.4, 1.1, 1.7, -0.8, 1.1, -1.4, -6.0, 0.0, 0.0, 10.0])
+var _fdp_hit := PackedFloat32Array([0.5, 0.05, 1.2, 1.25, 1.15, 1.2, 1.2, -0.5, 0.6, -1.0, 14.0, 0.0, 0.3, 10.0])
+# Jumping backfist: the lead fist folds across the chest on the way up and
+# whips out to the temple, lead knee chambered.
+var _jbf_load := PackedFloat32Array([0.0, 0.15, 1.3, 4.08, 0.6, 2.9, 1.8, -0.9, 0.5, -1.3, -3.0, 0.0, 0.3])
+var _jbf_hit := PackedFloat32Array([0.3, 0.05, 1.55, 1.7, 0.6, 2.9, 1.6, -0.6, -0.4, -0.9, 8.0, 0.0, 0.6])
+# Jumping spinning hook kick: turn the back in the air with the lead leg
+# tucked, the rear heel whipping across at head height.
+var _jshk_load := PackedFloat32Array([0.4, 0.35, 1.0, 2.8, 0.9, 2.9, 1.7, -0.9, 0.9, -1.6, 0.0, 0.0, 0.0, 6.0])
+var _jshk_hit := PackedFloat32Array([0.75, 0.5, 1.2, 2.6, 0.6, 2.4, 1.5, -1.2, -2.05, -1.9, -6.0, 0.0, 0.0, 4.0])
+# Jumping roundhouse: both knees tucked high, then the lead shin whips round
+# at head height with the body leaning away and the rear arm swinging down.
+var _lrh_load := PackedFloat32Array([0.1, 0.15, 1.0, 2.8, 0.4, 2.7, 1.9, -1.2, 1.3, -1.5, -2.0, 0.0, 0.6, 8.0])
+var _lrh_hit := PackedFloat32Array([-0.5, 0.45, 1.2, 2.2, -0.5, 0.4, 2.0, 2.0, 0.9, -1.4, 8.0, 0.0, 1.0, -6.0])
 # --- Signatures -------------------------------------------------------------------
 # Gazelle Hook: sink into a deep crouch, then spring up and forward into a
 # rising lead hook (the whole body drives up through the fist).
@@ -672,6 +721,39 @@ func _ready() -> void:
 		CombatData.AttackType.JUMP_SPIN_KICK: [
 			[S, 0.6, _jspin_load, EASE_SMOOTH], [A, 0.0, _jspin_hit, EASE_IN],
 			[A, 1.0, _jspin_hit, EASE_LINEAR], [R, 0.5, _jspin_load, EASE_OUT]],
+		CombatData.AttackType.POWER_UPPERCUT: [
+			[S, 0.45, _pupper_coil, EASE_SMOOTH], [S, 0.85, _pupper_coil, EASE_LINEAR],
+			[A, 0.0, _pupper_hit, EASE_IN], [A, 1.0, _pupper_hit, EASE_LINEAR], [R, 0.35, _pupper_hit, EASE_LINEAR]],
+		CombatData.AttackType.SUPERMAN_PUNCH: [
+			[S, 0.35, _sm_load, EASE_SMOOTH], [S, 0.6, _sm_load, EASE_LINEAR], [A, 0.0, _sm_hit, EASE_IN],
+			[A, 1.0, _sm_hit, EASE_LINEAR], [R, 0.4, _sm_land, EASE_SMOOTH]],
+		CombatData.AttackType.JUMPING_ELBOW: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _jelbow_load, EASE_SMOOTH], [A, 0.0, _jelbow_hit, EASE_IN],
+			[A, 1.0, _jelbow_hit, EASE_LINEAR], [R, 0.4, _jelbow_recoil, EASE_SMOOTH]],
+		CombatData.AttackType.FLYING_KNEE_FACE: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _kface_load, EASE_SMOOTH], [A, 0.0, _kface_hit, EASE_IN],
+			[A, 1.0, _kface_hit, EASE_LINEAR], [R, 0.45, _kface_load, EASE_OUT]],
+		CombatData.AttackType.JUMPING_REVERSE_PUNCH: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _jrp_load, EASE_SMOOTH], [A, 0.0, _jrp_hit, EASE_IN],
+			[A, 1.0, _jrp_hit, EASE_LINEAR], [R, 0.4, _jrp_recoil, EASE_SMOOTH]],
+		CombatData.AttackType.FLYING_SIDE_KICK: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _fsk_chamber, EASE_SMOOTH], [A, 0.0, _fsk_extend, EASE_IN],
+			[A, 1.0, _fsk_extend, EASE_LINEAR], [R, 0.45, _fsk_chamber, EASE_OUT]],
+		CombatData.AttackType.LEAPING_PALM: [
+			[S, 0.25, _jump_squat, EASE_SMOOTH], [S, 0.85, _leap_palm_load, EASE_SMOOTH], [A, 0.0, _leap_palm_hit, EASE_IN],
+			[A, 1.0, _leap_palm_hit, EASE_LINEAR], [R, 0.4, _leap_palm_load, EASE_OUT]],
+		CombatData.AttackType.FLYING_DOUBLE_PALM: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _fdp_load, EASE_SMOOTH], [A, 0.0, _fdp_hit, EASE_IN],
+			[A, 1.0, _fdp_hit, EASE_LINEAR], [R, 0.4, _fdp_load, EASE_OUT]],
+		CombatData.AttackType.JUMPING_BACKFIST: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _jbf_load, EASE_SMOOTH], [A, 0.0, _jbf_hit, EASE_IN],
+			[A, 1.0, _over(_jbf_hit, _jbf_load), EASE_LINEAR], [R, 0.4, _jbf_load, EASE_OUT]],
+		CombatData.AttackType.JUMPING_SPIN_HOOK: [
+			[S, 0.25, _jump_squat, EASE_SMOOTH], [S, 0.85, _jshk_load, EASE_SMOOTH], [A, 0.0, _jshk_hit, EASE_IN],
+			[A, 1.0, _jshk_hit, EASE_LINEAR], [R, 0.45, _jshk_load, EASE_OUT]],
+		CombatData.AttackType.LEAPING_ROUNDHOUSE: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _lrh_load, EASE_SMOOTH], [A, 0.0, _lrh_hit, EASE_IN],
+			[A, 1.0, _lrh_hit, EASE_LINEAR], [R, 0.45, _lrh_load, EASE_OUT]],
 		CombatData.AttackType.BOB_WEAVE: [
 			[S, 1.0, _weave_in, EASE_SMOOTH], [A, 0.5, _weave_low, EASE_SMOOTH],
 			[A, 1.0, _weave_out, EASE_SMOOTH], [R, 0.7, null, EASE_OUT]],
@@ -1371,7 +1453,7 @@ func _mechanics(pose: PackedFloat32Array, t: float) -> PackedFloat32Array:
 	var joint := _attack_joint(attack.type)
 	if d > 0.0 and joint in [J_HAND_F, J_HAND_B]:
 		var lead := joint == J_HAND_F
-		var high := attack.hitbox.get_center().y < -120.0
+		var high := _hits_high(attack)
 		if CombatData.impact_kind(attack.type) == CombatData.ImpactKind.STRAIGHT and kind in [MECH_LEAD, MECH_REAR]:
 			out = _aim_arm(out, J_SHOULDER_F if lead else J_SHOULDER_B, UA_F if lead else UA_B,
 				LA_F if lead else LA_B, high, d)
@@ -1457,7 +1539,7 @@ func _aim_arm(pose: PackedFloat32Array, shoulder_joint: int, ua: int, la: int, h
 
 static func _mech_kind(type: CombatData.AttackType) -> int:
 	if type in [CombatData.AttackType.UPPERCUT, CombatData.AttackType.RISING_PUNCH, CombatData.AttackType.RISING_PALM,
-			CombatData.AttackType.RISING_ELBOW]:
+			CombatData.AttackType.RISING_ELBOW, CombatData.AttackType.POWER_UPPERCUT]:
 		return MECH_RISING
 	if type in [CombatData.AttackType.LEAD_HOOK, CombatData.AttackType.BODY_HOOK]:
 		return MECH_HOOK_LEAD
@@ -2199,10 +2281,17 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 			return J_FOOT_F
 		CombatData.AttackType.KNEE, CombatData.AttackType.FLYING_KNEE:
 			return J_KNEE_F
-		CombatData.AttackType.ELBOW, CombatData.AttackType.RISING_ELBOW:
+		CombatData.AttackType.ELBOW, CombatData.AttackType.RISING_ELBOW, CombatData.AttackType.JUMPING_ELBOW:
 			return J_ELBOW_B
-		CombatData.AttackType.LEG_FEINT:
+		CombatData.AttackType.FLYING_KNEE_FACE:
+			return J_KNEE_B
+		CombatData.AttackType.LEG_FEINT, CombatData.AttackType.FLYING_SIDE_KICK, CombatData.AttackType.LEAPING_ROUNDHOUSE:
 			return J_FOOT_F
+		CombatData.AttackType.JUMPING_SPIN_HOOK:
+			return J_FOOT_B
+		CombatData.AttackType.POWER_UPPERCUT, CombatData.AttackType.SUPERMAN_PUNCH, \
+				CombatData.AttackType.JUMPING_REVERSE_PUNCH:
+			return J_HAND_B
 		CombatData.AttackType.REVERSE_PUNCH, CombatData.AttackType.PERFECT_GYAKU, CombatData.AttackType.RISING_PUNCH, \
 				CombatData.AttackType.RISING_PALM, CombatData.AttackType.DEFLECT_COUNTER, \
 				CombatData.AttackType.BODY_STRAIGHT, CombatData.AttackType.BODY_PUNCH:
@@ -2289,6 +2378,12 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 	return _blend(pose, base, hi)
 
 
+## A strike aimed at head height, measured from the floor (a leaping strike's
+## hitbox is relative to the airborne root).
+func _hits_high(attack: CombatData.Attack) -> bool:
+	return attack.hitbox.get_center().y + fighter.position.y - fighter.ground_y < -120.0
+
+
 ## Local x (along this fighter's facing) of the near surface of the part of
 ## the opponent's DRAWN body the strike aims at: the head for high strikes, the
 ## chest / stomach otherwise. INF when the opponent has not been drawn yet.
@@ -2298,7 +2393,7 @@ func _drawn_target_x(opp: Fighter, attack: CombatData.Attack) -> float:
 	var ov := opp.get_node_or_null("Visual") as FighterVisual
 	if not _drawing_fresh(ov):
 		return INF
-	var high := attack.hitbox.get_center().y < -120.0
+	var high := _hits_high(attack)
 	if high and CombatData.impact_kind(attack.type) == CombatData.ImpactKind.RISING:
 		# Uppercuts and knees come up under the chin, not into the face.
 		return _aim_point(ov, true, true).x + 2.0

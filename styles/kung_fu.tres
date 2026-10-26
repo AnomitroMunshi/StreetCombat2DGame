@@ -24,6 +24,8 @@ move_names = {
 &"deflect_counter": "Deflect"
 }
 input_map = {
+&"power_heavy": &"flying_double_palm",
+&"power_light": &"leaping_palm",
 &"down_heavy": &"sweep",
 &"down_light": &"low_palm",
 &"heavy": &"double_palm",
@@ -44,8 +46,8 @@ chains = {
 &"rising_palm": [&"straight_palm", &"backhand"],
 &"straight_palm": [&"straight_palm", &"backhand", &"double_palm", &"low_palm", &"sweep"]
 }
-ai_close_plans = [[&"straight_palm", &"straight_palm", &"double_palm"], [&"backhand", &"rising_palm"], [&"straight_palm", &"sweep"], [&"deflect_counter", &"double_palm"], [&"low_palm", &"rising_palm"], [&"straight_palm", &"low_palm", &"sweep"]]
-ai_far_plans = [[&"straight_palm", &"double_palm"], [&"double_palm"], [&"sweep"]]
+ai_close_plans = [[&"straight_palm", &"straight_palm", &"double_palm"], [&"backhand", &"rising_palm"], [&"straight_palm", &"sweep"], [&"deflect_counter", &"double_palm"], [&"low_palm", &"rising_palm"], [&"straight_palm", &"low_palm", &"sweep"], [&"leaping_palm"]]
+ai_far_plans = [[&"straight_palm", &"double_palm"], [&"double_palm"], [&"sweep"], [&"flying_double_palm"], [&"leaping_palm"]]
 wall_entry = PackedStringArray("palm_windup", "palm_lead", "palm_rear", "palm_windup", "palm_strike")
 signature = &"palm_barrage"
 finishers = PackedStringArray("hundred_palms", "dragons_descent")

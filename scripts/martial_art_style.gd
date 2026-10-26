@@ -9,13 +9,16 @@ extends Resource
 ## Input slots (keyboard -> slot; the style maps slot -> move id):
 ##   light J · heavy K · technique L
 ##   up_light W+J · up_heavy W+K · down_light S+J · down_heavy S+K
+##   power_light Space+J · power_heavy Space+K (a chord: either order within
+##   CombatData.POWER_CHORD_WINDOW ticks; ground only)
 ## W / S are read at the moment J / K is pressed. A and D only move and dash:
 ## they never change which attack a button performs.
 ## A variant slot with no entry falls back to its base slot (SLOT_FALLBACK).
 ## `air_map` uses the same slots for attacks started in the air.
 
 const SLOTS: Array[StringName] = [&"light", &"heavy", &"technique",
-	&"up_light", &"up_heavy", &"down_light", &"down_heavy"]
+	&"up_light", &"up_heavy", &"down_light", &"down_heavy", &"power_light", &"power_heavy"]
+const POWER_SLOTS: Array[StringName] = [&"power_light", &"power_heavy"]
 const SLOT_FALLBACK: Dictionary = {
 	&"up_light": &"light", &"down_light": &"light",
 	&"up_heavy": &"heavy", &"down_heavy": &"heavy",
@@ -24,6 +27,7 @@ const SLOT_FALLBACK: Dictionary = {
 const SLOT_KEYS: Dictionary = {
 	&"light": "J", &"heavy": "K", &"technique": "L",
 	&"up_light": "W+J", &"up_heavy": "W+K", &"down_light": "S+J", &"down_heavy": "S+K",
+	&"power_light": "Space+J", &"power_heavy": "Space+K",
 }
 ## Known combat categories (metadata for the roster and future subsystems).
 const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"clinching",
@@ -142,6 +146,8 @@ func validate() -> PackedStringArray:
 			if CombatData.type_for_id(table[slot]) == CombatData.AttackType.NONE:
 				errors.append("unknown move %s" % table[slot])
 	for slot in air_map:
+		if slot in POWER_SLOTS:
+			errors.append("power slot %s is a ground chord, not an air slot" % slot)
 		var t := CombatData.type_for_id(air_map[slot])
 		if t != CombatData.AttackType.NONE and not CombatData.get_attack(t).air_only:
 			errors.append("air move %s is not an air attack" % air_map[slot])
@@ -183,6 +189,14 @@ func validate() -> PackedStringArray:
 			elif i > 0 and not plan[i] in chains.get(plan[i - 1], []):
 				errors.append("AI plan %s -> %s is not a chain" % [plan[i - 1], plan[i]])
 	return errors
+
+
+## This style has Space + J / Space + K power moves.
+func has_power() -> bool:
+	for slot in POWER_SLOTS:
+		if input_map.has(slot):
+			return true
+	return false
 
 
 ## A move's name in this style (its own name for a shared move, if it has one).

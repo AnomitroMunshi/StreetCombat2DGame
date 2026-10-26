@@ -20,6 +20,8 @@ move_names = {
 &"high_kick": "High Roundhouse"
 }
 input_map = {
+&"power_heavy": &"jumping_spin_hook",
+&"power_light": &"jumping_backfist",
 &"down_heavy": &"axe_kick",
 &"down_light": &"body_punch",
 &"heavy": &"side_kick",
@@ -40,8 +42,8 @@ chains = {
 &"rising_punch": [&"jab", &"high_kick"],
 &"side_kick": [&"high_kick"]
 }
-ai_close_plans = [[&"jab", &"side_kick"], [&"jab", &"body_punch", &"high_kick"], [&"axe_kick"], [&"lead_leg_feint", &"high_kick"], [&"rising_punch", &"high_kick"], [&"jab", &"lead_leg_feint", &"side_kick"]]
-ai_far_plans = [[&"side_kick"], [&"lead_leg_feint", &"side_kick"], [&"high_kick"], [&"lead_leg_feint", &"axe_kick"]]
+ai_close_plans = [[&"jab", &"side_kick"], [&"jab", &"body_punch", &"high_kick"], [&"axe_kick"], [&"lead_leg_feint", &"high_kick"], [&"rising_punch", &"high_kick"], [&"jab", &"lead_leg_feint", &"side_kick"], [&"jumping_backfist"]]
+ai_far_plans = [[&"side_kick"], [&"lead_leg_feint", &"side_kick"], [&"high_kick"], [&"lead_leg_feint", &"axe_kick"], [&"jumping_spin_hook"]]
 wall_entry = PackedStringArray("knee_windup", "front_extend", "heavy_strike", "shook_load", "high_extend")
 signature = &"tornado_540"
 finishers = PackedStringArray("cyclone_360", "heavens_heel")

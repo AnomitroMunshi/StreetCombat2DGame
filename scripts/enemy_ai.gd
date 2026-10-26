@@ -400,6 +400,8 @@ func _can_reach(type: CombatData.AttackType, dist: float) -> bool:
 		return true
 	var a := CombatData.get_attack(type)
 	var travel := a.lunge * float(a.startup + a.active) + a.step * _me.step_scale()
+	if a.leap_vy != 0.0:
+		travel += a.leap_vx * float(a.startup - a.leap_at)  # flies into range
 	return dist <= a.hitbox.end.x + travel + REACH_SLACK
 
 
