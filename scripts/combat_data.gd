@@ -20,7 +20,9 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	BOB_WEAVE, RISING_ELBOW, BODY_STRAIGHT, BODY_PUNCH, LOW_PALM, LEG_FEINT,
 	POWER_UPPERCUT, SUPERMAN_PUNCH, JUMPING_ELBOW, FLYING_KNEE_FACE, JUMPING_REVERSE_PUNCH, FLYING_SIDE_KICK,
 	LEAPING_PALM, FLYING_DOUBLE_PALM, JUMPING_BACKFIST, JUMPING_SPIN_HOOK, LEAPING_ROUNDHOUSE,
-	LEAPING_SPIN_BACKFIST, FLYING_AXE_KICK }
+	LEAPING_SPIN_BACKFIST, FLYING_AXE_KICK,
+	LIGHT_SLAP, THRUST_KICK, DOUBLE_PUSH, HEAD_ELBOW, HAMMER_FIST, STOMACH_SHOT, PARA_LEG_KICK,
+	FLYING_SLAP, FLYING_CHEST_KICK, BELLY_BOMB }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
 ## part): strikes travel into range like real footwork instead of being thrown
@@ -34,6 +36,8 @@ const STEP_IN: Dictionary = {
 	&"chain_palms": 10.0, &"side_kick": 14.0, &"front_kick": 12.0, &"high_kick": 6.0,
 	&"body_roundhouse": 8.0, &"low_roundhouse": 6.0, &"low_side_kick": 12.0, &"axe_kick": 8.0,
 	&"rising_elbow": 8.0, &"body_straight": 14.0, &"body_punch": 20.0, &"low_palm": 14.0,
+	&"light_slap": 14.0, &"thrust_kick": 10.0, &"double_push": 14.0, &"head_elbow": 10.0, &"hammer_fist": 16.0,
+	&"stomach_shot": 12.0, &"leg_kick": 8.0,
 }
 ## A grounded strike stops travelling (step-in and lunge) once the opponent is
 ## within the move's own reach plus this margin, so the limb arrives extended
@@ -254,6 +258,10 @@ const AIR_HIT_POP_VELOCITY: float = -3.5
 ##                    forward speed leap_vx (default 2.5) px/tick. Landing ends
 ##                    it, followed by land_lag ticks of landing recovery.
 ##   stun (optional): ticks of dizzy on a clean hit (see DIZZY_*).
+##   backstep / backstep_ticks (optional): px stepped back over the first
+##                    ticks of the startup (a run-up, e.g. the Belly Bomb).
+##   bounce (optional): on contact the attacker rebounds off the target;
+##                    hit_land_lag then replaces the (long) whiff landing.
 ##   no_strike (optional): a technique with no hitbox of its own (a weave, a
 ##                    feint); it cancels into its chains without needing contact.
 ##   sequence (optional): this move is a series of other moves (by id), each
@@ -786,6 +794,96 @@ const ATTACK_TABLE: Dictionary = {
 		"knockback": 5.0, "lunge": 0.0, "hitstop": 11,
 		"hitbox": Rect2(52.0, -126.0, 58.0, 50.0),
 	},
+	# --- Bangla Maar (para street fighting, a parody style) -----------------------
+	# Light slap: a quick open palm across the cheek.
+	AttackType.LIGHT_SLAP: {
+		"id": &"light_slap", "name": "Light Slap", "posture": 6.0,
+		"startup": 5, "active": 2, "recovery": 11, "cancel_window": 9,
+		"damage": 6, "hitstun": 16, "blockstun": 10,
+		"knockback": 2.5, "lunge": 0.8, "hitstop": 5,
+		"hitbox": Rect2(26.0, -162.0, 52.0, 30.0),
+	},
+	# Front thrust kick: a flat-footed shove of a kick into the stomach.
+	AttackType.THRUST_KICK: {
+		"id": &"thrust_kick", "name": "Front Thrust Kick", "posture": 16.0,
+		"startup": 9, "active": 4, "recovery": 18, "cancel_window": 6,
+		"damage": 10, "hitstun": 19, "blockstun": 13,
+		"knockback": 8.5, "lunge": 1.0, "hitstop": 6,
+		"hitbox": Rect2(36.0, -118.0, 62.0, 32.0),
+	},
+	# Double-hand push: a two-palmed shove. Big push on a clean hit and a 20%
+	# knockdown roll (blocked: reduced push, never a knockdown).
+	AttackType.DOUBLE_PUSH: {
+		"id": &"double_push", "name": "Double-Hand Push", "posture": 12.0,
+		"startup": 10, "active": 4, "recovery": 22, "cancel_window": 0,
+		"damage": 5, "hitstun": 20, "blockstun": 12,
+		"knockback": 10.0, "lunge": 1.2, "hitstop": 6,
+		"blowback_chance": 0.2, "blowback_vx": 7.5, "blowback_vy": -5.0, "blowback_rolls": 0,
+		"hitbox": Rect2(24.0, -142.0, 56.0, 48.0),
+	},
+	# Head elbow: the rear elbow swung round at head height.
+	AttackType.HEAD_ELBOW: {
+		"id": &"head_elbow", "name": "Head Elbow", "posture": 14.0,
+		"startup": 8, "active": 3, "recovery": 17, "cancel_window": 6,
+		"damage": 11, "hitstun": 21, "blockstun": 13,
+		"knockback": 4.5, "lunge": 1.2, "hitstop": 7,
+		"hitbox": Rect2(14.0, -170.0, 48.0, 40.0),
+	},
+	# Double-hand hammer: both fists clasped high overhead, brought down on the head.
+	AttackType.HAMMER_FIST: {
+		"id": &"hammer_fist", "name": "Double-Hand Hammer", "stun": 80, "posture": 22.0,
+		"startup": 15, "active": 4, "recovery": 25, "cancel_window": 0,
+		"damage": 15, "hitstun": 24, "blockstun": 16,
+		"knockback": 6.5, "lunge": 1.5, "hitstop": 10,
+		"hitbox": Rect2(26.0, -172.0, 56.0, 56.0),
+	},
+	# Stomach shot: a dipping rear-hand punch to the belly.
+	AttackType.STOMACH_SHOT: {
+		"id": &"stomach_shot", "name": "Stomach Shot", "posture": 10.0,
+		"startup": 7, "active": 3, "recovery": 14, "cancel_window": 8,
+		"damage": 8, "hitstun": 18, "blockstun": 11,
+		"knockback": 4.0, "lunge": 1.2, "hitstop": 5,
+		"hitbox": Rect2(30.0, -118.0, 54.0, 30.0),
+	},
+	# Leg kick: a toe-poke to the shin (block it low).
+	AttackType.PARA_LEG_KICK: {
+		"id": &"leg_kick", "name": "Leg Kick", "posture": 12.0, "low": true,
+		"startup": 9, "active": 3, "recovery": 17, "cancel_window": 6,
+		"damage": 9, "hitstun": 18, "blockstun": 12,
+		"knockback": 3.5, "lunge": 0.8, "hitstop": 6,
+		"hitbox": Rect2(30.0, -62.0, 60.0, 36.0),
+	},
+	# Flying slap (Space + J): a hop and an open palm across the face.
+	AttackType.FLYING_SLAP: {
+		"id": &"flying_slap", "name": "Flying Slap", "posture": 12.0,
+		"leap": -7.5, "leap_at": 3, "leap_vx": 5.0,
+		"startup": 9, "active": 4, "recovery": 20, "cancel_window": 0,
+		"damage": 11, "hitstun": 21, "blockstun": 13,
+		"knockback": 5.0, "lunge": 0.0, "hitstop": 8,
+		"hitbox": Rect2(40.0, -155.0, 54.0, 42.0),
+	},
+	# Flying chest kick (Space + K): a leap and a flat kick into the chest.
+	AttackType.FLYING_CHEST_KICK: {
+		"id": &"flying_chest_kick", "name": "Flying Chest Kick", "stun": 70, "posture": 20.0,
+		"leap": -9.0, "leap_at": 4, "leap_vx": 5.5,
+		"startup": 12, "active": 5, "recovery": 24, "cancel_window": 0,
+		"damage": 14, "hitstun": 24, "blockstun": 16,
+		"knockback": 8.0, "lunge": 0.0, "hitstop": 9,
+		"blowback_chance": 0.3, "blowback_vx": 8.0, "blowback_vy": -6.0, "blowback_rolls": 1,
+		"hitbox": Rect2(46.0, -110.0, 62.0, 40.0),
+	},
+	# Signature: Belly Bomb. Backstep, crouch, a forward leap belly-first into
+	# the opponent, bounce off and land. Badly punishable if it misses.
+	AttackType.BELLY_BOMB: {
+		"id": &"belly_bomb", "name": "Belly Bomb", "posture": 30.0, "signature": true,
+		"backstep": 34.0, "backstep_ticks": 8, "leap": -8.0, "leap_at": 14, "leap_vx": 11.0,
+		"bounce": true, "hit_land_lag": 10,
+		"startup": 20, "active": 6, "recovery": 32, "cancel_window": 0,
+		"damage": 22, "hitstun": 30, "blockstun": 18,
+		"knockback": 10.0, "lunge": 0.0, "hitstop": 12,
+		"blowback_chance": 1.0, "blowback_vx": 11.0, "blowback_vy": -8.0, "blowback_rolls": 1,
+		"hitbox": Rect2(4.0, -120.0, 58.0, 60.0),
+	},
 	# Jumping backfist (Taekwondo Space + J): lead fist folded across the chest
 	# on the way up, whipped out to the temple at the top.
 	AttackType.JUMPING_BACKFIST: {
@@ -895,6 +993,12 @@ class Attack extends RefCounted:
 	var no_strike: bool = false
 	## Dizzy ticks on a clean hit (0 = this move never stuns).
 	var stun: int = 0
+	## Run-up: px stepped back over the first backstep_ticks of the startup.
+	var backstep: float = 0.0
+	var backstep_ticks: int = 0
+	## Rebounds off the target on contact; landing lag after a contact.
+	var bounce: bool = false
+	var hit_land_lag: int = 0
 
 	func total_frames() -> int:
 		return startup + active + recovery
@@ -964,6 +1068,10 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.sequence = row.get("sequence", [])
 	attack.no_strike = row.get("no_strike", false)
 	attack.stun = row.get("stun", 0)
+	attack.backstep = row.get("backstep", 0.0)
+	attack.backstep_ticks = row.get("backstep_ticks", 0)
+	attack.bounce = row.get("bounce", false)
+	attack.hit_land_lag = row.get("hit_land_lag", 0)
 	_attack_cache[type] = attack
 	return attack
 
@@ -1004,10 +1112,10 @@ static func impact_kind(type: AttackType) -> ImpactKind:
 				AttackType.RISING_ELBOW, AttackType.POWER_UPPERCUT, AttackType.FLYING_KNEE_FACE:
 			return ImpactKind.RISING
 		AttackType.AXE_KICK, AttackType.OVERHAND, AttackType.JUMP_PUNCH, AttackType.JUMPING_ELBOW, \
-				AttackType.FLYING_AXE_KICK:
+				AttackType.FLYING_AXE_KICK, AttackType.HAMMER_FIST:
 			return ImpactKind.DOWNWARD
 		AttackType.JUMPING_BACKFIST, AttackType.JUMPING_SPIN_HOOK, AttackType.LEAPING_ROUNDHOUSE, \
-				AttackType.LEAPING_SPIN_BACKFIST:
+				AttackType.LEAPING_SPIN_BACKFIST, AttackType.LIGHT_SLAP, AttackType.HEAD_ELBOW, AttackType.FLYING_SLAP:
 			return ImpactKind.HOOK
 	return ImpactKind.STRAIGHT
 

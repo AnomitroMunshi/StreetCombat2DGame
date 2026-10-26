@@ -73,6 +73,15 @@ var _debug_visible: bool = true
 var _debug_lines: PackedStringArray = PackedStringArray()
 var _canvas: Control = null
 var _font: Font = null
+## Speech bubbles: side (0 player, 1 rival) -> {"fighter", "text", "age"}.
+var _speech: Dictionary = {}
+var _speech_font: Font = null
+const SPEECH_FONT_SIZE: int = 20
+const SPEECH_POP_TIME: float = 0.12
+## Fonts with Bengali glyphs, tried in order (installed system fonts: nothing
+## is bundled or downloaded). Nirmala UI and Vrinda ship with Windows.
+const SPEECH_FONT_NAMES: PackedStringArray = ["Nirmala UI", "Vrinda", "Shonar Bangla", "Noto Sans Bengali",
+	"Noto Serif Bengali", "Lohit Bengali", "Kalpurush", "SolaimanLipi"]
 ## Big centred countdown text ("3", "2", "1", "FIGHT!") and its age in seconds,
 ## for the pop-in scale animation.
 var _count_text: String = ""
@@ -100,6 +109,7 @@ var _selected_id: StringName = &""
 
 func _ready() -> void:
 	_font = ThemeDB.fallback_font
+	_speech_font = make_speech_font()
 	_canvas = Control.new()
 	_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_canvas.size = Vector2(SCREEN_W, 720.0)
@@ -452,6 +462,23 @@ func _on_button_pressed() -> void:
 
 
 ## Callout under a fighter's health bar ("GUARD BREAK", "COUNTER", "PARRY").
+## A font for speech bubbles: a system font with Bengali script (complex
+## shaping by the text server), falling back to the game font.
+static func make_speech_font() -> Font:
+	var sys := SystemFont.new()
+	sys.font_names = SPEECH_FONT_NAMES
+	sys.fallbacks = [ThemeDB.fallback_font]
+	return sys
+
+
+func show_speech(fighter: Fighter, text: String) -> void:
+	_speech[0 if fighter == _player else 1] = {"fighter": fighter, "text": text, "age": 0.0}
+
+
+func hide_speech(fighter: Fighter) -> void:
+	_speech.erase(0 if fighter == _player else 1)
+
+
 func popup(fighter: Fighter, text: String, color: Color) -> void:
 	_popups.append({"text": text, "side": 0 if fighter == _player else 1, "age": 0.0, "color": color})
 
@@ -533,6 +560,8 @@ func _process(delta: float) -> void:
 		_trail[i] = ratio if _trail[i] < ratio else move_toward(_trail[i], ratio, TRAIL_DRAIN_PER_SEC * delta)
 		var pr := f.posture / CombatData.POSTURE_MAX
 		_posture_shown[i] = lerpf(_posture_shown[i], pr, 1.0 - exp(-14.0 * real_delta))
+	for side in _speech:
+		_speech[side]["age"] += real_delta
 	for i in range(_popups.size() - 1, -1, -1):
 		_popups[i]["age"] += real_delta
 		if _popups[i]["age"] > POPUP_LIFE:
@@ -629,6 +658,7 @@ func _draw_overlays() -> void:
 		_shadow_text(Vector2(0.0, 350.0), _subline, 24, HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, COLOR_DIM)
 	if _count_text != "":
 		_draw_countdown()
+	_draw_speech()
 
 	if _flash > 0.0:
 		_canvas.draw_rect(Rect2(0.0, 0.0, SCREEN_W, 720.0), Color(1.0, 0.97, 0.9, _flash * 0.75))
@@ -701,6 +731,53 @@ func _draw_focus(f: Fighter, x: float, mirrored: bool) -> void:
 		var text := ("SIGNATURE READY - F   " + sig) if f == _player else sig + " READY"
 		var align := HORIZONTAL_ALIGNMENT_RIGHT if mirrored else HORIZONTAL_ALIGNMENT_LEFT
 		_shadow_text(Vector2(x, BAR_Y + 84.0), text, 18, align, BAR_WIDTH, Color(1.0, 0.9, 0.5, 0.75 + 0.25 * pulse))
+
+
+## Bubbles above the speakers' heads: kept on screen, and the second one moved
+## up when the two would overlap. A tail points at the speaker.
+func _draw_speech() -> void:
+	var placed: Array[Rect2] = []
+	for side in [0, 1]:
+		if not _speech.has(side):
+			continue
+		var sp: Dictionary = _speech[side]
+		var f: Fighter = sp["fighter"]
+		if not is_instance_valid(f):
+			continue
+		var text: String = sp["text"]
+		var head := f.get_global_transform_with_canvas() * Vector2(0.0, -200.0)
+		var size := _speech_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, SPEECH_FONT_SIZE)
+		var w := size.x + 28.0
+		var h := size.y + 16.0
+		var rect := Rect2(head.x - w * 0.5, head.y - h - 16.0, w, h)
+		rect.position.x = clampf(rect.position.x, 8.0, SCREEN_W - w - 8.0)
+		rect.position.y = maxf(rect.position.y, 96.0)
+		for other in placed:
+			if rect.intersects(other.grow(6.0)):
+				rect.position.y = other.position.y - h - 12.0
+		# Never over the result headline / countdown in the middle of the screen.
+		var middle := Rect2(0.0, 220.0, SCREEN_W, 150.0)
+		if (_headline != "" or _count_text != "") and rect.intersects(middle):
+			rect.position.y = middle.position.y - h - 8.0
+		placed.append(rect)
+		var pop := smoothstep(0.0, SPEECH_POP_TIME, sp["age"])
+		var c := rect.get_center()
+		var shown := Rect2(c - rect.size * 0.5 * (0.7 + 0.3 * pop), rect.size * (0.7 + 0.3 * pop))
+		var tail_x := clampf(head.x, shown.position.x + 14.0, shown.end.x - 14.0)
+		var tail := PackedVector2Array([Vector2(tail_x - 8.0, shown.end.y - 1.0), Vector2(tail_x + 8.0, shown.end.y - 1.0),
+			Vector2(lerpf(tail_x, head.x, 0.5), shown.end.y + 13.0)])
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color(1.0, 0.99, 0.95, pop)
+		box.border_color = Color(0.1, 0.08, 0.08, pop)
+		box.set_border_width_all(2)
+		box.set_corner_radius_all(12)
+		_canvas.draw_colored_polygon(tail, Color(0.1, 0.08, 0.08, pop))
+		_canvas.draw_style_box(box, shown)
+		var inner := PackedVector2Array([tail[0] + Vector2(2.5, -1.0), tail[1] + Vector2(-2.5, -1.0), tail[2] + Vector2(0.0, -4.0)])
+		_canvas.draw_colored_polygon(inner, Color(1.0, 0.99, 0.95, pop))
+		if pop > 0.6:
+			_canvas.draw_string(_speech_font, Vector2(shown.position.x + 14.0, shown.position.y + 8.0 + size.y * 0.78), text,
+				HORIZONTAL_ALIGNMENT_LEFT, -1, SPEECH_FONT_SIZE, Color(0.12, 0.08, 0.06, pop))
 
 
 func _draw_popups() -> void:

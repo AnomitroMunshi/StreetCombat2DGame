@@ -81,6 +81,23 @@ const SLOWMO_DIZZY := Vector2(6.0, 0.45)
 ## Dizzy birdsong repeats this often (ticks) while a fighter is stunned.
 const DIZZY_CHIRP_TICKS: int = 40
 const DIZZY_COLOR := Color(1.0, 0.86, 0.3)
+## Speech bubbles (styles with MartialArtStyle.quotes): one bubble per fighter,
+## shown SPEECH_TICKS (the victory line longer). A line only replaces a
+## showing one of lower priority; after a bubble the fighter stays quiet for
+## SPEECH_COOLDOWN ticks (except for priority >= SPEECH_URGENT). Each event
+## fires once per game event (never per hit-detection frame).
+const SPEECH_TICKS: int = 80
+const SPEECH_VICTORY_TICKS: int = 200
+const SPEECH_COOLDOWN: int = 45
+const SPEECH_URGENT: int = 4
+const SPEECH_PRIORITY: Dictionary = {"hurt": 1, "block": 1, "slap": 2, "miss_heavy": 2, "match_start": 3,
+	"low_health": 4, "victory": 5}
+## Moves whose whiff makes the fighter speak (big committal swings).
+const SPEECH_MISS_MOVES: Array[StringName] = [&"hammer_fist", &"thrust_kick", &"flying_chest_kick", &"belly_bomb",
+	&"double_push"]
+const SPEECH_SLAPS: Array[StringName] = [&"light_slap", &"flying_slap"]
+## Low-health line below this fraction of max health (once per match).
+const SPEECH_LOW_HEALTH: float = 0.25
 const VIEW_MIN := Vector2(-200.0, -200.0)
 const VIEW_MAX := Vector2(1480.0, 920.0)
 const HIT_COLOR := Color(1.0, 0.9, 0.6)
@@ -132,6 +149,11 @@ var _slowmo_ticks: int = 0
 # Double-tap detection for dodges: tick of the last A / D tap.
 var _last_tap := {-1: -1000, 1: -1000}
 var _block_was_held: bool = false
+# Speech: fighter -> {"event", "text", "prio", "ticks", "quiet"}; who already
+# said the low-health line; each fighter's swing being watched for a whiff.
+var _speech: Dictionary = {}
+var _low_health_said: Dictionary = {}
+var _watched_swing: Dictionary = {}
 # Finisher ambience: where the wall was last hit (dust keeps trickling from the
 # cracks), whether the attacker was airborne last tick (takeoff dust), and the
 # last x of each skidding body (floor scuff marks).
@@ -224,6 +246,7 @@ func _physics_process(_delta: float) -> void:
 	_tick_match_flow()
 	_tick_dizzy_audio()
 	_tick_celebration()
+	_tick_speech()
 
 	var fighting := _round_state == RoundState.FIGHTING
 	# Player input is buffered even during hitstop so combos feel responsive.
@@ -416,6 +439,8 @@ func _reset_training() -> void:
 		f.reset_physics_interpolation()
 	_set_round_state(RoundState.FIGHTING)
 	enemy_ai.setup(enemy, player)
+	for f: Fighter in [player, enemy]:
+		say(f, "match_start")
 
 
 ## Back to the pre-match screen with the same style (START, TRAINING, CHANGE STYLE).
@@ -572,6 +597,7 @@ func _begin_fight() -> void:
 	for f: Fighter in [player, enemy]:
 		f.prefight_pose = &""
 		f.stop_combat()
+		say(f, "match_start")
 	enemy_ai.setup(enemy, player)
 	hud.set_countdown("FIGHT!")
 	hud.flash(0.25)
@@ -744,6 +770,7 @@ func _resolve_hits() -> void:
 				defender.add_block_focus()
 		if result == CombatData.HitResult.KO:
 			killing_attack = attack
+		_speech_on_hit(result, attack, attacker, defender)
 		attacker.confirm_hit(result)
 		if training != null:
 			training.on_hit(result, attacker, defender, attack)
@@ -1157,6 +1184,72 @@ func _on_fighter_posture_broken(fighter: Fighter) -> void:
 	_slowmo(SLOWMO_GUARD_BREAK)
 
 
+# --- Speech bubbles ----------------------------------------------------------
+
+## `fighter` says its style's line for `event`, if it has one and the bubble
+## rules allow it (see SPEECH_*). Returns true when a bubble was shown.
+func say(fighter: Fighter, event: String) -> bool:
+	if fighter.style == null or not fighter.style.quotes.has(event):
+		return false
+	var prio: int = SPEECH_PRIORITY.get(event, 1)
+	var cur: Dictionary = _speech.get(fighter, {})
+	if not cur.is_empty():
+		if cur["ticks"] > 0 and cur["prio"] >= prio:
+			return false  # an equally or more important line is showing
+		if cur["ticks"] <= 0 and cur["quiet"] > 0 and prio < SPEECH_URGENT:
+			return false  # still catching their breath after the last line
+	var text: String = fighter.style.quotes[event]
+	var ticks := SPEECH_VICTORY_TICKS if event == "victory" else SPEECH_TICKS
+	_speech[fighter] = {"event": event, "text": text, "prio": prio, "ticks": ticks, "quiet": 0}
+	hud.show_speech(fighter, text)
+	return true
+
+
+## The line `fighter` is saying now ("" if none).
+func speech_text(fighter: Fighter) -> String:
+	var cur: Dictionary = _speech.get(fighter, {})
+	return cur["text"] if not cur.is_empty() and cur["ticks"] > 0 else ""
+
+
+func _speech_on_hit(result: CombatData.HitResult, attack: CombatData.Attack, attacker: Fighter, defender: Fighter) -> void:
+	match result:
+		CombatData.HitResult.HIT:
+			if attack.id in SPEECH_SLAPS:
+				say(attacker, "slap")
+			if defender.health <= defender.max_health * SPEECH_LOW_HEALTH and not _low_health_said.has(defender):
+				_low_health_said[defender] = true
+				say(defender, "low_health")
+			else:
+				say(defender, "hurt")
+		CombatData.HitResult.BLOCKED:
+			say(defender, "block")
+
+
+## Bubble timers, and whiffed big swings ("you got lucky!").
+func _tick_speech() -> void:
+	for f: Fighter in [player, enemy]:
+		var cur: Dictionary = _speech.get(f, {})
+		if not cur.is_empty():
+			if cur["ticks"] > 0:
+				cur["ticks"] -= 1
+				if cur["ticks"] == 0:
+					cur["quiet"] = SPEECH_COOLDOWN
+					hud.hide_speech(f)
+			elif cur["quiet"] > 0:
+				cur["quiet"] -= 1
+		var w: Dictionary = _watched_swing.get(f, {})
+		var swinging := f.state == Fighter.State.ATTACK and f.current_attack != null
+		if not w.is_empty() and (not swinging or f.swing_id != w["swing"]):
+			if not w["hit"] and w["id"] in SPEECH_MISS_MOVES and _round_state == RoundState.FIGHTING:
+				say(f, "miss_heavy")
+			w = {}
+		if swinging:
+			if w.is_empty():
+				w = {"swing": f.swing_id, "id": f.current_attack.id, "hit": false}
+			w["hit"] = w["hit"] or f.swing_has_hit
+		_watched_swing[f] = w
+
+
 ## A stun move landed: a bell ring and a dazed warble, a burst of stars at
 ## the head, a short slow-motion beat. The stars circling the head and the
 ## sway are drawn by FighterVisual while the fighter is DIZZY.
@@ -1196,6 +1289,7 @@ func _tick_celebration() -> void:
 				f.call("_enter_state", Fighter.State.IDLE)
 			f.face_opponent()
 			f.celebration = f.style.id
+			say(f, "victory")
 
 
 func _on_fighter_perfect_evaded(fighter: Fighter) -> void:

@@ -385,6 +385,54 @@ var _win_kb_both := PackedFloat32Array([-0.1, -0.3, 2.75, 2.95, 3.55, 3.45, 0.3,
 var _victory: Dictionary = {}
 var _victory_seen: StringName = &""
 var _victory_t0: float = 0.0
+# --- Bangla Maar ---------------------------------------------------------------
+# Light slap: the lead hand drawn back low and wide, then swung across the cheek.
+var _slap_wind := PackedFloat32Array([0.0, 0.1, 0.2, -0.3, 0.2, 0.4, 0.3, 0.0, -0.25, -0.3, -4.0, 0.0, 0.0, 10.0])
+var _slap_hit := PackedFloat32Array([0.25, -0.05, 1.75, 1.95, 0.2, 0.45, 0.32, 0.0, -0.3, -0.35, 8.0, 0.0, 0.3, -6.0])
+var _slap_follow := PackedFloat32Array([0.3, -0.1, 2.0, 2.6, 0.2, 0.45, 0.32, 0.0, -0.3, -0.35, 9.0, 0.0, 0.35, -8.0])
+# Front thrust kick: arms flung up for balance, a flat-footed shove of a kick.
+var _thrust_chamber := PackedFloat32Array([-0.3, 0.2, 1.6, 2.3, 1.3, 2.0, 1.9, 0.2, -0.3, -0.25, -2.0, 6.0, 0.2, 4.0])
+var _thrust_extend := PackedFloat32Array([-0.5, 0.3, 1.9, 2.5, 1.5, 2.2, 1.55, 1.55, -0.45, -0.15, 12.0, 4.0, 0.35, 4.0])
+# Double-hand push: both hands pulled to the chest, then a full-body shove.
+var _push_load := PackedFloat32Array([-0.05, 0.05, 0.85, 2.7, 0.8, 2.7, 0.35, -0.05, -0.35, -0.4, -6.0, 0.0, 0.0, 6.0])
+var _push_hit := PackedFloat32Array([0.38, 0.1, 1.5, 1.5, 1.45, 1.45, 0.6, -0.1, -0.6, -0.5, 14.0, 0.0, 0.4, 2.0])
+# Head elbow: the rear elbow cocked high, swung round into the head.
+var _helbow_load := PackedFloat32Array([0.0, 0.1, 0.6, 0.9, 2.4, 4.4, 0.3, 0.0, -0.3, -0.35, -4.0, 0.0, 0.0, 14.0])
+var _helbow_hit := PackedFloat32Array([0.4, 0.05, 0.6, 0.9, 1.8, 4.45, 0.45, -0.05, -0.5, -0.5, 12.0, 0.0, 0.7, -10.0])
+# Double-hand hammer: both fists clasped high (a long, comic wind-up), then
+# brought straight down.
+var _hammer_raise := PackedFloat32Array([-0.35, -0.25, 3.3, 3.45, 3.25, 3.4, 0.35, 0.0, -0.3, -0.35, -6.0, 0.0, 0.0, 4.0])
+var _hammer_hit := PackedFloat32Array([0.55, 0.2, 1.35, 1.25, 1.3, 1.2, 0.7, -0.2, -0.55, -0.6, 12.0, 0.0, 0.3, 2.0])
+# Stomach shot: dip, rear fist at the hip, then dug into the belly.
+var _stomach_load := PackedFloat32Array([0.3, 0.15, 0.7, 1.2, 0.25, 2.3, 0.9, -0.4, -0.45, -0.85, -4.0, 0.0, 0.0, 12.0])
+var _stomach_hit := PackedFloat32Array([0.5, 0.25, 0.7, 1.2, 1.3, 1.3, 1.0, -0.45, -0.55, -0.95, 12.0, 0.0, 0.7, -10.0])
+# Leg kick: a toe-poke at the shin, lead leg swung forward low.
+var _lkick_load := PackedFloat32Array([-0.1, 0.1, 0.5, 0.8, 0.3, 0.6, 0.5, -0.6, -0.3, -0.3, -2.0, 0.0, 0.0, 4.0])
+var _lkick_hit := PackedFloat32Array([-0.25, 0.15, 0.7, 1.0, 0.2, 0.5, 0.85, 1.0, -0.35, -0.25, 8.0, 0.0, 0.3, 4.0])
+# Flying slap: hop with the slapping hand raised high, swung down across the face.
+var _fslap_load := PackedFloat32Array([0.0, 0.05, 2.9, 3.4, 0.5, 2.6, 1.6, -0.8, 0.8, -1.3, -4.0, 0.0, 0.0, 12.0])
+var _fslap_hit := PackedFloat32Array([0.35, -0.05, 1.55, 1.5, 0.5, 2.6, 1.3, -0.4, -0.4, -0.9, 8.0, 0.0, 0.3, -4.0])
+# Flying chest kick: knees tucked, then one leg flat into the chest with the
+# body leaning back and both arms thrown up.
+var _fck_load := PackedFloat32Array([0.0, 0.1, 1.5, 2.5, 1.3, 2.4, 2.0, -1.0, 1.2, -1.4, -2.0, 0.0, 0.3])
+var _fck_hit := PackedFloat32Array([-0.55, 0.4, 2.2, 2.6, 2.0, 2.4, 1.6, 1.55, 0.9, -1.3, 8.0, 0.0, 0.6])
+# Belly Bomb: step back leaning away, crouch, then fly belly-first with the
+# back arched and arms flung behind; bounce and land.
+var _bb_back := PackedFloat32Array([-0.2, -0.1, 0.6, 1.0, 0.4, 0.8, 0.5, -0.2, -0.4, -0.5, -8.0, 0.0, 0.0, 4.0])
+var _bb_crouch := PackedFloat32Array([0.45, 0.2, 0.3, 0.6, 0.2, 0.5, 1.2, -0.8, -0.6, -1.4, -4.0, 0.0, 0.0, 4.0])
+var _bb_fly := PackedFloat32Array([-0.75, -0.3, -0.7, -0.4, -0.8, -0.5, 0.9, -0.4, -0.9, -0.5, 16.0, 0.0, 0.0, 4.0])
+var _bb_land := PackedFloat32Array([0.2, 0.1, 0.8, 1.6, 0.6, 1.4, 1.1, -0.6, -0.4, -1.1, 0.0, 0.0, 0.0, 4.0])
+# Finishers: a punt at a sitting opponent's head, the enormous Super Chor slap
+# and shaking the stinging hand afterwards.
+var _punt_load := PackedFloat32Array([-0.2, 0.15, 1.2, 1.6, 0.6, 1.2, -0.6, -1.2, -0.3, -0.3, -6.0, 0.0, 0.0, 6.0])
+var _punt_hit := PackedFloat32Array([-0.4, 0.2, 1.6, 2.1, 0.9, 1.8, 1.5, 1.45, -0.3, -0.25, 10.0, 0.0, 0.6, 4.0])
+var _mega_slap_wind := PackedFloat32Array([-0.4, -0.2, 3.8, 4.1, 0.6, 1.0, 0.35, 0.0, -0.35, -0.35, -10.0, 0.0, 0.0, 18.0])
+var _mega_slap_hit := PackedFloat32Array([0.45, 0.0, 1.6, 1.7, 0.3, 0.5, 0.6, -0.1, -0.6, -0.5, 14.0, 0.0, 0.8, -12.0])
+var _hand_shake_a := PackedFloat32Array([0.1, 0.15, 1.1, 1.0, 0.2, 0.4, 0.3, 0.0, -0.25, -0.3, 0.0, 0.0, 0.0, 3.0])
+var _hand_shake_b := PackedFloat32Array([0.1, 0.05, 1.0, 1.55, 0.2, 0.4, 0.3, 0.0, -0.25, -0.3, 0.0, 0.0, 0.0, 3.0])
+# Victory: hands on the waist, chest out.
+var _win_para := PackedFloat32Array([-0.15, -0.2, -0.55, 0.95, -0.55, 0.95, 0.25, 0.0, -0.2, -0.25, 0.0, 0.0, 0.0, 3.0])
+var _win_para_point := PackedFloat32Array([-0.1, -0.1, 1.5, 1.6, -0.55, 0.95, 0.25, 0.0, -0.2, -0.25, 0.0, 0.0, 0.0, 3.0])
 # --- Signatures -------------------------------------------------------------------
 # Gazelle Hook: sink into a deep crouch, then spring up and forward into a
 # rising lead hook (the whole body drives up through the fist).
@@ -609,7 +657,7 @@ var _shoe := Color.TRANSPARENT
 # extra bulk]); everything else is skin. Details (belts, collars, armbands,
 # hair) are drawn in the same body pass, so depth order stays right.
 enum { P_UPPER_ARM, P_FOREARM, P_TORSO, P_THIGH, P_SHIN, P_FOOT }
-const OUTFIT_KITS: Array[StringName] = [&"muay_thai", &"karate", &"kung_fu", &"taekwondo", &"kickboxing"]
+const OUTFIT_KITS: Array[StringName] = [&"muay_thai", &"karate", &"kung_fu", &"taekwondo", &"kickboxing", &"bangla_maar"]
 const GLOVED_KITS: Array[StringName] = [&"boxing", &"muay_thai", &"kickboxing"]
 const GI_WHITE := Color(0.95, 0.94, 0.9)
 const GI_BLACK := Color(0.14, 0.14, 0.16)
@@ -664,6 +712,13 @@ func _ready() -> void:
 		# Directional reactions for finisher victims.
 		&"hitstun_hook": _hitstun_hook, &"hitstun_up": _hitstun_up, &"hitstun_down": _hitstun_down,
 		&"hitstun_leg": _hitstun_leg, &"hitstun_heavy": _hitstun_heavy,
+		# Bangla Maar finishers.
+		&"getup_sit": _getup_sit, &"lkick_hit": _lkick_hit, &"thrust_chamber": _thrust_chamber,
+		&"thrust_extend": _thrust_extend, &"punt_load": _punt_load, &"punt_hit": _punt_hit,
+		&"mega_slap_wind": _mega_slap_wind, &"mega_slap_hit": _mega_slap_hit,
+		&"hand_shake_a": _hand_shake_a, &"hand_shake_b": _hand_shake_b, &"push_load": _push_load,
+		&"push_hit": _push_hit, &"stomach_hit": _stomach_hit, &"hammer_raise": _hammer_raise, &"hammer_hit": _hammer_hit,
+		&"slap_hit": _slap_hit, &"bb_fly": _bb_fly,
 	}
 	_moves = {
 		CombatData.AttackType.LIGHT: [
@@ -815,6 +870,37 @@ func _ready() -> void:
 		CombatData.AttackType.LEAPING_ROUNDHOUSE: [
 			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _lrh_load, EASE_SMOOTH], [A, 0.0, _lrh_hit, EASE_IN],
 			[A, 1.0, _lrh_hit, EASE_LINEAR], [R, 0.45, _lrh_load, EASE_OUT]],
+		CombatData.AttackType.LIGHT_SLAP: [
+			[S, 0.55, _slap_wind, EASE_SMOOTH], [A, 0.0, _slap_hit, EASE_IN], [A, 1.0, _slap_follow, EASE_LINEAR],
+			[R, 0.45, _slap_follow, EASE_OUT]],
+		CombatData.AttackType.THRUST_KICK: [
+			[S, 0.6, _thrust_chamber, EASE_SMOOTH], [A, 0.0, _thrust_extend, EASE_IN],
+			[A, 1.0, _thrust_extend, EASE_LINEAR], [R, 0.4, _thrust_chamber, EASE_OUT]],
+		CombatData.AttackType.DOUBLE_PUSH: [
+			[S, 0.6, _push_load, EASE_SMOOTH], [A, 0.0, _push_hit, EASE_IN],
+			[A, 1.0, _push_hit, EASE_LINEAR], [R, 0.4, _push_hit, EASE_LINEAR]],
+		CombatData.AttackType.HEAD_ELBOW: [
+			[S, 0.55, _helbow_load, EASE_SMOOTH], [A, 0.0, _helbow_hit, EASE_IN],
+			[A, 1.0, _over(_helbow_hit, _helbow_load), EASE_LINEAR], [R, 0.3, _helbow_hit, EASE_LINEAR]],
+		CombatData.AttackType.HAMMER_FIST: [
+			[S, 0.4, _hammer_raise, EASE_SMOOTH], [S, 0.85, _hammer_raise, EASE_LINEAR], [A, 0.0, _hammer_hit, EASE_IN],
+			[A, 1.0, _hammer_hit, EASE_LINEAR], [R, 0.4, _hammer_hit, EASE_LINEAR]],
+		CombatData.AttackType.STOMACH_SHOT: [
+			[S, 0.55, _stomach_load, EASE_SMOOTH], [A, 0.0, _stomach_hit, EASE_IN],
+			[A, 1.0, _over(_stomach_hit, _stomach_load), EASE_LINEAR], [R, 0.35, _stomach_load, EASE_OUT]],
+		CombatData.AttackType.PARA_LEG_KICK: [
+			[S, 0.55, _lkick_load, EASE_SMOOTH], [A, 0.0, _lkick_hit, EASE_IN],
+			[A, 1.0, _lkick_hit, EASE_LINEAR], [R, 0.4, _lkick_load, EASE_OUT]],
+		CombatData.AttackType.FLYING_SLAP: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _fslap_load, EASE_SMOOTH], [A, 0.0, _fslap_hit, EASE_IN],
+			[A, 1.0, _fslap_hit, EASE_LINEAR], [R, 0.4, _fslap_load, EASE_OUT]],
+		CombatData.AttackType.FLYING_CHEST_KICK: [
+			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _fck_load, EASE_SMOOTH], [A, 0.0, _fck_hit, EASE_IN],
+			[A, 1.0, _fck_hit, EASE_LINEAR], [R, 0.45, _fck_load, EASE_OUT]],
+		CombatData.AttackType.BELLY_BOMB: [
+			[S, 0.15, _bb_back, EASE_SMOOTH], [S, 0.4, _bb_back, EASE_LINEAR], [S, 0.65, _bb_crouch, EASE_SMOOTH],
+			[S, 0.85, _bb_crouch, EASE_LINEAR], [A, 0.0, _bb_fly, EASE_IN], [A, 1.0, _bb_fly, EASE_LINEAR],
+			[R, 0.4, _bb_land, EASE_SMOOTH]],
 		CombatData.AttackType.LEAPING_SPIN_BACKFIST: [
 			[S, 0.35, _lsb_coil, EASE_SMOOTH], [S, 0.75, _lsb_turn, EASE_SMOOTH], [A, 0.0, _lsb_hit, EASE_IN],
 			[A, 1.0, _lsb_hit, EASE_LINEAR], [R, 0.45, _lsb_land, EASE_SMOOTH]],
@@ -851,6 +937,8 @@ func _ready() -> void:
 			[74, _win_kf_salute]],
 		&"taekwondo": [[0, null], [14, _win_tkd_ready], [30, _win_tkd_ready], [44, _win_tkd_bow], [62, _win_tkd_bow],
 			[76, _win_tkd_ready], [92, _win_tkd_fists]],
+		&"bangla_maar": [[0, null], [14, _win_para], [44, _win_para], [56, _win_para_point], [80, _win_para_point],
+			[94, _win_para]],
 		&"kickboxing": [[0, null], [10, _win_kb_pump], [20, _win_kb_chest], [28, _win_kb_pump], [38, _win_kb_chest],
 			[50, _win_kb_both]],
 	}
@@ -1422,6 +1510,8 @@ func _active_idle() -> PackedFloat32Array:
 		idle[UA_F] += g * sin(gp * 1.7 + 0.4)
 		idle[LA_F] += g * 0.7 * sin(gp * 2.3 + 1.0)
 		idle[UA_B] += g * 0.6 * sin(gp * 1.3 + 2.0)
+	if st.get("gestures", false):
+		idle = _idle_gesture(idle, t, k)
 	var feint := float(st.get("feint", 0.0))
 	if feint > 0.0:
 		# A quick half-jab with the lead hand now and then (out and straight
@@ -1434,6 +1524,38 @@ func _active_idle() -> PackedFloat32Array:
 			idle[LA_F] -= f * 1.6
 			idle[SPREAD] += f * 8.0
 	return idle
+
+
+## Street idle gestures, one at a time on a loop: point a finger at the
+## opponent (wagging it), a hand on the waist, tug the rear sleeve, shake the
+## head. Each eases in and out of the relaxed stance.
+const GESTURE_CYCLE: float = 8.0
+const GESTURES: Array = [[0.4, 2.0, "point"], [2.6, 4.2, "waist"], [4.8, 6.0, "sleeve"], [6.5, 7.6, "shake"]]
+
+
+func _idle_gesture(p: PackedFloat32Array, t: float, k: float) -> PackedFloat32Array:
+	var cycle := fposmod(t + fighter.idle_phase * 3.0, GESTURE_CYCLE)
+	for g in GESTURES:
+		if cycle < g[0] or cycle >= g[1]:
+			continue
+		var u: float = (cycle - g[0]) / (g[1] - g[0])
+		var w := smoothstep(0.0, 0.2, u) * (1.0 - smoothstep(0.8, 1.0, u)) * k
+		match g[2]:
+			"point":
+				p[UA_F] = lerpf(p[UA_F], 1.45, w)
+				p[LA_F] = lerpf(p[LA_F], 1.6 + sin(t * TAU * 3.0) * 0.12, w)
+				p[TORSO] += 0.05 * w
+			"waist":
+				p[UA_B] = lerpf(p[UA_B], -0.55, w)
+				p[LA_B] = lerpf(p[LA_B], 0.95, w)
+			"sleeve":
+				p[UA_F] = lerpf(p[UA_F], 0.95, w)
+				p[LA_F] = lerpf(p[LA_F], 2.5, w)
+				p[UA_B] = lerpf(p[UA_B], 0.7, w)
+				p[LA_B] = lerpf(p[LA_B], 1.1 + sin(t * TAU * 4.0) * 0.15, w)
+			"shake":
+				p[HEAD] += sin(t * TAU * 3.5) * 0.14 * w
+	return p
 
 
 ## Bounce dip 0..1 at `phase` (cycles): "hop" = springy landing dips,
@@ -2102,6 +2224,10 @@ func _leg(hip: Vector2, knee: Vector2, ankle: Vector2, toe_dir: Vector2, pad: fl
 		_capsule(sole - toe * 3.0 + shin * 3.2, sole + toe * 12.5 + shin * 3.2, 1.6, 1.4, SOLE_COLOR)
 	else:
 		_capsule(sole - toe * 3.5, sole + toe * 13.0, 4.8 + pad, 3.6 + pad, _pc(P_FOOT, color, pad))
+		if pad == 0.0 and _kit == &"bangla_maar":
+			# Rubber sandal: a thin sole and the toe strap.
+			_capsule(sole - toe * 3.0 + shin * 3.4, sole + toe * 13.0 + shin * 3.4, 1.8, 1.6, _ccol("sandal"))
+			draw_line(sole + toe * 4.0 + shin * 2.0, sole + toe * 7.0 - shin * 1.5, _ccol("sandal"), 2.0, true)
 		if pad == 0.0 and _kit == &"kung_fu":
 			# Cloth shoes: a white sole under the black slipper.
 			_capsule(sole - toe * 3.0 + shin * 3.2, sole + toe * 12.5 + shin * 3.2, 1.6, 1.4, GI_WHITE.darkened(0.15 if _far else 0.0))
@@ -2138,6 +2264,11 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 		var across := Vector2(-along.y, along.x)
 		var wrist := hand - along * 8.5
 		draw_line(wrist - across * 6.5, wrist + across * 6.5, Color(0.95, 0.94, 0.9), 4.0, true)
+	if _kit == &"bangla_maar":
+		# Open hand (slaps, shoves, pointing): a flat palm with the fingers out.
+		_capsule(hand - along * 1.5, hand + along * 10.0, 5.6 + pad, 4.2 + pad, fill)
+		draw_circle(hand + inside.normalized() * 4.0, 3.0 + pad, fill, true, -1.0, true)  # thumb
+		return
 	_capsule(hand - along * 1.5 * g, hand + along * 5.5 * g, 7.0 * g + pad, 8.0 * g + pad, fill)
 	draw_circle(hand - along * 2.0 * g + inside.normalized() * 4.5 * g, 3.6 * g + pad, fill, true, -1.0, true)  # thumb
 	if glove.a > 0.0:
@@ -2172,6 +2303,8 @@ func _torso(j: PackedVector2Array, forward: Vector2, pad: float, skin_color: Col
 	back_side.reverse()
 	draw_colored_polygon(front_side + back_side, color)
 	draw_circle(hip, 10.5 + pad, color, true, -1.0, true)
+	if _kit == &"bangla_maar":
+		draw_circle(hip + axis * length * 0.36 + n * 8.0, 11.5 + pad, color, true, -1.0, true)  # belly
 	draw_circle(j[J_SHOULDER_F], 8.5 + pad, color, true, -1.0, true)  # deltoids
 	draw_circle(j[J_SHOULDER_B], 8.5 + pad, color, true, -1.0, true)
 	_capsule(j[J_HIP_F], j[J_HIP_B], 10.0 + pad, 10.0 + pad, color)  # pelvis
@@ -2273,6 +2406,16 @@ func _build_outfit() -> void:
 			_cols["trim"] = GI_WHITE
 			_cols["support"] = Color(0.92, 0.91, 0.87)
 			_cols["mongkol"] = GI_WHITE
+		&"bangla_maar":
+			# Sando genji vest, checked lungi folded up to the knee, a gamchha over
+			# the shoulder, rubber sandals.
+			var vest := Color(0.97, 0.96, 0.92)
+			_cloth([P_TORSO], vest, 1.0)
+			_cols["vest"] = vest
+			_cols["lungi"] = acc.darkened(0.25)
+			_cols["check"] = acc.lightened(0.35)
+			_cols["gamchha"] = Color(0.82, 0.16, 0.13)
+			_cols["sandal"] = acc.darkened(0.1)
 		&"kickboxing":
 			var pants := acc.darkened(0.15)
 			_cloth([P_THIGH, P_SHIN], pants, 3.0)
@@ -2335,6 +2478,15 @@ func _leg_extras(hip: Vector2, knee: Vector2, ankle: Vector2) -> void:
 			# Loose trousers gathered at the ankle.
 			var band := knee.lerp(ankle, 0.88)
 			draw_line(band - sx * 8.0, band + sx * 8.0, _ccol("pants").lightened(0.15), 3.0, true)
+		&"bangla_maar":
+			# Lungi folded up to the knee: a checked tube over the thigh.
+			var fold := hip.lerp(knee, 0.9)
+			_capsule(hip, fold, 14.0, 12.5, _ccol("lungi"))
+			for k in 3:
+				var at := hip.lerp(fold, 0.25 + k * 0.28)
+				draw_line(at - tx * 12.0, at + tx * 12.0, _ccol("check"), 1.6, true)
+			draw_line(hip, fold, _ccol("check"), 1.6, true)
+			draw_line(fold - tx * 12.5, fold + tx * 12.5, _ccol("lungi").darkened(0.25), 3.0, true)
 		&"kickboxing":
 			# Satin trousers with a side stripe, flared over taped ankles.
 			draw_line(hip.lerp(knee, 0.1), knee, _ccol("trim"), 2.2, true)
@@ -2397,6 +2549,18 @@ func _torso_extras(j: PackedVector2Array, hip: Vector2, axis: Vector2, length: f
 			for k in 3:
 				var at := band + n * (-6.0 + k * 5.0)
 				draw_line(at - axis * 1.2, at + axis * 1.2, _cols["shorts"].darkened(0.3), 2.0, true)
+		&"bangla_maar":
+			# Vest neckline, the lungi round the waist with its tucked knot, and a
+			# gamchha thrown over the near shoulder.
+			draw_circle(neck_base + n * 4.0 - axis * 2.0, 6.0, _skin, true, -1.0, true)
+			_capsule(j[J_HIP_F], j[J_HIP_B], 13.0, 13.0, _cols["lungi"])
+			var roll := hip + axis * 10.0
+			draw_line(roll - n * 14.0, roll + n * 14.0, _cols["lungi"].darkened(0.2), 5.0, true)
+			draw_circle(roll + n * 12.0, 5.0, _cols["lungi"].darkened(0.1), true, -1.0, true)
+			var towel := PackedVector2Array([neck_base + n * 5.0, j[J_SHOULDER_F] + axis * 4.0, neck_base - n * 9.0,
+				hip + axis * length * 0.42 - n * 12.0])
+			draw_polyline(towel, _cols["gamchha"], 6.0, true)
+			draw_line(towel[2], towel[3], Color(0.97, 0.95, 0.9), 1.5, true)
 		&"kickboxing":
 			_capsule(j[J_HIP_F], j[J_HIP_B], 12.5, 12.5, _cols["pants"])
 			var band2 := hip + axis * 9.0
@@ -2411,6 +2575,10 @@ func _head_extras(head: Vector2, up: Vector2, face: Vector2) -> void:
 	draw_polyline(cap, _cols["hair"], 6.0 if _kit != &"muay_thai" else 4.0, true)
 	if _kit == &"kung_fu":
 		draw_circle(head + up * (HEAD_R + 1.5) - face * 5.0, 5.0, _cols["hair"], true, -1.0, true)  # topknot
+	elif _kit == &"bangla_maar":
+		# A thick moustache and an untidy tuft of hair.
+		draw_line(head + face * HEAD_R * 0.45 - up * 4.5, head + face * HEAD_R * 1.05 - up * 3.5, _cols["hair"], 3.4, true)
+		draw_line(head + up * (HEAD_R - 1.0), head + up * (HEAD_R + 4.0) + face * 3.0, _cols["hair"], 3.0, true)
 	elif _kit == &"muay_thai":
 		# Mongkol: a stiff rope ring round the head with a tail at the back.
 		var front := head + face * HEAD_R * 0.9 + up * 5.0
@@ -2661,13 +2829,19 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 			return J_FOOT_F
 		CombatData.AttackType.KNEE, CombatData.AttackType.FLYING_KNEE:
 			return J_KNEE_F
-		CombatData.AttackType.ELBOW, CombatData.AttackType.RISING_ELBOW, CombatData.AttackType.JUMPING_ELBOW:
+		CombatData.AttackType.ELBOW, CombatData.AttackType.RISING_ELBOW, CombatData.AttackType.JUMPING_ELBOW, \
+				CombatData.AttackType.HEAD_ELBOW:
 			return J_ELBOW_B
 		CombatData.AttackType.FLYING_KNEE_FACE:
 			return J_KNEE_B
 		CombatData.AttackType.LEG_FEINT, CombatData.AttackType.FLYING_SIDE_KICK, CombatData.AttackType.LEAPING_ROUNDHOUSE, \
-				CombatData.AttackType.FLYING_AXE_KICK:
+				CombatData.AttackType.FLYING_AXE_KICK, CombatData.AttackType.THRUST_KICK, CombatData.AttackType.PARA_LEG_KICK, \
+				CombatData.AttackType.FLYING_CHEST_KICK:
 			return J_FOOT_F
+		CombatData.AttackType.BELLY_BOMB:
+			return J_HIP
+		CombatData.AttackType.STOMACH_SHOT:
+			return J_HAND_B
 		CombatData.AttackType.JUMPING_SPIN_HOOK:
 			return J_FOOT_B
 		CombatData.AttackType.POWER_UPPERCUT, CombatData.AttackType.SUPERMAN_PUNCH, \
@@ -2692,7 +2866,8 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 ## or a strike through a dodge, still passes freely).
 func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 	var opp := fighter.opponent
-	if opp == null or fighter.current_attack == null or fighter.current_attack.no_strike:
+	if opp == null or fighter.current_attack == null or fighter.current_attack.no_strike \
+			or fighter.current_attack.type == CombatData.AttackType.BELLY_BOMB:
 		return pose
 	# A knockdown blow still lands on the body: limit while the hit freezes.
 	var down := opp.is_down() and opp.hitstop_frames <= 0

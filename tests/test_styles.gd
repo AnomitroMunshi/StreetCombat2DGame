@@ -317,7 +317,7 @@ func _initialize() -> void:
 		"a signature can be blocked (%s, no damage)" % CombatData.HitResult.keys()[sig_res])
 
 	print("[all six styles]")
-	_check(StyleRegistry.count() == 6, "six styles registered (%d)" % StyleRegistry.count())
+	_check(StyleRegistry.count() == 7, "seven styles registered (%d)" % StyleRegistry.count())
 	_check(StyleRegistry.default_style().id == &"kickboxing", "kickboxing is the default all-rounder")
 	var sig_ids := {}
 	var fin_ids := {}
@@ -518,7 +518,7 @@ func _initialize() -> void:
 	root.add_child(main)
 	current_scene = main
 	await process_frame
-	for rival_id in [&"boxing", &"taekwondo", &"muay_thai", &"karate", &"kung_fu", &"kickboxing"]:
+	for rival_id in [&"boxing", &"taekwondo", &"muay_thai", &"karate", &"kung_fu", &"kickboxing", &"bangla_maar"]:
 		var pl: Fighter = main.get_node("Player")
 		var en: Fighter = main.get_node("Enemy")
 		main.call("select_style", &"taekwondo" if rival_id != &"taekwondo" else &"boxing")
@@ -526,16 +526,28 @@ func _initialize() -> void:
 		main.call("start_match", true)
 		var seen := {}
 		var illegal := 0
+		var swings := {}
+		var last_swing := -1
 		for t in 1500:
 			await physics_frame
 			pl.health = 100
 			en.health = 100
 			if en.state == Fighter.State.ATTACK and en.current_attack != null:
 				seen[en.current_attack.display_name] = true
+				if en.swing_id != last_swing:
+					last_swing = en.swing_id
+					swings[en.current_attack.id] = swings.get(en.current_attack.id, 0) + 1
 				if not en.style.allows(en.current_attack.type):
 					illegal += 1
 		_check(illegal == 0 and en.rejected_attacks == 0, "%s rival: %d different moves used, none illegal, none refused (%s)" % [rival_id, seen.size(), seen.keys()])
 		_check(seen.size() >= 4, "%s rival uses a varied moveset" % rival_id)
+		if rival_id == &"bangla_maar":
+			var total := 0
+			for k in swings:
+				total += swings[k]
+			var pushes: int = swings.get(&"double_push", 0)
+			_check(total > 10 and pushes * 5 <= total and swings.get(&"belly_bomb", 0) <= 2,
+				"bangla_maar rival does not spam the shove or the Belly Bomb (%d shoves, %d belly bombs of %d swings)" % [pushes, swings.get(&"belly_bomb", 0), total])
 		main.queue_free()
 		main = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 		root.add_child(main)

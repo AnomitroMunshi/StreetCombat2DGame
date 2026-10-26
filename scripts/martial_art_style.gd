@@ -73,6 +73,11 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 ## the wall, pinning strike, final windup, final blow). Empty = the shared
 ## default (flying knee, cross, double palm).
 @export var wall_entry: PackedStringArray = PackedStringArray()
+## Speech bubbles (presentation): event -> line. Events: match_start, slap,
+## hurt, block, miss_heavy, low_health, victory (see main.gd SPEECH_*).
+## Empty = this style's fighters never speak.
+@export var quotes: Dictionary = {}
+const QUOTE_EVENTS: Array[String] = ["match_start", "slap", "hurt", "block", "miss_heavy", "low_health", "victory"]
 ## Signature technique (move id of a "signature" attack): F at full Focus.
 @export var signature: StringName = &""
 
@@ -175,6 +180,9 @@ func validate() -> PackedStringArray:
 		var mt := CombatData.type_for_id(m)
 		if mt != CombatData.AttackType.NONE and CombatData.get_attack(mt).signature:
 			errors.append("signature %s must not be mapped to a key" % m)
+	for event in quotes:
+		if not String(event) in QUOTE_EVENTS:
+			errors.append("unknown speech event %s" % event)
 	if not wall_entry.is_empty() and wall_entry.size() != 5:
 		errors.append("wall_entry needs 5 poses (got %d)" % wall_entry.size())
 	for fid in finishers:

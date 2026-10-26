@@ -11,6 +11,7 @@ Styles are data. The match code never checks a style's name.
    - `id`: permanent; saves refer to it.
    - `order`, `display_name`, `description`, `category`, `difficulty`, `strengths`, `weaknesses`, `stance`.
    - `input_map` and `air_map`: slot → move id. The slots are listed in `MartialArtStyle`: J `light`, K `heavy`, L `technique`, `up_light` / `up_heavy` (W), `down_light` / `down_heavy` (S), and the Space chords `power_light` / `power_heavy` (ground only, never in `air_map`).
+   - `quotes` (optional): speech-bubble lines by event (`match_start`, `slap`, `hurt`, `block`, `miss_heavy`, `low_health`, `victory`).
    - `move_names` (optional): the style's own name for a shared move, for example karate's `jab` is its "Straight Punch".
    - `chains`: move id → the move ids it may cancel into on contact.
    - `ai_close_plans`, `ai_far_plans`, `ai_preferred_range`.
@@ -18,7 +19,7 @@ Styles are data. The match code never checks a style's name.
      Short-range styles need more footwork to get inside long-range ones.
    - `ai_tuning` (optional): rival AI overrides for the style, from
      `EnemyAI.TUNABLE`, for example `{"aggression": 0.8, "parry_chance": 0.3}`.
-   - `kit` (optional): the character outfit, one of `&"boxing"`, `&"muay_thai"`, `&"karate"`, `&"kung_fu"`, `&"taekwondo"`, `&"kickboxing"`, or the plain `&"gi"` silhouette (default). A new outfit is a colour table in `FighterVisual._build_outfit` (which body parts are cloth) plus its details in the `_leg_extras` / `_arm_extras` / `_torso_extras` / `_head_extras` hooks.
+   - `kit` (optional): the character outfit, one of `&"boxing"`, `&"muay_thai"`, `&"karate"`, `&"kung_fu"`, `&"taekwondo"`, `&"kickboxing"`, `&"bangla_maar"`, or the plain `&"gi"` silhouette (default). A new outfit is a colour table in `FighterVisual._build_outfit` (which body parts are cloth) plus its details in the `_leg_extras` / `_arm_extras` / `_torso_extras` / `_head_extras` hooks.
    - Balance the new style by running AI-vs-AI matches against every style
      (both sides AI, several seeds). The current styles sit between about
      45% and 60%.

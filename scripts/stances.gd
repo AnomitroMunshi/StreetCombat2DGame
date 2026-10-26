@@ -10,7 +10,7 @@ extends RefCounted
 ## (body rotation) gives each stance its own silhouette.
 
 ## APPEND-ONLY (style files refer to stances by index).
-enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNTER, TAEKWONDO, KICKBOXING }
+enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNTER, TAEKWONDO, KICKBOXING, STREET }
 
 ## name, guard pose, southpaw (right foot forward), and the active idle (the
 ## looping fighting movement in neutral; presentation only):
@@ -24,6 +24,8 @@ enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNT
 ##   head      extra head movement in rad; circles: hands trace small circles
 ##   feint     optional lead-hand feint: rad of reach, every feint_every s
 ##   rear_heel rear heel kept raised in px (on the ball of the rear foot)
+##   gestures  street idle: now and then points a finger, puts a hand on the
+##             waist, tugs a sleeve or shakes the head (FighterVisual)
 ##   alternate boxer's bounce: heels lift on alternate bounces (rear, then
 ##             lead), the weight and shoulders rocking toward the planted
 ##             foot; one loop = two bounces (2 / hz seconds)
@@ -85,6 +87,14 @@ const DATA: Dictionary = {
 		"name": "KICKBOXING GUARD", "southpaw": false, "idle": {"hz": 2.0, "bob": 3.5, "shape": "hop", "shift": 4.0, "shift_hz": 1.0, "heel": 3.0, "lead_heel": 1.5, "shoulder": 1.6, "guard": 0.05, "sway": 0.03, "head": 0.03},
 		# Balanced, slightly square, high guard: ready to punch or kick.
 		"pose": [0.15, 0.15, 0.95, 2.9, 0.85, 3.0, 0.55, -0.15, -0.5, -0.35, 0.0, 0.0, 0.0, 9.0],
+	},
+	Kind.STREET: {
+		"name": "PARA STANCE", "southpaw": false, "idle": {"hz": 1.1, "bob": 1.5, "shape": "sine", "shift": 4.0, "shift_hz": 0.45, "heel": 1.0, "lead_heel": 0.5, "shoulder": 1.2, "guard": 0.05, "sway": 0.035, "head": 0.06, "gestures": true},
+		# Untrained and relaxed: no guard at all, hands hanging loose, shoulders
+		# down, leaning a little forward on an easy, narrow stance.
+		"pose": [0.14, 0.02, 0.35, 0.75, 0.15, 0.35, 0.28, 0.0, -0.22, -0.28, 0.0, 0.0, 0.0, 3.0],
+		# Squatting down with the hands still loose (no fists up).
+		"crouch": [0.4, 0.1, 0.7, 1.2, 0.5, 1.0, 1.25, -0.25, 0.5, -1.5, 0.0, 0.0, 0.0, 3.0],
 	},
 }
 

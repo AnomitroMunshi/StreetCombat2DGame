@@ -17,7 +17,8 @@ extends RefCounted
 enum Kind { PALM_FLURRY, SPINNING_HEEL, AIR_SMASH, WALL_CRUSH, TORNADO_KICK,
 	FINAL_BELL, EIGHT_COUNT, CYCLONE_360, HEAVENS_HEEL,
 	EIGHT_LIMBS, IRON_KNEE, ONE_INCH_VERDICT, CRIMSON_CRESCENT,
-	HUNDRED_PALMS, DRAGONS_DESCENT, LAST_COMBINATION, KNOCKOUT_RHYTHM }
+	HUNDRED_PALMS, DRAGONS_DESCENT, LAST_COMBINATION, KNOCKOUT_RHYTHM,
+	PAAYE_LATHI, SUPER_CHOR }
 
 const DISPLAY_NAMES: Dictionary = {
 	Kind.PALM_FLURRY: "PALM FLURRY",
@@ -37,6 +38,8 @@ const DISPLAY_NAMES: Dictionary = {
 	Kind.DRAGONS_DESCENT: "DRAGON'S DESCENT",
 	Kind.LAST_COMBINATION: "LAST COMBINATION",
 	Kind.KNOCKOUT_RHYTHM: "KNOCKOUT RHYTHM",
+	Kind.PAAYE_LATHI: "PAAYE LATHI, MATHAY LATHI",
+	Kind.SUPER_CHOR: "SUPER CHOR",
 }
 ## Permanent finisher ids (used by MartialArtStyle.finishers).
 const IDS: Dictionary = {
@@ -46,7 +49,7 @@ const IDS: Dictionary = {
 	Kind.EIGHT_LIMBS: &"eight_limbs", Kind.IRON_KNEE: &"iron_knee", Kind.ONE_INCH_VERDICT: &"one_inch_verdict",
 	Kind.CRIMSON_CRESCENT: &"crimson_crescent", Kind.HUNDRED_PALMS: &"hundred_palms",
 	Kind.DRAGONS_DESCENT: &"dragons_descent", Kind.LAST_COMBINATION: &"last_combination",
-	Kind.KNOCKOUT_RHYTHM: &"knockout_rhythm",
+	Kind.KNOCKOUT_RHYTHM: &"knockout_rhythm", Kind.PAAYE_LATHI: &"paaye_lathi", Kind.SUPER_CHOR: &"super_chor",
 }
 ## Environmental finishers: shared by every style, chosen by situation.
 const ENVIRONMENTAL: Array[Kind] = [Kind.AIR_SMASH, Kind.WALL_CRUSH]
@@ -87,9 +90,11 @@ const POSE_KIND: Dictionary = {
 	&"fknee_hit": CombatData.ImpactKind.RISING, &"rpalm_hit": CombatData.ImpactKind.RISING,
 	&"axe_chop": CombatData.ImpactKind.DOWNWARD, &"overhand_hit": CombatData.ImpactKind.DOWNWARD,
 	&"hammer_strike": CombatData.ImpactKind.DOWNWARD, &"rbody_hit": CombatData.ImpactKind.HOOK,
+	&"mega_slap_hit": CombatData.ImpactKind.HOOK, &"slap_hit": CombatData.ImpactKind.HOOK,
+	&"punt_hit": CombatData.ImpactKind.RISING, &"hammer_hit": CombatData.ImpactKind.DOWNWARD,
 }
 ## Low strikes: the victim's lead knee buckles.
-const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_extend"]
+const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_extend", &"lkick_hit"]
 
 ## Last finisher played. Static, so it survives scene reloads (restarts) and the
 ## same finisher is never chosen twice in a row.
@@ -432,6 +437,38 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 26, "atk": &"heavy_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
 					"ko_vy": -6.0, "ko_drift": 17.0, "ko_rolls": 0, "ko_tumble": true},
 				{"ticks": 55, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.PAAYE_LATHI:
+			# Bangla Maar ("a kick to the leg, a kick to the head"): a heavy kick
+			# to the leg drops them on their backside, a casual stroll in, a big
+			# wind-up and a punt to the head of the sitting opponent.
+			return [
+				{"ticks": 8, "atk": &"thrust_chamber", "def": &"stagger"},
+				{"ticks": 10, "atk": &"lkick_hit", "def": &"hitstun_leg", "hit": true, "high": false, "power": 2,
+					"atk_move": 1.0, "def_move": 0.5},
+				{"ticks": 16, "atk": &"guard", "def": &"getup_sit", "def_vy": -4.0, "def_move": 1.2},
+				{"ticks": 14, "atk": &"guard", "def": &"getup_sit", "atk_move": 2.6},
+				{"ticks": 12, "atk": &"punt_load", "def": &"getup_sit"},
+				{"ticks": 24, "atk": &"punt_hit", "def": &"knock_fly", "hit": true, "high": false, "power": 3, "final": true,
+					"ko_vy": -12.0, "ko_drift": 14.0, "ko_rolls": 1, "ko_tumble": true},
+				{"ticks": 55, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.SUPER_CHOR:
+			# Bangla Maar: a front thrust kick to the stomach folds them over, an
+			# enormous wind-up, and an open-palm slap that sends them flying and
+			# skidding; then shake the stinging hand.
+			return [
+				{"ticks": 8, "atk": &"thrust_chamber", "def": &"stagger"},
+				{"ticks": 10, "atk": &"thrust_extend", "def": &"hitstun_body", "hit": true, "high": false, "power": 2,
+					"atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 22, "atk": &"mega_slap_wind", "def": &"hitstun_body", "speed": 0.8},
+				{"ticks": 24, "atk": &"mega_slap_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"ko_vy": -9.0, "ko_drift": 18.0, "ko_rolls": 0, "ko_tumble": true},
+				{"ticks": 5, "atk": &"hand_shake_a", "def": &"knock_fly"},
+				{"ticks": 5, "atk": &"hand_shake_b", "def": &"knock_fly"},
+				{"ticks": 5, "atk": &"hand_shake_a", "def": &"knock_fly"},
+				{"ticks": 5, "atk": &"hand_shake_b", "def": &"knock_fly"},
+				{"ticks": 40, "atk": &"guard", "def": &"knock_fly"},
 			]
 		Kind.CYCLONE_360:
 			# Taekwondo: a double kick (front, then high), coil, jump into a full

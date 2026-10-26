@@ -63,6 +63,7 @@ finishers:
 | **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Deflect | Rising Palm · High Backfist | Low Palm · Leg Sweep | Leaping Spinning Backfist · Flying Axe Kick | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
 | **Taekwondo** | Long-range kicking. | Jab · Side Kick · Lead-Leg Feint | Rising Punch · High Roundhouse | Body Punch · Axe Kick | Jumping Backfist · Jumping Spinning Hook Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
 | **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Superman Punch · Jumping Roundhouse Kick | Breaker Combination | Last Combination · Knockout Rhythm |
+| **Bangla Maar** (parody) | Untrained para street fighting: loose hands, slaps, shoves, a big mouth. | Light Slap · Front Thrust Kick · Double-Hand Push | Head Elbow · Double-Hand Hammer | Stomach Shot · Leg Kick | Flying Slap · Flying Chest Kick | Belly Bomb | Paaye Lathi, Mathay Lathi · Super Chor |
 
 **Power moves (Space + J / Space + K).** Press Space and J (or K) together,
 or one right after the other in either order, within 6 ticks (0.1 s,
@@ -111,6 +112,48 @@ blocked low with S+Shift. Multi-strike signatures play their strikes one after
 another, each with its own contact window. A hit interrupts them, and only
 the last strike can knock down.
 
+**Bangla Maar (বাংলা মার).** The seventh style is an original parody of an
+untrained para street fighter.
+
+- **Look and stance:** a sando vest, a checked lungi folded to the knees,
+  a gamchha over the shoulder and rubber sandals. The fighter never raises a
+  guard (hands hang loose until Shift), and the idle has finger-pointing,
+  a hand on the waist, sleeve tugs and head shakes.
+- **Moves:** open-hand slaps, a flat-footed thrust kick and a two-handed
+  shove.
+  - The shove pushes hard on a clean hit, with one 20% knockdown roll per
+    clean hit. A blocked shove pushes less and never knocks down.
+- **Belly Bomb (F):** a step back, a crouch, then a leap belly-first into
+  the opponent with a bounce off. It knocks them flying; a miss leaves a
+  long recovery.
+- **Finishers:**
+  - **Paaye Lathi, Mathay Lathi** ("a kick to the leg, a kick to the head"):
+    a leg kick sits them down, then a punt to the head.
+  - **Super Chor:** a thrust kick folds them over, then an enormous wind-up
+    slap sends them skidding.
+
+**Speech bubbles.** Bangla Maar talks:
+
+| Moment | Line |
+|---|---|
+| Match start | আয় বারা, আয়! |
+| Slap lands | শালা শুয়োর! |
+| Taking a hit | উফ্! |
+| Blocking | জোর নেই গায়ে? |
+| Whiffing a big swing | বেঁচে গেলি! |
+| Low health | ভুল হয়ে গেছে, ছেড়ে দাও! |
+| Victory | ****চোদা! |
+
+- **Rules:** one bubble per fighter, kept on screen and never overlapping.
+  Each line fires once per event, never once per frame. A line only
+  replaces a less important one, and a short cooldown follows each bubble,
+  except for the low-health and victory lines.
+- **Font:** the text uses an installed system font with Bengali script
+  (Nirmala UI or Vrinda on Windows; nothing is bundled). On a system
+  without one, the Bengali text cannot be displayed.
+- **Other styles:** lines are style data (`MartialArtStyle.quotes`), so any
+  style can be given lines.
+
 **Stun (dizzy).** Each style has two stunning moves:
 
 | Style | Stunning moves |
@@ -121,6 +164,7 @@ the last strike can knock down.
 | Kung Fu | Leaping Spinning Backfist, Flying Axe Kick |
 | Taekwondo | Axe Kick, Jumping Spinning Hook Kick |
 | Kickboxing | Superman Punch, Jumping Roundhouse Kick |
+| Bangla Maar | Double-Hand Hammer, Flying Chest Kick |
 
 - A clean hit from one of them leaves the opponent dizzy for 1 to 1.7 s
   after the hit reaction. Blocked or parried hits never stun.

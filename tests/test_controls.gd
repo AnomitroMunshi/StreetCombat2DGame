@@ -28,6 +28,9 @@ const SPEC: Dictionary = {
 	&"kickboxing": {&"light": &"jab", &"heavy": &"cross", &"technique": &"body_roundhouse", &"up_light": &"uppercut",
 		&"up_heavy": &"high_kick", &"down_light": &"body_hook", &"down_heavy": &"low_roundhouse", &"F": &"breaker_combo",
 		&"power_light": &"superman_punch", &"power_heavy": &"leaping_roundhouse"},
+	&"bangla_maar": {&"light": &"light_slap", &"heavy": &"thrust_kick", &"technique": &"double_push",
+		&"up_light": &"head_elbow", &"up_heavy": &"hammer_fist", &"down_light": &"stomach_shot", &"down_heavy": &"leg_kick",
+		&"F": &"belly_bomb", &"power_light": &"flying_slap", &"power_heavy": &"flying_chest_kick"},
 }
 ## Names the move list must show for each style (its own name for shared moves).
 const NAMES: Dictionary = {
@@ -276,6 +279,7 @@ func _power_chords() -> void:
 		&"boxing": [&"power_uppercut", &"superman_punch"], &"muay_thai": [&"jumping_elbow", &"flying_knee_face"],
 		&"karate": [&"jumping_reverse_punch", &"flying_side_kick"], &"kung_fu": [&"leaping_spin_backfist", &"flying_axe_kick"],
 		&"taekwondo": [&"jumping_backfist", &"jumping_spin_hook"], &"kickboxing": [&"superman_punch", &"leaping_roundhouse"],
+		&"bangla_maar": [&"flying_slap", &"flying_chest_kick"],
 	}
 	var w := CombatData.POWER_CHORD_WINDOW
 	for sid in POWER:

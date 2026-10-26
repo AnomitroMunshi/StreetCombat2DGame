@@ -538,6 +538,8 @@ func _air_move_for(ground: CombatData.AttackType, slot: StringName) -> CombatDat
 func _tick_attack() -> void:
 	var attack := current_attack
 	var strike_end := attack.startup + attack.active
+	if attack.backstep > 0.0 and state_frame < attack.backstep_ticks and not airborne:
+		position.x -= facing * attack.backstep / float(attack.backstep_ticks)  # run-up
 	if attack.leap_vy != 0.0 and state_frame == attack.leap_at and not airborne:
 		airborne = true
 		air_attack_used = true
@@ -658,7 +660,9 @@ func _land() -> void:
 		var lag := CombatData.LANDING_FRAMES_AFTER_AIR_ATTACK if air_attack_used else CombatData.LANDING_FRAMES
 		if current_attack != null and current_attack.land_lag > 0:
 			lag = current_attack.land_lag
-		elif current_attack != null and current_attack.leap_vy != 0.0:
+		if current_attack != null and current_attack.hit_land_lag > 0 and swing_has_hit:
+			lag = current_attack.hit_land_lag
+		elif current_attack != null and current_attack.leap_vy != 0.0 and current_attack.land_lag <= 0:
 			# A leaping move with no fixed landing lag: the landing runs out the
 			# rest of its own frame data (startup + active + recovery).
 			lag = maxi(lag, current_attack.total_frames() - state_frame)
@@ -1256,8 +1260,12 @@ func finish_ko(push_dir: int, vy: float, drift: float, rolls: int = 0, spin: boo
 
 
 ## Called on the attacker once its current swing has connected (hit or block).
-func confirm_hit(_result: CombatData.HitResult) -> void:
+func confirm_hit(result: CombatData.HitResult) -> void:
 	swing_has_hit = true
+	if current_attack != null and current_attack.bounce and airborne and result != CombatData.HitResult.WHIFF:
+		# Belly-first collision: rebound off the target and drop.
+		jump_vx = -facing * 3.5
+		velocity_y = minf(velocity_y, -6.5)
 
 
 # --- Queries ------------------------------------------------------------------
