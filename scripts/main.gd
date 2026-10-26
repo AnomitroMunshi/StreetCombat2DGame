@@ -91,7 +91,7 @@ const SPEECH_VICTORY_TICKS: int = 200
 const SPEECH_COOLDOWN: int = 45
 const SPEECH_URGENT: int = 4
 const SPEECH_PRIORITY: Dictionary = {"hurt": 1, "block": 1, "slap": 2, "miss_heavy": 2, "match_start": 3,
-	"low_health": 4, "victory": 5}
+	"low_health": 4, "finisher": 5, "victory": 5}
 ## Moves whose whiff makes the fighter speak (big committal swings).
 const SPEECH_MISS_MOVES: Array[StringName] = [&"hammer_fist", &"thrust_kick", &"flying_chest_kick", &"belly_bomb",
 	&"double_push"]
@@ -910,6 +910,7 @@ func _start_finisher(attacker: Fighter, victim: Fighter, kind: FinisherDirector.
 	hud.flash(0.35)
 	audio.play(&"finisher_sting")
 	audio.play(&"finisher_drums", -2.0, 0.0)
+	say(attacker, "finisher")
 	audio.duck_bgm(-14.0)
 
 
@@ -924,7 +925,9 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_wall_dent = Vector2(_wall_face_x(event["dir"]) + event["dir"] * 10.0, pos.y)
 	_finisher_kind_fx(pos, fdir, power, event["final"])
 	var hit_dir := CombatData.dir_for_kind(event.get("kind", CombatData.ImpactKind.STRAIGHT), event["dir"])
-	if event["final"]:
+	if event["final"] and event.get("style", &"") != &"":
+		_styled_final(event, pos, hit_dir)
+	elif event["final"]:
 		_hitstop = maxi(_hitstop, 5)  # short: the slow motion carries the moment
 		_shake(30, 12.0)
 		fx.hit(pos, hit_dir, 3, KO_COLOR)
@@ -946,12 +949,51 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_camera_punch += 0.015 * power
 
 
+## Knockout blows that must stay visible (no flare or white-out over them):
+## the Super Chor slap and the Paaye Lathi football punt.
+func _styled_final(event: Dictionary, pos: Vector2, hit_dir: Vector2) -> void:
+	_hitstop = maxi(_hitstop, 6)
+	_camera_punch += 0.1
+	_follow_victim = true
+	_ko_focus = pos
+	_ko_cut = true
+	var dir := float(event["dir"])
+	match event["style"]:
+		&"slap":
+			# The palm's swing smeared behind it, a sharp crack and a comic "thas!".
+			var shoulder := _finisher.attacker.position + Vector2(dir * 6.0, -150.0)
+			var toward := (pos - shoulder).angle()
+			fx.swing_arc(shoulder, shoulder.distance_to(pos) + 10.0, toward - dir * 2.3, toward + dir * 0.25, Color.WHITE, 14)
+			fx.hit(pos, hit_dir, 2, KO_COLOR, CombatData.ImpactKind.HOOK)
+			fx.comic(pos + Vector2(dir * 40.0, -46.0), "ঠাস!", Color(1.0, 0.82, 0.2))
+			fx.sweat(pos, hit_dir, 10, 6.0)
+			_shake(22, 9.0)
+			audio.play(&"slap", 4.0, 0.0)
+			audio.play(&"slap", -4.0, 0.15)
+			audio.play(&"ko_boom", -6.0)
+		&"punt":
+			# Boot into the head on the floor: a spray of dust along the boards,
+			# a hollow thud, a comic "dhum!", then the body scraping away.
+			var floor_pos := Vector2(pos.x, FLOOR_Y)
+			fx.hit(pos, hit_dir, 3, KO_COLOR)
+			fx.dust_cloud(floor_pos, 1.6, 40, 9)
+			fx.ground_ring(floor_pos, 70.0, 22)
+			fx.streaks(pos, Vector2(dir, -0.15), 10, Color(0.85, 0.75, 0.6), 0.25, 90.0)
+			fx.comic(pos + Vector2(dir * 30.0, -70.0), "ধুম!", Color(1.0, 0.55, 0.2))
+			_shake(26, 10.0)
+			audio.play(&"punt", 3.0, 0.0)
+			audio.play(&"ko_boom", -3.0)
+			audio.play(&"body_slide", -2.0, 0.0)
+	hud.flash(0.08)
+
+
 ## Each finisher's own effects at the moment of each hit (after the finisher
 ## VFX reference sheet): warm impact flares on every contact, blue energy for
 ## the attacker's power, a huge flare and signature effect on the final blow.
 func _finisher_kind_fx(pos: Vector2, dir: Vector2, power: int, final: bool) -> void:
-	# Only the final blow flares; the build-up hits stay clean and readable.
-	if final:
+	# Only the final blow flares; the build-up hits stay clean and readable
+	# (the slap and the punt keep the blow itself in view instead).
+	if final and not _finisher.kind in [FinisherDirector.Kind.SUPER_CHOR, FinisherDirector.Kind.PAAYE_LATHI]:
 		fx.flare(pos, 1)
 	match _finisher.kind:
 		FinisherDirector.Kind.PALM_FLURRY:

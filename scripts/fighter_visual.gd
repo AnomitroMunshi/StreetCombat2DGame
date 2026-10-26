@@ -424,10 +424,14 @@ var _bb_fly := PackedFloat32Array([-0.75, -0.3, -0.7, -0.4, -0.8, -0.5, 0.9, -0.
 var _bb_land := PackedFloat32Array([0.2, 0.1, 0.8, 1.6, 0.6, 1.4, 1.1, -0.6, -0.4, -1.1, 0.0, 0.0, 0.0, 4.0])
 # Finishers: a punt at a sitting opponent's head, the enormous Super Chor slap
 # and shaking the stinging hand afterwards.
-var _punt_load := PackedFloat32Array([-0.2, 0.15, 1.2, 1.6, 0.6, 1.2, -0.6, -1.2, -0.3, -0.3, -6.0, 0.0, 0.0, 6.0])
-var _punt_hit := PackedFloat32Array([-0.4, 0.2, 1.6, 2.1, 0.9, 1.8, 1.5, 1.45, -0.3, -0.25, 10.0, 0.0, 0.6, 4.0])
+# Football punt at a head on the floor: the kicking leg swung far back with the
+# arms out for balance, through low along the floor, then a high follow-through.
+var _punt_load := PackedFloat32Array([0.05, 0.25, 1.4, 1.6, -0.6, -0.3, -0.75, -1.7, 0.1, -0.1, -6.0, 0.0, 0.0, 6.0])
+var _punt_hit := PackedFloat32Array([-0.35, 0.45, 1.6, 2.0, -0.9, -0.6, 0.45, 1.35, 0.5, -0.4, 6.0, 0.0, 0.3, 4.0])
+var _punt_follow := PackedFloat32Array([-0.55, 0.2, 2.2, 2.6, -1.0, -0.6, 2.0, 2.1, 0.3, -0.3, 10.0, 0.0, 0.6, 4.0])
 var _mega_slap_wind := PackedFloat32Array([-0.4, -0.2, 3.8, 4.1, 0.6, 1.0, 0.35, 0.0, -0.35, -0.35, -10.0, 0.0, 0.0, 18.0])
 var _mega_slap_hit := PackedFloat32Array([0.45, 0.0, 1.6, 1.7, 0.3, 0.5, 0.6, -0.1, -0.6, -0.5, 14.0, 0.0, 0.8, -12.0])
+var _mega_slap_follow := PackedFloat32Array([0.65, 0.15, 2.3, 2.9, 0.2, 0.4, 0.65, -0.1, -0.65, -0.5, 16.0, 0.0, 1.0, -16.0])
 var _hand_shake_a := PackedFloat32Array([0.1, 0.15, 1.1, 1.0, 0.2, 0.4, 0.3, 0.0, -0.25, -0.3, 0.0, 0.0, 0.0, 3.0])
 var _hand_shake_b := PackedFloat32Array([0.1, 0.05, 1.0, 1.55, 0.2, 0.4, 0.3, 0.0, -0.25, -0.3, 0.0, 0.0, 0.0, 3.0])
 # Victory: hands on the waist, chest out.
@@ -714,7 +718,8 @@ func _ready() -> void:
 		&"hitstun_leg": _hitstun_leg, &"hitstun_heavy": _hitstun_heavy,
 		# Bangla Maar finishers.
 		&"getup_sit": _getup_sit, &"lkick_hit": _lkick_hit, &"thrust_chamber": _thrust_chamber,
-		&"thrust_extend": _thrust_extend, &"punt_load": _punt_load, &"punt_hit": _punt_hit,
+		&"thrust_extend": _thrust_extend, &"punt_load": _punt_load, &"punt_hit": _punt_hit, &"punt_follow": _punt_follow, &"ko_lie": _ko,
+		&"lkick_load": _lkick_load, &"mega_slap_follow": _mega_slap_follow,
 		&"mega_slap_wind": _mega_slap_wind, &"mega_slap_hit": _mega_slap_hit,
 		&"hand_shake_a": _hand_shake_a, &"hand_shake_b": _hand_shake_b, &"push_load": _push_load,
 		&"push_hit": _push_hit, &"stomach_hit": _stomach_hit, &"hammer_raise": _hammer_raise, &"hammer_hit": _hammer_hit,

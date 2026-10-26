@@ -128,9 +128,13 @@ untrained para street fighter.
   long recovery.
 - **Finishers:**
   - **Paaye Lathi, Mathay Lathi** ("a kick to the leg, a kick to the head"):
-    a leg kick sits them down, then a punt to the head.
+    a leg kick spins them onto their back with the head towards you, then a
+    run-up football punt to the head sends the body sliding along the floor
+    ("ধুম!", dust spray, boot thud, scrape).
   - **Super Chor:** a thrust kick folds them over, then an enormous wind-up
-    slap sends them skidding.
+    and an open-palm slap across the face ("ঠাস!", motion arc, slap crack)
+    sends them skidding.
+  - Both start with the line জয় মা কালী!
 
 **Speech bubbles.** Bangla Maar talks:
 
@@ -142,6 +146,7 @@ untrained para street fighter.
 | Blocking | জোর নেই গায়ে? |
 | Whiffing a big swing | বেঁচে গেলি! |
 | Low health | ভুল হয়ে গেছে, ছেড়ে দাও! |
+| Finisher | জয় মা কালী! |
 | Victory | ****চোদা! |
 
 - **Rules:** one bubble per fighter, kept on screen and never overlapping.

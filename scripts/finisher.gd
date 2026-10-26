@@ -91,7 +91,7 @@ const POSE_KIND: Dictionary = {
 	&"axe_chop": CombatData.ImpactKind.DOWNWARD, &"overhand_hit": CombatData.ImpactKind.DOWNWARD,
 	&"hammer_strike": CombatData.ImpactKind.DOWNWARD, &"rbody_hit": CombatData.ImpactKind.HOOK,
 	&"mega_slap_hit": CombatData.ImpactKind.HOOK, &"slap_hit": CombatData.ImpactKind.HOOK,
-	&"punt_hit": CombatData.ImpactKind.RISING, &"hammer_hit": CombatData.ImpactKind.DOWNWARD,
+	&"punt_hit": CombatData.ImpactKind.STRAIGHT, &"hammer_hit": CombatData.ImpactKind.DOWNWARD,
 }
 ## Low strikes: the victim's lead knee buckles.
 const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_extend", &"lkick_hit"]
@@ -259,6 +259,8 @@ func _start_beat(beat: Dictionary) -> Dictionary:
 	attacker.script_spin_rate = float(beat.get("atk_spin", 0.0)) / maxf(float(beat["ticks"]), 1.0)
 	if beat.has("def"):
 		victim.script_pose = beat["def"]
+	if beat.has("def_flip"):
+		victim.script_flip = beat["def_flip"]  # turned round (and stays so once down)
 	if beat.has("atk_vy") and beat["atk_vy"] != 0.0:
 		attacker.scripted_launch(beat["atk_vy"])
 	if beat.has("def_vy"):
@@ -267,6 +269,11 @@ func _start_beat(beat: Dictionary) -> Dictionary:
 		return {}
 	var high: bool = beat.get("high", true)
 	var contact := (attacker.position + victim.position) * 0.5 + Vector2(0.0, -135.0 if high else -95.0)
+	if beat.get("contact", &"") == &"head":
+		# On the victim's drawn head (a face slap, a head lying on the floor).
+		var vv := victim.get_node_or_null("Visual") as FighterVisual
+		if vv != null and vv._last_joints.size() > FighterVisual.J_HEAD:
+			contact = vv._last_joints[FighterVisual.J_HEAD]
 	var final: bool = beat.get("final", false)
 	var strike_kind: int = POSE_KIND.get(attacker.script_pose, CombatData.ImpactKind.STRAIGHT)
 	if final:
@@ -287,7 +294,7 @@ func _start_beat(beat: Dictionary) -> Dictionary:
 				_:
 					victim.script_pose = &"hitstun_heavy" if victim.hit_counter % 2 == 0 else &"hitstun"
 	return {"pos": contact, "power": beat.get("power", 1), "final": final, "wall": beat.get("wall", false),
-		"dir": _dir, "kind": strike_kind, "high": high}
+		"dir": _dir, "kind": strike_kind, "high": high, "style": beat.get("style", &"")}
 
 
 func _move(fighter: Fighter, speed: float, is_attacker: bool) -> void:
@@ -439,31 +446,40 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 55, "atk": &"guard", "def": &"knock_fly"},
 			]
 		Kind.PAAYE_LATHI:
-			# Bangla Maar ("a kick to the leg, a kick to the head"): a heavy kick
-			# to the leg drops them on their backside, a casual stroll in, a big
-			# wind-up and a punt to the head of the sitting opponent.
+			# Bangla Maar ("a kick to the leg, a kick to the head"): a hard kick to
+			# the leg spins them round and drops them on their back with the head
+			# towards the attacker; a stroll in, a run-up and a football punt to
+			# the head sends the body sliding away along the floor.
 			return [
-				{"ticks": 8, "atk": &"thrust_chamber", "def": &"stagger"},
-				{"ticks": 10, "atk": &"lkick_hit", "def": &"hitstun_leg", "hit": true, "high": false, "power": 2,
-					"atk_move": 1.0, "def_move": 0.5},
-				{"ticks": 16, "atk": &"guard", "def": &"getup_sit", "def_vy": -4.0, "def_move": 1.2},
-				{"ticks": 14, "atk": &"guard", "def": &"getup_sit", "atk_move": 2.6},
-				{"ticks": 12, "atk": &"punt_load", "def": &"getup_sit"},
-				{"ticks": 24, "atk": &"punt_hit", "def": &"knock_fly", "hit": true, "high": false, "power": 3, "final": true,
-					"ko_vy": -12.0, "ko_drift": 14.0, "ko_rolls": 1, "ko_tumble": true},
-				{"ticks": 55, "atk": &"guard", "def": &"knock_fly"},
+				{"ticks": 8, "atk": &"lkick_load", "def": &"stagger"},
+				{"ticks": 8, "atk": &"lkick_hit", "def": &"hitstun_leg", "hit": true, "high": false, "power": 2,
+					"atk_move": 0.8, "def_move": 0.8},
+				{"ticks": 12, "atk": &"guard", "def": &"knock_fly", "def_vy": -5.0, "def_flip": true, "def_move": 3.0},
+				{"ticks": 12, "atk": &"guard", "def": &"ko_lie", "def_flip": true},
+				{"ticks": 14, "atk": &"guard", "def": &"ko_lie", "atk_move": 1.0},
+				{"ticks": 14, "atk": &"punt_load", "def": &"ko_lie", "atk_move": 0.5},
+				{"ticks": 4, "atk": &"punt_hit", "def": &"ko_lie", "speed": 1.0},
+				{"ticks": 9, "atk": &"punt_hit", "def": &"ko_lie", "hit": true, "high": false, "power": 3, "final": true,
+					"style": &"punt", "contact": &"head",
+					"ko_vy": -1.5, "ko_drift": 15.0, "ko_rolls": 0, "ko_tumble": false},
+				{"ticks": 16, "atk": &"punt_follow", "def": &"ko_lie"},
+				{"ticks": 45, "atk": &"guard", "def": &"ko_lie"},
 			]
 		Kind.SUPER_CHOR:
 			# Bangla Maar: a front thrust kick to the stomach folds them over, an
-			# enormous wind-up, and an open-palm slap that sends them flying and
-			# skidding; then shake the stinging hand.
+			# enormous wind-up, and an open-palm slap right across the face that
+			# sends them flying and skidding; then shake the stinging hand.
 			return [
 				{"ticks": 8, "atk": &"thrust_chamber", "def": &"stagger"},
 				{"ticks": 10, "atk": &"thrust_extend", "def": &"hitstun_body", "hit": true, "high": false, "power": 2,
 					"atk_move": 0.8, "def_move": 0.8},
 				{"ticks": 22, "atk": &"mega_slap_wind", "def": &"hitstun_body", "speed": 0.8},
-				{"ticks": 24, "atk": &"mega_slap_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+				# The swing: the giant palm whips round and arrives at the face first.
+				{"ticks": 4, "atk": &"mega_slap_hit", "def": &"hitstun_body", "speed": 1.0},
+				{"ticks": 8, "atk": &"mega_slap_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"style": &"slap", "contact": &"head",
 					"ko_vy": -9.0, "ko_drift": 18.0, "ko_rolls": 0, "ko_tumble": true},
+				{"ticks": 16, "atk": &"mega_slap_follow", "def": &"knock_fly"},
 				{"ticks": 5, "atk": &"hand_shake_a", "def": &"knock_fly"},
 				{"ticks": 5, "atk": &"hand_shake_b", "def": &"knock_fly"},
 				{"ticks": 5, "atk": &"hand_shake_a", "def": &"knock_fly"},

@@ -50,6 +50,7 @@ var _effects: Array[Dictionary] = []
 var _decals: Array[Dictionary] = []
 var _debris: Array[Dictionary] = []
 var _rng := RandomNumberGenerator.new()
+var _comic_font: Font = null
 
 
 ## Additive layer for light: flares, energy waves, spin arcs, speed lines.
@@ -144,6 +145,19 @@ func hit(pos: Vector2, dir: Vector2, tier: int, color: Color, kind: int = Combat
 	if tier >= 3:
 		# Heavy: a shock wave off the impact (no flare: it hid the punch).
 		air_wave(pos + dir * 12.0, dir, 34.0, 10)
+
+
+## A wide motion smear behind a big swing (the Super Chor slap): an arc round
+## `centre` from angle a0 to a1, fading quickly.
+func swing_arc(centre: Vector2, radius: float, a0: float, a1: float, color: Color, life: int = 12) -> void:
+	_spawn({"kind": "swing_arc", "pos": centre, "age": 0, "life": life, "color": color, "size": radius,
+		"a0": a0, "a1": a1})
+
+
+## Comic onomatopoeia ("ঠাস!", "ধুম!"): a jagged burst with the word on it.
+func comic(pos: Vector2, text: String, color: Color, life: int = 34) -> void:
+	_spawn({"kind": "comic", "pos": pos, "age": 0, "life": life, "color": color, "text": text,
+		"tilt": _rng.randf_range(-0.25, 0.25)})
 
 
 ## Sweat / spit droplets thrown along a blow, falling under gravity.
@@ -786,6 +800,33 @@ func _draw() -> void:
 				draw_set_transform(pos, e["dir"], Vector2(1.7, 0.6))
 				draw_circle(Vector2.ZERO, fs * (0.7 + 0.5 * t), Color(color.r, color.g, color.b, 0.45 * fk))
 				draw_circle(Vector2.ZERO, fs * 0.5 * fk, Color(1.0, 1.0, 1.0, 0.95 * fk))
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"swing_arc":
+				var sa := 1.0 - t
+				var r: float = e["size"]
+				for k in 4:
+					var c2 := Color(1.0, 1.0, 1.0, 0.55 * sa * (1.0 - k * 0.22))
+					draw_arc(pos, r - k * 7.0, minf(e["a0"], e["a1"]), maxf(e["a0"], e["a1"]), 24, c2, 9.0 - k * 1.5, true)
+			"comic":
+				var pop := minf(t * 5.0, 1.0)
+				var fade := 1.0 - smoothstep(0.7, 1.0, t)
+				var scale := lerpf(0.4, 1.0, pop) * (1.0 + 0.06 * sin(t * 40.0))
+				draw_set_transform(pos, e["tilt"], Vector2.ONE * scale)
+				var star := PackedVector2Array()
+				for k in 18:
+					var ang := TAU * k / 18.0
+					star.append(Vector2(cos(ang) * 1.5, sin(ang)) * (44.0 if k % 2 == 0 else 28.0))
+				draw_colored_polygon(star, Color(color.r, color.g, color.b, 0.95 * fade))
+				star.append(star[0])
+				draw_polyline(star, Color(0.1, 0.05, 0.05, fade), 3.0, true)
+				if _comic_font == null:
+					_comic_font = Hud.make_speech_font()
+				var text: String = e["text"]
+				var ts := _comic_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 34)
+				draw_string_outline(_comic_font, Vector2(-ts.x * 0.5, 12.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 34, 6,
+					Color(0.1, 0.05, 0.05, fade))
+				draw_string(_comic_font, Vector2(-ts.x * 0.5, 12.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 34,
+					Color(1.0, 0.98, 0.9, fade))
 				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			"swipe":
 				# Curved swipe: an arc sweeping toward the target, thinning out.

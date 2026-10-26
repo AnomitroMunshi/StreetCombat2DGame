@@ -48,6 +48,7 @@ ai_far_plans = [[&"thrust_kick"], [&"leg_kick"], [&"flying_slap"], [&"flying_che
 wall_entry = PackedStringArray("push_load", "push_hit", "stomach_hit", "hammer_raise", "hammer_hit")
 quotes = {
 "block": "জোর নেই গায়ে?",
+"finisher": "জয় মা কালী!",
 "hurt": "উফ্!",
 "low_health": "ভুল হয়ে গেছে, ছেড়ে দাও!",
 "match_start": "আয় বারা, আয়!",

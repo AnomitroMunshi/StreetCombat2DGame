@@ -314,6 +314,30 @@ func _build_sfx() -> void:
 		_pluck(b, i * 0.13 + 0.045, 3200.0, 0.06, 0.08, rng)
 	_sfx[&"dizzy_chirp"] = _finish(b, 0.6)
 
+	# Open-palm slap: a very bright, dry crack of skin on skin with a short
+	# room tail (no thump: a slap is all top end).
+	b = _buffer(0.45)
+	_noise(b, 0.0, 0.05, 0.006, 0.99, 1.0, rng)
+	_thump(b, 0.0, 0.07, 1500.0, 520.0, 0.012, 0.55)
+	_noise(b, 0.006, 0.3, 0.07, 0.8, 0.22, rng)
+	_echo(b, 0.06, 0.25)
+	_soft_clip(b, 1.6)
+	_sfx[&"slap"] = _finish(b, 0.95)
+
+	# Football punt: a hollow boot thud.
+	b = _buffer(0.5)
+	_thump(b, 0.0, 0.3, 190.0, 55.0, 0.07, 1.0)
+	_noise(b, 0.0, 0.03, 0.008, 0.55, 0.6, rng)
+	_thump(b, 0.02, 0.2, 420.0, 160.0, 0.04, 0.35)
+	_soft_clip(b, 1.5)
+	_sfx[&"punt"] = _finish(b, 0.9)
+
+	# A body sliding along the floorboards: a long gritty scrape dying away.
+	b = _buffer(1.2)
+	_noise(b, 0.0, 1.1, 0.45, 0.32, 0.5, rng)
+	_noise(b, 0.0, 0.9, 0.3, 0.6, 0.18, rng)
+	_sfx[&"body_slide"] = _finish(b, 0.7)
+
 	# Shaking it off: two quick head-shake whooshes.
 	b = _buffer(0.35)
 	_whoosh(b, 0.0, 0.12, 0.05, 0.45, 0.4, rng)

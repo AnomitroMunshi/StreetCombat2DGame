@@ -248,8 +248,58 @@ class Driver extends Node:
 				p.push_intent(_attack_intent(CombatData.AttackType.HAMMER_FIST))
 			620:
 				check(main.call("speech_text", p) == st.quotes["miss_heavy"], "whiffed hammer: the miss line (%s)" % main.call("speech_text", p))
-				print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
-				tree.quit(fails)
+		_finisher_checks(main, p, e, st)
+
+	## Both finishers through the real scene: the line, the blow landing with the
+	## limb on the head, Paaye Lathi's head-toward-attacker fall and slide.
+	func _finisher_checks(main: Node, p: Fighter, e: Fighter, st: MartialArtStyle) -> void:
+		var kinds := [FinisherDirector.Kind.PAAYE_LATHI, FinisherDirector.Kind.SUPER_CHOR]
+		var starts := [700, 1060]
+		for i in 2:
+			var f0: int = starts[i]
+			if frame == f0 - 40 and i == 1:
+				main.call("restart_match")
+			if frame == f0 - 20 and i == 1:
+				main.call("select_style", &"bangla_maar")
+				main.call("start_match", true)
+				(main.get_node("EnemyAI") as EnemyAI).setup(null, null)
+			if frame == f0:
+				print("[%s]" % FinisherDirector.DISPLAY_NAMES[kinds[i]])
+				p.position.x = 560.0
+				e.position.x = 650.0
+				p.call("_enter_state", Fighter.State.IDLE)
+				e.call("_enter_state", Fighter.State.IDLE)
+				p.face_opponent()
+				e.face_opponent()
+				e.health = 0
+				said.erase("ko")
+				said.erase("slid")
+				main.call("_start_finisher", p, e, kinds[i])
+			if frame == f0 + 2:
+				check(main.call("speech_text", p) == st.quotes["finisher"], "finisher line: %s" % main.call("speech_text", p))
+			if frame > f0 and frame < f0 + 300:
+				if e.state == Fighter.State.KO and not said.has("ko"):
+					said["ko"] = true
+					var pj: PackedVector2Array = (p.get_node("Visual") as FighterVisual).get("_last_joints")
+					var ej: PackedVector2Array = (e.get_node("Visual") as FighterVisual).get("_last_joints")
+					var head: Vector2 = ej[FighterVisual.J_HEAD]
+					if kinds[i] == FinisherDirector.Kind.PAAYE_LATHI:
+						var toward := absf(head.x - p.position.x) < absf(ej[FighterVisual.J_HIP].x - p.position.x)
+						check(e.script_flip and toward and head.y > e.ground_y - 45.0,
+							"Paaye Lathi: lying on the floor, head towards the attacker (head %s, hip %s)" % [head, ej[FighterVisual.J_HIP]])
+						var foot: Vector2 = pj[FighterVisual.J_FOOT_F]
+						check(foot.distance_to(head) < 60.0, "Paaye Lathi: the punt lands with the foot on the head (%.0f px)" % foot.distance_to(head))
+					else:
+						var hand: Vector2 = pj[FighterVisual.J_HAND_F]
+						check(hand.distance_to(head) < 60.0, "Super Chor: the palm is on the face as the slap lands (%.0f px)" % hand.distance_to(head))
+				if e.skidding:
+					said["slid"] = true
+			if frame == f0 + 300:
+				check(said.has("ko"), "%s knocks out" % FinisherDirector.DISPLAY_NAMES[kinds[i]])
+				check(said.has("slid"), "%s: the body slides along the floor" % FinisherDirector.DISPLAY_NAMES[kinds[i]])
+		if frame == starts[1] + 310:
+			print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
+			tree.quit(fails)
 
 	func _attack_intent(t: CombatData.AttackType) -> CombatData.Intent:
 		var i := CombatData.Intent.new()
