@@ -473,9 +473,10 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 8, "atk": &"thrust_chamber", "def": &"stagger"},
 				{"ticks": 10, "atk": &"thrust_extend", "def": &"hitstun_body", "hit": true, "high": false, "power": 2,
 					"atk_move": 0.8, "def_move": 0.8},
-				{"ticks": 22, "atk": &"mega_slap_wind", "def": &"hitstun_body", "speed": 0.8},
-				# The swing: the giant palm whips round and arrives at the face first.
-				{"ticks": 4, "atk": &"mega_slap_hit", "def": &"hitstun_body", "speed": 1.0},
+				# The wind-up: they stagger back upright (the slap needs the full arm).
+				{"ticks": 22, "atk": &"mega_slap_wind", "def": &"stagger", "def_move": 1.4, "speed": 0.8},
+				# The swing: the open palm whips round and arrives at the cheek first.
+				{"ticks": 7, "atk": &"mega_slap_hit", "def": &"stagger", "speed": 1.0},
 				{"ticks": 8, "atk": &"mega_slap_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
 					"style": &"slap", "contact": &"head",
 					"ko_vy": -9.0, "ko_drift": 18.0, "ko_rolls": 0, "ko_tumble": true},

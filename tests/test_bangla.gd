@@ -291,7 +291,7 @@ class Driver extends Node:
 						check(foot.distance_to(head) < 60.0, "Paaye Lathi: the punt lands with the foot on the head (%.0f px)" % foot.distance_to(head))
 					else:
 						var hand: Vector2 = pj[FighterVisual.J_HAND_F]
-						check(hand.distance_to(head) < 60.0, "Super Chor: the palm is on the face as the slap lands (%.0f px)" % hand.distance_to(head))
+						check(hand.distance_to(head) < 25.0, "Super Chor: the open palm is on the face as the slap lands (%.0f px, hand %s head %s shoulder %s)" % [hand.distance_to(head), hand, head, pj[FighterVisual.J_SHOULDER_F]])
 				if e.skidding:
 					said["slid"] = true
 			if frame == f0 + 300:

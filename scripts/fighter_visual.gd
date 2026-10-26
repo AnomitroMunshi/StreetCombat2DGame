@@ -430,8 +430,8 @@ var _punt_load := PackedFloat32Array([0.05, 0.25, 1.4, 1.6, -0.6, -0.3, -0.75, -
 var _punt_hit := PackedFloat32Array([-0.35, 0.45, 1.6, 2.0, -0.9, -0.6, 0.45, 1.35, 0.5, -0.4, 6.0, 0.0, 0.3, 4.0])
 var _punt_follow := PackedFloat32Array([-0.55, 0.2, 2.2, 2.6, -1.0, -0.6, 2.0, 2.1, 0.3, -0.3, 10.0, 0.0, 0.6, 4.0])
 var _mega_slap_wind := PackedFloat32Array([-0.4, -0.2, 3.8, 4.1, 0.6, 1.0, 0.35, 0.0, -0.35, -0.35, -10.0, 0.0, 0.0, 18.0])
-var _mega_slap_hit := PackedFloat32Array([0.45, 0.0, 1.6, 1.7, 0.3, 0.5, 0.6, -0.1, -0.6, -0.5, 14.0, 0.0, 0.8, -12.0])
-var _mega_slap_follow := PackedFloat32Array([0.65, 0.15, 2.3, 2.9, 0.2, 0.4, 0.65, -0.1, -0.65, -0.5, 16.0, 0.0, 1.0, -16.0])
+var _mega_slap_hit := PackedFloat32Array([0.45, 0.0, 1.8, 1.85, 0.3, 0.5, 0.6, -0.1, -0.6, -0.5, 14.0, 0.0, 0.8, -12.0])
+var _mega_slap_follow := PackedFloat32Array([0.6, 0.1, 1.85, 2.05, 0.2, 0.4, 0.65, -0.1, -0.65, -0.5, 16.0, 0.0, 1.0, -16.0])
 var _hand_shake_a := PackedFloat32Array([0.1, 0.15, 1.1, 1.0, 0.2, 0.4, 0.3, 0.0, -0.25, -0.3, 0.0, 0.0, 0.0, 3.0])
 var _hand_shake_b := PackedFloat32Array([0.1, 0.05, 1.0, 1.55, 0.2, 0.4, 0.3, 0.0, -0.25, -0.3, 0.0, 0.0, 0.0, 3.0])
 # Victory: hands on the waist, chest out.
@@ -2270,9 +2270,7 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 		var wrist := hand - along * 8.5
 		draw_line(wrist - across * 6.5, wrist + across * 6.5, Color(0.95, 0.94, 0.9), 4.0, true)
 	if _kit == &"bangla_maar":
-		# Open hand (slaps, shoves, pointing): a flat palm with the fingers out.
-		_capsule(hand - along * 1.5, hand + along * 10.0, 5.6 + pad, 4.2 + pad, fill)
-		draw_circle(hand + inside.normalized() * 4.0, 3.0 + pad, fill, true, -1.0, true)  # thumb
+		_open_hand(hand, along, inside.normalized(), pad, fill)
 		return
 	_capsule(hand - along * 1.5 * g, hand + along * 5.5 * g, 7.0 * g + pad, 8.0 * g + pad, fill)
 	draw_circle(hand - along * 2.0 * g + inside.normalized() * 4.5 * g, 3.6 * g + pad, fill, true, -1.0, true)  # thumb
@@ -2281,6 +2279,25 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 		var side := -inside.normalized()
 		draw_circle(hand + along * 2.0 * g - side * 3.5, 5.0 * g, fill.darkened(0.25), true, -1.0, true)
 		draw_circle(hand + along * 3.0 * g + side * 3.0, 3.2, Color(1.0, 1.0, 1.0, 0.45), true, -1.0, true)
+
+
+## Open hand (slaps, shoves, pointing): a palm, four short fingers fanned a
+## little apart and the thumb off the side. Drawn in every silhouette pass, so
+## the outline follows the fingers.
+func _open_hand(wrist: Vector2, along: Vector2, side: Vector2, pad: float, fill: Color) -> void:
+	var across := Vector2(-along.y, along.x)
+	var palm_end := wrist + along * 6.5
+	_capsule(wrist - along * 1.0, palm_end, 4.6 + pad, 5.2 + pad, fill)
+	for k in 4:
+		var off := (k - 1.5) * 2.4
+		var base := palm_end + across * off
+		var tip := base + (along + across * off * 0.04).normalized() * (6.8 - absf(k - 1.5) * 0.9)
+		_capsule(base, tip, 1.6 + pad, 1.4 + pad, fill)
+	_capsule(wrist + side * 3.0 + along * 1.5, wrist + side * 5.5 + along * 6.0, 1.9 + pad, 1.6 + pad, fill)  # thumb
+	if pad == 0.0:
+		for k in 3:  # the gaps between the fingers
+			var gap := palm_end + across * (k - 1.0) * 2.4
+			draw_line(gap - along * 0.5, gap + along * 4.0, fill.darkened(0.3), 0.8, true)
 
 
 ## Side-profile torso: hips, narrower waist, chest out in front, shoulders.
