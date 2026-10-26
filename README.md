@@ -1,9 +1,15 @@
 # Street Combat
 
-A 2D side-view hand-to-hand fighting prototype for Godot 4: two procedural
-stickman fighters in a minimalist training hall, one player against one AI.
-It has keyframed martial-arts moves, ragdoll knockdowns, blowback physics,
-cinematic finishers, and procedurally generated sound and music.
+A 2D side-view hand-to-hand fighting game for Godot 4: one player against
+one AI in a training hall, with seven martial arts. Each style has its own
+character costume, stance, moveset, power moves, signature and two finishers:
+Boxing, Muay Thai, Karate, Kung Fu, Taekwondo, Kickboxing and the parody style
+Bangla Maar.
+
+The fighters are procedurally animated skeletons with keyframed martial-arts
+moves, ragdoll knockdowns and blowback physics. The game also has stuns,
+cinematic finishers, victory celebrations, speech bubbles, and procedurally
+generated sound and music.
 
 Built and tested with **Godot 4.7.2 stable** (GL Compatibility renderer).
 No plugins and no imported assets: all graphics, sound effects and music are
@@ -22,22 +28,27 @@ From a terminal:
 
 ## Match flow
 
-1. **Pre-match:** the dojo, both fighters standing relaxed and a **START MATCH**
-   button. Nobody can move or attack yet. Press **Q** here to pick your stance.
+1. **Style select and pre-match:** choose your martial art: click a card or
+   press **Q** to cycle, then **Enter** or CONFIRM. The rival always gets a
+   different style. Then comes the dojo with a **START MATCH** button. Press
+   **T** there for the training ground.
 2. **Start:** click the button or press **Enter**. Both fighters walk to their
    marks. The player salutes (fist in palm, small bow). The rival drops its chin
    and glares. Then both raise their stance guard.
 3. **Countdown:** 3, 2, 1, **FIGHT!**, one second per number, with taiko cues.
    The player's controls and the AI are unlocked on the same tick.
-4. **K.O.:** after the finisher, "K.O." stays up until the loser's body has
-   stopped moving. Then the winner appears with a **RESTART MATCH** button.
-   Enter or **R** also restarts. R works at any time.
+4. **Fight:** **P**, **Esc** or the ⏸ button pauses and resumes (R restarts
+   while paused).
+5. **K.O.:** the finisher plays, then "K.O." stays up until the loser's body has
+   stopped moving. The winner celebrates in their style, with **REMATCH**
+   (same style) and **CHANGE STYLE** buttons. Enter or **R** also restarts,
+   and R works at any time.
 
 Restarting reloads the scene, so health, AI, effects and animation all reset.
 Everything in the flow is counted in simulation ticks, with no timers, so an
 old countdown can never fire into a new match.
 
-## Martial arts (M6.5)
+## Martial arts
 
 Before a match, you choose a **martial art** on the style screen:
 - Click a card, or press **Q** to cycle through them. Your fighter shows that
@@ -213,16 +224,19 @@ stops on a full turn, then rises from a crouch.
 
 Misses earn nothing. Finishers and signature hits earn nothing either. At
 100 the HUD shows **SIGNATURE READY – F**. Pressing **F** spends the whole
-meter on your style's signature: Boxing's **Gazelle Hook** (an explosive step
-into a rising hook) or Taekwondo's **540 Tornado Kick** (a leaping 1.5-turn
-spinning kick). Signatures can be blocked, parried or dodged. A miss is not
+meter on your style's signature:
+- **Boxing:** Gazelle Hook, an explosive step into a rising hook.
+- **Muay Thai:** Flying Knee, a leap and a knee to the head.
+- **Karate:** Perfect Gyaku-Zuki, a rooted reverse punch.
+- **Kung Fu:** Flowing Palm Barrage, three palms into a double palm.
+- **Taekwondo:** 540 Tornado Kick, a leaping 1.5-turn spinning kick.
+- **Kickboxing:** Breaker Combination: jab, cross, low kick, high kick.
+- **Bangla Maar:** Belly Bomb, a run-up and a belly-first leap. Signatures can be blocked, parried or dodged. A miss is not
 refunded and leaves a long, punishable recovery. F with a part-full meter
 does nothing. The rival uses its signature too, sparingly and in range.
 
 **Style finishers.** On open floor, each style finishes with its own two
-finishers:
-- **Boxing:** The Final Bell, Eight-Count.
-- **Taekwondo:** Cyclone 360, Heaven's Heel.
+finishers (see [Finishers](#finishers)).
 
 Air Smash and Wall Crush are shared by all styles and still take priority.
 
@@ -290,24 +304,145 @@ The panels show:
 | R          | Restart the match (back to the pre-match screen) |
 | F1         | Toggle developer overlay (off by default) |
 
+## Movesets
+
+Generated from the style data. Frames are startup / active / recovery in
+60 Hz ticks. F needs a full Focus bar. Flowing Palm Barrage and Breaker
+Combination are sequences: each strike has its own frame data and damage.
+
+### Boxing
+
+| Key | Move | Frames | Damage | Notes |
+|---|---|---|---|---|
+| J | Jab | 5 / 3 / 11 | 6 |  |
+| K | Cross | 11 / 3 / 20 | 13 |  |
+| L | Bob and Weave | 6 / 10 / 8 | — | no hitbox |
+| W+J | Uppercut | 9 / 3 / 18 | 12 | launches |
+| W+K | Overhand | 13 / 3 / 22 | 15 | stuns |
+| S+J | Body Hook | 8 / 3 / 15 | 10 |  |
+| S+K | Slip Counter | 10 / 3 / 16 | 11 |  |
+| Space+J | Crouching Power Uppercut | 12 / 4 / 24 | 16 | launches |
+| Space+K | Superman Punch | 10 / 4 / 21 | 13 | stuns |
+| F | Gazelle Hook | 12 / 4 / 26 | 22 |  |
+
+Air (J / K / L while jumping): Jump Punch. Finishers: The Final Bell · Eight-Count.
+
+### Muay Thai
+
+| Key | Move | Frames | Damage | Notes |
+|---|---|---|---|---|
+| J | Jab | 5 / 3 / 11 | 6 |  |
+| K | Body Roundhouse | 9 / 3 / 18 | 12 |  |
+| L | Elbow | 6 / 3 / 14 | 11 |  |
+| W+J | Rising Elbow | 8 / 3 / 17 | 12 | launches |
+| W+K | High Roundhouse | 7 / 3 / 18 | 12 |  |
+| S+J | Body Straight | 8 / 3 / 16 | 10 |  |
+| S+K | Low Kick | 8 / 3 / 16 | 9 | block low |
+| Space+J | Jumping Downward Elbow | 9 / 4 / 23 | 14 | stuns |
+| Space+K | Flying Knee to Face | 12 / 5 / 25 | 16 | stuns |
+| F | Flying Knee | 11 / 5 / 24 | 24 |  |
+
+Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Eight Limbs · Iron Knee.
+
+### Karate
+
+| Key | Move | Frames | Damage | Notes |
+|---|---|---|---|---|
+| J | Straight Punch | 5 / 3 / 11 | 6 |  |
+| K | Reverse Punch | 9 / 3 / 17 | 12 |  |
+| L | Knife Hand | 7 / 3 / 14 | 9 |  |
+| W+J | Rising Punch | 8 / 3 / 17 | 11 | launches |
+| W+K | High Roundhouse | 7 / 3 / 18 | 12 |  |
+| S+J | Body Punch | 8 / 3 / 16 | 10 |  |
+| S+K | Low Side Kick | 8 / 3 / 16 | 9 | block low |
+| Space+J | Jumping Reverse Punch | 10 / 4 / 22 | 12 | stuns |
+| Space+K | Flying Side Kick | 11 / 5 / 23 | 14 | stuns |
+| F | Perfect Gyaku-Zuki | 14 / 3 / 26 | 22 |  |
+
+Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: One-Inch Verdict · Crimson Crescent.
+
+### Kung Fu
+
+| Key | Move | Frames | Damage | Notes |
+|---|---|---|---|---|
+| J | Straight Palm | 5 / 3 / 12 | 6 |  |
+| K | Double Palm | 11 / 4 / 20 | 12 |  |
+| L | Push Kick | 7 / 3 / 15 | 8 |  |
+| W+J | Rising Palm | 9 / 3 / 18 | 11 | launches |
+| W+K | High Backfist | 6 / 2 / 12 | 7 |  |
+| S+J | Low Palm | 7 / 3 / 15 | 8 |  |
+| S+K | Sweep | 10 / 3 / 19 | 9 | block low |
+| Space+J | Leaping Spinning Backfist | 9 / 3 / 19 | 12 | stuns |
+| Space+K | Flying Axe Kick | 12 / 5 / 25 | 17 | stuns |
+| F | Flowing Palm Barrage | sequence | — | three straight palms into a double palm |
+
+Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Hundred Palms · Dragon's Descent.
+
+### Taekwondo
+
+| Key | Move | Frames | Damage | Notes |
+|---|---|---|---|---|
+| J | Jab | 5 / 3 / 11 | 6 |  |
+| K | Side Kick | 9 / 4 / 17 | 10 |  |
+| L | Lead-Leg Feint | 5 / 6 / 8 | — | no hitbox |
+| W+J | Rising Punch | 8 / 3 / 17 | 11 | launches |
+| W+K | High Roundhouse | 7 / 3 / 18 | 12 |  |
+| S+J | Body Punch | 8 / 3 / 16 | 10 |  |
+| S+K | Axe Kick | 12 / 3 / 20 | 14 | stuns |
+| Space+J | Jumping Backfist | 9 / 3 / 21 | 11 |  |
+| Space+K | Jumping Spinning Hook Kick | 15 / 5 / 27 | 17 | stuns |
+| F | 540 Tornado Kick | 14 / 5 / 28 | 24 |  |
+
+Air (J / K / L while jumping): Jump Roundhouse, Jump Punch, Jumping Spin Kick. Finishers: Cyclone 360 · Heaven's Heel.
+
+### Kickboxing
+
+| Key | Move | Frames | Damage | Notes |
+|---|---|---|---|---|
+| J | Jab | 5 / 3 / 11 | 6 |  |
+| K | Cross | 11 / 3 / 20 | 13 |  |
+| L | Body Roundhouse | 9 / 3 / 18 | 12 |  |
+| W+J | Uppercut | 9 / 3 / 18 | 12 | launches |
+| W+K | High Kick | 7 / 3 / 18 | 12 |  |
+| S+J | Body Hook | 8 / 3 / 15 | 10 |  |
+| S+K | Low Kick | 8 / 3 / 16 | 9 | block low |
+| Space+J | Superman Punch | 10 / 4 / 21 | 13 | stuns |
+| Space+K | Jumping Roundhouse Kick | 11 / 4 / 24 | 15 | stuns |
+| F | Breaker Combination | sequence | — | jab, cross, block low kick, high kick |
+
+Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Last Combination · Knockout Rhythm.
+
+### Bangla Maar
+
+| Key | Move | Frames | Damage | Notes |
+|---|---|---|---|---|
+| J | Light Slap | 5 / 2 / 11 | 6 |  |
+| K | Front Thrust Kick | 9 / 4 / 18 | 10 |  |
+| L | Double-Hand Push | 10 / 4 / 22 | 5 |  |
+| W+J | Head Elbow | 8 / 3 / 17 | 11 |  |
+| W+K | Double-Hand Hammer | 15 / 4 / 25 | 15 | stuns, **guard breaker** |
+| S+J | Stomach Shot | 7 / 3 / 14 | 8 |  |
+| S+K | Leg Kick | 9 / 3 / 17 | 9 | block low |
+| Space+J | Flying Slap | 9 / 4 / 20 | 11 |  |
+| Space+K | Flying Chest Kick | 12 / 5 / 24 | 14 | stuns |
+| F | Belly Bomb | 20 / 6 / 32 | 22 |  |
+
+Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Paaye Lathi, Mathay Lathi · Super Chor.
+
 ## Combat rules
 
 All timing is in fixed 60 Hz simulation ticks (`_physics_process`), never in
 render frames.
 
-| Attack    | Startup | Active | Recovery | Damage | Hitstun | Blockstun | On block |
+Every style's moves and frame data are in [Movesets](#movesets). The shared
+basics:
+
+| Action    | Startup | Active | Recovery | Damage | Hitstun | Blockstun | On block |
 |-----------|--------:|-------:|---------:|-------:|--------:|----------:|---------:|
 | Jab       | 5       | 3      | 11       | 6      | 16      | 10        | -3       |
-| Cross     | 11      | 3      | 20       | 13     | 22      | 14        | -8       |
-| Side kick | 9       | 4      | 17       | 10     | 18      | 12        | -8       |
-| Front kick| 7       | 3      | 15       | 8      | 17      | 13        | -4       |
-| Backhand  | 6       | 2      | 12       | 7      | 16      | 11        | -3       |
-| Uppercut  | 9       | 3      | 18       | 12     | 24      | 14        | -7       |
 | Jump kick | 4       | 8      | 12*      | 11     | 20      | 12        | —        |
 | Jump punch| 3       | 6      | 10*      | 8      | 18      | 10        | —        |
-| High kick | 7       | 3      | 18       | 12     | 20      | 14        | -8       |
-| Sweep     | 10      | 3      | 19       | 9      | knockdown | 12      | -10      |
-| Dodge     | 2       | 9 (invulnerable) | 5 | —   | —       | —         | —        |
+| Dash      | 2       | 9 (invulnerable) | 5 | —   | —       | —         | —        |
 | Block     | 2       | hold   | 6        | 0      | —       | —         | —        |
 
 \* Air attacks end as soon as you land, followed by 8 ticks of landing lag.
@@ -405,7 +540,7 @@ The full table, including hitboxes, knockback and lunge, is in
   reaction time (its reaction frames plus 2–6 ticks) before turning and
   acting. It never predicts where you'll land, but it can still anti-air a
   jump.
-- **Sweep (S + L):** a low leg sweep that always knocks down if it isn't blocked. The
+- **Leg Sweep (Kung Fu S + K):** a low leg sweep that always knocks down if it isn't blocked. The
   swept fighter's feet are kicked out from under them.
 - **Blocking:** hold Shift while idle or walking. A blocked hit does no damage,
   causes blockstun and has reduced pushback. Heavy attacks are unsafe on block.
@@ -455,16 +590,27 @@ The full table, including hitboxes, knockback and lunge, is in
 The game picks the finisher that fits the situation; on open floor it picks
 one of two at random.
 
+Two finishers are shared by every style and chosen by the situation:
+
 | Finisher | When | Sequence |
 |---|---|---|
-| Air Smash | Opponent is airborne, or the kill was an uppercut | Leap together, reach and grab, overhead hammer-fist, spike into the floor, crater and shockwave |
-| Wall Crush | Opponent is within ~170 px of the pillar behind them | Flying knee into the wall, a cross while pinned, then a double palm strike; the wall cracks and they slump against it |
-| Palm Flurry | Open floor (random) | 4 alternating palm strikes, a load-up, then a double palm that blasts them across the arena |
-| Spinning Heel Kick | Open floor (random) | Jab and cross, a spin with the back turned, then a head-high heel kick that sends them tumbling |
-| Tornado Kick 360 | Open floor (random) | Jab and cross, coil, then a jumping full 360 spin into a high roundhouse |
+| Air Smash | Opponent is airborne, or the kill launched them | Leap together, reach and grab, overhead hammer-fist, spike into the floor, crater and shockwave |
+| Wall Crush | Opponent is within ~170 px of the pillar behind them | The style's own strikes drive them into the wall; it cracks and they slump against it |
 
-The finisher picked is random on open floor and never repeats the previous
-one (this is remembered across restarts). Every finisher ends with a
+On open floor, each style uses one of its own two finishers:
+
+| Style | Finishers |
+|---|---|
+| Boxing | The Final Bell · Eight-Count |
+| Muay Thai | Eight Limbs · Iron Knee |
+| Karate | One-Inch Verdict · Crimson Crescent |
+| Kung Fu | Hundred Palms · Dragon's Descent |
+| Taekwondo | Cyclone 360 · Heaven's Heel |
+| Kickboxing | Last Combination · Knockout Rhythm |
+| Bangla Maar | Paaye Lathi, Mathay Lathi · Super Chor |
+
+The pick never repeats the previous finisher (this is remembered across
+restarts). Every finisher ends with a
 follow-through beat: the attacker returns to stance, or lands in a low crouch
 after the aerial finishers.
 
@@ -556,19 +702,19 @@ the impact frame.
 
 ## Fighting stances
 
-There are 8 stances, taken from the reference sheet: Bladed (player default),
-Squared (right foot forward, pressure), Boxing Guard, Muay Thai Guard (lead knee
-up), Karate (long, low, rear fist chambered), Kung Fu (low and wide, open
-hands), Grappler (bent forward, hands out to clinch) and Counter-Fighter
-(upright, lead hand low, head movement).
+Each martial art brings its own stance. The stance sets the guard every move
+starts from and returns to, the active idle and which foot leads:
+- Boxing: a bouncing guard.
+- Muay Thai: upright and rhythmic.
+- Karate: long and low.
+- Kung Fu: low and wide with open hands.
+- Taekwondo: bouncy and side-on.
+- Kickboxing: balanced.
+- Bangla Maar: no guard at all, with idle finger-pointing, a hand on the
+  waist, sleeve tugs and head shakes.
 
-- Each stance sets the guard every move starts from and returns to, the idle
-  rhythm, and which foot leads.
-- **Q** cycles your stance. Your choice is remembered across restarts.
-- The AI picks a random stance each match and never uses yours. If you switch
-  into its stance, it changes to another one.
-- Stances are style only: frame data and damage are the same in every stance.
-- The stance name is shown under each health bar.
+Stances are presentation only: frame data and damage don't depend on them.
+The stance name is shown under each health bar.
 
 ## Blowback physics
 
@@ -576,26 +722,38 @@ hands), Grappler (bent forward, hands out to clinch) and Counter-Fighter
   side kick 30%, cross 15% (no blowback on blocked hits).
 - A launched body may tumble in the air, bounces once off the floor (harder
   falls bounce higher), bounces once off a wall if it hits one fast enough, and
-  then may do backward breakfall rolls before a quick crouch get-up.
+  then may do backward breakfall rolls before a quick crouch get-up. A roll is
+  a tight ball turning about its own centre without slipping. It slows evenly
+  from the landing speed and stops on a whole turn.
 - A body that comes to rest too close to a pillar slides clear of it.
 
 ## Character look
 
-Fighters are solid silhouettes drawn from the same 12-joint skeleton that
-drives animation and the ragdoll:
+Fighters are drawn from the same skeleton that drives animation and the
+ragdoll: muscle-profile limbs, a side-profile torso, one outline around the
+whole body, and cel shading with skin tones. The player is the light version
+(light skin, light kit, blue accents). The rival is the dark version (dark
+skin, dark kit, red accents and a red rim glow).
 
-- Tapered limbs: thick thighs and upper arms narrowing to the calves, ankles and
-  wrists. Solid fists and shoe-shaped feet.
-- A side-profile torso: chest out in front, a narrower waist, hips and
-  shoulders. The head has a jaw and chin profile.
-- One outline is drawn around the whole body first, so overlapping limbs merge
-  into a single clean silhouette. Far-side limbs are shaded for depth.
-- The player is an ivory silhouette with a dark outline. The rival is a
-  charcoal silhouette with a red rim glow, matching the reference sheet. Both
-  wear an accent-coloured belt with a hanging knot, a headband with trailing
-  tails, and wrist wraps.
-- Colours are exported on the Fighter (`body_color`, `accent_color`,
-  `outline_color`, `rim_glow`), so new characters are just new values.
+Each style has its own costume:
+
+| Style | Costume |
+|---|---|
+| Boxing | Tank top, trunks, boots, headgear, gloves |
+| Muay Thai | Bare-chested; Thai shorts, mongkol headband, prajioud armbands, gloves, ankle supports |
+| Karate | Gi with crossed lapels and a black belt; bare feet |
+| Kung Fu | Silk jacket with a mandarin collar, frog buttons and white cuffs; sash; loose trousers; cloth shoes; topknot |
+| Taekwondo | Dobok with a black V collar and a black belt; bare feet |
+| Kickboxing | Bare-chested; satin trousers with a side stripe, gloves, taped ankles |
+| Bangla Maar | Sando vest, checked lungi folded to the knee, gamchha towel, rubber sandals, moustache, open hands |
+
+How the costumes are drawn:
+- Sleeves, trousers and shorts are coloured into the body as it is drawn,
+  so far-side limbs stay behind the torso.
+- Belts, sashes and waistbands follow the body's contour, and hems wrap
+  round the limbs.
+- Outfits are data: a colour table in `FighterVisual._build_outfit` plus
+  per-part detail hooks.
 
 ## Body mechanics (from the stance and animation review)
 
@@ -697,7 +855,7 @@ drives animation and the ragdoll:
   The joint impulses scale with the weight of the hit.
 - **Body mechanics:** the cross and uppercut turn the rear heel out as the
   hips drive through. The sweep keeps the body back and lets the leg reach.
-- **Leg sweep (S + L),** following the reference sheet:
+- **Leg sweep (Kung Fu S + K),** following the reference sheet:
   1. the body drops onto the bent rear leg;
   2. the lead leg slides out, the torso pitches forward and the lead hand goes
      to the floor for balance;
@@ -707,10 +865,10 @@ drives animation and the ragdoll:
 
   A swept opponent has the feet kicked out toward the sweeper and falls onto
   their back.
-- **Back kick:** the body turns its back on the opponent through the startup,
-  pulls the knee in, thrusts the heel straight back into the target, then
-  completes the turn during recovery. This is a visual spin only; gameplay
-  facing never changes.
+- **Spinning moves** (spinning hook kicks, the 540, the Leaping Spinning
+  Backfist): the body turns its back on the opponent through the startup,
+  strikes with the back turned, then completes the turn during recovery. This
+  is a visual spin only; gameplay facing never changes.
 - **Active idle (fighting bounce):** in neutral, both fighters keep moving:
   - a bounce: the hips dip over planted feet, so the knees bend;
   - weight shifts between the feet;
@@ -794,12 +952,16 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 | Test | Covers |
 |---|---|
 | `test_core.gd` | Frame data, combos, block / low block, parry (window, whiff, cooldown, low), perfect dodge, cross-up guard, both facing directions, knockdown, dodge, finisher selection and choreography, audio |
-| `test_input.gd` | Real key mapping (W+L, S+L, S crouch, double-tap dodge, stance cycling) |
+| `test_input.gd` | Real key mapping: J/K/L with W/S, A/D never modifiers, S crouch, double-tap dash, Q style cycling |
+| `test_controls.gd` | Every style x key x facing, every combo branch, Space+J/K chords (order, window, one per press, grounded uppercut), dash rules, guard, parry, jump, signature, pause, restart |
+| `test_stun.gd` | Every stun move both ways, dizzy rules (helpless, drain per hit, recovery, immunity, knockdown clears, mashing) |
+| `test_bangla.gd` | Bangla Maar: relaxed stance, every move both ways, the shove's seeded 20% knockdown, guard breaker, Belly Bomb, finishers (limb on the head, fall, slide), speech bubbles and the Bengali font |
+| `test_training.gd` | Training ground: dummy modes, speeds, pause and step, frame advantage readouts |
 | `test_flow.gd` | Start button, input lock, countdown order and timing, simultaneous unlock, button mashing, restart mid-countdown |
 | `test_match.gd` | A full scripted match against the real AI, KO, then restart |
 | `test_ai_finisher.gd` | AI finisher on a passive player; result only after the body is at rest |
 | `test_ai_defense.gd` | AI blocks most, parries some, punishes a stagger (seeded) |
-| `test_styles.gd` | Style registry and validation, Boxing cannot kick, Taekwondo has no boxing combos, air moves and combos follow the style, new moves in both directions, slip counter, AI rivals never use an illegal move |
+| `test_styles.gd` | Style registry (seven styles) and validation, Boxing cannot kick, air moves and combos follow the style, signatures, finishers, Focus (including from hits taken), AI rivals never use an illegal move and Bangla Maar's never spams the shove |
 | `test_movement.gd` | Jump cross-ups (both directions, moving rival, simultaneous jumps, walls), forward/backward roll, close slip-past, walking never passes, back hits after crossing, AI reaction delay |
 
 The V0.3 plan and audit are in `docs/V0.3_PLAN.md`. M6.5 design and merge
@@ -809,6 +971,11 @@ review: `docs/M6.5_ARCHITECTURE.md`, `docs/M6.5_REVIEW.md`,
 ## Known limitations
 
 - Single round. No round timer, no best-of-3.
+- Speech bubbles need an installed font with Bengali script (Nirmala UI or
+  Vrinda on Windows). Nothing is bundled, so on a system without one the
+  Bengali lines can't be shown.
+- AI-vs-AI balance: six styles sit between about 40% and 65%. Bangla Maar, a
+  parody style with lighter damage, wins about 20%.
 - Hurtboxes are fixed rectangles; they don't follow extended limbs.
 - No throws yet (see the grappling note in `docs/V0.3_PLAN.md`).
 - At the 60 px minimum distance, forward-leaning torsos can still overlap slightly. Strikes no longer pass through bodies.
