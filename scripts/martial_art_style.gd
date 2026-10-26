@@ -74,11 +74,12 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 ## default (flying knee, cross, double palm).
 @export var wall_entry: PackedStringArray = PackedStringArray()
 ## Speech bubbles (presentation): event -> line. Events: match_start, slap,
-## hurt, block, miss_heavy, low_health, finisher, victory (see main.gd SPEECH_*).
+## hurt, block, miss_heavy, low_health, finisher, victory, knocked_out (see
+## main.gd SPEECH_*).
 ## Empty = this style's fighters never speak.
 @export var quotes: Dictionary = {}
 const QUOTE_EVENTS: Array[String] = ["match_start", "slap", "hurt", "block", "miss_heavy", "low_health", "finisher",
-	"victory"]
+	"victory", "knocked_out"]
 ## Signature technique (move id of a "signature" attack): F at full Focus.
 @export var signature: StringName = &""
 

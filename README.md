@@ -60,7 +60,7 @@ finishers:
 | **Boxing** | Pressure and counterpunching. No kicks or sweeps. | Jab · Cross · Bob and Weave | Uppercut · Overhand | Body Hook · Slip Counter | Crouching Power Uppercut · Superman Punch | Gazelle Hook | The Final Bell · Eight-Count |
 | **Muay Thai** | Eight limbs. Upright, heavy weight transfer. | Jab · Body Roundhouse · Elbow | Rising Elbow · High Roundhouse | Body Straight · Low Kick | Jumping Downward Elbow · Flying Knee to Face | Flying Knee | Eight Limbs · Iron Knee |
 | **Karate** | Precision and distance, sharp counters. | Straight Punch · Reverse Punch · Knife-Hand | Rising Punch · High Roundhouse | Body Punch · Low Side Kick | Jumping Reverse Punch · Flying Side Kick | Perfect Gyaku-Zuki | One-Inch Verdict · Crimson Crescent |
-| **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Deflect | Rising Palm · High Backfist | Low Palm · Leg Sweep | Leaping Spinning Backfist · Flying Axe Kick | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
+| **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Push Kick | Rising Palm · High Backfist | Low Palm · Leg Sweep | Leaping Spinning Backfist · Flying Axe Kick | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
 | **Taekwondo** | Long-range kicking. | Jab · Side Kick · Lead-Leg Feint | Rising Punch · High Roundhouse | Body Punch · Axe Kick | Jumping Backfist · Jumping Spinning Hook Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
 | **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Superman Punch · Jumping Roundhouse Kick | Breaker Combination | Last Combination · Knockout Rhythm |
 | **Bangla Maar** (parody) | Untrained para street fighting: loose hands, slaps, shoves, a big mouth. | Light Slap · Front Thrust Kick · Double-Hand Push | Head Elbow · Double-Hand Hammer | Stomach Shot · Leg Kick | Flying Slap · Flying Chest Kick | Belly Bomb | Paaye Lathi, Mathay Lathi · Super Chor |
@@ -146,6 +146,7 @@ untrained para street fighter.
 | Match start | আয় বারা, আয়! |
 | Slap lands | শালা শুয়োর! |
 | Taking a hit | উফ্! |
+| Knocked out | মার গেরেছে !! |
 | Blocking | জোর নেই গায়ে? |
 | Whiffing a big swing | বেঁচে গেলি! |
 | Low health | ভুল হয়ে গেছে, ছেড়ে দাও! |
@@ -274,7 +275,7 @@ The panels show:
 | Space      | Jump (hold A/D to jump in that direction); a jump from normal range can cross over the opponent. Takeoff waits out the 6-tick power-move window |
 | J          | Light attack (your style's jab or palm) |
 | K          | Heavy attack (your style's main power strike) |
-| L          | Style technique (Bob and Weave, Elbow, Knife-Hand, Deflect, Lead-Leg Feint, Body Roundhouse) |
+| L          | Style technique (Bob and Weave, Elbow, Knife-Hand, Push Kick, Lead-Leg Feint, Body Roundhouse, Double-Hand Push) |
 | W + J / W + K | Rising / high attacks |
 | S + J / S + K | Body / low attacks (S + K is Boxing's Slip Counter) |
 | Space + J / Space + K | **Power move** (either order, within 6 ticks): see the table above |
@@ -285,6 +286,7 @@ The panels show:
 | S + Shift  | Low block (needed against low kicks and sweeps) |
 | Q          | Next martial art (on the style screen) |
 | Enter / click | START MATCH / RESTART MATCH button |
+| P / Esc / the ⏸ button | Pause and resume the match (R restarts while paused) |
 | R          | Restart the match (back to the pre-match screen) |
 | F1         | Toggle developer overlay (off by default) |
 

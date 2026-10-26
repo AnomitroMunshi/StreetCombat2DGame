@@ -19,7 +19,7 @@ const SPEC: Dictionary = {
 	&"karate": {&"light": &"jab", &"heavy": &"reverse_punch", &"technique": &"knife_hand", &"up_light": &"rising_punch",
 		&"up_heavy": &"high_kick", &"down_light": &"body_punch", &"down_heavy": &"low_side_kick", &"F": &"perfect_gyaku",
 		&"power_light": &"jumping_reverse_punch", &"power_heavy": &"flying_side_kick"},
-	&"kung_fu": {&"light": &"straight_palm", &"heavy": &"double_palm", &"technique": &"deflect_counter",
+	&"kung_fu": {&"light": &"straight_palm", &"heavy": &"double_palm", &"technique": &"front_kick",
 		&"up_light": &"rising_palm", &"up_heavy": &"backhand", &"down_light": &"low_palm", &"down_heavy": &"sweep",
 		&"F": &"palm_barrage", &"power_light": &"leaping_spin_backfist", &"power_heavy": &"flying_axe_kick"},
 	&"taekwondo": {&"light": &"jab", &"heavy": &"side_kick", &"technique": &"lead_leg_feint", &"up_light": &"rising_punch",
@@ -36,7 +36,7 @@ const SPEC: Dictionary = {
 const NAMES: Dictionary = {
 	&"karate": {&"jab": "Straight Punch", &"high_kick": "High Roundhouse"},
 	&"muay_thai": {&"body_roundhouse": "Body Roundhouse", &"high_kick": "High Roundhouse", &"low_roundhouse": "Low Kick"},
-	&"kung_fu": {&"backhand": "High Backfist", &"deflect_counter": "Deflect"},
+	&"kung_fu": {&"backhand": "High Backfist", &"front_kick": "Push Kick"},
 	&"taekwondo": {&"high_kick": "High Roundhouse"},
 }
 
@@ -214,6 +214,7 @@ func _initialize() -> void:
 	d.tree = self
 	d.fails = _fails
 	d.process_physics_priority = -100
+	d.process_mode = Node.PROCESS_MODE_ALWAYS  # keeps driving through the pause check
 	root.add_child(d)
 
 
@@ -361,6 +362,18 @@ class Driver extends Node:
 	var frame: int = 0
 	var fails: int = 0
 	var min_gap: float = INF
+	var said_frame: int = 0
+	var said_x: float = 0.0
+
+	func _key(code: Key) -> void:
+		var ev := InputEventKey.new()
+		ev.physical_keycode = code
+		ev.pressed = true
+		Input.parse_input_event(ev)
+		var up := InputEventKey.new()
+		up.physical_keycode = code
+		up.pressed = false
+		Input.parse_input_event(up)
 	## frame -> actions pressed that frame (released on the next frame unless held).
 	var taps: Dictionary = {}
 	var held: Dictionary = {}
@@ -505,6 +518,17 @@ class Driver extends Node:
 			646:
 				check(p.state == Fighter.State.ATTACK and p.current_attack.id == &"superman_punch",
 					"keys: K then Space -> Superman Punch (%s)" % p.get_debug_label())
-			680:
+			660:
+				_key(KEY_P)
+			662:
+				check(main.get("match_paused") and tree.paused, "P pauses the match")
+				said_frame = p.state_frame
+				said_x = e.position.x
+			672:
+				check(p.state_frame == said_frame and e.position.x == said_x, "nothing moves while paused")
+				_key(KEY_P)
+			676:
+				check(not main.get("match_paused") and not tree.paused and p.state_frame != said_frame, "P again resumes")
+			690:
 				print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 				tree.quit(fails)

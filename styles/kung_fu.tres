@@ -10,8 +10,8 @@ display_name = "Kung Fu"
 description = "Flowing counters. Low stances, open-hand palms in long chains, hands that turn strikes aside and sweeps that take the legs."
 category = &"hybrid"
 difficulty = 4
-strengths = PackedStringArray("Longest palm chains", "Deflection counter turns aside any non-low strike", "Low palm and sweep attack the base")
-weaknesses = PackedStringArray("Palms do little damage each", "Short reach", "Deflection is whiffable")
+strengths = PackedStringArray("Longest palm chains", "Push kick drives them back out of range", "Low palm and sweep attack the base")
+weaknesses = PackedStringArray("Palms do little damage each", "Short reach", "Few kicks: one push kick and the sweep")
 stance = 5
 kit = &"kung_fu"
 step_scale = 1.3
@@ -22,7 +22,7 @@ ai_tuning = {
 }
 move_names = {
 &"backhand": "High Backfist",
-&"deflect_counter": "Deflect"
+&"front_kick": "Push Kick"
 }
 input_map = {
 &"power_heavy": &"flying_axe_kick",
@@ -31,7 +31,7 @@ input_map = {
 &"down_light": &"low_palm",
 &"heavy": &"double_palm",
 &"light": &"straight_palm",
-&"technique": &"deflect_counter",
+&"technique": &"front_kick",
 &"up_heavy": &"backhand",
 &"up_light": &"rising_palm"
 }
@@ -42,13 +42,13 @@ air_map = {
 }
 chains = {
 &"backhand": [&"straight_palm", &"double_palm", &"rising_palm"],
-&"deflect_counter": [&"double_palm", &"low_palm", &"straight_palm"],
+&"front_kick": [&"straight_palm", &"low_palm"],
 &"low_palm": [&"straight_palm", &"rising_palm", &"sweep"],
 &"rising_palm": [&"straight_palm", &"backhand"],
-&"straight_palm": [&"straight_palm", &"backhand", &"double_palm", &"low_palm", &"sweep"]
+&"straight_palm": [&"straight_palm", &"backhand", &"double_palm", &"low_palm", &"sweep", &"front_kick"]
 }
-ai_close_plans = [[&"straight_palm", &"straight_palm", &"double_palm"], [&"backhand", &"rising_palm"], [&"straight_palm", &"sweep"], [&"deflect_counter", &"double_palm"], [&"low_palm", &"rising_palm"], [&"straight_palm", &"low_palm", &"sweep"], [&"leaping_spin_backfist"]]
-ai_far_plans = [[&"straight_palm", &"double_palm"], [&"double_palm"], [&"sweep"], [&"flying_axe_kick"], [&"leaping_spin_backfist"]]
+ai_close_plans = [[&"straight_palm", &"straight_palm", &"double_palm"], [&"backhand", &"rising_palm"], [&"straight_palm", &"sweep"], [&"straight_palm", &"front_kick"], [&"low_palm", &"rising_palm"], [&"straight_palm", &"low_palm", &"sweep"], [&"leaping_spin_backfist"]]
+ai_far_plans = [[&"straight_palm", &"double_palm"], [&"double_palm"], [&"sweep"], [&"flying_axe_kick"], [&"leaping_spin_backfist"], [&"front_kick"]]
 wall_entry = PackedStringArray("palm_windup", "palm_lead", "palm_rear", "palm_windup", "palm_strike")
 signature = &"palm_barrage"
 finishers = PackedStringArray("hundred_palms", "dragons_descent")

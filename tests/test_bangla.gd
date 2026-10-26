@@ -294,6 +294,7 @@ class Driver extends Node:
 				main.call("restart_match")
 			if frame == f0 - 20 and i == 1:
 				main.call("select_style", &"bangla_maar")
+				e.set_style(StyleRegistry.by_id(&"bangla_maar"))  # a talking victim
 				main.call("start_match", true)
 				(main.get_node("EnemyAI") as EnemyAI).setup(null, null)
 			if frame == f0:
@@ -327,6 +328,8 @@ class Driver extends Node:
 						check(hand.distance_to(head) < 25.0, "Super Chor: the open palm is on the face as the slap lands (%.0f px, hand %s head %s shoulder %s)" % [hand.distance_to(head), hand, head, pj[FighterVisual.J_SHOULDER_F]])
 				if e.skidding:
 					said["slid"] = true
+				if i == 1 and said.has("ko") and frame == f0 + 120:
+					check(main.call("speech_text", e) == st.quotes["knocked_out"], "knocked out: %s" % main.call("speech_text", e))
 			if frame == f0 + 300:
 				check(said.has("ko"), "%s knocks out" % FinisherDirector.DISPLAY_NAMES[kinds[i]])
 				check(said.has("slid"), "%s: the body slides along the floor" % FinisherDirector.DISPLAY_NAMES[kinds[i]])

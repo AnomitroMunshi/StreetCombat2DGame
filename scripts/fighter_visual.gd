@@ -670,6 +670,8 @@ var _outfit: Dictionary = {}
 var _cols: Dictionary = {}
 ## Drawing a far-side limb (outfit colours are darkened like the skin).
 var _far: bool = false
+## Where the belt goes this frame ([waist, across, sway]; set by the torso).
+var _belt_at: Array = []
 ## Extra thickness of the limb segment being drawn (cloth bulk).
 var _grow: float = 0.0
 var _skin := SKIN_LIGHT
@@ -2410,7 +2412,8 @@ func _build_outfit() -> void:
 			_cloth([P_TORSO], gi, 1.5)
 			_cloth([P_UPPER_ARM, P_FOREARM, P_THIGH, P_SHIN], gi, 2.5)
 			_cols["gi"] = gi
-			_cols["belt"] = Color(0.07, 0.07, 0.08) if light else acc
+			_cols["belt"] = Color(0.07, 0.07, 0.08)  # a black belt, on a white or a black gi
+			_cols["belt_edge"] = gi.darkened(0.35) if light else Color(0.42, 0.42, 0.46)
 			_cols["lapel"] = gi.darkened(0.3) if _kit == &"karate" else (Color(0.07, 0.07, 0.08) if light else acc)
 		&"kung_fu":
 			var silk := acc.darkened(0.45)
@@ -2496,6 +2499,8 @@ func _leg_extras(hip: Vector2, knee: Vector2, ankle: Vector2) -> void:
 			draw_line(skirt - tx * 12.5, skirt + tx * 12.5, _ccol("gi").darkened(0.2), 1.6, true)
 			var cuff := knee.lerp(ankle, 0.93)
 			draw_line(cuff - sx * 9.0, cuff + sx * 9.0, _ccol("gi").darkened(0.25), 1.8, true)
+			if not _far:
+				_draw_belt()
 		&"kung_fu":
 			# Loose trousers gathered at the ankle.
 			var band := knee.lerp(ankle, 0.88)
@@ -2517,6 +2522,24 @@ func _leg_extras(hip: Vector2, knee: Vector2, ankle: Vector2) -> void:
 			draw_line(flare - sx * 10.0, flare + sx * 10.0, _ccol("pants").darkened(0.2), 2.0, true)
 			draw_line(ankle - sx * 5.5 - (ankle - knee).normalized() * 2.0, ankle + sx * 5.5 - (ankle - knee).normalized() * 2.0,
 				_ccol("tape"), 3.0, true)
+
+
+## A wide black belt round the waist (edged, so it reads on a black gi too),
+## knotted at the front with two tails hanging over the jacket.
+func _draw_belt() -> void:
+	if _belt_at.is_empty():
+		return
+	var waist: Vector2 = _belt_at[0]
+	var n: Vector2 = _belt_at[1]
+	var sway: float = _belt_at[2]
+	draw_line(waist - n * 15.0, waist + n * 15.0, _cols["belt_edge"], 10.5, true)
+	draw_line(waist - n * 14.5, waist + n * 14.5, _cols["belt"], 8.0, true)
+	var knot := waist + n * 12.0
+	draw_circle(knot, 5.0, _cols["belt_edge"], true, -1.0, true)
+	draw_circle(knot, 4.0, _cols["belt"], true, -1.0, true)
+	for tail in [Vector2(n.x * 3.0, 20.0 + sway), Vector2(n.x * 9.0, 17.0 - sway)]:
+		draw_line(knot, knot + tail, _cols["belt_edge"], 5.6, true)
+		draw_line(knot, knot + tail, _cols["belt"], 4.0, true)
 
 
 ## Armbands, sleeve hems, silk cuffs: per arm, before the hand is drawn.
@@ -2548,11 +2571,9 @@ func _torso_extras(j: PackedVector2Array, hip: Vector2, axis: Vector2, length: f
 			var wide := 2.5 if _kit == &"karate" else 5.0
 			draw_line(neck_base + n * 3.0, hip + axis * length * 0.38 + n * 11.0, _cols["lapel"], wide, true)
 			draw_line(neck_base - n * 2.0, hip + axis * length * 0.55 + n * 8.0, _cols["lapel"], wide * 0.8, true)
-			draw_line(waist - n * 13.5, waist + n * 13.5, _cols["belt"], 6.0, true)
-			var knot := waist + n * 10.0
-			draw_circle(knot, 3.8, _cols["belt"], true, -1.0, true)
-			draw_line(knot, knot + Vector2(n.x * 3.0, 15.0 + sway), _cols["belt"], 3.2, true)
-			draw_line(knot, knot + Vector2(n.x * 7.0, 13.0 - sway), _cols["belt"], 3.2, true)
+			# The belt itself is drawn over the near leg (_draw_belt), so the jacket
+			# skirt never hides it.
+			_belt_at = [waist, n, sway]
 		&"kung_fu":
 			# Mandarin collar, frog buttons down the front, a wide sash.
 			draw_line(neck_base - n * 4.0, neck_base + n * 6.0, _cols["silk"].darkened(0.35), 4.5, true)

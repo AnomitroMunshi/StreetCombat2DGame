@@ -14,6 +14,8 @@ signal style_confirmed
 signal training_pressed
 ## A training panel button (same names as main.gd's training actions).
 signal training_action(action: StringName)
+## The on-screen pause button.
+signal pause_pressed
 
 const SCREEN_W: float = 1280.0
 const BAR_WIDTH: float = 480.0
@@ -73,6 +75,7 @@ var _debug_visible: bool = true
 var _debug_lines: PackedStringArray = PackedStringArray()
 var _canvas: Control = null
 var _font: Font = null
+var _pause_button: Button = null
 ## Speech bubbles: side (0 player, 1 rival) -> {"fighter", "text", "age"}.
 var _speech: Dictionary = {}
 var _speech_font: Font = null
@@ -277,6 +280,37 @@ func _build_training_panels() -> void:
 		_train_buttons.add_child(b)
 	_train_buttons.visible = false
 	add_child(_train_buttons)
+
+	# Pause button, top centre between the health bars (matches only).
+	_pause_button = Button.new()
+	_pause_button.text = "II  PAUSE"
+	_pause_button.custom_minimum_size = Vector2(96.0, 26.0)
+	_pause_button.position = Vector2(SCREEN_W * 0.5 - 48.0, 8.0)
+	_pause_button.focus_mode = Control.FOCUS_NONE  # Space must stay jump
+	_pause_button.add_theme_font_size_override("font_size", 13)
+	for state in ["normal", "hover", "pressed"]:
+		var box := _panel_box()
+		box.content_margin_top = 2.0
+		box.content_margin_bottom = 2.0
+		if state != "normal":
+			box.bg_color = Color(0.42, 0.13, 0.11, 0.95)
+		_pause_button.add_theme_stylebox_override(state, box)
+	_pause_button.add_theme_color_override("font_color", COLOR_TEXT)
+	_pause_button.pressed.connect(func() -> void: pause_pressed.emit())
+	_pause_button.visible = false
+	add_child(_pause_button)
+
+
+func show_pause_button(on: bool) -> void:
+	_pause_button.visible = on
+
+
+func set_paused(on: bool) -> void:
+	_pause_button.text = "▶  RESUME" if on else "II  PAUSE"
+
+
+func get_message() -> Array:
+	return [_headline, _subline]
 
 
 func show_training(on: bool) -> void:

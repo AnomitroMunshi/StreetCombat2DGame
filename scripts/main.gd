@@ -91,7 +91,7 @@ const SPEECH_VICTORY_TICKS: int = 200
 const SPEECH_COOLDOWN: int = 45
 const SPEECH_URGENT: int = 4
 const SPEECH_PRIORITY: Dictionary = {"hurt": 1, "block": 1, "slap": 2, "miss_heavy": 2, "match_start": 3,
-	"low_health": 4, "finisher": 5, "victory": 5}
+	"low_health": 4, "finisher": 5, "victory": 5, "knocked_out": 6}
 ## Moves whose whiff makes the fighter speak (big committal swings).
 const SPEECH_MISS_MOVES: Array[StringName] = [&"hammer_fist", &"thrust_kick", &"flying_chest_kick", &"belly_bomb",
 	&"double_push"]
@@ -154,6 +154,10 @@ var _block_was_held: bool = false
 var _speech: Dictionary = {}
 var _low_health_said: Dictionary = {}
 var _watched_swing: Dictionary = {}
+var _ko_said: Dictionary = {}
+## The match is paused (P / Esc / the pause button).
+var match_paused: bool = false
+var _pause_message: Array = ["", ""]
 # Finisher ambience: where the wall was last hit (dust keeps trickling from the
 # cracks), whether the attacker was airborne last tick (takeoff dust), and the
 # last x of each skidding body (floor scuff marks).
@@ -204,6 +208,13 @@ func _ready() -> void:
 		f.signature_started.connect(_on_signature_started)
 		f.parried.connect(_on_fighter_parried)
 	fx.decals_changed.connect(queue_redraw)
+	# Pause: this node and the HUD keep running (input, the pause screen); the
+	# fighters and effects freeze with the tree.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	hud.process_mode = Node.PROCESS_MODE_ALWAYS
+	for node: Node in [player, enemy, fx]:
+		node.process_mode = Node.PROCESS_MODE_PAUSABLE
+	hud.pause_pressed.connect(toggle_pause)
 	fx.floor_y = FLOOR_Y
 	# Martial arts: the player's choice persists across restarts; the rival
 	# gets a different style.
@@ -229,6 +240,12 @@ func _physics_process(_delta: float) -> void:
 	if training != null and get_tree().paused:
 		# Paused training: everything is frozen; keep the readouts live.
 		_refresh_presentation()
+		return
+	if match_paused:
+		# Paused match: nothing advances; R still restarts.
+		if Input.is_action_just_pressed("restart"):
+			toggle_pause()
+			restart_match()
 		return
 	if Input.is_action_just_pressed("restart"):
 		if training != null:
@@ -373,6 +390,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if training == null:
 		if key.physical_keycode == KEY_T and _round_state == RoundState.PRE_MATCH:
 			start_training()
+		elif key.physical_keycode in [KEY_P, KEY_ESCAPE] and (match_paused or can_pause()):
+			toggle_pause()
+			get_viewport().set_input_as_handled()
 		return
 	var action: StringName = {
 		KEY_1: &"dummy", KEY_2: &"dummy_style", KEY_3: &"speed", KEY_4: &"focus", KEY_5: &"next_finisher",
@@ -381,6 +401,35 @@ func _unhandled_input(event: InputEvent) -> void:
 	if action != &"":
 		training_action(action)
 		get_viewport().set_input_as_handled()
+
+
+# --- Pause (matches; training has its own) -------------------------------------
+
+func _update_pause_button() -> void:
+	hud.show_pause_button(can_pause())
+
+
+## A match can be paused from the countdown to the end of the K.O.
+func can_pause() -> bool:
+	return training == null and _round_state in [RoundState.STANCE_PREP, RoundState.COUNTDOWN, RoundState.FIGHTING,
+		RoundState.FINISHER, RoundState.KO]
+
+
+## P / Esc / the pause button: freezes the whole match (fighters, effects,
+## timers, slow motion); the HUD keeps drawing the pause screen.
+func toggle_pause() -> void:
+	if not match_paused and not can_pause():
+		return
+	match_paused = not match_paused
+	get_tree().paused = match_paused
+	if match_paused:
+		_pause_message = hud.get_message()
+		hud.set_message("PAUSED", "P / ESC resume  ·  R restart")
+		audio.duck_bgm(-12.0)
+	else:
+		hud.set_message(_pause_message[0], _pause_message[1])
+		audio.duck_bgm(-14.0 if _round_state == RoundState.FINISHER else 0.0)
+	hud.set_paused(match_paused)
 
 
 ## Plays a finisher on the dummy right away (Wall Crush at the wall, Air Smash
@@ -454,6 +503,7 @@ func _exit_training() -> void:
 # --- Match flow -----------------------------------------------------------------
 
 func _set_round_state(new_state: RoundState) -> void:
+	call_deferred("_update_pause_button")
 	_round_state = new_state
 	_state_tick = 0
 
@@ -1268,9 +1318,12 @@ func _speech_on_hit(result: CombatData.HitResult, attack: CombatData.Attack, att
 			say(defender, "block")
 
 
-## Bubble timers, and whiffed big swings ("you got lucky!").
+## Bubble timers, whiffed big swings ("you got lucky!") and the knocked-out line.
 func _tick_speech() -> void:
 	for f: Fighter in [player, enemy]:
+		if f.state == Fighter.State.KO and not _ko_said.has(f):
+			_ko_said[f] = true
+			say(f, "knocked_out")
 		var cur: Dictionary = _speech.get(f, {})
 		if not cur.is_empty():
 			if cur["ticks"] > 0:
