@@ -51,5 +51,6 @@ ai_close_plans = [[&"straight_palm", &"straight_palm", &"double_palm"], [&"backh
 ai_far_plans = [[&"straight_palm", &"double_palm"], [&"double_palm"], [&"sweep"], [&"flying_axe_kick"], [&"leaping_spin_backfist"], [&"front_kick"]]
 wall_entry = PackedStringArray("palm_windup", "palm_lead", "palm_rear", "palm_windup", "palm_strike")
 signature = &"palm_barrage"
+intro_pose = &"kf_crane"
 finishers = PackedStringArray("hundred_palms", "dragons_descent")
 ai_preferred_range = 105.0

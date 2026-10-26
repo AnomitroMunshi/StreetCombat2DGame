@@ -64,8 +64,12 @@ const DATA: Dictionary = {
 	},
 	Kind.KUNG_FU: {
 		"name": "KUNG FU STANCE", "southpaw": false, "idle": {"hz": 0.8, "bob": 3.0, "shape": "sine", "shift": 5.0, "shift_hz": 0.4, "heel": 1.0, "lead_heel": 0.0, "shoulder": 2.5, "guard": 0.12, "sway": 0.05, "head": 0.02, "circles": true},
-		# Low and wide, both hands open and forward, fluid.
+		# Low and wide, both hands open and forward, fluid (the moving stance).
 		"pose": [0.15, 0.1, 1.3, 2.4, 1.0, 2.85, 1.0, -0.4, -0.95, -0.55, 0.0, 0.0, 0.0, 10.0],
+		# Standing still: Shaolin one-legged guard. Lead knee at hip height with
+		# the foot hanging, lead fist out at shoulder level, rear open palm
+		# across the chest, slight bend in the support knee.
+		"crane": [0.06, 0.05, 1.5, 1.6, 0.95, 2.75, 1.8, -0.2, 0.04, -0.1, 0.0, 2.0, 0.2, 5.0],
 	},
 	Kind.GRAPPLER: {
 		"name": "GRAPPLER STANCE", "southpaw": false, "idle": {"hz": 0.7, "bob": 2.0, "shape": "sine", "shift": 6.0, "shift_hz": 0.35, "heel": 0.0, "lead_heel": 0.0, "shoulder": 3.0, "guard": 0.05, "sway": 0.06, "head": 0.02},
@@ -112,6 +116,11 @@ static func stance_name(kind: Kind) -> String:
 
 static func pose(kind: Kind) -> PackedFloat32Array:
 	return PackedFloat32Array(DATA[kind]["pose"])
+
+
+## The stance's one-legged standing pose (held when idle), or an empty array.
+static func crane_pose(kind: Kind) -> PackedFloat32Array:
+	return PackedFloat32Array(DATA[kind].get("crane", []))
 
 
 static func is_southpaw(kind: Kind) -> bool:

@@ -588,9 +588,18 @@ var _kt_side_chamber := PackedFloat32Array([-0.3, 0.3, 0.6, 2.6, 0.3, 2.9, 2.2, 
 var _kt_side_hit := PackedFloat32Array([-0.75, 0.6, 0.6, 2.6, 0.3, 2.9, 1.35, 1.4, -0.4, -0.2, 8.0, 3.0, 1.0, 14.0])
 var _kt_fsk_hit := PackedFloat32Array([-0.6, 0.5, 0.7, 2.5, 0.2, 2.8, 1.65, 1.65, 0.9, -1.5, 8.0, 0.0, 1.0])
 ## Intro poses that stand on one leg (the feet are not planted on the floor).
-const ONE_LEG_POSES: Array[StringName] = [&"mt_ready"]
+const ONE_LEG_POSES: Array[StringName] = [&"mt_ready", &"kf_crane"]
 ## Intro poses with an open lead hand.
 const OPEN_HAND_POSES: Array[StringName] = [&"kt_ready"]
+## Intro poses with an open rear hand.
+const OPEN_REAR_POSES: Array[StringName] = [&"kf_crane"]
+## Kung fu flows: softer, well-damped joint springs outside strikes, and every
+## keyframe eases in and out (no hard accelerations), so motion reads like water.
+const SPRING_FLOW := Vector2(230.0, 0.92)
+const FLOW_KITS: Array[StringName] = [&"kung_fu"]
+## How fast the raised leg of a one-legged pose lifts and lowers (per second).
+const LIFT_RATE_UP: float = 2.6
+const LIFT_RATE_DOWN: float = 9.0
 
 # Muay Thai roundhouses: step out, turn the hip over, lean the torso far back
 # against a straight leg that lands with the shin; the kicking-side arm swings
@@ -715,6 +724,10 @@ var _grow: float = 0.0
 var _skin := SKIN_LIGHT
 ## The arm being drawn ends in an open hand.
 var _open_arm: bool = false
+## Standing one-legged guard (Stances "crane"), empty if the stance has none.
+var _crane := PackedFloat32Array()
+## 0..1: how far the lead leg is lifted off the floor (one-legged poses).
+var _lift: float = 0.0
 
 @onready var fighter: Fighter = get_parent() as Fighter
 
@@ -1056,6 +1069,10 @@ func _sync_stance() -> void:
 	while _guard.size() < CHANNELS:
 		_guard.append(DEFAULT_SPREAD if _guard.size() == SPREAD else 0.0)
 	_pose_library[&"guard"] = _guard
+	_crane = Stances.crane_pose(fighter.stance)
+	while not _crane.is_empty() and _crane.size() < CHANNELS:
+		_crane.append(DEFAULT_SPREAD if _crane.size() == SPREAD else 0.0)
+	_pose_library[&"kf_crane"] = _crane if not _crane.is_empty() else _guard
 	_build_light_reactions()
 
 
@@ -1329,6 +1346,8 @@ func _spring_params() -> Vector2:
 			return SPRING_LIMP
 		Fighter.State.FINISHER, Fighter.State.JUMP, Fighter.State.BLOCK, Fighter.State.DODGE, Fighter.State.CROUCH, Fighter.State.PARRY:
 			return SPRING_FAST
+	if _kit in FLOW_KITS and fighter.state != Fighter.State.ATTACK:
+		return SPRING_FLOW
 	return SPRING_DEFAULT
 
 
@@ -1541,6 +1560,11 @@ func _active_idle() -> PackedFloat32Array:
 	var k := _idle_amount
 	if k <= 0.0:
 		return idle
+	var crane := 0.0
+	if not _crane.is_empty():
+		# Settle from the moving stance onto one leg once standing still.
+		crane = smoothstep(0.35, 1.0, k)
+		idle = _blend(_guard, _crane, crane)
 	var t := _time * fighter.idle_tempo + fighter.idle_phase
 	var shape: String = st["shape"]
 	var hz: float = st["hz"]
@@ -1550,7 +1574,8 @@ func _active_idle() -> PackedFloat32Array:
 	if shape == "snap":
 		shift = tanh(3.0 * shift) / tanh(3.0)  # settle and hold, then a quick adjustment
 	var amp := fighter.idle_amplitude
-	_bob_target = float(st["bob"]) * dip * k * amp
+	# One leg: a gentle support-knee compression instead of a bounce.
+	_bob_target = float(st["bob"]) * dip * k * amp * (1.0 - 0.5 * crane)
 	var heel_base := float(st.get("rear_heel", 0.0)) * k
 	if st.get("alternate", false):
 		# Boxer's bounce: the heels lift on alternate bounces (rear, then lead)
@@ -1566,7 +1591,8 @@ func _active_idle() -> PackedFloat32Array:
 		# the rear heel as the weight rocks forward (lead heel as it rocks back).
 		var rise := 1.0 - dip if shape == "hop" else 0.5 + 0.5 * shift
 		_heel_target = Vector2(float(st["lead_heel"]) * (0.5 - 0.5 * shift), float(st["heel"]) * rise) * k * amp
-		idle[HIP_X] += float(st["shift"]) * shift * k * amp
+		# On one leg the weight barely travels (no drifting off the support foot).
+		idle[HIP_X] += float(st["shift"]) * shift * k * amp * (1.0 - 0.8 * crane)
 		idle[SPREAD] += float(st["shoulder"]) * sin(TAU * shift_hz * t + 0.8) * k * amp
 	var sway := float(st["sway"]) * sin(PI * shift_hz * t) * k
 	idle[TORSO] += sway
@@ -1906,12 +1932,15 @@ func _attack_keys(t: float) -> PackedFloat32Array:
 		var key_pose: PackedFloat32Array = key[2] if key[2] != null else rest
 		if t < key_t:
 			var u := (t - prev_t) / maxf(key_t - prev_t, 0.001)
-			return _blend(prev_pose, key_pose, _ease(u, key[3]))
+			var kind: int = key[3]
+			if _kit in FLOW_KITS and kind != EASE_LINEAR:
+				kind = EASE_SMOOTH
+			return _blend(prev_pose, key_pose, _ease(u, kind))
 		prev_t = key_t
 		prev_pose = key_pose
 	var total := float(attack.total_frames())
 	var w := (t - prev_t) / maxf(total - prev_t, 0.001)
-	return _blend(prev_pose, rest, _ease(w, EASE_OUT))
+	return _blend(prev_pose, rest, _ease(w, EASE_SMOOTH if _kit in FLOW_KITS else EASE_OUT))
 
 
 static func _key_time(phase: int, fraction: float, attack: CombatData.Attack) -> float:
@@ -2152,7 +2181,9 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 func _silhouette(j: PackedVector2Array, forward: Vector2, back_toe: Vector2, pad: float, far: Color, near: Color) -> void:
 	_far = true
 	_leg(j[J_HIP_B], j[J_KNEE_B], j[J_FOOT_B], back_toe, pad, far, _heel_draw.y * _plant, _foot_point.y)
+	_open_arm = fighter.prefight_pose in OPEN_REAR_POSES or (_lift > 0.5 and not _crane.is_empty())
 	_arm(j[J_SHOULDER_B], j[J_ELBOW_B], j[J_HAND_B], pad, far, _glove_color(false, pad))
+	_open_arm = false
 	_far = false
 	_torso(j, forward, pad, near)
 	_head(j, forward, pad, near)
@@ -2851,8 +2882,6 @@ func _wants_plant() -> bool:
 		return false
 	if absf(_spin_angle) > 0.01 or fighter.script_flip:
 		return false
-	if fighter.prefight_pose in ONE_LEG_POSES:
-		return false
 	if fighter.state == Fighter.State.ATTACK:
 		# Hand strikes keep the feet planted, so the hips drive over them and a
 		# step-in steps front foot then rear (kicks own their legs).
@@ -2870,6 +2899,10 @@ func _wants_plant() -> bool:
 func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2) -> PackedVector2Array:
 	var dt := _last_delta
 	_plant = move_toward(_plant, 1.0 if _wants_plant() else 0.0, dt * PLANT_RATE)
+	# One-legged poses: the lead foot leaves the floor (the support foot stays).
+	var lifting := fighter.state == Fighter.State.IDLE and (fighter.prefight_pose in ONE_LEG_POSES
+		or (fighter.prefight_pose == &"" and fighter.celebration == &"" and not _crane.is_empty() and _idle_amount > 0.45))
+	_lift = move_toward(_lift, 1.0 if lifting else 0.0, dt * (LIFT_RATE_UP if lifting else LIFT_RATE_DOWN))
 	# Body speed (for stepping ahead of the motion).
 	var hip_x := j[J_HIP].x
 	if dt > 0.0:
@@ -2902,8 +2935,13 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 			_step_leg = -1
 	# Start a step. Footwork order: advancing, the front foot steps first and the
 	# rear follows; retreating, the rear foot steps back first. Feet never cross.
+	if _lift > 0.0:
+		# A lifted foot comes back down on its stance spot.
+		if _step_leg == 0:
+			_step_leg = -1
+		_feet[0] = homes[0]
 	if _step_leg < 0:
-		var errs := [absf(_feet[0].x - homes[0].x), absf(_feet[1].x - homes[1].x)]
+		var errs := [0.0 if _lift > 0.0 else absf(_feet[0].x - homes[0].x), absf(_feet[1].x - homes[1].x)]
 		var moving_forward := _body_speed * forward.x > 30.0
 		var moving_back := _body_speed * forward.x < -30.0
 		var moving := moving_forward or moving_back
@@ -2950,6 +2988,8 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 	var comfy := (THIGH + SHIN) * KNEE_SOFT
 	var settle := 0.0
 	for leg in 2:
+		if leg == 0 and _lift > 0.5:
+			continue
 		var hip_p: Vector2 = j[legs[leg][0]]
 		var dx := absf(targets[leg].x - hip_p.x)
 		var highest := targets[leg].y - sqrt(maxf(comfy * comfy - dx * dx, 0.0))
@@ -2971,10 +3011,11 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 		var foot := targets[leg]
 		var ids: Array = legs[leg]
 		var solved := _ik_leg(j[ids[0]], foot, forward)
-		if leg != _step_leg:
+		var w := _plant * (1.0 - _lift if leg == 0 else 1.0)
+		if leg != _step_leg and not (leg == 0 and _lift > 0.0):
 			_feet[leg] = Vector2(solved[1].x, floor_y)  # a dragged foot stays dragged
-		j[ids[1]] = j[ids[1]].lerp(solved[0], _plant)
-		j[ids[2]] = j[ids[2]].lerp(solved[1], _plant)
+		j[ids[1]] = j[ids[1]].lerp(solved[0], w)
+		j[ids[2]] = j[ids[2]].lerp(solved[1], w)
 	return j
 
 
