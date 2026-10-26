@@ -123,6 +123,8 @@ const GLOVE_SCALE: float = 1.35
 ## Straight punch aim limits (limb angle from straight down; pi/2 = level).
 const AIM_MIN: float = 1.15
 const AIM_MAX: float = 2.3
+## Most a bent arm (hook / uppercut) is swung to reach its target (rad).
+const AIM_BENT_MAX: float = 1.3
 ## Close-range punches: how far the hips sit back and the torso straightens
 ## before the elbow has to bend.
 const PUNCH_ROOM_HIP: float = 10.0
@@ -206,7 +208,7 @@ var _heavy_strike := PackedFloat32Array([0.32, 0.05, 0.75, 2.8, 1.57, 1.6, 0.6, 
 var _backhand_windup := PackedFloat32Array([0.1, 0.15, 1.3, 4.08, 0.55, 2.95, 0.6, -0.05, -0.62, -0.3, -3.0, 0.0])
 var _backhand_strike := PackedFloat32Array([0.25, 0.05, 1.8, 2.05, 0.55, 2.95, 0.68, 0.05, -0.66, -0.32, 6.0, 0.0])
 var _uppercut_windup := PackedFloat32Array([0.45, 0.15, 0.9, 2.6, 0.15, 0.9, 1.0, -0.4, -0.75, -1.1, -4.0, 0.0])
-var _uppercut_strike := PackedFloat32Array([0.12, -0.05, 0.7, 2.8, 1.15, 2.95, 0.75, -0.2, -0.5, -0.55, 8.0, 4.0, 0.7])
+var _uppercut_strike := PackedFloat32Array([0.12, -0.05, 0.7, 2.8, 1.65, 3.0, 0.75, -0.2, -0.5, -0.55, 8.0, 4.0, 0.7])
 
 # Side kick (lead leg): pivot and chamber the knee across the body (heel to the
 # hip), thrust the heel out with the hips while the torso counter-leans and the
@@ -461,6 +463,9 @@ var _breath: float = 0.0
 var _pose_ready: bool = false
 ## Skeleton as last drawn (world space), for the developer overlay.
 var _last_joints := PackedVector2Array()
+## This fighter's position when _last_joints was drawn.
+var _last_root := Vector2.ZERO
+var _last_facing: int = 0
 # Active idle: amount (0..1), hip dip in px and heel lifts (x lead, y rear).
 var _idle_amount: float = 0.0
 var _bob: float = 0.0
@@ -476,6 +481,11 @@ var _kit: StringName = &"gi"
 ## Cel shading on the body fill pass (boxing kit): shadow on the far side of
 ## every limb and the torso, a highlight along the near edge.
 var _shade: bool = false
+## Where punches aim (opponent's drawn head / chest, local), held during
+## hitstop so the glove stays on the contact point while the target reacts.
+var _aim_head := Vector2.INF
+var _aim_chest := Vector2.INF
+var _aim_chin_offset := Vector2.ZERO
 ## Shoe colour on the fill pass (transparent = body colour).
 var _shoe := Color.TRANSPARENT
 
@@ -723,7 +733,10 @@ func _process(delta: float) -> void:
 		_seen_swing = fighter.swing_id
 		_swing_from = _pose.duplicate()
 
-	_apply_impulses()
+	# Hitstop: the whole body holds (both fighters freeze at the contact);
+	# the hit's reaction impulse is applied when the freeze ends.
+	if not frozen:
+		_apply_impulses()
 	var target := _target_pose(t)
 	var dt := minf(delta, 1.0 / 30.0)
 	if not _pose_ready:
@@ -739,11 +752,11 @@ func _process(delta: float) -> void:
 			if dt > 0.0:
 				_pose_vel[i] = _clamp_speed(i, (target[i] - _pose[i]) / dt)
 		_pose = target
-	elif dt > 0.0:
+	elif dt > 0.0 and not frozen:
 		_spring_toward(target, dt, _spring_params())
 
 	_update_down_amount(t)
-	_update_spin(dt, fraction)
+	_update_spin(0.0 if frozen else dt, fraction)  # tumbles hold in hitstop too
 	if _is_back_kick():
 		_spin_angle = PI * _back_turn(t)
 	# Idle dip and heel lifts ease toward the wave (and to zero when acting).
@@ -1314,10 +1327,67 @@ func _mechanics(pose: PackedFloat32Array, t: float) -> PackedFloat32Array:
 		out[ch] += g * (maxf(d, 0.0) if ch in MECH_FORWARD_ONLY else d)
 	out[PIVOT] = clampf(out[PIVOT], 0.0, 1.0)
 	var kind := _mech_kind(attack.type)
-	if d > 0.0 and kind in [MECH_LEAD, MECH_REAR] 			and CombatData.impact_kind(attack.type) == CombatData.ImpactKind.STRAIGHT:
-		out = _aim_arm(out, J_SHOULDER_F if kind == MECH_LEAD else J_SHOULDER_B,
-			UA_F if kind == MECH_LEAD else UA_B, LA_F if kind == MECH_LEAD else LA_B,
-			attack.hitbox.get_center().y < -120.0, d)
+	var joint := _attack_joint(attack.type)
+	if d > 0.0 and joint in [J_HAND_F, J_HAND_B]:
+		var lead := joint == J_HAND_F
+		var high := attack.hitbox.get_center().y < -120.0
+		if CombatData.impact_kind(attack.type) == CombatData.ImpactKind.STRAIGHT and kind in [MECH_LEAD, MECH_REAR]:
+			out = _aim_arm(out, J_SHOULDER_F if lead else J_SHOULDER_B, UA_F if lead else UA_B,
+				LA_F if lead else LA_B, high, d)
+		else:
+			# Hooks, uppercuts, overhands: keep the arm's bend and swing the
+			# whole arm about the shoulder so the glove arrives at the target.
+			out = _aim_bent_arm(out, lead, high, CombatData.impact_kind(attack.type), d)
+	return out
+
+
+## The opponent's drawing matches where and which way it is now.
+static func _drawing_fresh(ov: FighterVisual) -> bool:
+	return ov != null and ov.fighter != null and ov._last_joints.size() >= JOINTS 		and ov._last_facing == ov.fighter.facing and ov._last_root.distance_to(ov.global_position) < 40.0
+
+
+## The opponent's drawn head (or chin) / chest in local space; frozen while
+## this fighter is in hitstop.
+func _aim_point(ov: FighterVisual, high: bool, chin: bool) -> Vector2:
+	if fighter.hitstop_frames <= 0 or (_aim_head == Vector2.INF):
+		var oj := ov._last_joints
+		# Drawn joints are anchored to where the opponent is now (they were
+		# drawn up to a frame ago).
+		var shift := ov.global_position - ov._last_root
+		var head := oj[J_HEAD] + shift
+		var chest := oj[J_HIP].lerp(oj[J_NECK], 0.55) + shift
+		_aim_head = Vector2((head.x - global_position.x) * fighter.facing, head.y - global_position.y)
+		_aim_chest = Vector2((chest.x - global_position.x) * fighter.facing, chest.y - global_position.y)
+		var down := (oj[J_NECK] - head).normalized() * HEAD_R * 0.7
+		_aim_chin_offset = Vector2(down.x * fighter.facing, down.y)
+	if not high:
+		return _aim_chest
+	return _aim_head + (_aim_chin_offset if chin else Vector2.ZERO)
+
+
+## Rotates a bent arm about its shoulder so the glove points at the target:
+## the side of the head (hooks), the chin from below (uppercuts) or the ribs.
+func _aim_bent_arm(pose: PackedFloat32Array, lead: bool, high: bool, kind: int, weight: float) -> PackedFloat32Array:
+	var opp := fighter.opponent
+	if opp == null:
+		return pose
+	var ov := opp.get_node_or_null("Visual") as FighterVisual
+	if not _drawing_fresh(ov):
+		return pose
+	var target := _aim_point(ov, high, high and kind == CombatData.ImpactKind.RISING)
+	var j := _solve_joints(pose)
+	var shoulder := j[J_SHOULDER_F if lead else J_SHOULDER_B]
+	var glove := j[J_HAND_F if lead else J_HAND_B]
+	var from := glove - shoulder
+	var to := target - shoulder
+	if from.length() < 4.0 or to.x <= 0.0:
+		return pose
+	# Limb angles are measured from straight down: rotating the glove vector by
+	# +x radians (screen) is -x in limb-angle terms for a right-facing body.
+	var delta := clampf(wrapf(from.angle() - to.angle(), -PI, PI), -AIM_BENT_MAX, AIM_BENT_MAX) * clampf(weight, 0.0, 1.0)
+	var out := pose.duplicate()
+	out[UA_F if lead else UA_B] += delta
+	out[LA_F if lead else LA_B] += delta
 	return out
 
 
@@ -1330,10 +1400,9 @@ func _aim_arm(pose: PackedFloat32Array, shoulder_joint: int, ua: int, la: int, h
 	if opp == null:
 		return pose
 	var opp_visual := opp.get_node_or_null("Visual") as FighterVisual
-	if opp_visual == null or opp_visual._last_joints.size() < JOINTS:
+	if not _drawing_fresh(opp_visual):
 		return pose
-	var target_world: Vector2 = opp_visual._last_joints[J_HEAD] if high 		else opp_visual._last_joints[J_HIP].lerp(opp_visual._last_joints[J_NECK], 0.55)
-	var target := Vector2((target_world.x - global_position.x) * fighter.facing, target_world.y - global_position.y)
+	var target := _aim_point(opp_visual, high, false)
 	var to := target - _solve_joints(pose)[shoulder_joint]
 	if to.x <= 0.0:
 		return pose
@@ -1428,7 +1497,10 @@ func _solve_joints(p: PackedFloat32Array) -> PackedVector2Array:
 	# On the ground (or while falling / lying) the supporting foot is planted on
 	# the floor: crouching comes from bending the knees, never from floating.
 	# The hip never sinks below the body's own thickness when legs are flat.
-	if not fighter.airborne or fighter.is_down():
+	# Just launched but not yet off the floor (a launch lands during the hit
+	# freeze): still drawn standing, so the body does not pop up at impact.
+	var on_floor := fighter.ground_y - fighter.position.y < 1.0
+	if not fighter.airborne or fighter.is_down() or on_floor:
 		var leg_f := THIGH * cos(p[TH_F]) + SHIN * cos(p[SH_F])
 		var leg_b := THIGH * cos(p[TH_B]) + SHIN * cos(p[SH_B])
 		hip.y = -maxf(maxf(leg_f, leg_b), TORSO_WIDTH * 0.5 + 1.0)
@@ -1528,6 +1600,8 @@ func _draw() -> void:
 	var forward := Vector2(signf(face), 0.0)
 	_draw_body(world_joints, front, back, accent, forward, Stances.is_southpaw(fighter.stance) and not _rag_on)
 	_last_joints = world_joints
+	_last_root = global_position
+	_last_facing = fighter.facing
 	draw_set_transform_matrix(Transform2D.IDENTITY)
 
 
@@ -2103,13 +2177,20 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 ## or a strike through a dodge, still passes freely).
 func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 	var opp := fighter.opponent
-	if opp == null or fighter.current_attack == null or opp.is_down() or opp.is_evading():
+	if opp == null or fighter.current_attack == null:
+		return pose
+	# A knockdown blow still lands on the body: limit while the hit freezes.
+	var down := opp.is_down() and opp.hitstop_frames <= 0
+	if down or opp.is_evading():
 		return pose
 	var gap := (opp.position.x - fighter.position.x) * fighter.facing
 	if gap <= 0.0:
 		return pose
 	var idx := _attack_joint(fighter.current_attack.type)
 	var limit := gap - BODY_HALF + CONTACT_DEPTH
+	var drawn := _drawn_target_x(opp, fighter.current_attack)
+	if drawn != INF:
+		limit = drawn + CONTACT_DEPTH
 	var box := opp.get_hurtbox_world()
 	var top := box.position.y - fighter.position.y - 8.0
 	var bottom := box.end.y - fighter.position.y + 8.0
@@ -2161,6 +2242,23 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 		else:
 			hi = mid
 	return _blend(pose, base, hi)
+
+
+## Local x (along this fighter's facing) of the near surface of the part of
+## the opponent's DRAWN body the strike aims at: the head for high strikes, the
+## chest / stomach otherwise. INF when the opponent has not been drawn yet.
+## The opponent's root is not where its body is drawn (stance lean, sway,
+## reactions), so contact is measured against the drawing.
+func _drawn_target_x(opp: Fighter, attack: CombatData.Attack) -> float:
+	var ov := opp.get_node_or_null("Visual") as FighterVisual
+	if not _drawing_fresh(ov):
+		return INF
+	var high := attack.hitbox.get_center().y < -120.0
+	if high and CombatData.impact_kind(attack.type) == CombatData.ImpactKind.RISING:
+		# Uppercuts and knees come up under the chin, not into the face.
+		return _aim_point(ov, true, true).x + 2.0
+	var surface := HEAD_R if high else BODY_HALF * 0.75
+	return _aim_point(ov, high, false).x - surface
 
 
 ## Two-bone arm IK: the glove placed on its current line from the shoulder,
