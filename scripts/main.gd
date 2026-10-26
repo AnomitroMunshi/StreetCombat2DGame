@@ -766,6 +766,7 @@ func _resolve_hits() -> void:
 			CombatData.HitResult.HIT:
 				if not attacker.in_signature:
 					attacker.add_focus(CombatData.focus_for_hit(attack, defender.last_hit_counter))
+				defender.add_focus(CombatData.focus_for_hurt(attack.damage))
 			CombatData.HitResult.BLOCKED:
 				defender.add_block_focus()
 		if result == CombatData.HitResult.KO:

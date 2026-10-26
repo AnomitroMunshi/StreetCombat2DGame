@@ -185,7 +185,10 @@ const FACING_HYSTERESIS: float = 8.0
 ## signature technique (F at FOCUS_MAX). It never decays during a match and is
 ## never earned during finishers or from signature hits. Blocking pays at most
 ## once per FOCUS_BLOCK_COOLDOWN ticks, so turtling cannot farm it.
+## Taking a clean hit also fills it (FOCUS_HURT_PER_DAMAGE per point of
+## damage taken): the fighter being beaten up builds toward a comeback.
 const FOCUS_MAX: float = 100.0
+const FOCUS_HURT_PER_DAMAGE: float = 0.6
 const FOCUS_LIGHT: float = 5.0
 const FOCUS_HEAVY: float = 10.0
 const FOCUS_KICK: float = 8.0
@@ -1078,6 +1081,11 @@ static func get_attack(type: AttackType) -> Attack:
 
 ## Focus for landing `attack` cleanly: kicks, heavy blows, light blows;
 ## a counter hit pays the counter rate instead; signatures pay nothing.
+## Focus for TAKING a clean hit of `damage`.
+static func focus_for_hurt(damage: int) -> float:
+	return damage * FOCUS_HURT_PER_DAMAGE
+
+
 static func focus_for_hit(attack: Attack, counter: bool) -> float:
 	if attack.signature:
 		return 0.0

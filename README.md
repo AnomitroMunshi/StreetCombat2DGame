@@ -205,6 +205,7 @@ stops on a full turn, then rises from a crouch.
 | Perfect parry | +20 |
 | Perfect dodge | +12 |
 | Block | +3, at most once every half second, so turtling can't farm it |
+| Taking a clean hit | +0.6 per point of damage taken (a comeback: being beaten up builds toward your signature) |
 
 Misses earn nothing. Finishers and signature hits earn nothing either. At
 100 the HUD shows **SIGNATURE READY – F**. Pressing **F** spends the whole

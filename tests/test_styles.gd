@@ -232,6 +232,7 @@ func _initialize() -> void:
 	_check(CombatData.focus_for_hit(jab_at, false) == 5.0 and CombatData.focus_for_hit(cross_at, false) == 10.0
 		and CombatData.focus_for_hit(kick_at, false) == 8.0 and CombatData.focus_for_hit(jab_at, true) == 15.0,
 		"focus per hit: light 5, heavy 10, kick 8, counter 15")
+	_check(is_equal_approx(CombatData.focus_for_hurt(12), 12.0 * CombatData.FOCUS_HURT_PER_DAMAGE), "taking a 12-damage hit pays the victim %.1f focus" % CombatData.focus_for_hurt(12))
 	_check(CombatData.focus_for_hit(CombatData.get_attack(CombatData.AttackType.GAZELLE_HOOK), false) == 0.0, "signature hits earn no focus")
 	p = _pair(boxing, 80.0)
 	a = p[0]
@@ -541,6 +542,8 @@ func _initialize() -> void:
 					illegal += 1
 		_check(illegal == 0 and en.rejected_attacks == 0, "%s rival: %d different moves used, none illegal, none refused (%s)" % [rival_id, seen.size(), seen.keys()])
 		_check(seen.size() >= 4, "%s rival uses a varied moveset" % rival_id)
+		# The idle player never attacks or blocks: all its Focus came from being hit.
+		_check(pl.hit_counter > 0 and pl.focus > 0.0, "taking hits fills the Focus bar (%d hits taken, focus %.0f)" % [pl.hit_counter, pl.focus])
 		if rival_id == &"bangla_maar":
 			var total := 0
 			for k in swings:
