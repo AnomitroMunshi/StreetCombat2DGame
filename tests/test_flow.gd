@@ -97,8 +97,9 @@ class Driver extends Node:
 				if fight_frame > 0 and frame - fight_frame == 30:
 					check(locked_ok, "no combat action by either side before FIGHT")
 					check(marks_ok, "both fighters reached their start marks before the countdown")
-					check(poses_seen.has(&"relaxed") and poses_seen.has(&"salute") and poses_seen.has(&"glare"),
-						"pre-fight poses played: relaxed, salute (player), glare (rival)")
+					var rival_gesture: StringName = e.style.intro_pose if e.style.intro_pose != &"" else &"glare"
+					check(poses_seen.has(&"relaxed") and poses_seen.has(&"salute") and poses_seen.has(rival_gesture),
+						"pre-fight poses played: relaxed, salute (player), %s (rival)" % rival_gesture)
 					check(p.stance != e.stance, "player and rival start in different stances")
 					check(counts == ["3", "2", "1", "FIGHT!"], "countdown order 3, 2, 1, FIGHT! (%s)" % [counts])
 					var spacing_ok := count_frames.size() == 4

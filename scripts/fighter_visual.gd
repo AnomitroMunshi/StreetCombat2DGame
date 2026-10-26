@@ -568,11 +568,30 @@ var _tornado_kick := PackedFloat32Array([-0.6, 0.45, 1.3, 2.3, -1.3, -1.0, 1.95,
 var _relaxed := PackedFloat32Array([0.03, 0.02, 0.14, 0.32, 0.1, 0.28, 0.24, 0.02, -0.2, -0.26, 0.0, 0.0, 0.0, 3.0])
 var _salute := PackedFloat32Array([0.34, 0.42, 0.8, 1.95, 0.85, 2.15, 0.24, 0.02, -0.2, -0.26, -1.0, 2.0, 0.0, 2.0])
 var _glare := PackedFloat32Array([0.22, 0.35, 0.4, 1.35, 0.32, 1.25, 0.34, -0.1, -0.32, -0.32, 0.0, 3.0, 0.0, 5.0])
+# Style intro poses (MartialArtStyle.intro_pose). Muay Thai: on the rear leg,
+# lead knee high with the foot hanging, rear glove on top of the head, lead
+# glove at the chin.
+var _mt_ready := PackedFloat32Array([-0.05, 0.2, 0.35, 2.95, 3.55, 1.75, 2.05, -0.15, -0.05, -0.12, 0.0, 0.0, 0.3, 4.0])
+## Intro poses that stand on one leg (the feet are not planted on the floor).
+const ONE_LEG_POSES: Array[StringName] = [&"mt_ready"]
+
+# Muay Thai roundhouses: step out, turn the hip over, lean the torso far back
+# against a straight leg that lands with the shin; the kicking-side arm swings
+# down and back, the other glove stays at the face.
+var _mt_rh_load := PackedFloat32Array([-0.2, 0.15, 1.3, 2.85, 0.4, 2.4, 1.1, -0.2, -0.35, -0.45, -2.0, 2.0, 0.5, 12.0])
+var _mt_rh_body := PackedFloat32Array([-0.8, 0.55, 2.2, 4.6, -0.2, 0.15, 1.62, 1.72, -0.18, -0.12, 10.0, 0.0, 1.0, 2.0])
+var _mt_rh_high := PackedFloat32Array([-1.0, 0.75, 2.0, 4.75, -0.2, 0.2, 2.25, 2.35, -0.2, -0.12, 10.0, 0.0, 1.0, 2.0])
+var _mt_rh_low := PackedFloat32Array([-0.5, 0.35, 2.3, 4.6, -0.15, 0.2, 1.0, 1.15, -0.25, -0.2, 8.0, 3.0, 1.0, 2.0])
+# Muay Thai flying knees: both hands grab the head and pull it into the knee.
+var _mt_kface_hit := PackedFloat32Array([-0.1, 0.25, 1.1, 0.8, 1.0, 0.75, -0.45, -0.75, 2.3, -0.55, 8.0, 0.0, 0.6, -8.0])
+var _mt_fknee_hit := PackedFloat32Array([0.0, 0.2, 1.1, 0.8, 1.0, 0.75, 2.25, -0.5, -0.6, -0.5, 8.0, 0.0])
 
 ## Named poses a FinisherDirector can request via Fighter.script_pose.
 var _pose_library: Dictionary = {}
 ## AttackType -> keyframes [phase, fraction, pose, easing].
 var _moves: Dictionary = {}
+## Outfit kit -> {AttackType -> keyframes}: a style's own version of a shared move.
+var _kit_moves: Dictionary = {}
 
 var _pose := PackedFloat32Array()
 var _pose_vel := PackedFloat32Array()
@@ -704,7 +723,7 @@ func _ready() -> void:
 		&"palm_windup": _palm_windup, &"palm_strike": _palm_strike, &"spin_windup": _spin_windup,
 		&"spin_kick": _spin_kick, &"knee_windup": _knee_windup, &"knee": _knee, &"slumped": _slumped,
 		&"tornado_windup": _tornado_windup, &"tornado_chamber": _tornado_chamber, &"tornado_kick": _tornado_kick,
-		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare,
+		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare, &"mt_ready": _mt_ready,
 		# Style finishers reuse the move poses.
 		&"lhook_hit": _lhook_hit, &"rhook_hit": _rhook_hit, &"bhook_load": _bhook_load, &"bhook_hit": _bhook_hit,
 		&"overhand_hit": _overhand_hit, &"slip_dip": _slip_dip, &"uppercut_windup": _uppercut_windup,
@@ -726,6 +745,25 @@ func _ready() -> void:
 		&"hand_shake_a": _hand_shake_a, &"hand_shake_b": _hand_shake_b, &"push_load": _push_load,
 		&"push_hit": _push_hit, &"stomach_hit": _stomach_hit, &"hammer_raise": _hammer_raise, &"hammer_hit": _hammer_hit,
 		&"slap_hit": _slap_hit, &"bb_fly": _bb_fly,
+	}
+	_kit_moves = {
+		&"muay_thai": {
+			CombatData.AttackType.BODY_ROUNDHOUSE: [
+				[S, 0.55, _mt_rh_load, EASE_SMOOTH], [A, 0.0, _mt_rh_body, EASE_IN],
+				[A, 1.0, _over(_mt_rh_body, _mt_rh_load), EASE_LINEAR], [R, 0.45, _mt_rh_load, EASE_OUT]],
+			CombatData.AttackType.HIGH_KICK: [
+				[S, 0.5, _mt_rh_load, EASE_SMOOTH], [A, 0.0, _mt_rh_high, EASE_IN],
+				[A, 1.0, _over(_mt_rh_high, _mt_rh_load), EASE_LINEAR], [R, 0.45, _mt_rh_load, EASE_OUT]],
+			CombatData.AttackType.LOW_ROUNDHOUSE: [
+				[S, 0.55, _mt_rh_load, EASE_SMOOTH], [A, 0.0, _mt_rh_low, EASE_IN],
+				[A, 1.0, _over(_mt_rh_low, _mt_rh_load), EASE_LINEAR], [R, 0.4, _mt_rh_load, EASE_OUT]],
+			CombatData.AttackType.FLYING_KNEE_FACE: [
+				[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _kface_load, EASE_SMOOTH], [A, 0.0, _mt_kface_hit, EASE_IN],
+				[A, 1.0, _mt_kface_hit, EASE_LINEAR], [R, 0.45, _kface_load, EASE_OUT]],
+			CombatData.AttackType.FLYING_KNEE: [
+				[S, 0.35, _jump_squat, EASE_SMOOTH], [S, 0.85, _kface_load, EASE_SMOOTH],
+				[A, 0.0, _mt_fknee_hit, EASE_IN], [A, 1.0, _mt_fknee_hit, EASE_LINEAR], [R, 0.5, _fknee_load, EASE_OUT]],
+		},
 	}
 	_moves = {
 		CombatData.AttackType.LIGHT: [
@@ -1828,7 +1866,7 @@ static func _mech_kind(type: CombatData.AttackType) -> int:
 func _attack_keys(t: float) -> PackedFloat32Array:
 	var attack := fighter.current_attack
 	var rest := _air_pose() if fighter.airborne else _guard
-	var keys: Array = _moves.get(attack.type, [])
+	var keys: Array = _kit_moves.get(_kit, {}).get(attack.type, _moves.get(attack.type, []))
 	var prev_t := 0.0
 	var prev_pose := _swing_from
 	for key in keys:
@@ -2778,6 +2816,8 @@ func _wants_plant() -> bool:
 	if fighter.airborne or _rag_on or _rag_blend > 0.0 or _tuck_amount > 0.0:
 		return false
 	if absf(_spin_angle) > 0.01 or fighter.script_flip:
+		return false
+	if fighter.prefight_pose in ONE_LEG_POSES:
 		return false
 	if fighter.state == Fighter.State.ATTACK:
 		# Hand strikes keep the feet planted, so the hips drive over them and a

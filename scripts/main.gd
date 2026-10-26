@@ -615,8 +615,8 @@ func _tick_match_flow() -> void:
 		RoundState.STANCE_PREP:
 			# Walk in relaxed, gesture, then raise the stance guard.
 			if _state_tick == PREP_GESTURE_TICK:
-				player.prefight_pose = &"salute"
-				enemy.prefight_pose = &"glare"
+				player.prefight_pose = _intro_pose(player, &"salute")
+				enemy.prefight_pose = _intro_pose(enemy, &"glare")
 			elif _state_tick == PREP_GUARD_TICK:
 				player.prefight_pose = &""
 				enemy.prefight_pose = &""
@@ -633,6 +633,11 @@ func _tick_match_flow() -> void:
 		RoundState.FIGHTING:
 			if _state_tick == FIGHT_TEXT_TICKS:
 				hud.set_countdown("")
+
+
+## The style's own pre-fight gesture, or the shared one.
+static func _intro_pose(f: Fighter, fallback: StringName) -> StringName:
+	return f.style.intro_pose if f.style != null and f.style.intro_pose != &"" else fallback
 
 
 func _show_count(n: int) -> void:

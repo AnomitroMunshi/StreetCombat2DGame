@@ -80,6 +80,9 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 @export var quotes: Dictionary = {}
 const QUOTE_EVENTS: Array[String] = ["match_start", "slap", "hurt", "block", "miss_heavy", "low_health", "finisher",
 	"victory", "knocked_out"]
+## Pre-fight gesture (a FighterVisual pose name) held before the guard goes up.
+## Empty = the shared salute (player) / glare (rival).
+@export var intro_pose: StringName = &""
 ## Signature technique (move id of a "signature" attack): F at full Focus.
 @export var signature: StringName = &""
 
