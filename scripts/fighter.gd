@@ -1087,7 +1087,10 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	if guarding and facing_attacker:
 		block_counter += 1
 		velocity_x = push_dir * knockback * CombatData.BLOCK_KNOCKBACK_MULT
-		if add_posture(attack.posture * CombatData.POSTURE_BLOCK_MULT):
+		# A guard breaker smashes straight through a raised guard (not through
+		# a parry, and not again while the guard is still recovering from a break).
+		var smashed := attack.guard_break and posture_lock <= 0
+		if smashed or add_posture(attack.posture * CombatData.POSTURE_BLOCK_MULT):
 			_break_posture(push_dir)
 			return CombatData.HitResult.GUARD_BREAK
 		_enter_state(State.BLOCKSTUN)

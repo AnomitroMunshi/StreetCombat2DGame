@@ -123,6 +123,9 @@ untrained para street fighter.
   shove.
   - The shove pushes hard on a clean hit, with one 20% knockdown roll per
     clean hit. A blocked shove pushes less and never knocks down.
+- **Guard breaker:** the Double-Hand Hammer (W+K) is the only guard breaker
+  in the game. Blocking it breaks the guard outright, but a parry still
+  beats it, and its long wind-up and recovery make it punishable.
 - **Belly Bomb (F):** a step back, a crouch, then a leap belly-first into
   the opponent with a bounce off. It knocks them flying; a miss leaves a
   long recovery.

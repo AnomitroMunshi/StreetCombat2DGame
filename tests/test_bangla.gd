@@ -130,6 +130,39 @@ func _initialize() -> void:
 		outcomes.append(seq)
 	_check(outcomes[0] == outcomes[1], "reproducible with a fixed seed (%s)" % outcomes[0])
 
+	print("[guard breaker]")
+	var hammer := CombatData.get_attack(CombatData.AttackType.HAMMER_FIST)
+	var only := 0
+	for st2 in StyleRegistry.all():
+		for m in st2.moves():
+			if CombatData.get_attack(CombatData.type_for_id(m)).guard_break:
+				only += 1 if st2.id == &"bangla_maar" else 100
+	_check(only == 1, "exactly one guard breaker in the game, and it is Bangla Maar's hammer")
+	for side in [1, -1]:
+		var pg := _pair(80.0, side)
+		var g := pg[1]
+		g.block_held = true
+		g.call("_enter_state", Fighter.State.BLOCK)
+		g.state_frame = 5
+		var r := g.receive_hit(hammer, pg[0], 1)
+		_check(r == CombatData.HitResult.GUARD_BREAK and g.state == Fighter.State.BROKEN,
+			"a blocked hammer breaks the guard outright (facing %d, %s)" % [side, CombatData.HitResult.keys()[r]])
+		_free(pg)
+	var pp := _pair(80.0, 1)
+	pp[1].block_held = true
+	pp[1].parry_buffer_frames = 3
+	pp[1].call("_enter_block")
+	_check(pp[1].receive_hit(hammer, pp[0], 1) == CombatData.HitResult.PARRIED, "a parry still beats the hammer")
+	_free(pp)
+	var pb := _pair(80.0, 1)
+	var gb := pb[1]
+	gb.block_held = true
+	gb.call("_enter_state", Fighter.State.BLOCK)
+	gb.state_frame = 5
+	var r_jab := gb.receive_hit(CombatData.get_attack(CombatData.AttackType.LIGHT_SLAP), pb[0], 1)
+	_check(r_jab == CombatData.HitResult.BLOCKED, "other Bangla Maar moves are ordinary blocks")
+	_free(pb)
+
 	print("[belly bomb]")
 	for case in [[150.0, true], [260.0, false]]:
 		var p := _pair(case[0], 1)

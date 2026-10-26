@@ -263,6 +263,8 @@ const AIR_HIT_POP_VELOCITY: float = -3.5
 ##   stun (optional): ticks of dizzy on a clean hit (see DIZZY_*).
 ##   backstep / backstep_ticks (optional): px stepped back over the first
 ##                    ticks of the startup (a run-up, e.g. the Belly Bomb).
+##   guard_break (optional): a blocked hit breaks the guard outright (parries
+##                    still beat it; not while the guard is locked after a break).
 ##   bounce (optional): on contact the attacker rebounds off the target;
 ##                    hit_land_lag then replaces the (long) whiff landing.
 ##   no_strike (optional): a technique with no hitbox of its own (a weave, a
@@ -832,9 +834,10 @@ const ATTACK_TABLE: Dictionary = {
 		"knockback": 4.5, "lunge": 1.2, "hitstop": 7,
 		"hitbox": Rect2(14.0, -170.0, 48.0, 40.0),
 	},
-	# Double-hand hammer: both fists clasped high overhead, brought down on the head.
+	# Double-hand hammer: both fists clasped high overhead, brought down on the
+	# head. Bangla Maar's guard breaker: blocking it breaks the guard.
 	AttackType.HAMMER_FIST: {
-		"id": &"hammer_fist", "name": "Double-Hand Hammer", "stun": 80, "posture": 22.0,
+		"id": &"hammer_fist", "name": "Double-Hand Hammer", "stun": 80, "posture": 22.0, "guard_break": true,
 		"startup": 15, "active": 4, "recovery": 25, "cancel_window": 0,
 		"damage": 15, "hitstun": 24, "blockstun": 16,
 		"knockback": 6.5, "lunge": 1.5, "hitstop": 10,
@@ -999,6 +1002,8 @@ class Attack extends RefCounted:
 	## Run-up: px stepped back over the first backstep_ticks of the startup.
 	var backstep: float = 0.0
 	var backstep_ticks: int = 0
+	## Breaks a blocking opponent's guard outright (parries still beat it).
+	var guard_break: bool = false
 	## Rebounds off the target on contact; landing lag after a contact.
 	var bounce: bool = false
 	var hit_land_lag: int = 0
@@ -1074,6 +1079,7 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.backstep = row.get("backstep", 0.0)
 	attack.backstep_ticks = row.get("backstep_ticks", 0)
 	attack.bounce = row.get("bounce", false)
+	attack.guard_break = row.get("guard_break", false)
 	attack.hit_land_lag = row.get("hit_land_lag", 0)
 	_attack_cache[type] = attack
 	return attack
