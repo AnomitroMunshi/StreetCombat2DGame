@@ -1,8 +1,9 @@
 class_name GameAudio
 extends Node
-## Procedural audio. Every sound effect and the background music are synthesized
-## in code (no audio files). SFX are short and built in _ready; the music loop is
-## rendered on a worker thread and starts playing as soon as it is ready.
+## Procedural sound effects (synthesized in _ready) and the music. Music: the
+## menu theme and each style's own track are files (MUSIC_FILES); a style with
+## no track yet plays the procedural loop, rendered on a worker thread. Tracks
+## crossfade on a dedicated Music bus; the same track is never restarted.
 
 const MIX_RATE: int = 22050
 const VOICES: int = 14
@@ -16,9 +17,31 @@ const LIMITER_CEILING_DB: float = -1.0
 var _sfx: Dictionary = {}
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice: int = 0
+## Music id -> [file, gain dB]. Gains match each track's measured loudness to
+## the procedural loop's (about -22 dBFS mean as heard). Add a style's track
+## here when it exists; until then that style plays the procedural loop.
+const MUSIC_FILES: Dictionary = {
+	&"menu": ["res://assets/audio/music/originals/menu_theme.mp3", -4.5],
+	&"boxing": ["res://assets/audio/music/originals/boxing_theme.mp3", -5.8],
+	&"muay_thai": ["res://assets/audio/music/originals/muay_thai_theme.mp3", -4.2],
+	&"kung_fu": ["res://assets/audio/music/originals/kung_fu_theme.mp3", -3.9],
+	&"bangla_maar": ["res://assets/audio/music/originals/bangla_maar_theme.mp3", -4.4],
+}
+const MUSIC_BUS: StringName = &"Music"
+const MUSIC_FADE_TIME: float = 0.8
+const SILENT_DB: float = -60.0
+
+## The playing music player (and the one fading out under it).
 var _bgm: AudioStreamPlayer = null
+var _bgm_out: AudioStreamPlayer = null
+var _bgm_gain: float = BGM_VOLUME_DB
+var _music_id: StringName = &""
+var _fade: float = 1.0
+var _procedural: AudioStreamWAV = null
+var _streams: Dictionary = {}
 var _bgm_thread: Thread = null
 var _bgm_duck_db: float = 0.0
+var _duck_now: float = 0.0
 var _rng := RandomNumberGenerator.new()
 
 
@@ -29,9 +52,16 @@ func _ready() -> void:
 		var voice := AudioStreamPlayer.new()
 		add_child(voice)
 		_voices.append(voice)
-	_bgm = AudioStreamPlayer.new()
-	_bgm.volume_db = BGM_VOLUME_DB
-	add_child(_bgm)
+	_install_music_bus()
+	for k in 2:
+		var player := AudioStreamPlayer.new()
+		player.bus = MUSIC_BUS
+		player.volume_db = SILENT_DB
+		add_child(player)
+		if k == 0:
+			_bgm = player
+		else:
+			_bgm_out = player
 	_build_sfx()
 	_bgm_thread = Thread.new()
 	_bgm_thread.start(_render_bgm)
@@ -39,12 +69,20 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _bgm_thread != null and not _bgm_thread.is_alive():
-		var stream: AudioStreamWAV = _bgm_thread.wait_to_finish()
+		_procedural = _bgm_thread.wait_to_finish()
 		_bgm_thread = null
-		_bgm.stream = stream
-		_bgm.play()
+		if not MUSIC_FILES.has(_music_id):
+			_switch_to(_procedural, BGM_VOLUME_DB)  # the loop was waited for
 	var real_delta := delta / maxf(Engine.time_scale, 0.01)
-	_bgm.volume_db = lerpf(_bgm.volume_db, BGM_VOLUME_DB + _bgm_duck_db, 1.0 - exp(-3.0 * real_delta))
+	_fade = minf(_fade + real_delta / MUSIC_FADE_TIME, 1.0)
+	_duck_now = lerpf(_duck_now, _bgm_duck_db, 1.0 - exp(-3.0 * real_delta))
+	# Crossfade in the linear domain (no dip in loudness halfway).
+	_bgm.volume_db = linear_to_db(maxf(db_to_linear(_bgm_gain + _duck_now) * _fade, 0.000001))
+	if _bgm_out.playing:
+		_bgm_out.volume_db = linear_to_db(maxf(db_to_linear(_bgm_out.get_meta("from_db", SILENT_DB)) * (1.0 - _fade), 0.000001))
+		if _fade >= 1.0:
+			_bgm_out.stop()
+			_bgm_out.stream = null
 
 
 func _exit_tree() -> void:
@@ -52,7 +90,7 @@ func _exit_tree() -> void:
 		_bgm_thread.wait_to_finish()
 		_bgm_thread = null
 	# Release streams so nothing is still playing when the audio server shuts down.
-	for voice: AudioStreamPlayer in _voices + [_bgm]:
+	for voice: AudioStreamPlayer in _voices + [_bgm, _bgm_out]:
 		voice.stop()
 		voice.stream = null
 
@@ -72,6 +110,60 @@ func play(sound: StringName, volume_db: float = 0.0, pitch_jitter: float = 0.06)
 	voice.play()
 
 
+## Plays the music for `id` (&"menu" or a style id): its own track, or the
+## procedural loop when it has none yet. Crossfades from what is playing;
+## asking for the music already playing changes nothing (no restart).
+func set_music(id: StringName) -> void:
+	_music_id = id
+	if MUSIC_FILES.has(id):
+		var entry: Array = MUSIC_FILES[id]
+		if not _streams.has(id):
+			var stream: AudioStream = load(entry[0])
+			if stream is AudioStreamMP3:
+				(stream as AudioStreamMP3).loop = true
+			_streams[id] = stream
+		_switch_to(_streams[id], entry[1])
+	elif _procedural != null:
+		_switch_to(_procedural, BGM_VOLUME_DB)
+	# else: the procedural loop starts as soon as it has rendered.
+
+
+## The music id last asked for.
+func get_music_id() -> StringName:
+	return _music_id
+
+
+## The stream playing (or fading in) now, or null.
+func get_music_stream() -> AudioStream:
+	return _bgm.stream if _bgm != null else null
+
+
+func _switch_to(stream: AudioStream, gain_db: float) -> void:
+	if stream == null or (_bgm.stream == stream and _bgm.playing):
+		_bgm_gain = gain_db
+		return
+	# The playing track becomes the one fading out; the free player takes the new one.
+	var old := _bgm
+	_bgm = _bgm_out
+	_bgm_out = old
+	_bgm_out.set_meta("from_db", _bgm_out.volume_db)
+	_bgm.stream = stream
+	_bgm.volume_db = SILENT_DB
+	_bgm_gain = gain_db
+	_fade = 0.0 if _bgm_out.playing else 1.0
+	_bgm.play()
+
+
+## Music has its own bus (under Master), so its level can be set apart from SFX.
+func _install_music_bus() -> void:
+	if AudioServer.get_bus_index(MUSIC_BUS) >= 0:
+		return
+	AudioServer.add_bus()
+	var idx := AudioServer.bus_count - 1
+	AudioServer.set_bus_name(idx, MUSIC_BUS)
+	AudioServer.set_bus_send(idx, &"Master")
+
+
 ## Lowers the music by `db` (0 = normal). Eases over ~0.3 s.
 func duck_bgm(db: float) -> void:
 	_bgm_duck_db = db
@@ -85,8 +177,9 @@ func is_bgm_playing() -> bool:
 	return _bgm != null and _bgm.stream != null and _bgm.playing
 
 
+## Length of the procedural loop (s), 0 before it has rendered.
 func get_bgm_length() -> float:
-	return (_bgm.stream as AudioStreamWAV).get_length() if _bgm != null and _bgm.stream != null else 0.0
+	return _procedural.get_length() if _procedural != null else 0.0
 
 
 ## Big finishers stack many loud sounds; limit the master bus instead of clipping.

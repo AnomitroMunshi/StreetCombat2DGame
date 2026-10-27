@@ -513,6 +513,12 @@ func _set_round_state(new_state: RoundState) -> void:
 	call_deferred("_update_pause_button")
 	_round_state = new_state
 	_state_tick = 0
+	# Music follows the PLAYER: the menu theme while choosing, then the chosen
+	# style's own track for the match (the rival's style never changes it).
+	if new_state == RoundState.STYLE_SELECT:
+		audio.set_music(&"menu")
+	elif player.style != null:
+		audio.set_music(player.style.id)
 
 
 func get_round_state_name() -> String:

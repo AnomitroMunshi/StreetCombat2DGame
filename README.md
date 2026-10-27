@@ -8,12 +8,12 @@ Bangla Maar.
 
 The fighters are procedurally animated skeletons with keyframed martial-arts
 moves, ragdoll knockdowns and blowback physics. The game also has stuns,
-cinematic finishers, victory celebrations, speech bubbles, and procedurally
-generated sound and music.
+cinematic finishers, victory celebrations, speech bubbles, procedurally
+generated sound effects, and a music track for each style.
 
 Built and tested with **Godot 4.7.2 stable** (GL Compatibility renderer).
-No plugins and no imported assets: all graphics, sound effects and music are
-generated from code.
+No plugins. All graphics and sound effects are generated from code; the only
+imported assets are the original music tracks in `assets/audio/music/originals/`.
 
 ## Run
 
@@ -925,7 +925,14 @@ files.
 
 - **Sound effects:** whooshes, light and heavy hits, block clack, landing,
   body slam, wall impact, rolling, KO boom, and a finisher gong sting.
-- **Music:** a driving fight track at 140 BPM in A minor, 16 bars
+- **Music follows the player's style:** the menu theme plays while choosing
+  a style, then the chosen style's own track (Boxing, Muay Thai, Kung Fu,
+  Bangla Maar) for the match; the rival's style never changes it. Tracks
+  crossfade (0.8 s) on a separate Music bus, are loudness-matched, loop, and
+  are never restarted when already playing. A style without its own track
+  yet (Karate, Taekwondo, Kickboxing) plays the procedural fight track; add a
+  file to `GameAudio.MUSIC_FILES` to give it one.
+- **Procedural fight track:** 140 BPM in A minor, 16 bars
   (about 27 s) that loop seamlessly. It has a punchy kick and snare, 16th-note
   hats, a distorted saw bass with octave jumps, taiko accents, and a square-wave
   lead: a stabbing riff for bars 1-8, then a melody doubled by a plucked string
