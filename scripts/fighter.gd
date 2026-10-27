@@ -249,6 +249,8 @@ var script_pose: StringName = &"guard"
 var script_flip: bool = false
 ## Finisher spin about the vertical axis, in turns per tick (0 = not spinning).
 var script_spin_rate: float = 0.0
+## Finisher: hold the current turn about the vertical axis (see FinisherDirector).
+var script_spin_hold: bool = false
 ## Increments on every blocked hit; visuals use it to jolt the guard.
 var block_counter: int = 0
 ## Pre-match presentation: a named pose shown instead of the stance guard while
@@ -1230,6 +1232,7 @@ func begin_scripted(as_victim: bool) -> void:
 	script_pose = &"hitstun" if as_victim else &"guard"
 	script_flip = false
 	script_spin_rate = 0.0
+	script_spin_hold = false
 
 
 func scripted_launch(vy: float) -> void:
@@ -1249,6 +1252,7 @@ func scripted_hit(high: bool, kind: int = CombatData.ImpactKind.STRAIGHT) -> voi
 func end_scripted() -> void:
 	script_flip = false
 	script_spin_rate = 0.0
+	script_spin_hold = false
 	_enter_state(State.IDLE)
 
 

@@ -74,6 +74,14 @@ const RAG_ITERATIONS: int = 8
 const RAG_FLOOR_FRICTION: float = 0.7
 const RAG_FOLLOW: float = 0.06
 const RAG_BLEND_TIME: float = 0.3
+## Knocked-out bodies are dead weight: much more damping once they hit the floor.
+const RAG_DAMPING_KO: float = 0.93
+## Knockout flight (authored, not a ragdoll): the reaction to the blow is held
+## for KO_IMPACT_TICKS, then the body trails into its flight pose and turns
+## onto its back (KO_LAYOUT_ANGLE) exactly by the time it lands; tumbling
+## bodies fit one whole backflip in first.
+const KO_IMPACT_TICKS: float = 6.0
+const KO_LAYOUT_ANGLE: float = 1.25
 ## Planted feet: legs are solved with 2-bone IK to feet fixed on the floor; a
 ## foot that drifts too far from its stance spot steps (one foot at a time).
 const STEP_THRESHOLD: float = 13.0
@@ -803,7 +811,7 @@ func _ready() -> void:
 		&"elbow_load": _elbow_load, &"elbow_hit": _elbow_hit, &"lowrh_hit": _lowrh_hit, &"bodyrh_hit": _bodyrh_hit,
 		&"fknee_hit": _fknee_hit, &"gyaku_load": _gyaku_load, &"gyaku_hit": _gyaku_hit, &"knife_hit": _knife_hit,
 		&"rpalm_hit": _rpalm_hit, &"lowside_hit": _lowside_hit, &"sweep_load": _sweep_load, &"sweep_extend": _sweep_extend,
-		&"back_extend": _back_extend, &"jrh_hit": _jrh_hit, &"deflect": _deflect,
+		&"back_extend": _back_extend, &"back_chamber": _back_chamber, &"jrh_hit": _jrh_hit, &"deflect": _deflect,
 		&"rbody_load": _rbody_load, &"rbody_hit": _rbody_hit, &"upper_load_deep": _upper_load_deep,
 		# Directional reactions for finisher victims.
 		&"hitstun_hook": _hitstun_hook, &"hitstun_up": _hitstun_up, &"hitstun_down": _hitstun_down,
@@ -1234,7 +1242,29 @@ func _wants_ragdoll() -> bool:
 		return false
 	if fighter.state == Fighter.State.KO and fighter.script_pose == &"slumped":
 		return false
+	if _ko_in_flight():
+		return false  # an authored flight until the body first meets the floor
 	return fighter.state == Fighter.State.KO or fighter.pending_rolls == 0
+
+
+## Ticks until a falling body reaches the floor (from its height and vertical
+## speed; rising uses the lighter gravity, falling the heavier).
+func _ticks_to_land() -> float:
+	var h := maxf(fighter.ground_y - fighter.position.y, 0.0)
+	var vy := fighter.velocity_y
+	var t := 0.0
+	if vy < 0.0:
+		var rise := -vy / CombatData.GRAVITY_RISE
+		h += vy * vy / (2.0 * CombatData.GRAVITY_RISE)
+		t += rise
+		vy = 0.0
+	var g := CombatData.GRAVITY_FALL
+	return t + (-vy + sqrt(vy * vy + 2.0 * g * h)) / g
+
+
+## Knocked out and still in the air from the blow (before the first landing).
+func _ko_in_flight() -> bool:
+	return fighter.state == Fighter.State.KO and fighter.airborne and not fighter.bounced
 
 
 func _update_ragdoll() -> void:
@@ -1259,7 +1289,7 @@ func _update_ragdoll() -> void:
 	var max_x := Fighter.ARENA_MAX_X + 20.0
 	for i in JOINTS:
 		var p := _rag_pos[i]
-		var v := (p - _rag_prev[i]) * RAG_DAMPING
+		var v := (p - _rag_prev[i]) * (RAG_DAMPING_KO if fighter.state == Fighter.State.KO else RAG_DAMPING)
 		_rag_prev[i] = p
 		_rag_pos[i] = p + v + Vector2(0.0, RAG_GRAVITY)
 	# Keep the limp body with the simulated (gameplay) body horizontally.
@@ -1305,6 +1335,8 @@ func _seed_ragdoll() -> void:
 	var away := signf(vel.x) if not is_zero_approx(vel.x) else float(-fighter.facing)
 	var hip := _rag_pos[J_HIP]
 	var spin := clampf(vel.length() * 0.012, 0.03, 0.14) * -away
+	if fighter.state == Fighter.State.KO:
+		spin *= 0.25  # the flight already laid the body out
 	for i in JOINTS:
 		var r := _rag_pos[i] - hip
 		var swirl := Vector2(-r.y, r.x) * spin  # tangential velocity of a rotation
@@ -1357,6 +1389,26 @@ func _update_spin(dt: float, fraction: float) -> void:
 	elif balled:
 		var travel := signf(fighter.jump_vx) * fighter.facing
 		_body_rot += (travel if travel != 0.0 else -1.0) * TUMBLE_SPIN * dt
+	elif _ko_in_flight() and not fighter.spiked:
+		# Thrown backward: the body turns as a whole (head back, feet up), onto
+		# its back by the landing; a tumbling body keeps spinning with the
+		# angular momentum of its launch.
+		var away := signf(fighter.jump_vx) * fighter.facing
+		if away == 0.0:
+			away = -1.0
+		var since := float(fighter.state_frame)
+		if since < KO_IMPACT_TICKS * 0.5:
+			pass  # the impact reaction first; the turn starts after it
+		else:
+			# Turn so the body comes down flat on its back exactly as it lands
+			# (a tumbling body fits a whole extra backflip in first): the angle
+			# still to turn, spread over the ticks left in the air.
+			var goal := away * (KO_LAYOUT_ANGLE + (TAU if fighter.tumble else 0.0))
+			var left := _ticks_to_land()
+			var step := (goal - _body_rot) / maxf(left, 1.0)
+			_body_rot += step * minf(60.0 * dt, left)
+	elif fighter.state == Fighter.State.KO and (_rag_on or _rag_blend > 0.0):
+		pass  # the ragdoll owns the body now; keep the turn it landed with
 	else:
 		_body_rot = lerp_angle(_body_rot, 0.0, 1.0 - exp(-14.0 * dt))
 	_was_rolling = fighter.rolling and balled
@@ -1364,6 +1416,8 @@ func _update_spin(dt: float, fraction: float) -> void:
 	# director asks for it, otherwise settle onto the nearest full turn.
 	if fighter.state == Fighter.State.FINISHER and fighter.script_spin_rate != 0.0:
 		_spin_angle += fighter.script_spin_rate * TAU * 60.0 * dt * (0.0 if fighter.hitstop_frames > 0 else 1.0)
+	elif fighter.state == Fighter.State.FINISHER and fighter.script_spin_hold:
+		pass
 	else:
 		_spin_angle = lerp_angle(_spin_angle, 0.0, 1.0 - exp(-18.0 * dt))
 
@@ -1403,6 +1457,8 @@ func _spring_params() -> Vector2:
 		Fighter.State.HITSTUN, Fighter.State.FINISHED, Fighter.State.STAGGER, Fighter.State.BROKEN, Fighter.State.DIZZY:
 			return SPRING_HITSTUN
 		Fighter.State.KNOCKDOWN, Fighter.State.KO:
+			if _ko_in_flight():
+				return SPRING_FAST if fighter.state_frame < KO_IMPACT_TICKS else SPRING_HITSTUN
 			return SPRING_LIMP
 		Fighter.State.FINISHER, Fighter.State.JUMP, Fighter.State.BLOCK, Fighter.State.DODGE, Fighter.State.CROUCH, Fighter.State.PARRY:
 			return SPRING_FAST
@@ -1554,10 +1610,37 @@ func _target_pose(t: float) -> PackedFloat32Array:
 		Fighter.State.LAND:
 			return _blend(_land, _guard, smoothstep(0.0, 1.0, t / maxf(float(fighter.stun_frames), 1.0)))
 		Fighter.State.KO:
-			return _slumped if fighter.script_pose == &"slumped" else _ko
+			if fighter.script_pose == &"slumped":
+				return _slumped
+			if _ko_in_flight():
+				return _ko_flight_pose(t)
+			return _ko
 		Fighter.State.FINISHER, Fighter.State.FINISHED:
 			return _pose_library.get(fighter.script_pose, _guard)
 	return _active_idle()
+
+
+## Knockout flight: the reaction the blow forced (by where and how it landed),
+## held through the impact, then the limbs trail into the flight pose.
+func _ko_flight_pose(t: float) -> PackedFloat32Array:
+	var impact: PackedFloat32Array
+	if fighter.last_hit_low:
+		impact = _hitstun_leg
+	elif not fighter.last_hit_high:
+		impact = _hitstun_body
+	else:
+		match fighter.last_hit_kind:
+			CombatData.ImpactKind.HOOK:
+				impact = _hitstun_hook
+			CombatData.ImpactKind.RISING:
+				impact = _hitstun_up
+			CombatData.ImpactKind.DOWNWARD:
+				impact = _hitstun_down
+			_:
+				impact = _hitstun_heavy
+	if fighter.spiked:
+		return _blend(impact, _hitstun_down, smoothstep(0.0, KO_IMPACT_TICKS, t))
+	return _blend(impact, _knock_fly, smoothstep(KO_IMPACT_TICKS, KO_IMPACT_TICKS + 10.0, t))
 
 
 ## Neutral fighting movement for the current stance: a bounce (the hips dip

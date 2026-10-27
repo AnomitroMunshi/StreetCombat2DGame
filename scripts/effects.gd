@@ -101,6 +101,17 @@ func _physics_process(_delta: float) -> void:
 		if e["kind"] == "cloud":
 			e["pos"] = (e["pos"] as Vector2) + (e["vel"] as Vector2)
 			e["vel"] = (e["vel"] as Vector2) * 0.96
+		elif e["kind"] == "blood":
+			var bv: Vector2 = e["vel"]
+			bv.y += e["gravity"]
+			bv.x *= 0.985
+			e["vel"] = bv
+			var bp := (e["pos"] as Vector2) + bv
+			if bp.y >= floor_y - 1.0:
+				_add_decal({"kind": "stain", "pos": Vector2(bp.x, floor_y - _rng.randf_range(1.0, 7.0)), "age": 0, "grow": 4,
+					"size": float(e["size"]) * _rng.randf_range(1.2, 2.2), "stretch": clampf(absf(bv.x) * 0.35, 1.0, 3.0)})
+				e["age"] = e["life"]
+			e["pos"] = bp
 		elif e["kind"] == "particle" or e["kind"] == "shard":
 			var vel: Vector2 = e["vel"]
 			vel.y += e["gravity"]
@@ -153,6 +164,10 @@ func hit(pos: Vector2, dir: Vector2, tier: int, color: Color, kind: int = Combat
 ## shockwave flattened across the line of the blow. The knockout blow adds a
 ## short anamorphic lens streak. No soft discs or thick rings: the blow itself
 ## stays readable.
+## Blood on heavy blows to the head: false turns it off everywhere.
+const BLOOD: bool = true
+const BLOOD_COLOR := Color(0.52, 0.03, 0.04)
+const BLOOD_DARK := Color(0.3, 0.01, 0.02)
 const STRIKE_HOT := Color(1.0, 0.97, 0.9)
 const STRIKE_WARM := Color(1.0, 0.72, 0.38)
 
@@ -178,6 +193,21 @@ func strike(pos: Vector2, dir: Vector2, power: int, final: bool = false) -> void
 		_spawn({"kind": "shock", "glow": true, "pos": pos + dir * 10.0, "age": 0, "life": 16,
 			"color": STRIKE_WARM, "size": 120.0, "dir": base})
 		_spawn({"kind": "lens", "glow": true, "pos": pos, "age": 0, "life": 18, "color": STRIKE_HOT, "size": 360.0})
+
+
+## Blood thrown along a blow: a short spray of droplets (bigger ones first,
+## a fine mist after) that fall under gravity and stain the floor where they
+## land.
+func blood(pos: Vector2, dir: Vector2, amount: int) -> void:
+	if not BLOOD:
+		return
+	dir = dir.normalized() if dir != Vector2.ZERO else Vector2.RIGHT
+	for i in amount:
+		var heavy := i < amount / 3
+		var a := dir.angle() + _rng.randfn(0.0, 0.28 if heavy else 0.5) - 0.15 * signf(dir.x)
+		var spd := _rng.randf_range(3.0, 6.5) if heavy else _rng.randf_range(4.0, 9.0)
+		_spawn({"kind": "blood", "pos": pos, "vel": Vector2.from_angle(a) * spd, "gravity": 0.38, "age": 0,
+			"life": 90, "color": BLOOD_COLOR, "size": _rng.randf_range(2.2, 3.4) if heavy else _rng.randf_range(1.0, 1.8)})
 
 
 ## A wide motion smear behind a big swing (the Super Chor slap): an arc round
@@ -606,6 +636,15 @@ func draw_decals(canvas: CanvasItem) -> void:
 		if d["kind"] == "dent":
 			_draw_dent(canvas, d, g)
 			continue
+		if d["kind"] == "stain":
+			# Floor seen at a low angle: a flattened drop, darker at its rim.
+			var sp0: Vector2 = d["pos"]
+			var sz: float = d["size"] * g
+			canvas.draw_set_transform(sp0, 0.0, Vector2(d["stretch"], 0.32))
+			canvas.draw_circle(Vector2.ZERO, sz * 1.15, Color(BLOOD_DARK, 0.75))
+			canvas.draw_circle(Vector2.ZERO, sz * 0.8, Color(BLOOD_COLOR, 0.85))
+			canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			continue
 		if d["kind"] == "scuff":
 			var sp: PackedVector2Array = d["pts"]
 			canvas.draw_line(sp[0], sp[1], Color(0.1, 0.07, 0.05, 0.35), 3.0, true)
@@ -921,6 +960,12 @@ func _draw() -> void:
 				draw_set_transform(pos, 0.0, Vector2(1.0, 0.22))
 				draw_arc(Vector2.ZERO, gr, 0.0, TAU, 48, color, 10.0 * (1.0 - t) + 2.0, true)
 				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"blood":
+				# A droplet stretched along its motion.
+				var bv2: Vector2 = e["vel"]
+				var bs: float = e["size"]
+				draw_line(pos, pos - bv2 * 0.9, Color(BLOOD_COLOR, 0.9), bs, true)
+				draw_circle(pos, bs * 0.55, BLOOD_DARK)
 			"particle":
 				color.a = 1.0 - t
 				var vel: Vector2 = e["vel"]

@@ -47,9 +47,9 @@ const FINISHER_ZOOM: float = 1.3
 ## Cinematic finisher camera: pushes in from FIN_ZOOM_START to FIN_ZOOM_END
 ## through the build-up, slams to FIN_ZOOM_KO on the knockout blow for
 ## FIN_KO_HOLD ticks with a tilt, then follows the flying body out.
-const FIN_ZOOM_START: float = 1.25
-const FIN_ZOOM_END: float = 1.5
-const FIN_ZOOM_KO: float = 1.75
+const FIN_ZOOM_START: float = 1.1
+const FIN_ZOOM_END: float = 1.2
+const FIN_ZOOM_KO: float = 1.3
 const FIN_KO_HOLD: int = 16
 const FIN_TILT: float = 0.06
 const FIN_FOCUS_Y: float = -118.0
@@ -992,6 +992,8 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_shake(18, 7.0)
 		_kick_camera(hit_dir, 14.0)
 		fx.strike(pos, hit_dir, 3, true)
+		if event.get("high", true):
+			fx.blood(pos, hit_dir + Vector2(0.0, -0.35), 16)
 		hud.flash(0.1)  # a beat of light, never a white-out over the blow
 		audio.play(&"hit_heavy", 3.0)
 		audio.play(&"ko_boom")
@@ -1004,6 +1006,8 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_hitstop = maxi(_hitstop, 1 + power)
 		_shake(3 + power * 2, 1.5 + power * 1.5)
 		fx.strike(pos, hit_dir, power)
+		if power >= 2 and event.get("high", true):
+			fx.blood(pos, hit_dir + Vector2(0.0, -0.3), 4)
 		_kick_camera(hit_dir, 3.0 + power * 3.0)
 		_finisher_hit_sound(power, event)
 		_camera_punch += 0.015 * power
@@ -1492,7 +1496,7 @@ func _process(delta: float) -> void:
 			# Track the flying victim, widening the shot as they get thrown away.
 			focus = mid.lerp(victim.position, 0.55) + Vector2(0.0, -80.0)
 			var spread := absf(attacker.position.x - victim.position.x)
-			target_zoom = clampf(1300.0 / (spread + 650.0), 1.05, 1.4)
+			target_zoom = clampf(1300.0 / (spread + 650.0), 1.0, 1.2)
 		var half := Vector2(640.0, 360.0) / target_zoom
 		target_pos = Vector2(clampf(focus.x, VIEW_MIN.x + half.x, VIEW_MAX.x - half.x),
 			clampf(focus.y, VIEW_MIN.y + half.y, VIEW_MAX.y - half.y))

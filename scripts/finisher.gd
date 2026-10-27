@@ -72,12 +72,12 @@ const MIN_GAP: float = 88.0
 ## ticks), the start of the fall, wall impacts, then a smooth return to 1x
 ## over SETTLE_TICKS after the knockout.
 const SPEED_SETUP: float = 1.0
-const SPEED_STRIKE: float = 0.9
-const SPEED_KO: float = 0.25
-const SPEED_WALL: float = 0.6
-const KO_SLOW_TICKS: int = 7
+const SPEED_STRIKE: float = 1.0
+const SPEED_KO: float = 0.5
+const SPEED_WALL: float = 0.8
+const KO_SLOW_TICKS: int = 4
 ## Ticks the knockout blow eases out of its slow motion.
-const KO_EASE_TICKS: float = 10.0
+const KO_EASE_TICKS: float = 6.0
 ## How each striking pose drives the victim (reaction pose and impact direction);
 ## anything not listed is a straight blow.
 const POSE_KIND: Dictionary = {
@@ -113,6 +113,8 @@ const LIMB_RADIUS: float = 6.0
 ## closest its root may come to the victim's while doing so.
 const REACH_ASSIST: float = 7.0
 const REACH_MIN_GAP: float = 40.0
+## How fast (px/tick) the attacker steps back out to MIN_GAP after a lunge.
+const RECOVER_STEP: float = 3.0
 
 ## Last finisher played. Static, so it survives scene reloads (restarts) and the
 ## same finisher is never chosen twice in a row.
@@ -274,10 +276,22 @@ func tick() -> Dictionary:
 	_move(attacker, beat.get("atk_move", 0.0), true)
 	if _pending.is_empty():
 		_move(victim, beat.get("def_move", 0.0), false)
+		_recover_spacing(beat)
 	if not _pending.is_empty() and event.is_empty():
 		event = _try_land()
 	_beat_tick += 1
 	return event
+
+
+## After a lunge into a blow, the attacker steps back out to striking distance
+## (a recoil step, never a snap) unless this beat drives forward on purpose.
+func _recover_spacing(beat: Dictionary) -> void:
+	if float(beat.get("atk_move", 0.0)) > 0.0 or attacker.airborne or victim.is_down():
+		return
+	var gap := (victim.position.x - attacker.position.x) * _dir
+	if gap < MIN_GAP:
+		attacker.position.x -= minf(MIN_GAP - gap, RECOVER_STEP) * _dir
+		attacker.clamp_to_arena()
 
 
 ## The pending blow lands once the striking limb meets the victim's drawn body,
@@ -297,7 +311,7 @@ func _try_land() -> Dictionary:
 	var arrived := g <= CONTACT_SLOP
 	# Spinning and airborne blows swing away before they come round (or drop
 	# from above), so they get longer to arrive and no closest-approach rule.
-	var sweeping: bool = float(_pending.get("atk_spin", 0.0)) > 0.0 or attacker.airborne
+	var sweeping: bool = float(_pending.get("atk_spin", 0.0)) > 0.0 or _pending.get("atk_spin_hold", false) 		or attacker.airborne
 	var receding: bool = not sweeping and _pending_ticks > 1 and g > _pending_gap + 0.5
 	var wait := mini(IMPACT_MAX_WAIT_SWEEP, int(_pending["ticks"]) - 2) if sweeping else IMPACT_MAX_WAIT
 	_pending_gap = minf(_pending_gap, g)
@@ -360,6 +374,9 @@ func _start_beat(beat: Dictionary) -> Dictionary:
 	attacker.script_flip = beat.get("atk_flip", false)
 	# atk_spin = full turns about the vertical axis spread over this beat.
 	attacker.script_spin_rate = float(beat.get("atk_spin", 0.0)) / maxf(float(beat["ticks"]), 1.0)
+	# atk_spin_hold: keep the turn reached so far (a back kick thrown with the
+	# back to the target) instead of settling round to face again.
+	attacker.script_spin_hold = beat.get("atk_spin_hold", false)
 	if beat.has("atk_vy") and beat["atk_vy"] != 0.0:
 		attacker.scripted_launch(beat["atk_vy"])
 	if not beat.get("hit", false):
@@ -512,10 +529,15 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 6, "atk": &"heavy_strike", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 1.0, "def_move": 0.8},
 				{"ticks": 7, "atk": &"bodyrh_hit", "def": &"hitstun_body", "hit": true, "high": false, "def_move": 1.0},
 				{"ticks": 8, "atk": &"high_extend", "def": &"hitstun", "hit": true, "power": 2, "def_move": 1.0},
-				{"ticks": 10, "atk": &"spin_windup", "def": &"stagger", "atk_spin": 0.5},
+				# Spinning back kick: turn the back to them, look over the
+				# shoulder with the knee chambered, thrust the heel straight
+				# back, and only then turn round to face again.
+				{"ticks": 10, "atk": &"spin_windup", "def": &"hitstun_hook", "atk_spin": 0.5},
+				{"ticks": 4, "atk": &"back_chamber", "def": &"hitstun_hook", "atk_spin_hold": true},
 				{"ticks": 18, "atk": &"back_extend", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
-					"ko_vy": -10.0, "ko_drift": 17.0, "ko_rolls": 2, "ko_tumble": true, "atk_spin": 0.5},
-				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+					"ko_vy": -10.0, "ko_drift": 17.0, "ko_rolls": 2, "ko_tumble": true, "atk_spin_hold": true},
+				{"ticks": 12, "atk": &"back_chamber", "def": &"knock_fly", "atk_spin": 0.5},
+				{"ticks": 38, "atk": &"guard", "def": &"knock_fly"},
 			]
 		Kind.KNOCKOUT_RHYTHM:
 			# Kickboxing: punch, kick, punch, kick, then a jumping roundhouse.
