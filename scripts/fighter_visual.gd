@@ -632,6 +632,15 @@ var _kf_bh_hit := PackedFloat32Array([0.15, 0.0, 1.85, 2.1, 0.8, 2.6, 1.0, -0.3,
 # S+J: drop low with the hand circling down, palm into the stomach.
 var _kf_lp_load := PackedFloat32Array([0.35, 0.25, 0.9, 2.5, 1.1, 2.5, 1.35, -0.9, -0.8, -1.1, -6.0, 18.0, 0.2, 12.0])
 var _kf_lp_hit := PackedFloat32Array([0.55, 0.2, 1.25, 1.3, 0.3, 2.2, 1.3, -0.7, -0.9, -1.05, 12.0, 20.0, 0.5, 8.0])
+# Taekwondo double kick: the rear leg (B) chambers and snaps a low roundhouse
+# at the thigh, then plants forward and takes the weight (the stance switches);
+# the other leg (F), now behind, chambers and throws the roundhouse to the ribs
+# before landing back in front.
+var _dk_low_chamber := PackedFloat32Array([-0.1, 0.1, 1.0, 2.8, 0.6, 2.9, 0.2, 0.05, 1.3, -0.5, 0.0, 4.0, 0.6, -6.0])
+var _dk_low_hit := PackedFloat32Array([-0.35, 0.25, 1.1, 2.9, -0.3, 0.0, 0.15, 0.0, 1.15, 1.22, 4.0, 2.0, 0.9, -10.0])
+var _dk_plant := PackedFloat32Array([0.1, 0.1, 1.0, 2.8, 0.7, 2.9, -0.35, -0.55, 0.45, 0.15, 6.0, 4.0, 0.3, -4.0])
+var _dk_mid_chamber := PackedFloat32Array([-0.1, 0.15, 1.0, 2.8, 0.7, 2.9, 1.4, -0.6, 0.25, 0.05, 6.0, 4.0, 0.7, 2.0])
+var _dk_mid_hit := PackedFloat32Array([-0.6, 0.45, -0.2, 0.1, 1.0, 2.8, 1.62, 1.7, 0.2, 0.05, 8.0, 0.0, 1.0, 6.0])
 ## Intro poses that stand on one leg (the feet are not planted on the floor).
 const ONE_LEG_POSES: Array[StringName] = [&"mt_ready", &"kf_crane"]
 ## Intro poses with an open lead hand.
@@ -1081,6 +1090,12 @@ func _ready() -> void:
 		CombatData.AttackType.BOB_WEAVE: [
 			[S, 1.0, _weave_in, EASE_SMOOTH], [A, 0.5, _weave_low, EASE_SMOOTH],
 			[A, 1.0, _weave_out, EASE_SMOOTH], [R, 0.7, null, EASE_OUT]],
+		CombatData.AttackType.DOUBLE_KICK_LOW: [
+			[S, 0.5, _dk_low_chamber, EASE_SMOOTH], [A, 0.0, _dk_low_hit, EASE_IN],
+			[A, 1.0, _over(_dk_low_hit, _dk_low_chamber), EASE_LINEAR], [R, 0.25, _dk_plant, EASE_SMOOTH]],
+		CombatData.AttackType.DOUBLE_KICK_MID: [
+			[S, 0.6, _dk_mid_chamber, EASE_SMOOTH], [A, 0.0, _dk_mid_hit, EASE_IN],
+			[A, 1.0, _over(_dk_mid_hit, _dk_mid_chamber), EASE_LINEAR], [R, 0.4, _dk_mid_chamber, EASE_OUT]],
 		CombatData.AttackType.LEG_FEINT: [
 			[S, 1.0, _feint_lift, EASE_OUT], [A, 0.4, _feint_top, EASE_OUT],
 			[A, 1.0, _feint_lift, EASE_LINEAR], [R, 0.6, null, EASE_SMOOTH]],
@@ -2080,8 +2095,11 @@ static func _mech_kind(type: CombatData.AttackType) -> int:
 		return MECH_HOOK_LEAD
 	if type == CombatData.AttackType.REAR_HOOK:
 		return MECH_HOOK_REAR
-	if type in [CombatData.AttackType.HIGH_KICK, CombatData.AttackType.BODY_ROUNDHOUSE, CombatData.AttackType.LOW_ROUNDHOUSE]:
+	if type in [CombatData.AttackType.HIGH_KICK, CombatData.AttackType.BODY_ROUNDHOUSE, CombatData.AttackType.LOW_ROUNDHOUSE,
+			CombatData.AttackType.DOUBLE_KICK_MID]:
 		return MECH_ROUNDHOUSE
+	if type == CombatData.AttackType.DOUBLE_KICK_LOW:
+		return MECH_NONE  # thrown with the rear leg: its own keys carry the body
 	match _attack_joint(type):
 		J_HAND_F:
 			return MECH_LEAD
@@ -3389,8 +3407,10 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 			return J_HIP
 		CombatData.AttackType.STOMACH_SHOT:
 			return J_HAND_B
-		CombatData.AttackType.JUMPING_SPIN_HOOK:
+		CombatData.AttackType.JUMPING_SPIN_HOOK, CombatData.AttackType.DOUBLE_KICK_LOW:
 			return J_FOOT_B
+		CombatData.AttackType.DOUBLE_KICK_MID:
+			return J_FOOT_F
 		CombatData.AttackType.POWER_UPPERCUT, CombatData.AttackType.SUPERMAN_PUNCH, \
 				CombatData.AttackType.JUMPING_REVERSE_PUNCH, CombatData.AttackType.LEAPING_SPIN_BACKFIST:
 			return J_HAND_B

@@ -189,6 +189,23 @@ func after_tick() -> void:
 		player.focus = CombatData.FOCUS_MAX
 
 
+## The player's multi-strike technique `attack` is an internal strike of
+## (null for ordinary moves).
+func _sequence_of(attack: CombatData.Attack) -> CombatData.Attack:
+	if player.style == null:
+		return null
+	var ids := player.style.moves()
+	if attack.id in ids:
+		return null  # an ordinary move of its own (a signature may reuse it)
+	if player.style.signature != &"":
+		ids.append(player.style.signature)
+	for m in ids:
+		var whole := CombatData.get_attack(CombatData.type_for_id(m))
+		if attack.id in whole.sequence:
+			return whole
+	return null
+
+
 func info_text() -> String:
 	var lines := PackedStringArray()
 	lines.append("[b]TRAINING[/b]  %s  vs  dummy %s" % [player.style.display_name if player.style else "-",
@@ -196,7 +213,25 @@ func info_text() -> String:
 	lines.append("Dummy [color=#f2c14e]%s[/color]   Speed [color=#f2c14e]%d%%[/color]%s   Focus %s" % [
 		DUMMY_NAMES[dummy_mode], roundi(speed() * 100.0), "   [color=#ff8a6a]PAUSED[/color]" if paused else "",
 		"[color=#f2c14e]unlimited[/color]" if infinite_focus else "normal"])
-	if last_move != null:
+	var parent := _sequence_of(last_move) if last_move != null else null
+	if parent != null:
+		# A multi-strike technique reads as one move: every active window, the
+		# gaps between them, the final recovery and each strike's damage.
+		var subs: Array[CombatData.Attack] = []
+		for m in parent.sequence:
+			subs.append(CombatData.get_attack(CombatData.type_for_id(m)))
+		var actives := PackedStringArray()
+		var gaps := PackedStringArray()
+		var damages := PackedStringArray()
+		for i in subs.size():
+			actives.append(str(subs[i].active))
+			damages.append(str(subs[i].damage))
+			if i > 0:
+				gaps.append(str(CombatData.SEQUENCE_GAP + subs[i].startup))
+		lines.append("Last move  [b]%s[/b] (%s)   startup %d  active %s  gap %s  recovery %d   damage %s" % [parent.display_name,
+			last_move.display_name, subs[0].startup, "+".join(actives), "/".join(gaps), subs[-1].recovery, "+".join(damages)])
+		lines.append("Result  [color=#f2c14e]%s[/color]   %s" % [last_result, advantage_text])
+	elif last_move != null:
 		lines.append("Last move  [b]%s[/b]   startup %d  active %d  recovery %d   damage %d" % [last_move.display_name,
 			last_move.startup, last_move.active, last_move.recovery, last_move.damage])
 		lines.append("Result  [color=#f2c14e]%s[/color]   %s" % [last_result, advantage_text])

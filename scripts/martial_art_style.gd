@@ -106,6 +106,10 @@ func allows(type: CombatData.AttackType) -> bool:
 			_allowed[CombatData.type_for_id(m)] = true
 		if signature != &"":
 			_allowed[CombatData.type_for_id(signature)] = true
+		# A mapped sequence's own strikes (only ever started by that sequence).
+		for t in _allowed.keys():
+			for sub in CombatData.get_attack(t).sequence:
+				_allowed[CombatData.type_for_id(sub)] = true
 	return _allowed.has(type)
 
 
@@ -186,6 +190,10 @@ func validate() -> PackedStringArray:
 		var mt := CombatData.type_for_id(m)
 		if mt != CombatData.AttackType.NONE and CombatData.get_attack(mt).signature:
 			errors.append("signature %s must not be mapped to a key" % m)
+		if mt != CombatData.AttackType.NONE:
+			for sub in CombatData.get_attack(mt).sequence:
+				if CombatData.type_for_id(sub) == CombatData.AttackType.NONE:
+					errors.append("sequence %s uses unknown move %s" % [m, sub])
 	for event in quotes:
 		if not String(event) in QUOTE_EVENTS:
 			errors.append("unknown speech event %s" % event)

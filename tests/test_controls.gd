@@ -22,7 +22,7 @@ const SPEC: Dictionary = {
 	&"kung_fu": {&"light": &"straight_palm", &"heavy": &"double_palm", &"technique": &"front_kick",
 		&"up_light": &"rising_palm", &"up_heavy": &"backhand", &"down_light": &"low_palm", &"down_heavy": &"sweep",
 		&"F": &"palm_barrage", &"power_light": &"leaping_spin_backfist", &"power_heavy": &"flying_axe_kick"},
-	&"taekwondo": {&"light": &"jab", &"heavy": &"side_kick", &"technique": &"lead_leg_feint", &"up_light": &"rising_punch",
+	&"taekwondo": {&"light": &"jab", &"heavy": &"side_kick", &"technique": &"double_kick", &"up_light": &"rising_punch",
 		&"up_heavy": &"high_kick", &"down_light": &"body_punch", &"down_heavy": &"axe_kick", &"F": &"tornado_540",
 		&"power_light": &"jumping_backfist", &"power_heavy": &"jumping_spin_hook"},
 	&"kickboxing": {&"light": &"jab", &"heavy": &"cross", &"technique": &"body_roundhouse", &"up_light": &"uppercut",
@@ -69,6 +69,12 @@ func _free(p: Array[Fighter]) -> void:
 		f.queue_free()
 
 
+## A sequence move (e.g. the Double Kick) runs as its first strike.
+func _first_strike(move_id: StringName) -> StringName:
+	var seq := CombatData.get_attack(CombatData.type_for_id(move_id)).sequence
+	return seq[0] if not seq.is_empty() else move_id
+
+
 func _slot(slot: StringName) -> CombatData.Intent:
 	var i := CombatData.Intent.new()
 	i.slot = slot
@@ -109,6 +115,7 @@ func _initialize() -> void:
 				var got: StringName = a.current_attack.id if a.state == Fighter.State.ATTACK else &"-"
 				faced.append([got, a.facing])
 				_free(p)
+			want = _first_strike(want)
 			_check(faced[0] == [want, 1] and faced[1] == [want, -1],
 				"%s %s -> %s, facing right and left (%s)" % [sid, MartialArtStyle.SLOT_KEYS[slot], want, faced])
 		for m in NAMES.get(sid, {}):
@@ -163,24 +170,7 @@ func _initialize() -> void:
 	body_lands = a.receive_hit(CombatData.get_attack(CombatData.AttackType.BODY_HOOK), p[1], 1) == CombatData.HitResult.HIT
 	_check(body_lands, "a body hook still lands during the weave (facing left)")
 	_free(p)
-	var tkd := StyleRegistry.by_id(&"taekwondo")
-	for side in [1, -1]:
-		p = _pair(tkd, 300.0, side)
-		a = p[0]
-		a.push_intent(_slot(&"technique"))
-		active = false
-		var next := &""
-		for t in 30:
-			a.tick()
-			if a.current_attack != null and a.current_attack.id == &"lead_leg_feint":
-				active = active or a.is_hitbox_active()
-			if t == 12:
-				a.push_intent(_slot(&"heavy"))
-			if a.combo_step == 2 and next == &"":
-				next = a.current_attack.id
-		_check(not active and next == &"side_kick",
-			"lead-leg feint: no hitbox, flows into a side kick without contact (facing %d, %s)" % [side, next])
-		_free(p)
+	# (Taekwondo's L is the Double Kick now: see tests/test_double_kick.gd.)
 
 	print("[new strikes: one hit, same either way]")
 	for mid in [&"rising_elbow", &"body_straight", &"body_punch", &"low_palm"]:
@@ -350,7 +340,7 @@ func _chains(st: MartialArtStyle, from: StringName, to_slot: StringName, to: Str
 			a.confirm_hit(b.receive_hit(a.current_attack, a, a.combo_step))
 		if t == at.startup + at.active - 2:
 			a.push_intent(_slot(to_slot))
-		if a.state == Fighter.State.ATTACK and a.combo_step == 2 and a.current_attack.id == to:
+		if a.state == Fighter.State.ATTACK and a.combo_step == 2 and a.current_attack.id == _first_strike(to):
 			ok = true
 			break
 	_free(p)

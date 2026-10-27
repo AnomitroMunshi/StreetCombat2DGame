@@ -72,7 +72,7 @@ finishers:
 | **Muay Thai** | Eight limbs. Upright, heavy weight transfer. | Jab · Body Roundhouse · Elbow | Rising Elbow · High Roundhouse | Body Straight · Low Kick | Jumping Downward Elbow · Flying Knee to Face | Flying Knee | Eight Limbs · Iron Knee |
 | **Karate** | Precision and distance, sharp counters. | Straight Punch · Reverse Punch · Knife-Hand | Rising Punch · High Roundhouse | Body Punch · Low Side Kick | Jumping Reverse Punch · Flying Side Kick | Perfect Gyaku-Zuki | One-Inch Verdict · Crimson Crescent |
 | **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Push Kick | Rising Palm · High Backfist | Low Palm · Leg Sweep | Leaping Spinning Backfist · Flying Axe Kick | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
-| **Taekwondo** | Long-range kicking. | Jab · Side Kick · Lead-Leg Feint | Rising Punch · High Roundhouse | Body Punch · Axe Kick | Jumping Backfist · Jumping Spinning Hook Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
+| **Taekwondo** | Long-range kicking. | Jab · Side Kick · Double Kick | Rising Punch · High Roundhouse | Body Punch · Axe Kick | Jumping Backfist · Jumping Spinning Hook Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
 | **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Superman Punch · Jumping Roundhouse Kick | Breaker Combination | Last Combination · Knockout Rhythm |
 | **Bangla Maar** (parody) | Untrained para street fighting: loose hands, slaps, shoves, a big mouth. | Light Slap · Front Thrust Kick · Double-Hand Push | Head Elbow · Double-Hand Hammer | Stomach Shot · Leg Kick | Flying Slap · Flying Chest Kick | Belly Bomb | Paaye Lathi, Mathay Lathi · Super Chor |
 
@@ -113,10 +113,16 @@ out the rest of the move's startup + active + recovery. Tune each move in
 `CombatData.ATTACK_TABLE`. `leap` is the vertical speed, `leap_vx` the
 forward speed, and `leap_at` the tick it leaves the ground.
 
-Two L techniques have no strike of their own. **Bob and Weave** ducks under
-head-height strikes, and **Lead-Leg Feint** fakes a kick. Each flows straight
-into its follow-ups (for example Bob and Weave into Uppercut, or the feint
-into Side Kick) without having to land first.
+**Bob and Weave** (Boxing L) has no strike of its own: it ducks under
+head-height strikes and flows straight into its follow-ups (for example into
+Uppercut) without having to land first.
+
+**Double Kick** (Taekwondo L) is one press, two kicks with alternating legs:
+a low rear-leg roundhouse to the thigh (5, beats a standing guard), that foot
+plants forward and takes the weight, then the other leg's roundhouse to the
+ribs (9). Startup 9, active 3 + 3 with a 9-tick plant between them, recovery
+20. The second kick comes whether the first lands, whiffs or is blocked; if
+the kicker is hit in between, it is dropped. Two kicks alone never knock down.
 
 Low kicks (the Muay Thai and Kickboxing Low Kick) and the Leg Sweep must be
 blocked low with S+Shift. Multi-strike signatures play their strikes one after
@@ -289,7 +295,7 @@ The panels show:
 | Space      | Jump (hold A/D to jump in that direction); a jump from normal range can cross over the opponent. Takeoff waits out the 6-tick power-move window |
 | J          | Light attack (your style's jab or palm) |
 | K          | Heavy attack (your style's main power strike) |
-| L          | Style technique (Bob and Weave, Elbow, Knife-Hand, Push Kick, Lead-Leg Feint, Body Roundhouse, Double-Hand Push) |
+| L          | Style technique (Bob and Weave, Elbow, Knife-Hand, Push Kick, Double Kick, Body Roundhouse, Double-Hand Push) |
 | W + J / W + K | Rising / high attacks |
 | S + J / S + K | Body / low attacks (S + K is Boxing's Slip Counter) |
 | Space + J / Space + K | **Power move** (either order, within 6 ticks): see the table above |
@@ -384,7 +390,7 @@ Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Hundred Palms �
 |---|---|---|---|---|
 | J | Jab | 5 / 3 / 11 | 6 |  |
 | K | Side Kick | 9 / 4 / 17 | 10 |  |
-| L | Lead-Leg Feint | 5 / 6 / 8 | — | no hitbox |
+| L | Double Kick | 9 / 3+3 / 20 (9-tick plant between) | 5 + 9 | low then mid; one press, two kicks |
 | W+J | Rising Punch | 8 / 3 / 17 | 11 | launches |
 | W+K | High Roundhouse | 7 / 3 / 18 | 12 |  |
 | S+J | Body Punch | 8 / 3 / 16 | 10 |  |
@@ -456,8 +462,8 @@ The full table, including hitboxes, knockback and lunge, is in
   buffered attack chains into the next swing, up to 3 swings. Two conditions:
   the swing must have **connected** (hit or blocked), and the branch must be
   listed in your style's `chains` (in `styles/*.tres`). A whiffed attack
-  always plays out its full recovery. Bob and Weave and Lead-Leg Feint are
-  the exceptions: they have nothing to land, so they always chain. For
+  always plays out its full recovery. Bob and Weave is the exception: it
+  has nothing to land, so it always chains. For
   example, Boxing:
 
   | From | Can chain into |
@@ -953,6 +959,8 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 |---|---|
 | `test_core.gd` | Frame data, combos, block / low block, parry (window, whiff, cooldown, low), perfect dodge, cross-up guard, both facing directions, knockdown, dodge, finisher selection and choreography, audio |
 | `test_input.gd` | Real key mapping: J/K/L with W/S, A/D never modifiers, S crouch, double-tap dash, Q style cycling |
+| `test_finisher_contact.gd` | Every style finisher, both directions: each blow lands with its intended limb within 6 px of the drawn body, exactly once, and completes |
+| `test_double_kick.gd` | Taekwondo L: 5 + 9 damage, active ticks 9-11 and 21-23, second kick after a whiff, low/standing guard rules, no restart, interrupts, both directions |
 | `test_controls.gd` | Every style x key x facing, every combo branch, Space+J/K chords (order, window, one per press, grounded uppercut), dash rules, guard, parry, jump, signature, pause, restart |
 | `test_stun.gd` | Every stun move both ways, dizzy rules (helpless, drain per hit, recovery, immunity, knockdown clears, mashing) |
 | `test_bangla.gd` | Bangla Maar: relaxed stance, every move both ways, the shove's seeded 20% knockdown, guard breaker, Belly Bomb, finishers (limb on the head, fall, slide), speech bubbles and the Bengali font |

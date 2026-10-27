@@ -22,6 +22,7 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	LEAPING_PALM, FLYING_DOUBLE_PALM, JUMPING_BACKFIST, JUMPING_SPIN_HOOK, LEAPING_ROUNDHOUSE,
 	LEAPING_SPIN_BACKFIST, FLYING_AXE_KICK,
 	LIGHT_SLAP, THRUST_KICK, DOUBLE_PUSH, HEAD_ELBOW, HAMMER_FIST, STOMACH_SHOT, PARA_LEG_KICK,
+	DOUBLE_KICK, DOUBLE_KICK_LOW, DOUBLE_KICK_MID,
 	FLYING_SLAP, FLYING_CHEST_KICK, BELLY_BOMB }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
@@ -662,6 +663,36 @@ const ATTACK_TABLE: Dictionary = {
 		"damage": 0, "hitstun": 0, "blockstun": 0,
 		"knockback": 0.0, "lunge": 0.0, "hitstop": 0,
 		"hitbox": Rect2(30.0, -120.0, 50.0, 30.0),
+	},
+	# Double kick (Taekwondo L): one press, two kicks with alternating legs.
+	# The rear leg's low roundhouse to the lead thigh (5), that foot plants
+	# forward and takes the weight, then the other leg's roundhouse to the ribs
+	# (9). Timeline from the press: startup 9, low kick active ticks 9-11, a
+	# 9-tick plant and weight transfer (SEQUENCE_GAP 3 + the mid kick's
+	# startup 6), mid kick active ticks 21-23, recovery 20 (ends at tick 44).
+	# The second kick follows whether the first lands, whiffs or is blocked; an
+	# interrupted attacker drops it. Mid-sequence hits never knock down.
+	AttackType.DOUBLE_KICK: {
+		"id": &"double_kick", "name": "Double Kick", "posture": 0.0,
+		"sequence": [&"double_kick_low", &"double_kick_mid"],
+		"startup": 9, "active": 3, "recovery": 20, "cancel_window": 0,
+		"damage": 0, "hitstun": 0, "blockstun": 0,
+		"knockback": 0.0, "lunge": 0.0, "hitstop": 0,
+		"hitbox": Rect2(30.0, -72.0, 64.0, 42.0),
+	},
+	AttackType.DOUBLE_KICK_LOW: {
+		"id": &"double_kick_low", "name": "Double Kick (low)", "posture": 8.0, "low": true,
+		"startup": 9, "active": 3, "recovery": 12, "cancel_window": 0,
+		"damage": 5, "hitstun": 20, "blockstun": 16,
+		"knockback": 1.5, "lunge": 0.6, "hitstop": 4,
+		"hitbox": Rect2(30.0, -72.0, 64.0, 42.0),
+	},
+	AttackType.DOUBLE_KICK_MID: {
+		"id": &"double_kick_mid", "name": "Double Kick (mid)", "posture": 14.0,
+		"startup": 6, "active": 3, "recovery": 20, "cancel_window": 0,
+		"damage": 9, "hitstun": 20, "blockstun": 14,
+		"knockback": 5.5, "lunge": 1.0, "hitstop": 6,
+		"hitbox": Rect2(32.0, -132.0, 66.0, 42.0),
 	},
 	# Rising elbow (Muay Thai W + J): the rear elbow driven up through the chin.
 	AttackType.RISING_ELBOW: {
