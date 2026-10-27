@@ -484,9 +484,10 @@ The full table, including hitboxes, knockback and lunge, is in
 - **One hit per swing:** each swing can connect at most once, then its hitbox
   is spent.
 - **Jumping:** 2 ticks of squat (held up to the 6-tick power-move window),
-  then about 35 ticks in the air: a ~128 px apex with a short hang at the top
-  and a firmer fall. A forward jump travels about 155 px; a back jump is
-  shorter (about 110 px) and reads as a guarded retreat. The body shape
+  then about 30 ticks in the air: a ~100 px apex with a short hang at the top
+  and a firmer fall, low enough for a jump-in punch to reach the head. A
+  forward jump travels about 135 px; a back jump is shorter (about 95 px) and
+  reads as a guarded retreat. The body shape
   follows the travel: a compact tuck straight up, a leap forward, an upright
   guard going back. Momentum: holding the travel direction keeps full speed;
   releasing keeps the momentum but it bleeds away slightly; reversing steers

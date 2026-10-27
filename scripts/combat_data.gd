@@ -246,14 +246,15 @@ const SKID_FRICTION: float = 0.9
 ## Bodies flying through the air slow down slightly each tick.
 const AIR_DRAG: float = 0.992
 ## Voluntary jumps (Space) have their own arc, so knockbacks, launches, power
-## leaps and finishers keep the shared gravity above. Targets: apex ~130 px
-## with a short hang at the top (|vy| < JUMP_APEX_BAND), a firmer fall, about
-## 34 ticks in the air; ~150 px forward, ~110 px back.
+## leaps and finishers keep the shared gravity above. Targets: apex ~100 px
+## (low enough for jump-in punches to reach the head) with a short hang at the
+## top (|vy| < JUMP_APEX_BAND), a firmer fall, about 30 ticks in the air;
+## ~135 px forward, ~95 px back.
 ## Momentum rule: holding the travel direction keeps full speed; releasing
 ## keeps the momentum, bleeding JUMP_RELEASE_DRAG per tick; reversing steers at
 ## JUMP_REVERSE_CONTROL (can stop and drift back, never snap round).
-const JUMP_LAUNCH: float = -15.5
-const JUMP_GRAVITY_RISE: float = 0.9
+const JUMP_LAUNCH: float = -14.0
+const JUMP_GRAVITY_RISE: float = 0.92
 const JUMP_GRAVITY_FALL: float = 1.45
 const JUMP_APEX_BAND: float = 2.0
 const JUMP_APEX_GRAVITY: float = 0.45
