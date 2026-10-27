@@ -49,4 +49,6 @@ ai_far_plans = [[&"jab", &"cross"], [&"overhand"], [&"jab", &"jab"], [&"superman
 wall_entry = PackedStringArray("heavy_windup", "rhook_hit", "heavy_strike", "heavy_windup", "overhand_hit")
 signature = &"gazelle_hook"
 finishers = PackedStringArray("final_bell", "eight_count")
+air_finisher = &"falling_cross"
+wall_finisher = &"corner_count"
 ai_preferred_range = 105.0

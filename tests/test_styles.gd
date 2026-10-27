@@ -202,22 +202,36 @@ func _initialize() -> void:
 	vic.airborne = true
 	var air_n := 0
 	for i in 100:
-		if FinisherDirector.choose(a, vic, null, rng) == FinisherDirector.Kind.AIR_SMASH:
+		if FinisherDirector.choose(a, vic, null, rng) == FinisherDirector.air_kind_for(boxing):
 			air_n += 1
-	_check(air_n > 40, "airborne kill: Air Smash still has priority for a styled attacker (%d/100)" % air_n)
+	_check(air_n > 40, "airborne kill: the style's air finisher has priority (%d/100)" % air_n)
 	vic.airborne = false
 	vic.position.x = Fighter.ARENA_MAX_X - 60.0
 	a.position.x = vic.position.x - 80.0
 	var wall_n := 0
 	for i in 100:
-		if FinisherDirector.choose(a, vic, null, rng) == FinisherDirector.Kind.WALL_CRUSH:
+		if FinisherDirector.choose(a, vic, null, rng) == FinisherDirector.wall_kind_for(boxing):
 			wall_n += 1
-	_check(wall_n > 30, "near the wall: Wall Crush still has priority (%d/100)" % wall_n)
+	_check(wall_n > 30, "near the wall: the style's wall finisher has priority (%d/100)" % wall_n)
+	# Boxing stays hands-only in its own air and wall finishers.
+	var box_kicks: Array = []
+	for bk in [FinisherDirector.air_kind_for(boxing), FinisherDirector.wall_kind_for(boxing)]:
+		var bd := FinisherDirector.new(bk, a, vic)
+		for beat: Dictionary in bd.get("_beats"):
+			var pose := String(beat.get("atk", &""))
+			if pose.contains("kick") or pose.contains("knee") or StringName(pose) in FinisherDirector.KICK_POSES:
+				box_kicks.append(pose)
+		a.end_scripted()
+		vic.end_scripted()
+	_check(box_kicks.is_empty(), "Boxing's air and wall finishers throw punches only (%s)" % [box_kicks])
 
 	print("[style air and wall finishers]")
 	# Each style's own contextual finisher, chosen from the ATTACKER's style
 	# whatever the rival's; a repeat falls back to that style's own finishers.
-	for case in [[&"karate", true, FinisherDirector.Kind.SKYLINE_VERDICT], [&"muay_thai", false, FinisherDirector.Kind.IRON_CORNER]]:
+	for case in [[&"karate", true, FinisherDirector.Kind.SKYLINE_VERDICT], [&"muay_thai", false, FinisherDirector.Kind.IRON_CORNER],
+			[&"boxing", true, FinisherDirector.Kind.FALLING_CROSS], [&"boxing", false, FinisherDirector.Kind.CORNER_COUNT],
+			[&"kickboxing", true, FinisherDirector.Kind.AIR_BREAKER], [&"kickboxing", false, FinisherDirector.Kind.CORNER_BREAKER],
+			[&"taekwondo", true, FinisherDirector.Kind.SKYFALL_AXE], [&"taekwondo", false, FinisherDirector.Kind.CORNER_CYCLONE]]:
 		var st := StyleRegistry.by_id(case[0])
 		p = _pair(st, 80.0)
 		a = p[0]

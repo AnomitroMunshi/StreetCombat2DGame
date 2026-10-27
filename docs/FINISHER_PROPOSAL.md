@@ -1,6 +1,6 @@
 # Style finishers — proposal for approval
 
-Status: **approved 2026-10-27; batch 5a (Skyline Verdict, Iron Corner) prototyped, awaiting your feel review.** Covers backlog FIN-STYLE-01..04, FIN-FEEL-01..06 and KAR-AIR-REF-01..03.
+Status: **approved 2026-10-27; batches 5a (Karate, Muay Thai) and 5b (Boxing, Kickboxing, Taekwondo) built; 5c (Kung Fu, Bangla Maar) next.** Covers backlog FIN-STYLE-01..04, FIN-FEEL-01..06 and KAR-AIR-REF-01..03.
 Mark each row ✅ / ✏️ (change) / ❌ in the approval table at the end.
 
 ## What changes
@@ -245,6 +245,32 @@ either way, starting 60, 110 or 160 px from the wall, at 30, 60 and 120 FPS. The
 against it.
 
 Clips (normal speed and quarter speed): `docs/reviews/2026-10-27-finisher-prototypes/`.
+
+## Batch 5b: timing sheet
+
+All contact is measured on the drawn bodies (≤ 6 px), with the same case grid as 5a. Where a blow lands on the
+torso runs from 0 at the neck to 1 at the hip; below 0 is the head and above 1 is the hip or legs. The heights
+below are what was measured, which in places differs from the proposal's wording.
+
+| Finisher | Beats (ticks) | Where the blows land |
+|---|---|---|
+| **FALLING CROSS** (Boxing air) | sink 10 · uppercut 9 (meets the fall) · **overhand 18** · guard 45 | uppercut low belly (about 1.2), overhand chest (0.25–0.5). A grounded boxer can't reach the jaw of someone in the air, so the overhand comes down onto the falling body. |
+| **THE CORNER COUNT** (Boxing wall) | load 8 · body hook 12 (slams into the wall) · lead hook 8 · load 7 · **straight right 18** · step back 22 + 30 | body 0.3–0.45, hook to the head (−0.12), straight to the upper chest (0.24–0.34) |
+| **AIR BREAKER** (Kickboxing air) | sink 6 · jump 9 (glide) · punch 8 (meets the fall) · **air roundhouse 16** · land 10 · guard 35 | punch to the head or upper chest, roundhouse to the flank (about 1.05) |
+| **CORNER BREAKER** (Kickboxing wall) | jab 7 (slams) · cross 7 · low kick 9 · load and step back 7 · **high roundhouse 18** · step back 22 + 30 | body, body, thigh (about 1.8), roundhouse to the upper body (0.5–0.9) |
+| **SKYFALL AXE** (Taekwondo air) | sink 6 · hop and leg up 10 (glide) · **heel chop 18** (meets the fall) · land 12 · guard 38 | the shoulder line (0.0–0.7, varies with frame rate) |
+| **CORNER CYCLONE** (Taekwondo wall) | chamber 6 · body roundhouse 12 (slams) · spin 10 · chamber 4 · **back kick 18** · turn back 12 · guard 34 | body about 1.1–1.3, back kick to the midsection (about 0.9–1.1) |
+
+**System changes in 5b:**
+- **Curled fall:** an airborne opponent now falls curled (`air_tumble`), not upright with the arms raised. A
+  spiked body folds into that pose as it is driven down.
+- **Vertical assist:** a blow waiting on an airborne opponent nudges their body up or down by at most 6 px per
+  tick toward the striking limb. It absorbs the difference between the planned and the drawn limb.
+- **Two new beat keys:**
+  - `meet_at` sets where on the torso a meeting blow aims;
+  - `strike_delay` lets a thrust connect only once extended, not on its way out.
+
+Clips (normal speed and quarter speed): `docs/reviews/2026-10-27-finisher-batch5b/`.
 
 ## Approval table
 

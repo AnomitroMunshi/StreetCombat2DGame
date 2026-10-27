@@ -264,6 +264,9 @@ var _jk_extend := PackedFloat32Array([-0.5, 0.3, 0.7, 2.7, -1.0, -0.8, 1.25, 1.2
 # tucked under the hips, the lead arm folds in front of the chest and the rear
 # arm swings back to counterbalance (clear of the kicking leg).
 var _flying_chamber := PackedFloat32Array([-0.25, 0.3, 1.0, 2.6, 0.2, 2.2, 1.95, -0.9, 0.9, -1.5, 0.0, 0.0, 0.9, 8.0])
+# An opponent falling through the air in a finisher: jack-knifed at the hips,
+# knees drawn up, head tipped back and the arms loose (not raised overhead).
+var _air_tumble := PackedFloat32Array([-0.5, -0.3, 1.6, 2.4, 1.2, 2.0, 1.2, -0.3, 0.8, -0.6, 0.0, 0.0])
 var _flying_side_kick := PackedFloat32Array([-0.55, 0.45, 1.1, 2.5, -0.8, -0.4, 1.7, 1.7, 0.9, -1.5, 6.0, 0.0, 1.0, 10.0])
 # High kick: knee chambered high and diagonal, then the shin snaps out to face
 # level with the torso counter-leaning and the support foot pivoting.
@@ -289,6 +292,9 @@ var _sweep_follow := PackedFloat32Array([0.7, 0.5, 0.45, 0.3, 0.9, 2.9, 1.55, 1.
 # knee pulled to the chest, then a heel thrust straight back at the opponent.
 var _back_chamber := PackedFloat32Array([0.35, 0.35, 1.0, 2.8, 0.9, 2.9, 0.25, -0.1, 1.3, -1.0, 2.0, 0.0, 0.0, 6.0])
 var _back_extend := PackedFloat32Array([0.75, 0.55, 1.2, 2.6, 0.6, 2.4, 0.3, -0.05, -1.45, -1.5, -8.0, 0.0, 0.0, 4.0])
+# Corner Cyclone's back kick: the heel drives up to the sternum of a body
+# pinned to the wall (more forward lean, the leg rising past horizontal).
+var _back_extend_high := PackedFloat32Array([1.1, 0.6, 1.2, 2.6, 0.6, 2.4, 0.3, -0.05, -2.15, -2.2, -8.0, 0.0, 0.0, 4.0])
 # --- Boxing ---------------------------------------------------------------------
 # Hooks: the elbow comes up to shoulder height and the fist travels across on a
 # short arc; the shoulders turn through (spread swings from loaded to closed).
@@ -855,6 +861,7 @@ func _ready() -> void:
 		&"spin_kick": _spin_kick, &"knee_windup": _knee_windup, &"knee": _knee, &"slumped": _slumped,
 		&"tornado_windup": _tornado_windup, &"tornado_chamber": _tornado_chamber, &"tornado_kick": _tornado_kick,
 		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare, &"mt_ready": _mt_ready, &"kt_ready": _kt_ready, &"flying_chamber": _flying_chamber, &"flying_side_kick": _flying_side_kick,
+		&"air_tumble": _air_tumble, &"air_punch_load": _jump_punch_windup, &"air_punch": _jump_punch_strike,
 		# Style finishers reuse the move poses.
 		&"lhook_hit": _lhook_hit, &"rhook_hit": _rhook_hit, &"bhook_load": _bhook_load, &"bhook_hit": _bhook_hit,
 		&"overhand_hit": _overhand_hit, &"slip_dip": _slip_dip, &"uppercut_windup": _uppercut_windup,
@@ -863,7 +870,7 @@ func _ready() -> void:
 		&"elbow_load": _elbow_load, &"elbow_hit": _elbow_hit, &"lowrh_hit": _lowrh_hit, &"bodyrh_hit": _bodyrh_hit,
 		&"fknee_hit": _fknee_hit, &"gyaku_load": _gyaku_load, &"gyaku_hit": _gyaku_hit, &"knife_hit": _knife_hit,
 		&"rpalm_hit": _rpalm_hit, &"lowside_hit": _lowside_hit, &"sweep_load": _sweep_load, &"sweep_extend": _sweep_extend,
-		&"back_extend": _back_extend, &"back_chamber": _back_chamber, &"jrh_hit": _jrh_hit, &"deflect": _deflect,
+		&"back_extend": _back_extend, &"back_extend_high": _back_extend_high, &"back_chamber": _back_chamber, &"jrh_hit": _jrh_hit, &"deflect": _deflect,
 		&"rbody_load": _rbody_load, &"rbody_hit": _rbody_hit, &"upper_load_deep": _upper_load_deep,
 		# Directional reactions for finisher victims.
 		&"hitstun_hook": _hitstun_hook, &"hitstun_up": _hitstun_up, &"hitstun_down": _hitstun_down,
@@ -1736,7 +1743,10 @@ func _ko_flight_pose(t: float) -> PackedFloat32Array:
 			_:
 				impact = _hitstun_heavy
 	if fighter.spiked:
-		return _blend(impact, _hitstun_down, smoothstep(0.0, KO_IMPACT_TICKS, t))
+		# Driven down into the floor: the blow's reaction folds into the
+		# jack-knifed fall (never a body dropping upright).
+		return _blend(_blend(impact, _hitstun_down, smoothstep(0.0, KO_IMPACT_TICKS * 0.5, t)), _air_tumble,
+			smoothstep(KO_IMPACT_TICKS * 0.5, KO_IMPACT_TICKS * 1.5, t))
 	return _blend(impact, _knock_fly, smoothstep(KO_IMPACT_TICKS, KO_IMPACT_TICKS + 10.0, t))
 
 
@@ -2661,7 +2671,7 @@ func _toe_point_for(foot: Vector2) -> float:
 		var pose := String(fighter.script_pose)
 		if pose in ["front_extend"]:
 			return POINT_BALL
-		if pose in ["kick_strike", "back_extend", "axe_chop", "axe_raise", "shook_hit", "lowside_hit", "sweep_extend",
+		if pose in ["kick_strike", "back_extend", "back_extend_high", "axe_chop", "axe_raise", "shook_hit", "lowside_hit", "sweep_extend",
 				"flying_chamber", "flying_side_kick"]:
 			return 0.0
 		return POINT_ROUNDHOUSE if pose.ends_with("extend") or pose.contains("rh") or pose.contains("knee") \

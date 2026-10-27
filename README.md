@@ -269,9 +269,21 @@ style's `air_finisher` and `wall_finisher`. So far:
   opponent's flight timed to meet it; they are driven into the floor.
 - **Muay Thai, Iron Corner:** a driving knee into the wall, which cracks as
   their back hits it, a rising knee, then a horizontal elbow across the jaw.
+- **Boxing, Falling Cross** (air, hands only): a rising uppercut into the
+  falling body, then an overhand cross drives them into the floor.
+- **Boxing, The Corner Count** (wall, hands only): a body hook into the wall,
+  a lead hook to the head, then the straight right.
+- **Kickboxing, Air Breaker:** a jumping straight punch to the head, then an
+  airborne roundhouse to the ribs.
+- **Kickboxing, Corner Breaker:** a jab and cross pin them to the wall, a low
+  kick buckles the leg, then a high roundhouse.
+- **Taekwondo, Skyfall Axe:** the leg swings up past the head, then the heel
+  chops down onto the shoulder and spikes them into the floor.
+- **Taekwondo, Corner Cyclone:** a body roundhouse into the wall, a turn on
+  the planted foot, then a spinning back kick to the midsection.
 
-The other styles still use the classic shared pair, Air Smash and Wall Crush,
-which training also keeps as extra entries. Wall Crush uses **your style's strikes** (the style's `wall_entry`): a
+Kung Fu and Bangla Maar still use the classic shared pair, Air Smash and Wall
+Crush, which training also keeps as extra entries for every style. Wall Crush uses **your style's strikes** (the style's `wall_entry`): a
 boxer charges in with a rear hook and finishes with an overhand, Karate drives
 reverse punches, Kung Fu palms. Muay Thai keeps the classic flying knee and
 double palm.

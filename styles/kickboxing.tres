@@ -51,4 +51,6 @@ ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"jab"
 wall_entry = PackedStringArray("knee_windup", "bodyrh_hit", "heavy_strike", "heavy_windup", "high_extend")
 signature = &"breaker_combo"
 finishers = PackedStringArray("last_combination", "knockout_rhythm")
+air_finisher = &"air_breaker"
+wall_finisher = &"corner_breaker"
 ai_preferred_range = 120.0
