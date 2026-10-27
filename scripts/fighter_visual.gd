@@ -102,8 +102,12 @@ const WALK_NARROW_REAR: float = 14.0
 ## the hips settle lower (up to MAX_SETTLE px) to keep that bend.
 const KNEE_SOFT: float = 0.95
 const MAX_SETTLE: float = 8.0
+## A committed strike from a long stance sinks the hips further (a lunge).
+const MAX_SETTLE_STRIKE: float = 18.0
 ## Fastest the hips settle or rise for the knee bend (px/s).
 const SETTLE_RATE: float = 70.0
+## Strikes sink into their lunge with the drive (still over a few frames).
+const SETTLE_RATE_STRIKE: float = 360.0
 ## Default body rotation for poses that do not set it.
 const DEFAULT_SPREAD: float = 6.0
 ## Body rotation per pose (var name -> px). Others use DEFAULT_SPREAD.
@@ -1419,7 +1423,9 @@ func _update_spin(dt: float, fraction: float) -> void:
 	elif fighter.state == Fighter.State.FINISHER and fighter.script_spin_hold:
 		pass
 	else:
-		_spin_angle = lerp_angle(_spin_angle, 0.0, 1.0 - exp(-18.0 * dt))
+		# Settle onto the nearest whole turn: wrap first, so a completed spin
+		# (TAU, 2 TAU...) reads as facing front and settles to exactly 0.
+		_spin_angle = lerp_angle(wrapf(_spin_angle, -PI, PI), 0.0, 1.0 - exp(-18.0 * dt))
 
 
 func _trail_active() -> bool:
@@ -3131,13 +3137,13 @@ func _draw_boxing_kit(j: PackedVector2Array, accent: Color) -> void:
 func _wants_plant() -> bool:
 	if fighter.airborne or _rag_on or _rag_blend > 0.0 or _tuck_amount > 0.0:
 		return false
-	if absf(_spin_angle) > 0.01 or fighter.script_flip:
+	if absf(wrapf(_spin_angle, -PI, PI)) > 0.01 or fighter.script_flip:
 		return false
 	if fighter.state == Fighter.State.ATTACK:
 		# Hand strikes keep the feet planted, so the hips drive over them and a
 		# step-in steps front foot then rear (kicks own their legs).
 		var attack := fighter.current_attack
-		return attack != null and not attack.spin and attack.sequence.is_empty() 			and _mech_kind(attack.type) in [MECH_LEAD, MECH_REAR, MECH_RISING]
+		return attack != null and not attack.spin and attack.sequence.is_empty() 			and _mech_kind(attack.type) in [MECH_LEAD, MECH_REAR, MECH_RISING, MECH_HOOK_LEAD, MECH_HOOK_REAR]
 	return fighter.state in [Fighter.State.IDLE, Fighter.State.WALK, Fighter.State.CROUCH, Fighter.State.BLOCK,
 		Fighter.State.BLOCKSTUN, Fighter.State.GUARD_RELEASE, Fighter.State.HITSTUN, Fighter.State.LAND,
 		Fighter.State.PARRY, Fighter.State.STAGGER, Fighter.State.BROKEN]
@@ -3154,11 +3160,13 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 	var lifting := fighter.state == Fighter.State.IDLE and (fighter.prefight_pose in ONE_LEG_POSES
 		or (fighter.prefight_pose == &"" and fighter.celebration == &"" and not _crane.is_empty() and _idle_amount > 0.45))
 	_lift = move_toward(_lift, 1.0 if lifting else 0.0, dt * (LIFT_RATE_UP if lifting else LIFT_RATE_DOWN))
-	# Body speed (for stepping ahead of the motion).
-	var hip_x := j[J_HIP].x
+	# Travel speed (for stepping ahead of the motion): the fighter's own
+	# movement, not the hips' weight shift, so a punch thrown on the spot
+	# (hips driving forward) never reads as walking and shuffles the feet.
+	var root_x := global_position.x
 	if dt > 0.0:
-		_body_speed = lerpf(_body_speed, (hip_x - _last_hip_x) / dt, 0.3)
-	_last_hip_x = hip_x
+		_body_speed = lerpf(_body_speed, (root_x - _last_hip_x) / dt, 0.3)
+	_last_hip_x = root_x
 	if _plant <= 0.0:
 		_feet_ready = false
 		_step_leg = -1
@@ -3203,16 +3211,30 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 			var next_leg := (0 if moving_forward else 1) if _last_step_leg < 0 else 1 - _last_step_leg
 			if errs[next_leg] > STEP_THRESHOLD * 0.4:
 				pick = next_leg
-		else:
+		elif fighter.state != Fighter.State.ATTACK:
+			# (A strike thrown on the spot keeps its feet planted: no shuffling.)
 			_last_step_leg = -1
 			var worst := 0 if errs[0] >= errs[1] else 1
 			if errs[worst] > STEP_THRESHOLD:
 				pick = worst
-		# A planted foot the leg can no longer reach steps now (never dragged).
-		if pick < 0 and moving:
+		# In a strike, a planted foot its leg can no longer reach with a soft
+		# knee takes one follow-up step in under the hips (never dragged, never
+		# locked straight). Standing stances keep their width; the hips settle.
+		var reach_step := false
+		if pick < 0 and fighter.state == Fighter.State.ATTACK:
 			for leg in 2:
-				if _feet[leg].distance_to(j[J_HIP_F if leg == 0 else J_HIP_B]) > THIGH + SHIN - 2.0:
-					pick = leg
+				if leg == 0 and _lift > 0.0:
+					continue
+				# Measured with the hips at their deepest strike sink: a foot the
+				# sink alone keeps in reach stays planted.
+				var hip_p: Vector2 = j[J_HIP_F if leg == 0 else J_HIP_B] + Vector2(0.0, MAX_SETTLE_STRIKE)
+				if _feet[leg].distance_to(hip_p) > (THIGH + SHIN) * KNEE_SOFT:
+					# Only as far as needed: the nearest spot the leg reaches.
+					var spot := _reach_spot(hip_p, _feet[leg].x, floor_y)
+					if absf(_feet[leg].x - spot) > 2.0:
+						pick = leg
+						reach_step = true
+						homes[leg].x = spot
 		if pick >= 0:
 			_step_leg = pick
 			_last_step_leg = pick
@@ -3224,7 +3246,7 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 			# Land slightly ahead of home in the direction of travel (capped, so
 			# the stance never splays wide).
 			var lead_max := WALK_STEP_LEAD_MAX if walking else STEP_LEAD_MAX
-			var lead := clampf(_body_speed * _step_time * 1.1, -lead_max, lead_max)
+			var lead := 0.0 if reach_step else clampf(_body_speed * _step_time * 1.1, -lead_max, lead_max)
 			_step_to = Vector2(homes[pick].x + lead, floor_y)
 	var legs := [[J_HIP_F, J_KNEE_F, J_FOOT_F], [J_HIP_B, J_KNEE_B, J_FOOT_B]]
 	var targets: Array[Vector2] = []
@@ -3247,10 +3269,10 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 		if leg == 0:
 			need *= 1.0 - _lift
 		settle = maxf(settle, need)
-	settle = minf(settle, MAX_SETTLE) * _plant
+	settle = minf(settle, MAX_SETTLE_STRIKE if fighter.state == Fighter.State.ATTACK else MAX_SETTLE) * _plant
 	# Eased, never applied in one frame: near full stretch the needed drop
 	# rises steeply, which would pop the whole upper body.
-	_settle = move_toward(_settle, settle, dt * SETTLE_RATE)
+	_settle = move_toward(_settle, settle, dt * (SETTLE_RATE_STRIKE if fighter.state == Fighter.State.ATTACK else SETTLE_RATE))
 	settle = _settle
 	# Active idle: the body dips over the planted feet (knees bend, the root
 	# and feet stay put).
@@ -3274,6 +3296,17 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 		j[ids[1]] = j[ids[1]].lerp(solved[0], w)
 		j[ids[2]] = j[ids[2]].lerp(solved[1], w)
 	return j
+
+
+## `x` moved (if needed) to where a leg from `hip` reaches the floor with a
+## soft knee (KNEE_SOFT of its length).
+static func _reach_spot(hip: Vector2, x: float, floor_y: float) -> float:
+	var reach := (THIGH + SHIN) * KNEE_SOFT
+	var dy := floor_y - hip.y
+	if dy >= reach:
+		return x  # standing tall: no wider spot is any closer, leave it
+	var half := sqrt(reach * reach - dy * dy)
+	return clampf(x, hip.x - half, hip.x + half)
 
 
 ## Two-bone leg IK: knee bends forward (toward the fighter's front). If the
