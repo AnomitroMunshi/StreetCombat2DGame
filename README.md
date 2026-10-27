@@ -926,12 +926,19 @@ files.
 - **Sound effects:** whooshes, light and heavy hits, block clack, landing,
   body slam, wall impact, rolling, KO boom, and a finisher gong sting.
 - **Music follows the player's style:** the menu theme plays while choosing
-  a style, then the chosen style's own track (Boxing, Muay Thai, Kung Fu,
-  Bangla Maar) for the match; the rival's style never changes it. Tracks
-  crossfade (0.8 s) on a separate Music bus, are loudness-matched, loop, and
-  are never restarted when already playing. A style without its own track
-  yet (Karate, Taekwondo, Kickboxing) plays the procedural fight track; add a
-  file to `GameAudio.MUSIC_FILES` to give it one.
+  a style, then the chosen style's own track for the match; the rival's
+  style never changes it. Boxing, Muay Thai, Kung Fu, Bangla Maar and the menu
+  use the original tracks in `assets/audio/music/originals/`; Karate,
+  Taekwondo and Kickboxing use placeholder themes rendered by
+  `tools/music/gen_style_music.py` (in `assets/audio/music/generated/`,
+  replaceable any time). Tracks crossfade (0.8 s) on a separate Music bus, are
+  loudness-matched, loop, and are never restarted when already playing. A
+  style missing from `GameAudio.MUSIC_FILES` plays the procedural fight track.
+- **Announcer:** "Three", "Two", "One", "FIGHT!" on the countdown's own cues
+  and "K.O.!" when a round ends, on a separate Voice bus (SFX never cut it
+  off; the music dips under it). Training starts silently; a paused countdown
+  never runs ahead. The clips in `assets/audio/voice/` are placeholders made
+  with Windows text-to-speech; drop in recordings with the same names.
 - **Procedural fight track:** 140 BPM in A minor, 16 bars
   (about 27 s) that loop seamlessly. It has a punchy kick and snare, 16th-note
   hats, a distorted saw bass with octave jumps, taiko accents, and a square-wave

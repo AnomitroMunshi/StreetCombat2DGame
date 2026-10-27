@@ -35,6 +35,8 @@ const PREP_GESTURE_TICK: int = 34
 const PREP_GUARD_TICK: int = 66
 const PREP_TICKS: int = 100
 const COUNT_NUMBER_TICKS: int = 60
+## Announcer words for the countdown numbers.
+const COUNT_WORDS: Array[StringName] = [&"", &"one", &"two", &"three"]
 const FIGHT_TEXT_TICKS: int = 45
 ## "K.O." is shown at least this long, and until the loser is at rest.
 const KO_MIN_TICKS: int = 50
@@ -643,6 +645,7 @@ func _tick_match_flow() -> void:
 				if left > 0:
 					_show_count(left)
 				else:
+					audio.announce(&"fight")  # the countdown's FIGHT (training starts silently)
 					_begin_fight()
 		RoundState.FIGHTING:
 			if _state_tick == FIGHT_TEXT_TICKS:
@@ -658,6 +661,7 @@ static func _intro_pose(f: Fighter, fallback: StringName) -> StringName:
 
 
 func _show_count(n: int) -> void:
+	audio.announce(COUNT_WORDS[n])
 	hud.set_countdown(str(n))
 	audio.play(&"count_tick", 0.0, 0.0)
 
@@ -1130,6 +1134,7 @@ func _end_round() -> void:
 		_reset_training()
 		return
 	_set_round_state(RoundState.KO)
+	audio.announce(&"ko")  # once per round, double K.O. included
 	set_game_speed(1.0)
 	_slowmo_ticks = 0
 	player.stop_combat()

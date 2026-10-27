@@ -55,24 +55,26 @@ func _run() -> void:
 	_check(playing == 1, "after the crossfade only one track plays (%d)" % playing)
 	_check(AudioServer.get_bus_index(GameAudio.MUSIC_BUS) >= 0, "music has its own bus")
 
-	print("[styles without a track yet]")
+	print("[every style has its own track]")
+	for st in StyleRegistry.all():
+		_check(GameAudio.MUSIC_FILES.has(st.id) and ResourceLoader.exists(GameAudio.MUSIC_FILES[st.id][0]),
+			"%s has its own track" % st.id)
+
+	print("[styles without a track fall back]")
 	main.call("change_style")
 	await _wait(3)
 	_check(audio.get_music_id() == &"menu", "CHANGE STYLE goes back to the menu theme")
 	hud.style_chosen.emit(&"karate")
 	main.call("confirm_style")
+	await _wait(3)
+	_check(audio.get_music_id() == &"karate" and audio.get_music_stream() is AudioStreamOggVorbis
+		and (audio.get_music_stream() as AudioStreamOggVorbis).loop, "Karate plays its own looping track")
 	var t0 := Time.get_ticks_msec()
 	while audio.get_bgm_length() <= 0.0 and Time.get_ticks_msec() - t0 < 20000:
 		await process_frame
-	await _wait(3)
-	_check(audio.get_music_stream() is AudioStreamWAV, "Karate (no track yet) plays the procedural loop")
-	main.call("change_style")
+	audio.set_music(&"some_new_style")
 	await _wait(2)
-	hud.style_chosen.emit(&"taekwondo")
-	main.call("confirm_style")
-	await _wait(2)
-	_check(audio.get_music_stream() is AudioStreamWAV and audio.get_music_id() == &"taekwondo",
-		"Taekwondo shares the procedural loop (%s)" % audio.get_music_id())
+	_check(audio.get_music_stream() is AudioStreamWAV, "a style with no track yet plays the procedural loop")
 
 	print("[same track: no restart]")
 	var before := audio.get_music_stream()

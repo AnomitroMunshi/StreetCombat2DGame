@@ -26,8 +26,23 @@ const MUSIC_FILES: Dictionary = {
 	&"muay_thai": ["res://assets/audio/music/originals/muay_thai_theme.mp3", -4.2],
 	&"kung_fu": ["res://assets/audio/music/originals/kung_fu_theme.mp3", -3.9],
 	&"bangla_maar": ["res://assets/audio/music/originals/bangla_maar_theme.mp3", -4.4],
+	# Placeholders rendered by tools/music/gen_style_music.py (-17 dB RMS).
+	&"karate": ["res://assets/audio/music/generated/karate_theme.ogg", -5.0],
+	&"taekwondo": ["res://assets/audio/music/generated/taekwondo_theme.ogg", -5.0],
+	&"kickboxing": ["res://assets/audio/music/generated/kickboxing_theme.ogg", -5.0],
 }
 const MUSIC_BUS: StringName = &"Music"
+## Announcer clips (placeholders: Windows text-to-speech, processed; replace
+## the files with recordings any time). Voice has its own bus and player, so
+## SFX never steal it, and the music dips under it.
+const VOICE_CLIPS: Dictionary = {
+	&"three": "res://assets/audio/voice/three.wav", &"two": "res://assets/audio/voice/two.wav",
+	&"one": "res://assets/audio/voice/one.wav", &"fight": "res://assets/audio/voice/fight.wav",
+	&"ko": "res://assets/audio/voice/ko.wav",
+}
+const VOICE_BUS: StringName = &"Voice"
+const VOICE_VOLUME_DB: float = -2.0
+const VOICE_MUSIC_DUCK_DB: float = -7.0
 const MUSIC_FADE_TIME: float = 0.8
 const SILENT_DB: float = -60.0
 
@@ -42,6 +57,10 @@ var _streams: Dictionary = {}
 var _bgm_thread: Thread = null
 var _bgm_duck_db: float = 0.0
 var _duck_now: float = 0.0
+var _announcer: AudioStreamPlayer = null
+var _voice_streams: Dictionary = {}
+## Announcements made (for tests): ids in order.
+var announced: Array[StringName] = []
 var _rng := RandomNumberGenerator.new()
 
 
@@ -53,6 +72,13 @@ func _ready() -> void:
 		add_child(voice)
 		_voices.append(voice)
 	_install_music_bus()
+	_install_bus(VOICE_BUS)
+	_announcer = AudioStreamPlayer.new()
+	_announcer.bus = VOICE_BUS
+	_announcer.volume_db = VOICE_VOLUME_DB
+	# Frozen with the match: a paused countdown never runs ahead in the voice.
+	_announcer.process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_child(_announcer)
 	for k in 2:
 		var player := AudioStreamPlayer.new()
 		player.bus = MUSIC_BUS
@@ -75,7 +101,8 @@ func _process(delta: float) -> void:
 			_switch_to(_procedural, BGM_VOLUME_DB)  # the loop was waited for
 	var real_delta := delta / maxf(Engine.time_scale, 0.01)
 	_fade = minf(_fade + real_delta / MUSIC_FADE_TIME, 1.0)
-	_duck_now = lerpf(_duck_now, _bgm_duck_db, 1.0 - exp(-3.0 * real_delta))
+	var duck := _bgm_duck_db + (VOICE_MUSIC_DUCK_DB if _announcer.playing else 0.0)
+	_duck_now = lerpf(_duck_now, duck, 1.0 - exp(-(10.0 if duck < _duck_now else 3.0) * real_delta))
 	# Crossfade in the linear domain (no dip in loudness halfway).
 	_bgm.volume_db = linear_to_db(maxf(db_to_linear(_bgm_gain + _duck_now) * _fade, 0.000001))
 	if _bgm_out.playing:
@@ -90,7 +117,7 @@ func _exit_tree() -> void:
 		_bgm_thread.wait_to_finish()
 		_bgm_thread = null
 	# Release streams so nothing is still playing when the audio server shuts down.
-	for voice: AudioStreamPlayer in _voices + [_bgm, _bgm_out]:
+	for voice: AudioStreamPlayer in _voices + [_bgm, _bgm_out, _announcer]:
 		voice.stop()
 		voice.stream = null
 
@@ -119,8 +146,8 @@ func set_music(id: StringName) -> void:
 		var entry: Array = MUSIC_FILES[id]
 		if not _streams.has(id):
 			var stream: AudioStream = load(entry[0])
-			if stream is AudioStreamMP3:
-				(stream as AudioStreamMP3).loop = true
+			if "loop" in stream:
+				stream.set("loop", true)  # MP3 / OGG tracks loop
 			_streams[id] = stream
 		_switch_to(_streams[id], entry[1])
 	elif _procedural != null:
@@ -154,13 +181,29 @@ func _switch_to(stream: AudioStream, gain_db: float) -> void:
 	_bgm.play()
 
 
+## The announcer says `id` (three, two, one, fight, ko): one clip at a time,
+## a new call replaces the one still sounding.
+func announce(id: StringName) -> void:
+	if not VOICE_CLIPS.has(id):
+		return
+	if not _voice_streams.has(id):
+		_voice_streams[id] = load(VOICE_CLIPS[id])
+	_announcer.stream = _voice_streams[id]
+	_announcer.play()
+	announced.append(id)
+
+
 ## Music has its own bus (under Master), so its level can be set apart from SFX.
 func _install_music_bus() -> void:
-	if AudioServer.get_bus_index(MUSIC_BUS) >= 0:
+	_install_bus(MUSIC_BUS)
+
+
+func _install_bus(bus: StringName) -> void:
+	if AudioServer.get_bus_index(bus) >= 0:
 		return
 	AudioServer.add_bus()
 	var idx := AudioServer.bus_count - 1
-	AudioServer.set_bus_name(idx, MUSIC_BUS)
+	AudioServer.set_bus_name(idx, bus)
 	AudioServer.set_bus_send(idx, &"Master")
 
 
