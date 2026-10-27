@@ -19,6 +19,7 @@ class Driver extends Node:
 		frame += 1
 		var main := tree.current_scene
 		if frame == 1:
+			main.set("rounds_to_win", 1)  # this test covers one K.O. -> result
 			main.call("start_match", true)
 		var p: Fighter = main.get_node("Player")
 		var state: String = main.call("get_round_state_name")

@@ -149,6 +149,22 @@ var _last_event: String = "-"
 var _fx_rng := RandomNumberGenerator.new()
 var _finisher_rng := RandomNumberGenerator.new()
 var _finisher: FinisherDirector = null
+## Health each fighter starts every round with (Fighter's own default is the
+## unit-test 100): sets the round length, ~30 s.
+const MATCH_HEALTH: int = 200
+## Rounds a fighter must win to take the match (best of 3). Each round ends in
+## a finisher; the next starts with "ROUND 2" / "FINAL ROUND", then FIGHT.
+## Tests that cover a single K.O. set this to 1.
+var rounds_to_win: int = 2
+## Rounds won [player, rival], and the round being fought (1-based).
+var round_wins: Array[int] = [0, 0]
+var round_number: int = 1
+## The round's opening call ("ROUND 2") is showing instead of the 3-2-1.
+var _round_call: bool = false
+## The match is decided (the KO screen leads to the result, not a new round).
+var _match_over: bool = false
+## Ticks the round call shows before FIGHT.
+const ROUND_CALL_TICKS: int = 80
 var _follow_victim: bool = false
 ## Where the knockout blow landed (world), for the KO shot.
 var _ko_focus := Vector2.INF
@@ -198,6 +214,9 @@ func _ready() -> void:
 	enemy.ground_y = FLOOR_Y
 	player.opponent = enemy
 	enemy.opponent = player
+	for f: Fighter in [player, enemy]:
+		f.max_health = MATCH_HEALTH
+		f.health = MATCH_HEALTH
 	player.face_opponent()
 	enemy.face_opponent()
 	# Positions were set directly: don't interpolate from the scene defaults.
@@ -473,11 +492,22 @@ func _reset_training() -> void:
 	hud.set_letterbox(false)
 	hud.set_message("", "")
 	audio.duck_bgm(0.0)
+	_reset_fighters(1)
+	_set_round_state(RoundState.FIGHTING)
+	enemy_ai.setup(enemy, player)
+	for f: Fighter in [player, enemy]:
+		say(f, "match_start")
+
+
+## Both fighters up, full health, back on their start marks (focus is kept).
+func _reset_fighters(min_hp: int) -> void:
 	for f: Fighter in [player, enemy]:
 		f.stop_combat()
 		f.end_scripted()
 		f.airborne = false
 		f.rolling = false
+		f.skidding = false
+		f.settling = false
 		f.celebration = &""
 		f.dizzy_left = 0
 		f.dizzy_immunity = 0
@@ -486,19 +516,15 @@ func _reset_training() -> void:
 		f.velocity_x = 0.0
 		f.velocity_y = 0.0
 		f.position.y = FLOOR_Y
-		f.health = 100
+		f.health = f.max_health
 		f.posture = 0.0
-		f.min_health = 1
+		f.min_health = min_hp
 		f.call("_enter_state", Fighter.State.IDLE)
 	player.position.x = PLAYER_START_X
 	enemy.position.x = ENEMY_START_X
 	for f: Fighter in [player, enemy]:
 		f.face_opponent()
 		f.reset_physics_interpolation()
-	_set_round_state(RoundState.FIGHTING)
-	enemy_ai.setup(enemy, player)
-	for f: Fighter in [player, enemy]:
-		say(f, "match_start")
 
 
 ## Back to the pre-match screen with the same style (START, TRAINING, CHANGE STYLE).
@@ -640,7 +666,12 @@ func _tick_match_flow() -> void:
 				_set_round_state(RoundState.COUNTDOWN)
 				_show_count(3)
 		RoundState.COUNTDOWN:
-			if _state_tick % COUNT_NUMBER_TICKS == 0:
+			if _round_call:
+				if _state_tick >= ROUND_CALL_TICKS:
+					_round_call = false
+					audio.announce(&"fight")
+					_begin_fight()
+			elif _state_tick % COUNT_NUMBER_TICKS == 0:
 				var left := 3 - _state_tick / COUNT_NUMBER_TICKS
 				if left > 0:
 					_show_count(left)
@@ -675,6 +706,7 @@ func _begin_fight() -> void:
 		f.stop_combat()
 		say(f, "match_start")
 	enemy_ai.setup(enemy, player)
+	hud.set_rounds(round_wins, rounds_to_win if training == null else 0)
 	hud.set_countdown("FIGHT!")
 	hud.flash(0.25)
 	audio.play(&"fight_call", 0.0, 0.0)
@@ -842,7 +874,7 @@ func _resolve_hits() -> void:
 			CombatData.HitResult.HIT:
 				if not attacker.in_signature:
 					attacker.add_focus(CombatData.focus_for_hit(attack, defender.last_hit_counter))
-				defender.add_focus(CombatData.focus_for_hurt(attack.damage))
+				defender.add_hurt_focus(CombatData.focus_for_hurt(attack.damage))
 			CombatData.HitResult.BLOCKED:
 				defender.add_block_focus()
 		if result == CombatData.HitResult.KO:
@@ -1141,9 +1173,16 @@ func _end_round() -> void:
 	enemy.stop_combat()
 	var player_down := player.state == Fighter.State.KO
 	var enemy_down := enemy.state == Fighter.State.KO
-	if player_down and enemy_down:
+	# The round goes to whoever is still standing (a double K.O. to both).
+	if enemy_down:
+		round_wins[0] += 1
+	if player_down:
+		round_wins[1] += 1
+	hud.set_rounds(round_wins, rounds_to_win)
+	_match_over = round_wins.max() >= rounds_to_win
+	if round_wins[0] >= rounds_to_win and round_wins[1] >= rounds_to_win:
 		_result_text = "DOUBLE K.O."
-	elif enemy_down:
+	elif round_wins[0] >= rounds_to_win:
 		_result_text = "%s WINS" % player.fighter_name
 	else:
 		_result_text = "%s WINS" % enemy.fighter_name
@@ -1156,6 +1195,9 @@ func _end_round() -> void:
 func _tick_round_over() -> void:
 	if _state_tick < KO_MIN_TICKS or not _bodies_at_rest():
 		return
+	if not _match_over:
+		_next_round()
+		return
 	_set_round_state(RoundState.RESULT)
 	hud.set_banner("", Color.WHITE)
 	hud.set_letterbox(false)
@@ -1163,6 +1205,32 @@ func _tick_round_over() -> void:
 	hud.show_button(&"rematch")
 	audio.play(&"victory", -2.0, 0.0)
 	audio.duck_bgm(-6.0)
+
+
+## Between rounds: both back up at full health on their marks (focus carries
+## over), then "ROUND 2" / "FINAL ROUND" and FIGHT. The arena keeps its
+## battle damage.
+func _next_round() -> void:
+	round_number += 1
+	_finisher = null
+	_follow_victim = false
+	_ko_focus = Vector2.INF
+	_hitstop = 0
+	_slowmo_ticks = 0
+	set_game_speed(1.0)
+	hud.set_banner("", Color.WHITE)
+	hud.set_letterbox(false)
+	hud.set_message("", "")
+	audio.duck_bgm(0.0)
+	_reset_fighters(0)
+	_low_health_said.clear()
+	for f: Fighter in [player, enemy]:
+		f.prefight_pose = _intro_pose(f, &"")
+	var final_round := round_wins[0] == rounds_to_win - 1 and round_wins[1] == rounds_to_win - 1
+	_round_call = true
+	_set_round_state(RoundState.COUNTDOWN)
+	hud.set_countdown("FINAL ROUND" if final_round else "ROUND %d" % round_number)
+	audio.announce(&"final_round" if final_round else &"round_2")
 
 
 func _bodies_at_rest() -> bool:

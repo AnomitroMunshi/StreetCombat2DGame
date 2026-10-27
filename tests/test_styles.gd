@@ -229,9 +229,22 @@ func _initialize() -> void:
 	var jab_at := CombatData.get_attack(CombatData.AttackType.LIGHT)
 	var cross_at := CombatData.get_attack(CombatData.AttackType.HEAVY)
 	var kick_at := CombatData.get_attack(CombatData.AttackType.KICK)
-	_check(CombatData.focus_for_hit(jab_at, false) == 5.0 and CombatData.focus_for_hit(cross_at, false) == 10.0
-		and CombatData.focus_for_hit(kick_at, false) == 8.0 and CombatData.focus_for_hit(jab_at, true) == 15.0,
-		"focus per hit: light 5, heavy 10, kick 8, counter 15")
+	_check(CombatData.focus_for_hit(jab_at, false) == CombatData.FOCUS_LIGHT and CombatData.focus_for_hit(cross_at, false) == CombatData.FOCUS_HEAVY
+		and CombatData.focus_for_hit(kick_at, false) == CombatData.FOCUS_KICK and CombatData.focus_for_hit(jab_at, true) == CombatData.FOCUS_COUNTER
+		and CombatData.FOCUS_LIGHT < CombatData.FOCUS_KICK and CombatData.FOCUS_KICK < CombatData.FOCUS_HEAVY and CombatData.FOCUS_HEAVY < CombatData.FOCUS_COUNTER,
+		"focus per hit: light < kick < heavy < counter (%.0f, %.0f, %.0f, %.0f)" % [CombatData.FOCUS_LIGHT, CombatData.FOCUS_KICK, CombatData.FOCUS_HEAVY, CombatData.FOCUS_COUNTER])
+	print("[focus from taking hits is capped]")
+	var hf := Fighter.new()
+	root.add_child(hf)
+	for i in 10:
+		hf.add_hurt_focus(CombatData.focus_for_hurt(13))
+	_check(is_equal_approx(hf.focus, CombatData.FOCUS_HURT_WINDOW_MAX),
+		"a long combo pays at most %.0f focus in the window (%.1f)" % [CombatData.FOCUS_HURT_WINDOW_MAX, hf.focus])
+	for i in CombatData.FOCUS_HURT_WINDOW:
+		hf.tick()
+	hf.add_hurt_focus(CombatData.focus_for_hurt(13))
+	_check(hf.focus > CombatData.FOCUS_HURT_WINDOW_MAX, "the window reopens afterwards (%.1f)" % hf.focus)
+	hf.queue_free()
 	_check(is_equal_approx(CombatData.focus_for_hurt(12), 12.0 * CombatData.FOCUS_HURT_PER_DAMAGE), "taking a 12-damage hit pays the victim %.1f focus" % CombatData.focus_for_hurt(12))
 	_check(CombatData.focus_for_hit(CombatData.get_attack(CombatData.AttackType.GAZELLE_HOOK), false) == 0.0, "signature hits earn no focus")
 	p = _pair(boxing, 80.0)

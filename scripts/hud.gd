@@ -22,6 +22,7 @@ const BAR_WIDTH: float = 480.0
 const BAR_HEIGHT: float = 20.0
 const BAR_MARGIN: float = 48.0
 const BAR_Y: float = 44.0
+const COLOR_ROUND_WON := Color(1.0, 0.8, 0.25)
 const TRAIL_DRAIN_PER_SEC: float = 0.5
 const LETTERBOX_HEIGHT: float = 62.0
 const FLASH_DECAY_PER_SEC: float = 3.5
@@ -66,6 +67,9 @@ const FOCUS_H: float = 5.0
 const COLOR_FOCUS := Color(0.95, 0.8, 0.35)
 const COLOR_FOCUS_FULL := Color(1.0, 0.95, 0.65)
 
+## Rounds won [player, rival] and rounds needed (0 = no pips, e.g. training).
+var _round_wins: Array = [0, 0]
+var _rounds_to_win: int = 0
 var _player: Fighter = null
 var _enemy: Fighter = null
 var _trail: Array[float] = [1.0, 1.0]
@@ -715,6 +719,8 @@ func _on_canvas_draw() -> void:
 func _draw_gameplay_hud() -> void:
 	_draw_bar(_player, BAR_MARGIN, false, _trail[0])
 	_draw_bar(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, true, _trail[1])
+	_draw_round_pips(0, BAR_MARGIN, false)
+	_draw_round_pips(1, SCREEN_W - BAR_MARGIN - BAR_WIDTH, true)
 	_draw_posture(_player, BAR_MARGIN, _posture_shown[0])
 	_draw_posture(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, _posture_shown[1])
 	_draw_focus(_player, BAR_MARGIN, false)
@@ -756,6 +762,27 @@ func _draw_overlays() -> void:
 		for i in _debug_lines.size():
 			_canvas.draw_string(_font, Vector2(20.0, 114.0 + i * line_h), _debug_lines[i],
 				HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.7, 1.0, 0.75))
+
+
+## Rounds won, as pips beside each name ([player, rival]); rounds_to_win 0 hides them.
+func set_rounds(wins: Array, rounds_to_win: int) -> void:
+	_round_wins = wins.duplicate()
+	_rounds_to_win = rounds_to_win
+	_canvas.queue_redraw()
+
+
+## One pip per round needed to win, filled gold for each round won, set just
+## inside the colour swatch.
+func _draw_round_pips(side: int, x: float, mirrored: bool) -> void:
+	if _rounds_to_win <= 0:
+		return
+	for i in _rounds_to_win:
+		var step := 20.0 + i * 18.0
+		var cx := x + BAR_WIDTH - 12.0 - step if not mirrored else x + 12.0 + step
+		var c := Vector2(cx, BAR_Y - 18.0)
+		var won: bool = i < int(_round_wins[side])
+		_canvas.draw_circle(c, 6.0, COLOR_ROUND_WON if won else Color(0.0, 0.0, 0.0, 0.55))
+		_canvas.draw_arc(c, 6.0, 0.0, TAU, 20, Color(1.0, 1.0, 1.0, 0.6), 1.5, true)
 
 
 func _draw_bar(f: Fighter, x: float, mirrored: bool, trail: float) -> void:

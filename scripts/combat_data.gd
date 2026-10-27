@@ -188,16 +188,21 @@ const FACING_HYSTERESIS: float = 8.0
 ## never earned during finishers or from signature hits. Blocking pays at most
 ## once per FOCUS_BLOCK_COOLDOWN ticks, so turtling cannot farm it.
 ## Taking a clean hit also fills it (FOCUS_HURT_PER_DAMAGE per point of
-## damage taken): the fighter being beaten up builds toward a comeback.
+## damage taken): the fighter being beaten up builds toward a comeback, but at
+## most FOCUS_HURT_WINDOW_MAX within any FOCUS_HURT_WINDOW ticks, so one long
+## combo cannot hand over a whole meter. Tuned for ~one signature per fighter
+## per round (rounds of ~30 s at MATCH_HEALTH, main.gd).
 const FOCUS_MAX: float = 100.0
-const FOCUS_HURT_PER_DAMAGE: float = 0.6
-const FOCUS_LIGHT: float = 5.0
-const FOCUS_HEAVY: float = 10.0
-const FOCUS_KICK: float = 8.0
-const FOCUS_COUNTER: float = 15.0
-const FOCUS_PARRY: float = 20.0
-const FOCUS_PERFECT_DODGE: float = 12.0
-const FOCUS_BLOCK: float = 3.0
+const FOCUS_HURT_PER_DAMAGE: float = 0.3
+const FOCUS_HURT_WINDOW: int = 120
+const FOCUS_HURT_WINDOW_MAX: float = 12.0
+const FOCUS_LIGHT: float = 3.0
+const FOCUS_HEAVY: float = 6.0
+const FOCUS_KICK: float = 5.0
+const FOCUS_COUNTER: float = 9.0
+const FOCUS_PARRY: float = 14.0
+const FOCUS_PERFECT_DODGE: float = 8.0
+const FOCUS_BLOCK: float = 2.0
 const FOCUS_BLOCK_COOLDOWN: int = 30
 ## F stays valid this long while the fighter cannot act yet.
 const SIGNATURE_BUFFER_FRAMES: int = 8

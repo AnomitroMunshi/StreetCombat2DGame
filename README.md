@@ -40,9 +40,20 @@ From a terminal:
 4. **Fight:** **P**, **Esc** or the ⏸ button pauses and resumes (R restarts
    while paused).
 5. **K.O.:** the finisher plays, then "K.O." stays up until the loser's body has
-   stopped moving. The winner celebrates in their style, with **REMATCH**
-   (same style) and **CHANGE STYLE** buttons. Enter or **R** also restarts,
-   and R works at any time.
+   stopped moving. **Every round ends in a finisher.**
+6. **Rounds (best of 3):** each fighter has 200 health per round, which makes
+   rounds of about 30 to 35 seconds. Rounds won show as gold pips beside each
+   name. After a round:
+   - both fighters get up at full health on their start marks;
+   - Focus carries over;
+   - the arena keeps its battle damage;
+   - the announcer calls **ROUND 2**, or **FINAL ROUND** at 1-1, then
+     **FIGHT!**
+
+   **Two round wins end the match at once**, so 2-0 never plays a third
+   round. The winner celebrates in their style, with **REMATCH** (same style)
+   and **CHANGE STYLE** buttons. Enter or **R** also restarts, and R works at
+   any time.
 
 Restarting reloads the scene, so health, AI, effects and animation all reset.
 Everything in the flow is counted in simulation ticks, with no timers, so an
@@ -220,14 +231,17 @@ stops on a full turn, then rises from a crouch.
 
 | Event | Focus |
 |---|---|
-| Light hit | +5 |
-| Heavy hit | +10 |
-| Kick | +8 |
-| Counter-hit | +15 |
-| Perfect parry | +20 |
-| Perfect dodge | +12 |
-| Block | +3, at most once every half second, so turtling can't farm it |
-| Taking a clean hit | +0.6 per point of damage taken (a comeback: being beaten up builds toward your signature) |
+| Light hit | +3 |
+| Heavy hit | +6 |
+| Kick | +5 |
+| Counter-hit | +9 |
+| Perfect parry | +14 |
+| Perfect dodge | +8 |
+| Block | +2, at most once every half second, so turtling can't farm it |
+| Taking a clean hit | +0.3 per point of damage taken, at most +12 in any 2 seconds (a comeback: being beaten up builds toward your signature, but one long combo can't hand over a whole meter) |
+
+In AI-vs-AI play the meter is first full about 20 seconds into a round (around
+60% of it), which works out to roughly one signature per fighter per round.
 
 Misses earn nothing. Finishers and signature hits earn nothing either. At
 100 the HUD shows **SIGNATURE READY – F**. Pressing **F** spends the whole
@@ -996,6 +1010,7 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 | `test_ai_defense.gd` | AI blocks most, parries some, punishes a stagger (seeded) |
 | `test_styles.gd` | Style registry (seven styles) and validation, Boxing cannot kick, air moves and combos follow the style, signatures, finishers, Focus (including from hits taken), AI rivals never use an illegal move and Bangla Maar's never spams the shove |
 | `test_movement.gd` | Jump cross-ups (both directions, moving rival, simultaneous jumps, walls), forward/backward roll, close slip-past, walking never passes, back hits after crossing, AI reaction delay |
+| `test_rounds.gd` | Best of 3: a finisher every round, full health and start marks between rounds, Focus carried over, ROUND 2 / FINAL ROUND then FIGHT, 2-0 ends the match, 1-1 goes to a final round, no rounds in training |
 
 The V0.3 plan and audit are in `docs/V0.3_PLAN.md`. M6.5 design and merge
 review: `docs/M6.5_ARCHITECTURE.md`, `docs/M6.5_REVIEW.md`,
