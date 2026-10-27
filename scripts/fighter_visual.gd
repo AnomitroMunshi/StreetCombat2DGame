@@ -94,6 +94,8 @@ const WALK_NARROW_REAR: float = 14.0
 ## the hips settle lower (up to MAX_SETTLE px) to keep that bend.
 const KNEE_SOFT: float = 0.95
 const MAX_SETTLE: float = 8.0
+## Fastest the hips settle or rise for the knee bend (px/s).
+const SETTLE_RATE: float = 70.0
 ## Default body rotation for poses that do not set it.
 const DEFAULT_SPREAD: float = 6.0
 ## Body rotation per pose (var name -> px). Others use DEFAULT_SPREAD.
@@ -587,6 +589,31 @@ var _kt_rh_hit := PackedFloat32Array([-0.35, 0.35, 0.6, 2.6, 0.45, 2.85, 2.3, 2.
 var _kt_side_chamber := PackedFloat32Array([-0.3, 0.3, 0.6, 2.6, 0.3, 2.9, 2.2, -0.9, -0.3, -0.2, -4.0, 4.0, 0.8, 12.0])
 var _kt_side_hit := PackedFloat32Array([-0.75, 0.6, 0.6, 2.6, 0.3, 2.9, 1.35, 1.4, -0.4, -0.2, 8.0, 3.0, 1.0, 14.0])
 var _kt_fsk_hit := PackedFloat32Array([-0.6, 0.5, 0.7, 2.5, 0.2, 2.8, 1.65, 1.65, 0.9, -1.5, 8.0, 0.0, 1.0])
+# Kung fu techniques (flowing): every move draws an arc before it lands.
+# J: the lead hand circles back to the chest, then a bow-stance palm thrust with
+# the rear fist pulled to the hip (barrage alternates with the rear palm).
+var _kf_palm_draw := PackedFloat32Array([0.08, 0.1, 1.0, 2.5, 1.2, 2.2, 1.0, -0.5, -0.9, -0.6, -4.0, 8.0, 0.2, 12.0])
+var _kf_palm_thrust := PackedFloat32Array([0.25, 0.05, 1.6, 1.65, -0.4, 1.7, 1.1, -0.15, -1.0, -0.95, 12.0, 12.0, 0.6, 16.0])
+var _kf_rpalm_draw := PackedFloat32Array([0.05, 0.1, 1.3, 2.4, 0.3, 2.7, 1.0, -0.5, -0.9, -0.6, -2.0, 8.0, 0.3, 14.0])
+var _kf_rpalm_thrust := PackedFloat32Array([0.3, 0.0, 0.6, 2.8, 1.6, 1.65, 1.1, -0.15, -1.0, -0.95, 14.0, 12.0, 0.9, -4.0])
+# K: gather both hands at the hips, sinking into a horse stance with the waist
+# turned away, then both palms push out as the waist turns back.
+var _kf_dpalm_gather := PackedFloat32Array([-0.05, 0.1, -0.2, 1.4, -0.3, 1.3, 0.9, -0.6, -0.9, -0.6, -8.0, 16.0, 0.2, 14.0])
+var _kf_dpalm_push := PackedFloat32Array([0.3, 0.0, 1.55, 1.6, 1.5, 1.55, 1.05, -0.3, -1.0, -0.8, 14.0, 14.0, 0.7, 4.0])
+# L: push kick from a high knee chamber, torso upright, hands guarding.
+var _kf_pk_chamber := PackedFloat32Array([0.0, 0.1, 0.9, 2.7, 0.6, 2.8, 1.95, -0.3, 0.0, -0.1, -2.0, 0.0, 0.6, 6.0])
+var _kf_pk_hit := PackedFloat32Array([-0.3, 0.25, 0.9, 2.6, 0.6, 2.8, 1.6, 1.6, -0.1, -0.1, 10.0, 0.0, 0.8, 8.0])
+# W+J: sink and scoop the lead hand low, then rise with the palm to the chin
+# while the rear hand sweeps down.
+var _kf_rise_sink := PackedFloat32Array([0.3, 0.2, 0.4, 0.9, 1.2, 2.6, 1.2, -0.8, -0.9, -1.1, -4.0, 14.0, 0.3, 10.0])
+var _kf_rise_hit := PackedFloat32Array([0.05, -0.1, 1.2, 2.85, -0.2, 0.3, 0.8, -0.2, -0.6, -0.4, 8.0, 2.0, 0.6, 6.0])
+# W+K: coil the arm across the body, then the waist whips and the arm uncoils
+# outward, the other hand resting at the elbow.
+var _kf_bh_coil := PackedFloat32Array([0.05, 0.25, 1.1, 3.6, 1.3, 2.5, 0.9, -0.4, -0.9, -0.6, -4.0, 8.0, 0.1, 18.0])
+var _kf_bh_hit := PackedFloat32Array([0.15, 0.0, 1.85, 2.1, 0.8, 2.6, 1.0, -0.3, -0.95, -0.6, 8.0, 8.0, 0.5, 14.0])
+# S+J: drop low with the hand circling down, palm into the stomach.
+var _kf_lp_load := PackedFloat32Array([0.35, 0.25, 0.9, 2.5, 1.1, 2.5, 1.35, -0.9, -0.8, -1.1, -6.0, 18.0, 0.2, 12.0])
+var _kf_lp_hit := PackedFloat32Array([0.55, 0.2, 1.25, 1.3, 0.3, 2.2, 1.3, -0.7, -0.9, -1.05, 12.0, 20.0, 0.5, 8.0])
 ## Intro poses that stand on one leg (the feet are not planted on the floor).
 const ONE_LEG_POSES: Array[StringName] = [&"mt_ready", &"kf_crane"]
 ## Intro poses with an open lead hand.
@@ -597,6 +624,13 @@ const OPEN_REAR_POSES: Array[StringName] = [&"kf_crane"]
 ## keyframe eases in and out (no hard accelerations), so motion reads like water.
 const SPRING_FLOW := Vector2(230.0, 0.92)
 const FLOW_KITS: Array[StringName] = [&"kung_fu"]
+## Ticks the trailing body parts lag behind the leading limb in a flowing move.
+const FLOW_LAG: float = 2.5
+## Share of the through-speed kept when a joint reverses at a key (0 = stop).
+const FLOW_TURN: float = 0.6
+## Flowing walk: lower, gliding, with the hands tracing slow circles.
+const FLOW_WALK_DROP: float = 6.0
+const FLOW_WALK_HANDS: float = 0.14
 ## How fast the raised leg of a one-legged pose lifts and lowers (per second).
 const LIFT_RATE_UP: float = 2.6
 const LIFT_RATE_DOWN: float = 9.0
@@ -618,6 +652,7 @@ var _pose_library: Dictionary = {}
 var _moves: Dictionary = {}
 ## Outfit kit -> {AttackType -> keyframes}: a style's own version of a shared move.
 var _kit_moves: Dictionary = {}
+var _kf_rear_palm_keys: Array = []
 
 var _pose := PackedFloat32Array()
 var _pose_vel := PackedFloat32Array()
@@ -728,6 +763,8 @@ var _open_arm: bool = false
 var _crane := PackedFloat32Array()
 ## 0..1: how far the lead leg is lifted off the floor (one-legged poses).
 var _lift: float = 0.0
+## Current knee-bend settle of the hips (px), eased.
+var _settle: float = 0.0
 
 @onready var fighter: Fighter = get_parent() as Fighter
 
@@ -780,7 +817,30 @@ func _ready() -> void:
 		&"push_hit": _push_hit, &"stomach_hit": _stomach_hit, &"hammer_raise": _hammer_raise, &"hammer_hit": _hammer_hit,
 		&"slap_hit": _slap_hit, &"bb_fly": _bb_fly,
 	}
+	_kf_rear_palm_keys = [
+		[S, 0.35, _kf_rpalm_draw, EASE_SMOOTH], [A, 0.0, _kf_rpalm_thrust, EASE_IN],
+		[A, 1.0, _over(_kf_rpalm_thrust, _kf_rpalm_draw), EASE_LINEAR], [R, 0.5, _kf_rpalm_draw, EASE_SMOOTH]]
 	_kit_moves = {
+		&"kung_fu": {
+			CombatData.AttackType.STRAIGHT_PALM: [
+				[S, 0.35, _kf_palm_draw, EASE_SMOOTH], [A, 0.0, _kf_palm_thrust, EASE_IN],
+				[A, 1.0, _over(_kf_palm_thrust, _kf_palm_draw), EASE_LINEAR], [R, 0.5, _kf_palm_draw, EASE_SMOOTH]],
+			CombatData.AttackType.DOUBLE_PALM: [
+				[S, 0.35, _kf_dpalm_gather, EASE_SMOOTH], [A, 0.0, _kf_dpalm_push, EASE_IN],
+				[A, 1.0, _over(_kf_dpalm_push, _kf_dpalm_gather), EASE_LINEAR], [R, 0.5, _kf_dpalm_gather, EASE_SMOOTH]],
+			CombatData.AttackType.FRONT_KICK: [
+				[S, 0.35, _kf_pk_chamber, EASE_SMOOTH], [A, 0.0, _kf_pk_hit, EASE_IN],
+				[A, 1.0, _over(_kf_pk_hit, _kf_pk_chamber), EASE_LINEAR], [R, 0.45, _kf_pk_chamber, EASE_SMOOTH]],
+			CombatData.AttackType.RISING_PALM: [
+				[S, 0.35, _kf_rise_sink, EASE_SMOOTH], [A, 0.0, _kf_rise_hit, EASE_IN],
+				[A, 1.0, _over(_kf_rise_hit, _kf_rise_sink), EASE_LINEAR], [R, 0.4, _kf_rise_hit, EASE_SMOOTH]],
+			CombatData.AttackType.BACKHAND: [
+				[S, 0.35, _kf_bh_coil, EASE_SMOOTH], [A, 0.0, _kf_bh_hit, EASE_IN],
+				[A, 1.0, _over(_kf_bh_hit, _kf_bh_coil), EASE_LINEAR], [R, 0.45, _kf_bh_hit, EASE_SMOOTH]],
+			CombatData.AttackType.LOW_PALM: [
+				[S, 0.35, _kf_lp_load, EASE_SMOOTH], [A, 0.0, _kf_lp_hit, EASE_IN],
+				[A, 1.0, _over(_kf_lp_hit, _kf_lp_load), EASE_LINEAR], [R, 0.45, _kf_lp_load, EASE_SMOOTH]],
+		},
 		&"karate": {
 			CombatData.AttackType.HIGH_KICK: [
 				[S, 0.55, _kt_rh_chamber, EASE_SMOOTH], [A, 0.0, _kt_rh_hit, EASE_IN],
@@ -1755,6 +1815,13 @@ func _walk_pose() -> PackedFloat32Array:
 	var dir := float(fighter.move_input * fighter.facing)
 	pose[TORSO] += 0.06 * dir
 	pose[HIP_X] += 3.0 * dir
+	if _kit in FLOW_KITS:
+		var w := _time * TAU * 0.9
+		pose[DROP] += FLOW_WALK_DROP
+		pose[UA_F] += FLOW_WALK_HANDS * sin(w)
+		pose[LA_F] += FLOW_WALK_HANDS * cos(w)
+		pose[UA_B] += FLOW_WALK_HANDS * sin(w + PI)
+		pose[LA_B] += FLOW_WALK_HANDS * cos(w + PI)
 	return pose
 
 
@@ -1791,6 +1858,15 @@ static func _drive(t: float, attack: CombatData.Attack) -> float:
 	return 1.0 - smoothstep(0.0, MECH_RELEASE, (t - e) / maxf(float(attack.recovery), 1.0))
 
 
+## Flowing drive: the body eases into the strike and out again with no snap.
+static func _flow_drive(t: float, attack: CombatData.Attack) -> float:
+	var s := float(attack.startup)
+	var e := s + attack.active
+	if t < e:
+		return smoothstep(s * 0.2, s, t)
+	return 1.0 - smoothstep(0.0, 0.8, (t - e) / maxf(float(attack.recovery), 1.0))
+
+
 ## Whole-body mechanics shared by every strike of a kind, so no technique is
 ## thrown with the arm or leg alone: the hips drive in, the shoulders turn
 ## through, the rear heel pivots, the chin tucks; kicks pivot on a bent support
@@ -1798,12 +1874,13 @@ static func _drive(t: float, attack: CombatData.Attack) -> float:
 ## their own full-body keys and are left alone.
 func _mechanics(pose: PackedFloat32Array, t: float) -> PackedFloat32Array:
 	var attack := fighter.current_attack
-	if fighter.airborne or attack.spin or attack.leap_vy != 0.0 or not attack.sequence.is_empty() or attack.no_strike:
+	if fighter.airborne or attack.spin or attack.leap_vy != 0.0 or not attack.sequence.is_empty() or attack.no_strike \
+			or _rear_palm_swing():
 		return pose
 	var gains: Dictionary = MECH_GAINS.get(_mech_kind(attack.type), {})
 	if gains.is_empty():
 		return pose
-	var d := _drive(t, attack)
+	var d := _flow_drive(t, attack) if _kit in FLOW_KITS else _drive(t, attack)
 	var out := pose.duplicate()
 	for ch: int in gains:
 		var g: float = gains[ch]
@@ -1925,6 +2002,10 @@ func _attack_keys(t: float) -> PackedFloat32Array:
 	var attack := fighter.current_attack
 	var rest := _air_pose() if fighter.airborne else _guard
 	var keys: Array = _kit_moves.get(_kit, {}).get(attack.type, _moves.get(attack.type, []))
+	if _rear_palm_swing():
+		keys = _kf_rear_palm_keys
+	if _kit in FLOW_KITS:
+		return _flow_keys(keys, t, rest)
 	var prev_t := 0.0
 	var prev_pose := _swing_from
 	for key in keys:
@@ -1932,15 +2013,102 @@ func _attack_keys(t: float) -> PackedFloat32Array:
 		var key_pose: PackedFloat32Array = key[2] if key[2] != null else rest
 		if t < key_t:
 			var u := (t - prev_t) / maxf(key_t - prev_t, 0.001)
-			var kind: int = key[3]
-			if _kit in FLOW_KITS and kind != EASE_LINEAR:
-				kind = EASE_SMOOTH
-			return _blend(prev_pose, key_pose, _ease(u, kind))
+			return _blend(prev_pose, key_pose, _ease(u, key[3]))
 		prev_t = key_t
 		prev_pose = key_pose
 	var total := float(attack.total_frames())
 	var w := (t - prev_t) / maxf(total - prev_t, 0.001)
-	return _blend(prev_pose, rest, _ease(w, EASE_SMOOTH if _kit in FLOW_KITS else EASE_OUT))
+	return _blend(prev_pose, rest, _ease(w, EASE_OUT))
+
+
+## Flowing styles: the body travels through its keyframes on one continuous
+## curve (monotone cubic per joint, so it never overshoots a key or a held
+## pose) instead of stopping at each key. Contact poses are still hit exactly
+## on their frames. The off-hand, head and hips trail the lead by a few ticks
+## (overlapping action), so motion ripples through the body like water.
+func _flow_keys(keys: Array, t: float, rest: PackedFloat32Array) -> PackedFloat32Array:
+	var attack := fighter.current_attack
+	var times := PackedFloat32Array([0.0])
+	var poses: Array[PackedFloat32Array] = [_swing_from]
+	for key in keys:
+		var key_t := _key_time(key[0], key[1], attack)
+		if key_t <= times[times.size() - 1]:
+			key_t = times[times.size() - 1] + 0.01
+		times.append(key_t)
+		poses.append(key[2] if key[2] != null else rest)
+	times.append(maxf(float(attack.total_frames()), times[times.size() - 1] + 0.01))
+	poses.append(rest)
+	var out := _flow_sample(times, poses, t)
+	var lagged := _flow_sample(times, poses, t - FLOW_LAG)
+	var joint := _attack_joint(attack.type)
+	var trailing: Array = [HEAD, HIP_X]
+	if joint in [J_HAND_F, J_ELBOW_F] and not _rear_palm_swing():
+		trailing += [UA_B, LA_B]
+	elif joint in [J_HAND_B, J_ELBOW_B] or _rear_palm_swing():
+		trailing += [UA_F, LA_F]
+	else:
+		trailing += [UA_F, LA_F, UA_B, LA_B]
+	for ch: int in trailing:
+		out[ch] = lagged[ch]
+	return out
+
+
+static func _flow_sample(times: PackedFloat32Array, poses: Array[PackedFloat32Array], t: float) -> PackedFloat32Array:
+	var n := times.size()
+	if t <= times[0]:
+		return poses[0].duplicate()
+	if t >= times[n - 1]:
+		return poses[n - 1].duplicate()
+	var i := 0
+	while i < n - 2 and t >= times[i + 1]:
+		i += 1
+	var h := times[i + 1] - times[i]
+	var u := (t - times[i]) / h
+	var h00 := 2.0 * u * u * u - 3.0 * u * u + 1.0
+	var h10 := u * u * u - 2.0 * u * u + u
+	var h01 := -2.0 * u * u * u + 3.0 * u * u
+	var h11 := u * u * u - u * u
+	var out := PackedFloat32Array()
+	out.resize(CHANNELS)
+	for c in CHANNELS:
+		var m0 := _flow_tangent(times, poses, i, c)
+		var m1 := _flow_tangent(times, poses, i + 1, c)
+		out[c] = h00 * poses[i][c] + h10 * h * m0 + h01 * poses[i + 1][c] + h11 * h * m1
+	return out
+
+
+## Tangent at key i for channel c: monotone (Fritsch-Carlson) where the joint
+## keeps going the same way, zero at the ends and across holds, and a partial
+## through-speed at reversals so windups loop into strikes.
+static func _flow_tangent(times: PackedFloat32Array, poses: Array[PackedFloat32Array], i: int, c: int) -> float:
+	if i <= 0 or i >= times.size() - 1:
+		return 0.0
+	var d0 := (poses[i][c] - poses[i - 1][c]) / (times[i] - times[i - 1])
+	var d1 := (poses[i + 1][c] - poses[i][c]) / (times[i + 1] - times[i])
+	if d0 * d1 > 0.0:
+		return 2.0 / (1.0 / d0 + 1.0 / d1)
+	if is_zero_approx(d0) or is_zero_approx(d1):
+		return 0.0  # a held pose stays held
+	# A reversal (windup -> strike): keep some speed through the turn so the
+	# limb loops round instead of stopping dead.
+	return (poses[i + 1][c] - poses[i - 1][c]) / (times[i + 1] - times[i - 1]) * FLOW_TURN
+
+
+## Kung fu fights open-handed (palms), except for its fist techniques and the
+## crane's extended lead fist.
+func _palm_hands(lead: bool) -> bool:
+	if _kit != &"kung_fu":
+		return false
+	if fighter.state == Fighter.State.ATTACK and fighter.current_attack != null:
+		return not fighter.current_attack.type in [CombatData.AttackType.BACKHAND, CombatData.AttackType.JUMP_PUNCH,
+			CombatData.AttackType.LEAPING_SPIN_BACKFIST]
+	return not (lead and _lift > 0.5)
+
+
+## Kung fu signature: the barrage's second palm is thrown with the rear hand.
+func _rear_palm_swing() -> bool:
+	return _kit == &"kung_fu" and fighter.current_attack != null \
+		and fighter.current_attack.type == CombatData.AttackType.STRAIGHT_PALM and fighter._sequence.size() == 2
 
 
 static func _key_time(phase: int, fraction: float, attack: CombatData.Attack) -> float:
@@ -2181,14 +2349,14 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 func _silhouette(j: PackedVector2Array, forward: Vector2, back_toe: Vector2, pad: float, far: Color, near: Color) -> void:
 	_far = true
 	_leg(j[J_HIP_B], j[J_KNEE_B], j[J_FOOT_B], back_toe, pad, far, _heel_draw.y * _plant, _foot_point.y)
-	_open_arm = fighter.prefight_pose in OPEN_REAR_POSES or (_lift > 0.5 and not _crane.is_empty())
+	_open_arm = fighter.prefight_pose in OPEN_REAR_POSES or (_lift > 0.5 and not _crane.is_empty()) or _palm_hands(false)
 	_arm(j[J_SHOULDER_B], j[J_ELBOW_B], j[J_HAND_B], pad, far, _glove_color(false, pad))
 	_open_arm = false
 	_far = false
 	_torso(j, forward, pad, near)
 	_head(j, forward, pad, near)
 	_leg(j[J_HIP_F], j[J_KNEE_F], j[J_FOOT_F], forward, pad, near, _heel_draw.x * _plant, _foot_point.x)
-	_open_arm = fighter.prefight_pose in OPEN_HAND_POSES
+	_open_arm = fighter.prefight_pose in OPEN_HAND_POSES or _palm_hands(true)
 	_arm(j[J_SHOULDER_F], j[J_ELBOW_F], j[J_HAND_F], pad, near, _glove_color(true, pad))
 	_open_arm = false
 
@@ -2988,13 +3156,19 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 	var comfy := (THIGH + SHIN) * KNEE_SOFT
 	var settle := 0.0
 	for leg in 2:
-		if leg == 0 and _lift > 0.5:
-			continue
 		var hip_p: Vector2 = j[legs[leg][0]]
 		var dx := absf(targets[leg].x - hip_p.x)
 		var highest := targets[leg].y - sqrt(maxf(comfy * comfy - dx * dx, 0.0))
-		settle = maxf(settle, highest - hip_p.y)
+		# A lifting leg hands its share of the settle over gradually (no pop).
+		var need := highest - hip_p.y
+		if leg == 0:
+			need *= 1.0 - _lift
+		settle = maxf(settle, need)
 	settle = minf(settle, MAX_SETTLE) * _plant
+	# Eased, never applied in one frame: near full stretch the needed drop
+	# rises steeply, which would pop the whole upper body.
+	_settle = move_toward(_settle, settle, dt * SETTLE_RATE)
+	settle = _settle
 	# Active idle: the body dips over the planted feet (knees bend, the root
 	# and feet stay put).
 	settle += _bob * _plant
