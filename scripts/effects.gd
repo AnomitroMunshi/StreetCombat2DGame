@@ -147,6 +147,39 @@ func hit(pos: Vector2, dir: Vector2, tier: int, color: Color, kind: int = Combat
 		air_wave(pos + dir * 12.0, dir, 34.0, 10)
 
 
+## Finisher strike (light layer), built to stay crisp: a small white-hot core
+## stretched along the blow, thin tapered spark needles thrown mostly in a cone
+## along it (decelerating, white at the tip, warm at the tail), and one thin
+## shockwave flattened across the line of the blow. The knockout blow adds a
+## short anamorphic lens streak. No soft discs or thick rings: the blow itself
+## stays readable.
+const STRIKE_HOT := Color(1.0, 0.97, 0.9)
+const STRIKE_WARM := Color(1.0, 0.72, 0.38)
+
+
+func strike(pos: Vector2, dir: Vector2, power: int, final: bool = false) -> void:
+	dir = dir.normalized() if dir != Vector2.ZERO else Vector2.RIGHT
+	var base := dir.angle()
+	power = clampi(power, 1, 3)
+	_spawn({"kind": "score", "glow": true, "pos": pos, "age": 0, "life": 4 + power, "color": STRIKE_HOT,
+		"size": 3.5 + power * 2.2 + (1.5 if final else 0.0), "dir": base})
+	var count := 5 + power * 4 + (8 if final else 0)
+	for i in count:
+		var wide := _rng.randf() < 0.3
+		var a := base + _rng.randf_range(-1.5, 1.5) if wide else base + _rng.randfn(0.0, 0.32)
+		var reach := _rng.randf_range(24.0, 50.0 + power * 26.0) * (1.5 if final else 1.0)
+		_spawn({"kind": "needle", "glow": true, "pos": pos, "age": 0,
+			"life": _rng.randi_range(5, 8 + power * 2) + (4 if final else 0), "color": STRIKE_HOT,
+			"dir": a, "size": reach, "len": _rng.randf_range(10.0, 18.0 + power * 8.0) * (0.6 if wide else 1.0),
+			"width": _rng.randf_range(1.0, 1.4 + power * 0.35)})
+	_spawn({"kind": "shock", "glow": true, "pos": pos + dir * 4.0, "age": 0, "life": 7 + power * 2,
+		"color": STRIKE_HOT, "size": 16.0 + power * 12.0 + (34.0 if final else 0.0), "dir": base})
+	if final:
+		_spawn({"kind": "shock", "glow": true, "pos": pos + dir * 10.0, "age": 0, "life": 16,
+			"color": STRIKE_WARM, "size": 120.0, "dir": base})
+		_spawn({"kind": "lens", "glow": true, "pos": pos, "age": 0, "life": 18, "color": STRIKE_HOT, "size": 360.0})
+
+
 ## A wide motion smear behind a big swing (the Super Chor slap): an arc round
 ## `centre` from angle a0 to a1, fading quickly.
 func swing_arc(centre: Vector2, radius: float, a0: float, a1: float, color: Color, life: int = 12) -> void:
@@ -690,6 +723,40 @@ func _draw_glow() -> void:
 				_glow.draw_arc(Vector2.ZERO, sr * (1.0 + t * 0.25), a0, a0 + 2.6, 24, Color(color, ga), 7.0 * (1.0 - t) + 1.0, true)
 				_glow.draw_arc(Vector2.ZERO, sr * 0.8, a0 + PI, a0 + PI + 2.0, 20, Color(GLOW_HOT, ga * 0.7), 3.0, true)
 				_glow.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"score":
+				# The contact itself: a tight hot core along the blow.
+				var fk := 1.0 - t
+				_glow.draw_set_transform(pos, e["dir"], Vector2(2.4, 0.5))
+				_glow.draw_circle(Vector2.ZERO, e["size"] * 1.9, Color(STRIKE_WARM, 0.22 * fk))
+				_glow.draw_circle(Vector2.ZERO, e["size"] * (1.0 - t * 0.4), Color(color, 0.95 * fk))
+				_glow.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"needle":
+				# A thin tapered spark: travels out fast and decelerates, tip
+				# white-hot, tail cooling to warm; shortens as it fades.
+				var u := 1.0 - pow(1.0 - t, 3.0)
+				var d := Vector2.from_angle(e["dir"])
+				var n := Vector2(-d.y, d.x)
+				var head := pos + d * (6.0 + float(e["size"]) * u)
+				var ln: float = e["len"] * (1.0 - t * 0.6)
+				var w: float = e["width"] * (1.0 - t * 0.5)
+				var a := pow(1.0 - t, 1.2)
+				var mid := head - d * ln * 0.3
+				_glow.draw_colored_polygon(PackedVector2Array([head - d * ln, mid + n * w, head, mid - n * w]), Color(STRIKE_WARM, 0.75 * a))
+				_glow.draw_colored_polygon(PackedVector2Array([head - d * ln * 0.5, mid + n * w * 0.45, head, mid - n * w * 0.45]), Color(color, 0.95 * a))
+			"shock":
+				# Pressure ring: thin, fast, flattened across the line of the blow.
+				var u := 1.0 - pow(1.0 - t, 2.2)
+				var r: float = e["size"] * (0.2 + 0.8 * u)
+				_glow.draw_set_transform(pos, e["dir"], Vector2(0.45, 1.0))
+				_glow.draw_arc(Vector2.ZERO, r, 0.0, TAU, 56, Color(color, 0.7 * pow(1.0 - t, 1.5)), maxf(2.6 * (1.0 - t), 0.6), true)
+				_glow.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"lens":
+				# Anamorphic streak through the knockout contact.
+				var open := minf(t * 6.0, 1.0)
+				var la := pow(1.0 - t, 1.6)
+				var half: float = e["size"] * (0.5 + 0.5 * open)
+				_glow.draw_line(pos - Vector2(half, 0.0), pos + Vector2(half, 0.0), Color(STRIKE_WARM, 0.35 * la), 3.0, true)
+				_glow.draw_line(pos - Vector2(half * 0.55, 0.0), pos + Vector2(half * 0.55, 0.0), Color(color, 0.8 * la), 1.2, true)
 			"speed":
 				var sd: Vector2 = e["dir"]
 				var sl: float = e["size"]

@@ -988,11 +988,11 @@ func _finisher_feedback(event: Dictionary) -> void:
 	if event["final"] and event.get("style", &"") != &"":
 		_styled_final(event, pos, hit_dir)
 	elif event["final"]:
-		_hitstop = maxi(_hitstop, 5)  # short: the slow motion carries the moment
-		_shake(30, 12.0)
-		fx.hit(pos, hit_dir, 3, KO_COLOR)
-		fx.ring(pos, Color.WHITE, 56.0, 20)
-		hud.flash(0.22)  # a beat of light, never a white-out over the blow
+		_hitstop = maxi(_hitstop, 6)  # short: the slow motion carries the moment
+		_shake(18, 7.0)
+		_kick_camera(hit_dir, 14.0)
+		fx.strike(pos, hit_dir, 3, true)
+		hud.flash(0.1)  # a beat of light, never a white-out over the blow
 		audio.play(&"hit_heavy", 3.0)
 		audio.play(&"ko_boom")
 		_camera_punch += 0.12
@@ -1002,8 +1002,8 @@ func _finisher_feedback(event: Dictionary) -> void:
 		hud.impact_frame()
 	else:
 		_hitstop = maxi(_hitstop, 1 + power)
-		_shake(4 + power * 3, 2.0 + power * 2.0)
-		fx.hit(pos, hit_dir, clampi(power, 1, 3), HIT_COLOR, event.get("kind", CombatData.ImpactKind.STRAIGHT), not event.get("high", true))
+		_shake(3 + power * 2, 1.5 + power * 1.5)
+		fx.strike(pos, hit_dir, power)
 		_kick_camera(hit_dir, 3.0 + power * 3.0)
 		_finisher_hit_sound(power, event)
 		_camera_punch += 0.015 * power
@@ -1024,7 +1024,7 @@ func _styled_final(event: Dictionary, pos: Vector2, hit_dir: Vector2) -> void:
 			var shoulder := _finisher.attacker.position + Vector2(dir * 6.0, -150.0)
 			var toward := (pos - shoulder).angle()
 			fx.swing_arc(shoulder, shoulder.distance_to(pos), toward - dir * 1.1, toward + dir * 0.1, Color.WHITE, 10)
-			fx.hit(pos, hit_dir, 2, KO_COLOR, CombatData.ImpactKind.HOOK)
+			fx.strike(pos, hit_dir, 2)
 			fx.comic(pos + Vector2(dir * 46.0, -62.0), "ঠাস!", Color(1.0, 0.82, 0.2))
 			fx.sweat(pos, hit_dir, 10, 6.0)
 			_shake(22, 9.0)
@@ -1035,7 +1035,7 @@ func _styled_final(event: Dictionary, pos: Vector2, hit_dir: Vector2) -> void:
 			# Boot into the head on the floor: a spray of dust along the boards,
 			# a hollow thud, a comic "dhum!", then the body scraping away.
 			var floor_pos := Vector2(pos.x, FLOOR_Y)
-			fx.hit(pos, hit_dir, 3, KO_COLOR)
+			fx.strike(pos, hit_dir, 3)
 			fx.dust_cloud(floor_pos, 1.6, 40, 9)
 			fx.ground_ring(floor_pos, 70.0, 22)
 			fx.streaks(pos, Vector2(dir, -0.15), 10, Color(0.85, 0.75, 0.6), 0.25, 90.0)
@@ -1053,36 +1053,10 @@ func _styled_final(event: Dictionary, pos: Vector2, hit_dir: Vector2) -> void:
 func _finisher_kind_fx(pos: Vector2, dir: Vector2, power: int, final: bool) -> void:
 	# Only the final blow flares; the build-up hits stay clean and readable
 	# (the slap and the punt keep the blow itself in view instead).
-	if final and not _finisher.kind in [FinisherDirector.Kind.SUPER_CHOR, FinisherDirector.Kind.PAAYE_LATHI]:
-		fx.flare(pos, 1)
-	match _finisher.kind:
-		FinisherDirector.Kind.PALM_FLURRY:
-			# Each palm: a burst at the palms. Final double palm: a huge blue
-			# shockwave fan that launches the body, with streaks and blown dust.
-			fx.energy_wave(pos, dir, 34.0 + power * 10.0, fx.GLOW_BLUE, 10, 2.5)
-			if final:
-				fx.energy_wave(pos, dir, 170.0, fx.GLOW_BLUE, 34, 4.0)
-				fx.energy_wave(pos + dir * 20.0, dir, 120.0, fx.GLOW_BLUE, 28, 5.0)
-				fx.energy_wave(pos, dir, 90.0, fx.GLOW_HOT, 16, 6.0)
-				fx.streaks(pos, dir, 24, Color(1.0, 0.95, 0.85), 0.35, 130.0)
-				fx.dust_cloud(Vector2(pos.x + dir.x * 50.0, FLOOR_Y), 1.6, 55, 10)
-		FinisherDirector.Kind.SPINNING_HEEL, FinisherDirector.Kind.TORNADO_KICK:
-			if final:
-				# The heel's arc sweeps through the head as a blue crescent.
-				fx.energy_wave(pos - dir * 30.0, (dir + Vector2(0.0, -0.4)).normalized(), 110.0, fx.GLOW_BLUE, 16, 4.0)
-				fx.streaks(pos, dir + Vector2(0.0, -0.25), 22, Color(1.0, 0.92, 0.75), 0.45, 120.0)
-				fx.particles(pos, Color(1.0, 0.75, 0.4), 16, 8.0, 16)
-		FinisherDirector.Kind.AIR_SMASH:
-			if final:
-				# Hammer-fist: everything is driven straight down.
-				fx.flare(pos, 3, fx.GLOW_WARM, PI * 0.5)
-				fx.energy_wave(pos, Vector2.DOWN, 90.0, fx.GLOW_BLUE, 14, 6.0)
-				fx.streaks(pos, Vector2.DOWN, 20, Color(1.0, 0.9, 0.75), 0.3, 140.0)
-		FinisherDirector.Kind.WALL_CRUSH:
-			if final:
-				# Double-palm burst into the wall, chunks blasted out of it.
-				fx.energy_wave(pos, dir, 120.0, fx.GLOW_BLUE, 16, 3.0)
-				fx.streaks(pos, -dir, 18, Color(1.0, 0.92, 0.8), 0.6, 110.0)
+	# The strike itself carries the light (fx.strike); here only what the blow
+	# does to the room: air pushed off the floor under a launching blow.
+	if final and _finisher.kind in [FinisherDirector.Kind.PALM_FLURRY, FinisherDirector.Kind.HUNDRED_PALMS]:
+		fx.dust_cloud(Vector2(pos.x + dir.x * 50.0, FLOOR_Y), 1.3, 45, 8)
 
 
 ## Continuous finisher effects between hits: the attacker's blue speed lines,
@@ -1095,20 +1069,11 @@ func _finisher_ambient() -> void:
 		return
 	var atk := _finisher.attacker
 	var vic := _finisher.victim
-	for f: Fighter in [atk, vic]:
-		var prev: Vector2 = _fin_prev_pos.get(f, f.position)
-		var v := f.position - prev
-		_fin_prev_pos[f] = f.position
-		if v.length() > 2.5 and _tick % 2 == 0:
-			var chest := f.position + Vector2(0.0, -100.0 if not f.is_down() else -40.0)
-			fx.speed_lines(chest, v.normalized(), fx.GLOW_BLUE if f == atk else Color(1.0, 0.85, 0.7), 3, 32.0)
 	if _finisher.done:
 		return
 	match _finisher.kind:
 		FinisherDirector.Kind.TORNADO_KICK, FinisherDirector.Kind.SPINNING_HEEL:
-			# Glowing spin arcs around the turning body; dust kicked up on takeoff.
-			if atk.script_spin_rate != 0.0 and _tick % 2 == 0:
-				fx.spin_arcs(atk.position + Vector2(0.0, -95.0), 58.0)
+			# Dust kicked up on takeoff (the body's own motion trail shows the spin).
 			if atk.airborne and not _fin_attacker_air:
 				fx.ground_ring(Vector2(atk.position.x, FLOOR_Y), 80.0, 18)
 				fx.dust_cloud(Vector2(atk.position.x, FLOOR_Y), 1.1, 40, 8)
@@ -1566,7 +1531,6 @@ func _update_cinematic_overlay() -> void:
 	if _finisher != null and _ko_focus != Vector2.INF:
 		var since := _finisher.ticks_since_ko()
 		if since >= 0 and since < FIN_KO_HOLD + 6:
-			lines = 1.0 - smoothstep(float(FIN_KO_HOLD - 4), float(FIN_KO_HOLD + 6), float(since))
 			focus = get_viewport().get_canvas_transform() * _ko_focus
 	hud.set_cinematic(amount, lines, focus)
 

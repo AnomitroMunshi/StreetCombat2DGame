@@ -2334,10 +2334,10 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 	if fighter.state == Fighter.State.FINISHER:
 		# Finisher aura: the attacker glows in its accent colour.
 		var aura := accent
-		aura.a = 0.16
-		_silhouette(j, forward, back_toe, 10.0, aura, aura)
-		aura.a = 0.32
-		_silhouette(j, forward, back_toe, 5.5, aura, aura)
+		aura.a = 0.1
+		_silhouette(j, forward, back_toe, 6.0, aura, aura)
+		aura.a = 0.22
+		_silhouette(j, forward, back_toe, 3.5, aura, aura)
 	_silhouette(j, forward, back_toe, OUTLINE_WIDTH, rim, rim)
 	_silhouette(j, forward, back_toe, 0.0, back, front)
 	_shade = false

@@ -646,11 +646,10 @@ func _on_canvas_draw() -> void:
 	if _cine_lines > 0.0:
 		_draw_focus_lines(_cine_lines)
 	if _impact > 0.0:
-		# Impact frame: the world drops to black, the blow's centre burns white.
-		_canvas.draw_rect(Rect2(0.0, 0.0, SCREEN_W, 720.0), Color(0.0, 0.0, 0.0, 0.82))
-		_draw_focus_lines(1.0, 3.0)
-		_canvas.draw_circle(_cine_focus, 70.0, Color(1.0, 1.0, 1.0, 0.9))
-		_canvas.draw_circle(_cine_focus, 110.0, Color(1.0, 0.92, 0.75, 0.35))
+		# Impact frame: the room dips dark for a beat around the knockout blow
+		# (the blow's own light, fx.strike, carries the contact).
+		var k := _impact / IMPACT_TIME
+		_canvas.draw_rect(Rect2(0.0, 0.0, SCREEN_W, 720.0), Color(0.0, 0.0, 0.0, 0.45 * k))
 	if _letterbox > 0.0:
 		var h := LETTERBOX_HEIGHT * smoothstep(0.0, 1.0, _letterbox)
 		_canvas.draw_rect(Rect2(0.0, 0.0, SCREEN_W, h), Color.BLACK)
