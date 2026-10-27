@@ -236,6 +236,9 @@ var hitstop_frames: int = 0
 var flash_frames: int = 0
 var walk_distance: float = 0.0
 var received_combo: int = 0
+## Why the last knockdown happened: combo, blowback (a heavy hit's chance) or
+## move (a move that always knocks down). For tuning and tests.
+var knockdown_cause: StringName = &""
 var combo_display_frames: int = 0
 ## Increments on every clean hit taken; visuals use it to trigger hit impulses.
 var hit_counter: int = 0
@@ -1153,7 +1156,11 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 		if airborne:
 			velocity_y = minf(velocity_y, 0.0)
 		return CombatData.HitResult.KO
-	var blown := attack.blowback_chance > 0.0 and _rng.randf() < attack.blowback_chance
+	# A heavy hit's chance to blow the target away (under 100%) only applies to
+	# a follow-up in a combo or a counter hit: a lone poke never knocks down.
+	var earned := received_combo >= CombatData.BLOWBACK_MIN_COMBO or last_hit_counter
+	var chance := attack.blowback_chance if attack.blowback_chance >= 1.0 		else attack.blowback_chance * CombatData.BLOWBACK_CHANCE_SCALE
+	var blown := chance > 0.0 and (chance >= 1.0 or earned) and _rng.randf() < chance
 	# Mid-sequence strikes never knock down: the whole sequence gets to land
 	# (the final strike can).
 	if attack.stun > 0 and dizzy_left <= 0 and dizzy_immunity <= 0:
@@ -1162,6 +1169,7 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	if mid_sequence and not attack.knockdown:
 		blown = false
 	if (received_combo >= CombatData.KNOCKDOWN_COMBO_HITS and not mid_sequence) or blown or attack.knockdown:
+		knockdown_cause = &"move" if attack.knockdown else (&"blowback" if blown else &"combo")
 		_enter_state(State.KNOCKDOWN)
 		if attack.blowback_vx > 0.0:
 			blowback(push_dir, attack.blowback_vx, attack.blowback_vy, attack.blowback_rolls, attack.blowback_rolls > 0)

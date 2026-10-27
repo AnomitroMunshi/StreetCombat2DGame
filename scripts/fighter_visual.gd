@@ -105,6 +105,12 @@ const WALK_NARROW_REAR: float = 14.0
 ## the hips settle lower (up to MAX_SETTLE px) to keep that bend.
 const KNEE_SOFT: float = 0.95
 const MAX_SETTLE: float = 8.0
+## Close quarters: within YIELD_GAP px a non-striking body sits back up to
+## YIELD_HIP px and leans forward at most YIELD_MAX_LEAN (rad) at 60 px.
+const YIELD_GAP: float = 105.0
+const YIELD_HIP: float = 14.0
+const YIELD_MAX_LEAN: float = 0.04
+const YIELD_STRIKE: float = 0.7
 ## Most a grounded knee may bend backward (rad): a straight leg, never a
 ## hyperextended one.
 const KNEE_REVERSE_MAX: float = 0.07
@@ -170,6 +176,10 @@ const MAX_IDLE_BOB: float = 6.0
 ## Duration of an idle lead-hand feint (s).
 const FEINT_TIME: float = 0.22
 const MAX_HEEL_LIFT: float = 5.0
+## A planted foot's heel lifts once its shin leans past this (rad), by this
+## many px per rad: the foot rolls onto its ball.
+const FOOT_PIVOT_LEAN: float = 0.45
+const FOOT_PIVOT_GAIN: float = 14.0
 ## Strike mechanics (see _mechanics): load depth against the strike, where the
 ## load peaks (fraction of startup), and how much of the recovery the release takes.
 const MECH_LOAD: float = 0.35
@@ -1236,7 +1246,7 @@ func _process(delta: float) -> void:
 	# the hit's reaction impulse is applied when the freeze ends.
 	if not frozen:
 		_apply_impulses()
-	var target := _target_pose(t)
+	var target := _close_yield(_target_pose(t))
 	var dt := minf(delta, 1.0 / 30.0)
 	if not _pose_ready:
 		# First frame: start in the target pose instead of springing into it.
@@ -1579,6 +1589,34 @@ func _update_down_amount(t: float) -> void:
 
 
 # --- Pose selection -----------------------------------------------------------
+
+## Close quarters (presentation only, collision unchanged): a grounded fighter
+## gives ground to an opponent pressed up against it. The hips sit back and a
+## forward fold or lean is capped, so a body-shot fold or a stagger hunches
+## away from the blow instead of falling into the attacker, and a point-blank
+## strike drives in without the head going through the body (the contact-aware
+## reach then still puts the fist on target). Spins and leaps keep their shape.
+func _close_yield(pose: PackedFloat32Array) -> PackedFloat32Array:
+	var opp := fighter.opponent
+	if opp == null or fighter.airborne or opp.airborne or fighter.is_down() or opp.is_down() 			or fighter.state in [Fighter.State.FINISHER, Fighter.State.FINISHED, Fighter.State.EVADE_ROLL]:
+		return pose
+	var attack := fighter.current_attack if fighter.state == Fighter.State.ATTACK else null
+	if attack != null and (attack.spin or attack.leap_vy != 0.0):
+		return pose
+	var gap := (opp.position.x - fighter.position.x) * fighter.facing
+	if gap <= 0.0:
+		return pose
+	var k := clampf((YIELD_GAP - gap) / (YIELD_GAP - 60.0), 0.0, 1.0)
+	if attack != null:
+		k *= YIELD_STRIKE  # a strike still drives in, just not through the body
+	if k <= 0.0:
+		return pose
+	var out := pose.duplicate()
+	out[HIP_X] -= YIELD_HIP * k
+	out[TORSO] = minf(out[TORSO], lerpf(out[TORSO], YIELD_MAX_LEAN, k))
+	out[HEAD] = minf(out[HEAD], lerpf(out[HEAD], 0.15, k))
+	return out
+
 
 func _target_pose(t: float) -> PackedFloat32Array:
 	if fighter.celebration != &"" and fighter.state == Fighter.State.IDLE:
@@ -2643,6 +2681,15 @@ func _leg(hip: Vector2, knee: Vector2, ankle: Vector2, toe_dir: Vector2, pad: fl
 		toe = -toe
 	if point > 0.01:
 		toe = toe.slerp(shin, clampf(point, 0.0, 1.0) * 0.85)
+	# A planted foot keeps its sole on the floor whatever the shin does; a shin
+	# leaning well over lifts the heel so the foot pivots on its ball (never
+	# the whole shoe tipping into or off the floor).
+	var planted := _plant if not fighter.airborne and point <= 0.01 else 0.0
+	if planted > 0.0:
+		var flat := Vector2(signf(toe_dir.x) if not is_zero_approx(toe_dir.x) else signf(toe.x), 0.0)
+		toe = toe.slerp(flat, planted).normalized()
+		var lean := absf(atan2(shin.x, shin.y))
+		heel_lift = maxf(heel_lift, clampf((lean - FOOT_PIVOT_LEAN) * FOOT_PIVOT_GAIN, 0.0, MAX_HEEL_LIFT + 3.0) * planted)
 	var sole := ankle + shin * 2.5
 	if heel_lift > 0.05:
 		# Heel raised: tilt the shoe so the toes stay down on the floor.
