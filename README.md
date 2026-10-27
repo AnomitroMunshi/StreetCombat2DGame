@@ -74,7 +74,7 @@ finishers:
 | **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Push Kick | Rising Palm · High Backfist | Low Palm · Leg Sweep | Leaping Spinning Backfist · Flying Axe Kick | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
 | **Taekwondo** | Long-range kicking. | Jab · Side Kick · Double Kick | Rising Punch · High Roundhouse | Body Punch · Axe Kick | Jumping Backfist · Jumping Spinning Hook Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
 | **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Superman Punch · Jumping Roundhouse Kick | Breaker Combination | Last Combination · Knockout Rhythm |
-| **Bangla Maar** (parody) | Untrained para street fighting: loose hands, slaps, shoves, a big mouth. | Light Slap · Front Thrust Kick · Double-Hand Push | Head Elbow · Double-Hand Hammer | Stomach Shot · Leg Kick | Flying Slap · Flying Chest Kick | Belly Bomb | Paaye Lathi, Mathay Lathi · Super Chor |
+| **Bangla Maar** (parody) | Untrained para street fighting: loose hands, slaps, shoves, a big mouth. | Light Slap · Front Thrust Kick · Jor Dhakka | Head Elbow · Double-Hand Hammer | Stomach Shot · Leg Kick | Flying Slap · Flying Chest Kick | Belly Bomb | Football Shot · Super Chor |
 
 **Power moves (Space + J / Space + K).** Press Space and J (or K) together,
 or one right after the other in either order, within 6 ticks (0.1 s,
@@ -147,7 +147,7 @@ untrained para street fighter.
   the opponent with a bounce off. It knocks them flying; a miss leaves a
   long recovery.
 - **Finishers:**
-  - **Paaye Lathi, Mathay Lathi** ("a kick to the leg, a kick to the head"):
+  - **Football Shot** (internally `paaye_lathi`, "a kick to the leg, a kick to the head"):
     a leg kick spins them onto their back with the head towards you, then a
     run-up football punt to the head sends the body sliding along the floor
     ("ধুম!", dust spray, boot thud, scrape).
@@ -295,7 +295,7 @@ The panels show:
 | Space      | Jump (hold A/D to jump in that direction); a jump from normal range can cross over the opponent. Takeoff waits out the 6-tick power-move window |
 | J          | Light attack (your style's jab or palm) |
 | K          | Heavy attack (your style's main power strike) |
-| L          | Style technique (Bob and Weave, Elbow, Knife-Hand, Push Kick, Double Kick, Body Roundhouse, Double-Hand Push) |
+| L          | Style technique (Bob and Weave, Elbow, Knife-Hand, Push Kick, Double Kick, Body Roundhouse, Jor Dhakka) |
 | W + J / W + K | Rising / high attacks |
 | S + J / S + K | Body / low attacks (S + K is Boxing's Slip Counter) |
 | Space + J / Space + K | **Power move** (either order, within 6 ticks): see the table above |
@@ -423,8 +423,8 @@ Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Last Combinatio
 | Key | Move | Frames | Damage | Notes |
 |---|---|---|---|---|
 | J | Light Slap | 5 / 2 / 11 | 6 |  |
-| K | Front Thrust Kick | 9 / 4 / 18 | 10 |  |
-| L | Double-Hand Push | 10 / 4 / 22 | 5 |  |
+| K | Front Thrust Kick | 9 / 4 / 18 | 10 | heel to the stomach; re-chambers up close |
+| L | Jor Dhakka | 12 / 4 / 26 | 9 | charging shoulder bash: bounded charge (~90 px on a miss) that stops on contact, heavy knockback, no knockdown, punishable |
 | W+J | Head Elbow | 8 / 3 / 17 | 11 |  |
 | W+K | Double-Hand Hammer | 15 / 4 / 25 | 15 | stuns, **guard breaker** |
 | S+J | Stomach Shot | 7 / 3 / 14 | 8 |  |
@@ -433,7 +433,7 @@ Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Last Combinatio
 | Space+K | Flying Chest Kick | 12 / 5 / 24 | 14 | stuns |
 | F | Belly Bomb | 20 / 6 / 32 | 22 |  |
 
-Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Paaye Lathi, Mathay Lathi · Super Chor.
+Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Football Shot · Super Chor.
 
 ## Combat rules
 
@@ -619,7 +619,7 @@ On open floor, each style uses one of its own two finishers:
 | Kung Fu | Hundred Palms · Dragon's Descent |
 | Taekwondo | Cyclone 360 · Heaven's Heel |
 | Kickboxing | Last Combination · Knockout Rhythm |
-| Bangla Maar | Paaye Lathi, Mathay Lathi · Super Chor |
+| Bangla Maar | Football Shot · Super Chor |
 
 The pick never repeats the previous finisher (this is remembered across
 restarts). Every finisher ends with a

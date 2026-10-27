@@ -26,7 +26,7 @@ const TRAIL_DRAIN_PER_SEC: float = 0.5
 const LETTERBOX_HEIGHT: float = 62.0
 const FLASH_DECAY_PER_SEC: float = 3.5
 
-const COLOR_BAR_BG := Color(0.06, 0.05, 0.05, 0.85)
+const COLOR_BAR_BG := Color(0.06, 0.05, 0.05, 1.0)  # opaque: nothing shows through
 const COLOR_BAR_FILL := Color(0.95, 0.76, 0.3)
 const COLOR_BAR_LOW := Color(0.9, 0.28, 0.22)
 const COLOR_TRAIL := Color(1.0, 0.95, 0.88, 0.85)

@@ -561,7 +561,7 @@ func _tick_attack() -> void:
 	if state_frame < strike_end:
 		# Signatures keep chasing through their own knockback (up to body contact).
 		var in_range := not airborne and _in_strike_range(attack, in_signature)
-		if not in_range:
+		if not in_range and not (attack.charge and swing_has_hit):
 			position.x += attack.lunge * facing
 		if attack.step > 0.0 and not airborne and state_frame < attack.startup and not in_range:
 			var s := float(attack.startup)

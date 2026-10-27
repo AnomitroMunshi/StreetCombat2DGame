@@ -14,6 +14,45 @@ func _check(cond: bool, msg: String) -> void:
 		_fails += 1
 
 
+## Runs `attack` from `gap` at a standing (or blocking) target: attacker
+## travel, defender travel, final gap, hits, result, attacker travel after
+## contact, whether the defender went down.
+func _charge(attack: CombatData.Attack, gap: float, side: int, block: bool) -> Dictionary:
+	var p := _pair(gap, side)
+	var a: Fighter = p[0]
+	var b: Fighter = p[1]
+	var ax := a.position.x
+	var bx := b.position.x
+	var hits := 0
+	var result := "-"
+	var hit_x := INF
+	var down := false
+	a.call("_start_attack", attack.type, 0, true)
+	for t in 70:
+		var i := CombatData.Intent.new()
+		i.block = block
+		b.push_intent(i)
+		a.tick()
+		b.tick()
+		var d := (b.position.x - a.position.x) * side
+		if d < Fighter.PUSH_HALF_WIDTH * 2.0:
+			var push := (Fighter.PUSH_HALF_WIDTH * 2.0 - d) * 0.5 * side
+			a.position.x -= push
+			b.position.x += push
+		if a.state == Fighter.State.ATTACK and a.is_hitbox_active() and not a.swing_has_hit 				and a.get_hitbox_world().intersects(b.get_hurtbox_world()):
+			var r := b.receive_hit(a.current_attack, a, 0)
+			a.confirm_hit(r)
+			hits += 1
+			result = CombatData.HitResult.keys()[r]
+			hit_x = a.position.x
+		down = down or b.state == Fighter.State.KNOCKDOWN
+	var out := {"attacker": (a.position.x - ax) * side, "defender": (b.position.x - bx) * side,
+		"gap": (b.position.x - a.position.x) * side, "hits": hits, "result": result, "down": down,
+		"after_hit": absf(a.position.x - hit_x) if hit_x != INF else 0.0}
+	_free(p)
+	return out
+
+
 func _pair(gap: float, side: int, seed_value: int = 1) -> Array[Fighter]:
 	var a := Fighter.new()
 	var b := Fighter.new()
@@ -54,7 +93,7 @@ func _initialize() -> void:
 	_check(guard[2] < 0.9 and guard[4] < 0.9, "relaxed stance: neither hand raised into a guard (ua %.2f / %.2f)" % [guard[2], guard[4]])
 
 	print("[every move, both directions]")
-	for mid in [&"light_slap", &"thrust_kick", &"double_push", &"head_elbow", &"hammer_fist", &"stomach_shot", &"leg_kick",
+	for mid in [&"light_slap", &"thrust_kick", &"jor_dhakka", &"head_elbow", &"hammer_fist", &"stomach_shot", &"leg_kick",
 			&"flying_slap", &"flying_chest_kick", &"belly_bomb"]:
 		var res := []
 		for side in [1, -1]:
@@ -76,59 +115,38 @@ func _initialize() -> void:
 			_free(p)
 		_check(res[0][0] == 1 and res[0] == res[1], "%s hits once, same either way (%s)" % [mid, res])
 
-	print("[double-hand push]")
-	var push := CombatData.get_attack(CombatData.AttackType.DOUBLE_PUSH)
+	print("[jor dhakka]")
+	var jd := CombatData.get_attack(CombatData.AttackType.JOR_DHAKKA)
+	_check(StyleRegistry.by_id(&"bangla_maar").resolve(&"technique", false) == CombatData.AttackType.JOR_DHAKKA
+		and jd.display_name == "Jor Dhakka", "L is Jor Dhakka")
+	_check(jd.blowback_chance == 0.0 and not jd.knockdown, "no random knockdown inherited from the old shove")
+	_check(jd.recovery >= 24, "a long recovery: punishable on a miss (%d)" % jd.recovery)
 	var downs := 0
-	var trials := 400
-	for k in trials:
+	for k in 200:
 		var p := _pair(80.0, 1, 1000 + k)
-		var r := p[1].receive_hit(push, p[0], 1)
-		if r == CombatData.HitResult.HIT and p[1].state == Fighter.State.KNOCKDOWN:
+		if p[1].receive_hit(jd, p[0], 1) == CombatData.HitResult.HIT and p[1].state == Fighter.State.KNOCKDOWN:
 			downs += 1
 		_free(p)
-	_check(downs > trials * 0.14 and downs < trials * 0.26, "a clean shove knocks down about 20%% of the time (%d / %d, seeded)" % [downs, trials])
-	var p2 := _pair(80.0, 1, 7)
-	var x0 := p2[1].position.x
-	p2[1].receive_hit(push, p2[0], 1)
-	for t in 30:
-		p2[1].tick()
-	var clean_push := p2[1].position.x - x0
-	_free(p2)
-	var blocked_down := 0
-	var block_push := 0.0
-	for k in 100:
-		var p := _pair(80.0, 1, 2000 + k)
-		var b := p[1]
-		b.block_held = true
-		b.call("_enter_state", Fighter.State.BLOCK)
-		b.state_frame = 5
-		var bx := b.position.x
-		var r := b.receive_hit(push, p[0], 1)
-		if r != CombatData.HitResult.BLOCKED or b.state == Fighter.State.KNOCKDOWN:
-			blocked_down += 1
-		for t in 30:
-			b.tick()
-		block_push = b.position.x - bx
-		_free(p)
-	_check(blocked_down == 0, "a blocked shove never knocks down (%d / 100)" % blocked_down)
-	_check(block_push < clean_push * 0.7, "blocking cuts the push (%.0f px vs %.0f px)" % [block_push, clean_push])
+	_check(downs == 0, "a clean shoulder bash never knocks down (%d / 200, seeded)" % downs)
+	for side in [1, -1]:
+		var dir := "facing right" if side == 1 else "facing left"
+		var res := _charge(jd, 150.0, side, false)
+		_check(res["hits"] == 1, "one shoulder hit from 150 px (%d, %s)" % [res["hits"], dir])
+		_check(res["attacker"] > 40.0 and res["defender"] > 70.0 and res["gap"] > 140.0,
+			"closes in, heavy knockback, space made (attacker +%.0f, defender +%.0f, gap %.0f, %s)" % [res["attacker"], res["defender"], res["gap"], dir])
+		_check(res["after_hit"] < 1.0, "the charge stops on contact: no chasing the body (%.1f px, %s)" % [res["after_hit"], dir])
+		var blk := _charge(jd, 150.0, side, true)
+		_check(blk["result"] == "BLOCKED" and blk["defender"] < res["defender"] * 0.7 and not blk["down"],
+			"blocked: reduced push, never a knockdown (%.0f vs %.0f px, %s)" % [blk["defender"], res["defender"], dir])
+		var miss := _charge(jd, 260.0, side, false)
+		_check(miss["hits"] == 0 and miss["attacker"] > 60.0 and miss["attacker"] < 110.0,
+			"a miss: bounded charge (%.0f px), no hit (%s)" % [miss["attacker"], dir])
 	var p3 := _pair(80.0, 1, 3)
 	p3[1].call("_enter_state", Fighter.State.DODGE)
 	p3[1].state_frame = CombatData.DODGE_INVULN_START
-	_check(p3[1].receive_hit(push, p3[0], 1) == CombatData.HitResult.WHIFF and p3[1].state == Fighter.State.DODGE,
-		"invulnerable frames: the shove passes through, no knockdown")
+	_check(p3[1].receive_hit(jd, p3[0], 1) == CombatData.HitResult.WHIFF and p3[1].state == Fighter.State.DODGE,
+		"invulnerable frames: the bash passes through")
 	_free(p3)
-	# One roll per hit: the same seed always gives the same outcome.
-	var outcomes := []
-	for rep in 2:
-		var seq := ""
-		for k in 20:
-			var p := _pair(80.0, 1, 5000 + k)
-			p[1].receive_hit(push, p[0], 1)
-			seq += "D" if p[1].state == Fighter.State.KNOCKDOWN else "-"
-			_free(p)
-		outcomes.append(seq)
-	_check(outcomes[0] == outcomes[1], "reproducible with a fixed seed (%s)" % outcomes[0])
 
 	print("[guard breaker]")
 	var hammer := CombatData.get_attack(CombatData.AttackType.HAMMER_FIST)

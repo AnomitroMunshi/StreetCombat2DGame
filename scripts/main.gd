@@ -97,7 +97,7 @@ const SPEECH_PRIORITY: Dictionary = {"hurt": 1, "block": 1, "slap": 2, "miss_hea
 	"low_health": 4, "finisher": 5, "victory": 5, "knocked_out": 6}
 ## Moves whose whiff makes the fighter speak (big committal swings).
 const SPEECH_MISS_MOVES: Array[StringName] = [&"hammer_fist", &"thrust_kick", &"flying_chest_kick", &"belly_bomb",
-	&"double_push"]
+	&"jor_dhakka"]
 const SPEECH_SLAPS: Array[StringName] = [&"light_slap", &"flying_slap"]
 ## Low-health line below this fraction of max health (once per match).
 const SPEECH_LOW_HEALTH: float = 0.25

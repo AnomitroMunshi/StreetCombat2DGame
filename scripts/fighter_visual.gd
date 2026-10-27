@@ -417,7 +417,9 @@ var _slap_hit := PackedFloat32Array([0.25, -0.05, 1.75, 1.95, 0.2, 0.45, 0.32, 0
 var _slap_follow := PackedFloat32Array([0.3, -0.1, 2.0, 2.6, 0.2, 0.45, 0.32, 0.0, -0.3, -0.35, 9.0, 0.0, 0.35, -8.0])
 # Front thrust kick: arms flung up for balance, a flat-footed shove of a kick.
 var _thrust_chamber := PackedFloat32Array([-0.3, 0.2, 1.6, 2.3, 1.3, 2.0, 1.9, 0.2, -0.3, -0.25, -2.0, 6.0, 0.2, 4.0])
-var _thrust_extend := PackedFloat32Array([-0.5, 0.3, 1.9, 2.5, 1.5, 2.2, 1.55, 1.55, -0.45, -0.15, 12.0, 4.0, 0.35, 4.0])
+# Heel-led: the leg drives out slightly above level so the heel meets the
+# stomach, the torso leaning back against it.
+var _thrust_extend := PackedFloat32Array([-0.6, 0.35, 1.9, 2.5, 1.5, 2.2, 1.74, 1.78, -0.45, -0.15, 12.0, 4.0, 0.35, 4.0])
 # Double-hand push: both hands pulled to the chest, then a full-body shove.
 var _push_load := PackedFloat32Array([-0.05, 0.05, 0.85, 2.7, 0.8, 2.7, 0.35, -0.05, -0.35, -0.4, -6.0, 0.0, 0.0, 6.0])
 var _push_hit := PackedFloat32Array([0.38, 0.1, 1.5, 1.5, 1.45, 1.45, 0.6, -0.1, -0.6, -0.5, 14.0, 0.0, 0.4, 2.0])
@@ -646,6 +648,13 @@ var _dk_low_hit := PackedFloat32Array([-0.35, 0.25, 1.1, 2.9, -0.3, 0.0, 0.15, 0
 var _dk_plant := PackedFloat32Array([0.1, 0.1, 1.0, 2.8, 0.7, 2.9, -0.35, -0.55, 0.45, 0.15, 6.0, 4.0, 0.3, -4.0])
 var _dk_mid_chamber := PackedFloat32Array([-0.1, 0.15, 1.0, 2.8, 0.7, 2.9, 1.4, -0.6, 0.25, 0.05, 6.0, 4.0, 0.7, 2.0])
 var _dk_mid_hit := PackedFloat32Array([-0.6, 0.45, -0.2, 0.1, 1.0, 2.8, 1.62, 1.7, 0.2, 0.05, 8.0, 0.0, 1.0, 6.0])
+# Jor Dhakka: lean in and brace (knees bent, lead shoulder turned in, arms
+# tucked), a running stride (rear leg swinging through), the drive with the
+# lead shoulder leading and the rear arm flung back, a stumbling follow-through.
+var _jd_brace := PackedFloat32Array([0.35, -0.1, 0.4, 2.2, 0.6, 2.5, 0.75, -0.35, -0.55, -0.9, -6.0, 10.0, 0.2, 16.0])
+var _jd_stride := PackedFloat32Array([0.5, -0.15, 0.35, 2.2, -0.2, 0.3, -0.3, -0.7, 0.9, -0.4, 2.0, 8.0, 0.4, 20.0])
+var _jd_drive := PackedFloat32Array([0.62, -0.25, 0.3, 2.3, -0.6, -0.3, 0.95, -0.05, -0.75, -1.0, 12.0, 8.0, 0.8, 24.0])
+var _jd_follow := PackedFloat32Array([0.35, 0.1, 1.2, 2.2, 0.3, 1.2, 0.55, -0.2, -0.35, -0.6, 8.0, 4.0, 0.3, 10.0])
 ## Intro poses that stand on one leg (the feet are not planted on the floor).
 const ONE_LEG_POSES: Array[StringName] = [&"mt_ready", &"kf_crane"]
 ## Intro poses with an open lead hand.
@@ -1060,6 +1069,9 @@ func _ready() -> void:
 		CombatData.AttackType.THRUST_KICK: [
 			[S, 0.6, _thrust_chamber, EASE_SMOOTH], [A, 0.0, _thrust_extend, EASE_IN],
 			[A, 1.0, _thrust_extend, EASE_LINEAR], [R, 0.4, _thrust_chamber, EASE_OUT]],
+		CombatData.AttackType.JOR_DHAKKA: [
+			[S, 0.4, _jd_brace, EASE_SMOOTH], [S, 0.75, _jd_stride, EASE_SMOOTH], [A, 0.0, _jd_drive, EASE_IN],
+			[A, 1.0, _jd_drive, EASE_LINEAR], [R, 0.35, _jd_follow, EASE_SMOOTH], [R, 0.75, _jd_follow, EASE_LINEAR]],
 		CombatData.AttackType.DOUBLE_PUSH: [
 			[S, 0.6, _push_load, EASE_SMOOTH], [A, 0.0, _push_hit, EASE_IN],
 			[A, 1.0, _push_hit, EASE_LINEAR], [R, 0.4, _push_hit, EASE_LINEAR]],
@@ -3420,6 +3432,8 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 			return J_FOOT_F
 		CombatData.AttackType.BELLY_BOMB:
 			return J_HIP
+		CombatData.AttackType.JOR_DHAKKA:
+			return J_SHOULDER_F
 		CombatData.AttackType.STOMACH_SHOT:
 			return J_HAND_B
 		CombatData.AttackType.JUMPING_SPIN_HOOK, CombatData.AttackType.DOUBLE_KICK_LOW:
@@ -3504,7 +3518,13 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 			var th := TH_F if idx == J_FOOT_F else TH_B
 			var sh := SH_F if idx == J_FOOT_F else SH_B
 			base = pose.duplicate()
-			base[sh] = pose[th] - signf(pose[th]) * 1.8
+			if fighter.current_attack.type == CombatData.AttackType.THRUST_KICK:
+				# A push kick re-chambers: the knee rises and the shin folds
+				# back, keeping the heel at stomach height (never dropped low).
+				base[th] = pose[th] + 0.75
+				base[sh] = base[th] - 1.5
+			else:
+				base[sh] = pose[th] - signf(pose[th]) * 1.8
 	var lo := 0.0  # 0 = full strike
 	var hi := 1.0  # 1 = stance
 	for i in REACH_SEARCH_STEPS:

@@ -38,7 +38,7 @@ const DISPLAY_NAMES: Dictionary = {
 	Kind.DRAGONS_DESCENT: "DRAGON'S DESCENT",
 	Kind.LAST_COMBINATION: "LAST COMBINATION",
 	Kind.KNOCKOUT_RHYTHM: "KNOCKOUT RHYTHM",
-	Kind.PAAYE_LATHI: "PAAYE LATHI, MATHAY LATHI",
+	Kind.PAAYE_LATHI: "FOOTBALL SHOT",
 	Kind.SUPER_CHOR: "SUPER CHOR",
 }
 ## Permanent finisher ids (used by MartialArtStyle.finishers).

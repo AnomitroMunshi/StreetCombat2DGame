@@ -548,9 +548,9 @@ func _initialize() -> void:
 			var total := 0
 			for k in swings:
 				total += swings[k]
-			var pushes: int = swings.get(&"double_push", 0)
+			var pushes: int = swings.get(&"jor_dhakka", 0)
 			_check(total > 10 and pushes * 5 <= total and swings.get(&"belly_bomb", 0) <= 2,
-				"bangla_maar rival does not spam the shove or the Belly Bomb (%d shoves, %d belly bombs of %d swings)" % [pushes, swings.get(&"belly_bomb", 0), total])
+				"bangla_maar rival does not spam Jor Dhakka or the Belly Bomb (%d bashes, %d belly bombs of %d swings)" % [pushes, swings.get(&"belly_bomb", 0), total])
 		main.queue_free()
 		main = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 		root.add_child(main)

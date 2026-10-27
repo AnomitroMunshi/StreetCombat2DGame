@@ -23,6 +23,7 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	LEAPING_SPIN_BACKFIST, FLYING_AXE_KICK,
 	LIGHT_SLAP, THRUST_KICK, DOUBLE_PUSH, HEAD_ELBOW, HAMMER_FIST, STOMACH_SHOT, PARA_LEG_KICK,
 	DOUBLE_KICK, DOUBLE_KICK_LOW, DOUBLE_KICK_MID,
+	JOR_DHAKKA,
 	FLYING_SLAP, FLYING_CHEST_KICK, BELLY_BOMB }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
@@ -37,7 +38,7 @@ const STEP_IN: Dictionary = {
 	&"chain_palms": 10.0, &"side_kick": 14.0, &"front_kick": 12.0, &"high_kick": 6.0,
 	&"body_roundhouse": 8.0, &"low_roundhouse": 6.0, &"low_side_kick": 12.0, &"axe_kick": 8.0,
 	&"rising_elbow": 8.0, &"body_straight": 14.0, &"body_punch": 20.0, &"low_palm": 14.0,
-	&"light_slap": 14.0, &"thrust_kick": 10.0, &"double_push": 14.0, &"head_elbow": 10.0, &"hammer_fist": 16.0,
+	&"light_slap": 14.0, &"thrust_kick": 10.0, &"double_push": 14.0, &"jor_dhakka": 14.0, &"head_elbow": 10.0, &"hammer_fist": 16.0,
 	&"stomach_shot": 12.0, &"leg_kick": 8.0,
 }
 ## A grounded strike stops travelling (step-in and lunge) once the opponent is
@@ -880,6 +881,19 @@ const ATTACK_TABLE: Dictionary = {
 		"blowback_chance": 0.2, "blowback_vx": 7.5, "blowback_vy": -5.0, "blowback_rolls": 0,
 		"hitbox": Rect2(24.0, -142.0, 56.0, 48.0),
 	},
+	# Jor Dhakka (Bangla Maar L): a reckless charging shoulder bash. Lean in,
+	# brace, then drive forward shoulder-first: a bounded charge (lunge 4.5 px
+	# a tick through startup + active, at most ~70 px) that stops on contact
+	# ("charge": no chasing the body it just knocked away). One shoulder hit,
+	# heavy knockback (reduced on block), no random knockdown; a long recovery
+	# leaves it wide open on a miss.
+	AttackType.JOR_DHAKKA: {
+		"id": &"jor_dhakka", "name": "Jor Dhakka", "posture": 16.0, "charge": true,
+		"startup": 12, "active": 4, "recovery": 26, "cancel_window": 0,
+		"damage": 9, "hitstun": 20, "blockstun": 14,
+		"knockback": 14.0, "lunge": 4.5, "hitstop": 7,
+		"hitbox": Rect2(12.0, -134.0, 46.0, 56.0),
+	},
 	# Head elbow: the rear elbow swung round at head height.
 	AttackType.HEAD_ELBOW: {
 		"id": &"head_elbow", "name": "Head Elbow", "posture": 14.0,
@@ -1051,6 +1065,8 @@ class Attack extends RefCounted:
 	var sequence: Array = []
 	## No hitbox (a weave, a feint): chains out without contact.
 	var no_strike: bool = false
+	## A charge: the lunge stops for good once the swing connects.
+	var charge: bool = false
 	## Dizzy ticks on a clean hit (0 = this move never stuns).
 	var stun: int = 0
 	## Run-up: px stepped back over the first backstep_ticks of the startup.
@@ -1129,6 +1145,7 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.deflect = row.get("deflect", false)
 	attack.sequence = row.get("sequence", [])
 	attack.no_strike = row.get("no_strike", false)
+	attack.charge = row.get("charge", false)
 	attack.stun = row.get("stun", 0)
 	attack.backstep = row.get("backstep", 0.0)
 	attack.backstep_ticks = row.get("backstep_ticks", 0)
