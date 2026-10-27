@@ -32,7 +32,7 @@ Timestamps are `clip @ seconds`.
 - [ ] **Bangla Maar balance.** It wins about 21% of AI-vs-AI matches because of the spec's lighter damage. Decide whether to buff it.
 - [ ] **Overall style balance spread.** From Kung Fu at 67% down to Boxing at 38%; the target is roughly 45–55%.
 - [ ] **Bundle a Bengali font.** Speech currently needs Nirmala UI or Vrinda installed. A free, openly licensed font (e.g. Noto Sans Bengali, OFL) would fix this, but it needs your approval before download.
-- [ ] **Rounds.** Single round only: no round timer, no best-of-3.
+- [x] **Rounds.** *Balance batch: best of 3 with a finisher every round; 2 wins ends the match. Health is 200 per round (rounds ~34 s, 34 hits). Focus gains cut ~40%, and focus from taking hits is capped at 12 per 2 s; the meter is first full ~20 s into a round (60%), ~0.8 signatures per fighter per round. ROUND 2 / FINAL ROUND voice calls, round pips. No round timer yet.*
 - [ ] **Hurtboxes are fixed rectangles** and don't follow extended limbs.
 - [ ] **AI difficulty select.** Difficulty is only adjustable through exported values on `EnemyAI`; there's no menu option.
 - [ ] **Throws and grappling.** Design note only (`docs/V0.3_PLAN.md` §4). Parked on purpose; the Bangla Maar spec said no grappling yet.

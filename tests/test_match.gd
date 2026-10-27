@@ -14,7 +14,7 @@ class Driver extends Node:
 	var max_combo: int = 0
 	var enemy_blocks: int = 0
 	var player_hits_taken: int = 0
-	var prev_player_hp: int = 100
+	var prev_player_hp: int = 0  # set when the match starts
 	var prev_enemy_state: int = 0
 	var ai_states_seen: Dictionary = {}
 	var overlap_reported: bool = false
@@ -41,7 +41,9 @@ class Driver extends Node:
 			# Fixed styles so the match is reproducible: the rival is otherwise random.
 			main.call("select_style", &"kickboxing")
 			e.set_style(StyleRegistry.by_id(&"boxing"))
+			main.set("rounds_to_win", 1)  # this test covers one K.O. -> result
 			main.call("start_match", true)
+			prev_player_hp = p.health
 		ai_states_seen[ai.get_state_name().get_slice(" ", 0)] = true
 
 		if phase == "fight":

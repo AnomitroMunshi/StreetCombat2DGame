@@ -226,6 +226,10 @@ var rejected_attacks: int = 0
 var focus: float = 0.0
 var signature_buffer: int = 0
 var _block_focus_cd: int = 0
+## Focus from taking hits inside the current FOCUS_HURT_WINDOW, and the ticks
+## left in it.
+var _hurt_focus: float = 0.0
+var _hurt_focus_left: int = 0
 ## Strikes of the current signature (or other sequence move) still to come.
 var _sequence: Array = []
 ## The current strike belongs to a signature technique (earns no Focus).
@@ -779,6 +783,10 @@ func _tick_buffers() -> void:
 		space_age += 1
 	if _block_focus_cd > 0:
 		_block_focus_cd -= 1
+	if _hurt_focus_left > 0:
+		_hurt_focus_left -= 1
+		if _hurt_focus_left == 0:
+			_hurt_focus = 0.0
 
 
 ## F at full Focus from an actionable state: the style's signature starts and
@@ -804,6 +812,18 @@ func _try_signature() -> bool:
 
 func add_focus(amount: float) -> void:
 	focus = clampf(focus + amount, 0.0, CombatData.FOCUS_MAX)
+
+
+## Focus for taking a clean hit: capped at FOCUS_HURT_WINDOW_MAX per
+## FOCUS_HURT_WINDOW ticks (the window opens with the first hit).
+func add_hurt_focus(amount: float) -> void:
+	if _hurt_focus_left <= 0:
+		_hurt_focus_left = CombatData.FOCUS_HURT_WINDOW
+		_hurt_focus = 0.0
+	var paid := minf(amount, CombatData.FOCUS_HURT_WINDOW_MAX - _hurt_focus)
+	if paid > 0.0:
+		_hurt_focus += paid
+		add_focus(paid)
 
 
 ## A blocked hit pays FOCUS_BLOCK at most once per FOCUS_BLOCK_COOLDOWN ticks.

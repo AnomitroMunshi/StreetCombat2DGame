@@ -129,7 +129,7 @@ class Driver extends Node:
 					check(saw_slow, "the finisher actually slows the simulation (cinematic speed)")
 				if phase_frame > 30 and state == "FIGHTING":
 					check(main.get("last_finisher_name") != "", "a finisher played (%s)" % main.get("last_finisher_name"))
-					check(e.health == 100 and e.state == Fighter.State.IDLE and p.state == Fighter.State.IDLE,
+					check(e.health == e.max_health and e.state == Fighter.State.IDLE and p.state == Fighter.State.IDLE,
 						"after the finisher both are back, fresh, in training")
 					check(is_equal_approx(Engine.time_scale, 1.0) and Engine.physics_ticks_per_second == 60,
 						"game speed restored after the finisher (ticks %d)" % Engine.physics_ticks_per_second)

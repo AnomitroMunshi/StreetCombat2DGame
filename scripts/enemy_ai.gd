@@ -147,6 +147,7 @@ func compute_intent() -> CombatData.Intent:
 		if not _was_stunned:
 			_was_stunned = true
 			_plan.clear()
+			_plan_pending = false
 		intent.block = _state == AIState.BLOCK
 		return intent
 	if _was_stunned:
@@ -157,6 +158,7 @@ func compute_intent() -> CombatData.Intent:
 	if _last_side != 0 and side != _last_side:
 		_side_wait = reaction_frames + _rng.randi_range(2, 6)
 		_plan.clear()
+		_plan_pending = false  # (a plan waiting on arrival would index an empty plan)
 	_last_side = side
 	if _side_wait > 0:
 		_side_wait -= 1

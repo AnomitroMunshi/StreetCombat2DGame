@@ -39,6 +39,7 @@ const VOICE_CLIPS: Dictionary = {
 	&"three": "res://assets/audio/voice/three.wav", &"two": "res://assets/audio/voice/two.wav",
 	&"one": "res://assets/audio/voice/one.wav", &"fight": "res://assets/audio/voice/fight.wav",
 	&"ko": "res://assets/audio/voice/ko.wav",
+	&"round_2": "res://assets/audio/voice/round_2.wav", &"final_round": "res://assets/audio/voice/final_round.wav",
 }
 const VOICE_BUS: StringName = &"Voice"
 const VOICE_VOLUME_DB: float = -2.0
