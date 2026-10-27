@@ -90,6 +90,7 @@ func _physics_process(_delta: float) -> bool:
 	if _frame == 1:
 		_main.call("select_style", c[0])
 		e.set_style(StyleRegistry.by_id(&"boxing" if c[0] == &"karate" else &"karate"))
+		_main.set("rounds_to_win", 1)  # one finisher per case: no next round resets the bodies
 		_main.call("start_match", true)
 		(_main.get_node("EnemyAI") as EnemyAI).setup(null, null)
 	if _frame == 30:
