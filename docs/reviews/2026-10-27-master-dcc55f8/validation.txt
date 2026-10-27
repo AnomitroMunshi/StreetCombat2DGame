@@ -1,0 +1,40 @@
+﻿fast_test_ai_defense: RESULT: PASS (0 failures)
+fast_test_ai_finisher: RESULT: PASS (0 failures)
+fast_test_bangla: RESULT: PASS (0 failures)
+fast_test_controls: RESULT: PASS (0 failures)
+fast_test_core: RESULT: PASS (0 failures)
+fast_test_double_kick: RESULT: PASS (0 failures)
+fast_test_finisher_contact: RESULT: FAIL (2 failures)
+  FAIL kickboxing last_combination left: every blow within 6 px of the body (worst 6.1)
+  FAIL kickboxing knockout_rhythm left: every blow within 6 px of the body (worst 6.1)
+fast_test_flow: RESULT: PASS (0 failures)
+fast_test_input: RESULT: PASS (0 failures)
+fast_test_jump: RESULT: PASS (0 failures)
+fast_test_match: RESULT: PASS (0 failures)
+fast_test_movement: RESULT: PASS (0 failures)
+fast_test_stun: RESULT: PASS (0 failures)
+fast_test_styles: RESULT: PASS (0 failures)
+fast_test_training: RESULT: PASS (0 failures)
+PERF n=779 median_ms=16.662 p95_ms=16.998 max_ms=19.349 mean_fps=59.9997011568159 over33ms=0
+DOUBLE gap=[70, 1] hits=[[16, 5], [32, 9]] result=HIT
+DOUBLE gap=[70, -1] hits=[[16, 5], [32, 9]] result=HIT
+DOUBLE gap=[80, 1] hits=[[16, 5], [32, 9]] result=HIT
+DOUBLE gap=[80, -1] hits=[[16, 5], [32, 9]] result=HIT
+DOUBLE gap=[90, 1] hits=[[16, 5], [32, 9]] result=HIT
+DOUBLE gap=[90, -1] hits=[[16, 5], [32, 9]] result=HIT
+DOUBLE gap=[100, 1] hits=[[16, 5], [32, 9]] result=HIT
+DOUBLE gap=[100, -1] hits=[[16, 5], [32, 9]] result=HIT
+DOUBLE gap=[110, 1] hits=[[16, 5], [32, 9]] result=HIT
+DOUBLE gap=[110, -1] hits=[[16, 5], [32, 9]] result=HIT
+GUARD crouch=false attack=low_roundhouse result=HIT
+GUARD crouch=false attack=body_roundhouse result=BLOCKED
+GUARD crouch=false attack=high_kick result=BLOCKED
+GUARD crouch=false attack=axe_kick result=BLOCKED
+GUARD crouch=false attack=flying_side_kick result=BLOCKED
+GUARD crouch=false attack=hammer_fist result=GUARD_BREAK
+GUARD crouch=true attack=low_roundhouse result=BLOCKED
+GUARD crouch=true attack=body_roundhouse result=BLOCKED
+GUARD crouch=true attack=high_kick result=BLOCKED
+GUARD crouch=true attack=axe_kick result=BLOCKED
+GUARD crouch=true attack=flying_side_kick result=BLOCKED
+GUARD crouch=true attack=hammer_fist result=GUARD_BREAK

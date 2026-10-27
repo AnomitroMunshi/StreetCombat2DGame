@@ -55,7 +55,7 @@ quotes = {
 "match_start": "আয় বারা, আয়!",
 "miss_heavy": "বেঁচে গেলি!",
 "slap": "শালা শুয়োর!",
-"victory": "****চোদা!"
+"victory": "কি রে বোকা**** !!"
 }
 signature = &"belly_bomb"
 finishers = PackedStringArray("paaye_lathi", "super_chor")
