@@ -258,6 +258,13 @@ var _front_extend := PackedFloat32Array([-0.3, 0.25, 0.8, 2.75, 0.45, 2.9, 1.52,
 # the rear leg folded underneath.
 var _jk_chamber := PackedFloat32Array([0.0, 0.1, 0.8, 2.75, 0.4, 2.8, 2.0, -0.6, 1.2, -1.2, -2.0, 0.0])
 var _jk_extend := PackedFloat32Array([-0.5, 0.3, 0.7, 2.7, -1.0, -0.8, 1.25, 1.25, 0.6, -1.2, 6.0, 0.0])
+# Skyline Verdict (Karate's airborne finisher): in the air the kicking knee
+# chambers high with the heel drawn to the hip, the body turning side-on; the
+# side kick then spears out heel first at chest height, the rear knee stays
+# tucked under the hips, the lead arm folds in front of the chest and the rear
+# arm swings back to counterbalance (clear of the kicking leg).
+var _flying_chamber := PackedFloat32Array([-0.25, 0.3, 1.0, 2.6, 0.2, 2.2, 1.95, -0.9, 0.9, -1.5, 0.0, 0.0, 0.9, 8.0])
+var _flying_side_kick := PackedFloat32Array([-0.55, 0.45, 1.1, 2.5, -0.8, -0.4, 1.7, 1.7, 0.9, -1.5, 6.0, 0.0, 1.0, 10.0])
 # High kick: knee chambered high and diagonal, then the shin snaps out to face
 # level with the torso counter-leaning and the support foot pivoting.
 var _high_chamber := PackedFloat32Array([-0.3, 0.3, 1.15, 2.3, 0.55, 2.95, 2.15, -0.7, -0.25, -0.15, -4.0, 0.0, 0.8])
@@ -847,7 +854,7 @@ func _ready() -> void:
 		&"palm_windup": _palm_windup, &"palm_strike": _palm_strike, &"spin_windup": _spin_windup,
 		&"spin_kick": _spin_kick, &"knee_windup": _knee_windup, &"knee": _knee, &"slumped": _slumped,
 		&"tornado_windup": _tornado_windup, &"tornado_chamber": _tornado_chamber, &"tornado_kick": _tornado_kick,
-		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare, &"mt_ready": _mt_ready, &"kt_ready": _kt_ready,
+		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare, &"mt_ready": _mt_ready, &"kt_ready": _kt_ready, &"flying_chamber": _flying_chamber, &"flying_side_kick": _flying_side_kick,
 		# Style finishers reuse the move poses.
 		&"lhook_hit": _lhook_hit, &"rhook_hit": _rhook_hit, &"bhook_load": _bhook_load, &"bhook_hit": _bhook_hit,
 		&"overhand_hit": _overhand_hit, &"slip_dip": _slip_dip, &"uppercut_windup": _uppercut_windup,
@@ -2654,7 +2661,8 @@ func _toe_point_for(foot: Vector2) -> float:
 		var pose := String(fighter.script_pose)
 		if pose in ["front_extend"]:
 			return POINT_BALL
-		if pose in ["kick_strike", "back_extend", "axe_chop", "axe_raise", "shook_hit", "lowside_hit", "sweep_extend"]:
+		if pose in ["kick_strike", "back_extend", "axe_chop", "axe_raise", "shook_hit", "lowside_hit", "sweep_extend",
+				"flying_chamber", "flying_side_kick"]:
 			return 0.0
 		return POINT_ROUNDHOUSE if pose.ends_with("extend") or pose.contains("rh") or pose.contains("knee") \
 			or pose.contains("tornado") or pose == "spin_kick" else POINT_RELAXED

@@ -1,6 +1,6 @@
 # Style finishers — proposal for approval
 
-Status: **proposal, nothing built.** Covers backlog FIN-STYLE-01..04, FIN-FEEL-01..06 and KAR-AIR-REF-01..03.
+Status: **approved 2026-10-27; batch 5a (Skyline Verdict, Iron Corner) prototyped, awaiting your feel review.** Covers backlog FIN-STYLE-01..04, FIN-FEEL-01..06 and KAR-AIR-REF-01..03.
 Mark each row ✅ / ✏️ (change) / ❌ in the approval table at the end.
 
 ## What changes
@@ -157,7 +157,7 @@ that already exists.
 
 ## 7. Bangla Maar (strikes only, no grab)
 
-### Air: **AKASH PATAK** — আকাশ পটক *("sky slam"; a placeholder name, you'll know better, see D2)*
+### Air: **AIR SMASH** *(name kept, D2; strike-only choreography below)*
 1. **8 ticks** — a messy run-up and an overconfident leap; arms swinging (`hammer_windup`, *reuse*).
 2. **6 ticks** — both fists raised over the head, the hands locked together.
 3. **18 ticks, final** — a reckless double-hand hammer on the falling victim (`hammer_strike`, *reuse*).
@@ -201,15 +201,50 @@ that already exists.
 - **Batch 5b:** Boxing, Kickboxing, Taekwondo.
 - **Batch 5c:** Kung Fu and Bangla Maar, then remove the generic Air Smash and Wall Crush from normal play.
 
-## Decisions needed
+## Decisions (answered 2026-10-27)
 
-| # | Question | My recommendation |
+| # | Question | Answer |
 |---|---|---|
-| D1 | Kung Fu and Taekwondo air finishers: new names (**Descending Dragon Palm**, **Skyfall Axe**) or keep "Dragon's Descent" and "Heaven's Heel" as aerial variants? | New names. Two finishers with the same name would confuse the banner and training. |
-| D2 | Bangla Maar air name: **Akash Patak**, keep **Air Smash**, or your own Bengali name? | Your call. You'll know what sounds right. |
-| D3 | Blood: small spray on the final hit only, more on wall impacts, or none? | Small spray on the final hit, darker on wall impacts. |
-| D4 | Prototype pair: Karate air plus Muay Thai wall? | Yes. One kick-based air finisher and one close-range wall finisher show both systems. |
-| D5 | Keep the old Air Smash and Wall Crush selectable in training as "classic"? | No. Keep them in code only. |
+| D1 | New names for the Kung Fu and Taekwondo air finishers? | **Yes:** Descending Dragon Palm, Skyfall Axe. (Air finishers only play when the kill catches an airborne opponent.) |
+| D2 | Bangla Maar air name | **Air Smash** |
+| D3 | Blood | **A small spray on the final hit only, darker on wall impacts** |
+| D4 | Prototype pair | **Karate air plus Muay Thai wall** |
+| D5 | Old Air Smash and Wall Crush in training | **Kept, as "classic" entries after the style's own** |
+
+## Batch 5a: prototype timing sheet
+
+Ticks at 60 per second. "Contact" is measured on the drawn bodies; the torso height runs from 0 at the neck to 1
+at the hip.
+
+**SKYLINE VERDICT** (Karate air), 84 ticks in total:
+
+| Beat | Ticks | Attacker | Victim |
+|---|---|---|---|
+| Sink | 8 | `jump_squat` | relaunched once, so their flight brings the chest to the heel (`meet`) |
+| Take-off and chamber | 11 | `flying_chamber`, launch 15 (about 118 px apex), glides into range | still in flight |
+| **Side kick (final)** | 12 | `flying_side_kick`, heel first, rear knee tucked | contact about 3 ticks in, near the apex; 6 ticks of hitstop, 4 ticks at half speed easing back over 6; driven down and away (vy +9, drift 12), crater, one roll and a skid |
+| Retract | 8 | `flying_chamber` (lands during this beat) | in flight, then in the crater |
+| Settle | 45 | `kt_ready`, the knife-hand front stance | at rest |
+
+Measured: the heel lands on the upper chest (0.09–0.24) with a gap of −7 to +5 px. That holds facing either way,
+at gaps of 70 and 120 px, for a victim rising, near the apex or falling, and at 30, 60 and 120 FPS.
+
+**IRON CORNER** (Muay Thai wall), 105 ticks in total:
+
+| Beat | Ticks | Attacker | Victim |
+|---|---|---|---|
+| Plant | 8 | `elbow_load` | stagger |
+| Driving knee | 12 | `fknee_hit` to the belly, then drives forward with the body | folds; shoved into the wall within the beat (from up to 170 px); the **wall cracks when the back hits it** |
+| Rising knee | 8 | `knee` | folded, back to the wall (wall impact) |
+| Load | 7 | `elbow_load` | stays doubled over, head low |
+| **Elbow (final)** | 18 | `elbow_hit`, the point of the rear elbow across the jaw | head impact against the wall, then collapses down it (`slumped`) |
+| Step back, stance | 22 + 30 | `guard`, then `mt_ready` (knee up) | slumped |
+
+Measured: belly at about 1.0, the folded body at 0.35–0.47, the jaw at −0.11 (the head). Gaps are ≤ 6 px, facing
+either way, starting 60, 110 or 160 px from the wall, at 30, 60 and 120 FPS. The wall cracks only with the body
+against it.
+
+Clips (normal speed and quarter speed): `docs/reviews/2026-10-27-finisher-prototypes/`.
 
 ## Approval table
 
@@ -221,4 +256,4 @@ that already exists.
 | Kung Fu | Descending Dragon Palm | | Wall of Palms | |
 | Taekwondo | Skyfall Axe | | Corner Cyclone | |
 | Kickboxing | Air Breaker | | Corner Breaker | |
-| Bangla Maar | Akash Patak | | Deowal Dhakka | |
+| Bangla Maar | Air Smash | | Deowal Dhakka | |

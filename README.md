@@ -245,10 +245,19 @@ does nothing. The rival uses its signature too, sparingly and in range.
 **Style finishers.** On open floor, each style finishes with its own two
 finishers (see [Finishers](#finishers)).
 
-Air Smash and Wall Crush are shared by all styles and still take priority.
+A kill on an airborne opponent, or one near a wall, still takes priority.
 
-**Environmental finishers.** Air Smash and Wall Crush are shared by every
-style. Wall Crush uses **your style's strikes** (the style's `wall_entry`): a
+**Air and wall finishers.** Each style is getting its own airborne finisher
+(the opponent was in the air) and wall finisher (the opponent was near the
+wall behind them), chosen from the attacker's style. These are set by the
+style's `air_finisher` and `wall_finisher`. So far:
+- **Karate, Skyline Verdict:** a flying side kick, heel to the chest, with the
+  opponent's flight timed to meet it; they are driven into the floor.
+- **Muay Thai, Iron Corner:** a driving knee into the wall, which cracks as
+  their back hits it, a rising knee, then a horizontal elbow across the jaw.
+
+The other styles still use the classic shared pair, Air Smash and Wall Crush,
+which training also keeps as extra entries. Wall Crush uses **your style's strikes** (the style's `wall_entry`): a
 boxer charges in with a rear hook and finishes with an overhand, Karate drives
 reverse punches, Kung Fu palms. Muay Thai keeps the classic flying knee and
 double palm.
@@ -271,7 +280,7 @@ least 1 HP, and health and posture refill once the action settles.
 | 2 | Dummy martial art |
 | 3 | Speed: 100%, 50% or 25% |
 | 4 | Unlimited Focus on or off (for signatures) |
-| 5 / 6 | Pick a finisher (your style's own, Wall Crush, Air Smash) / play it on the dummy |
+| 5 / 6 | Pick a finisher (your style's own, its wall and air finishers, then the classic Wall Crush and Air Smash) / play it on the dummy |
 | P / . | Pause / step one frame |
 | F1 | Hitboxes, hurtboxes and pushboxes |
 | R | Reset positions |

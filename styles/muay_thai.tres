@@ -54,4 +54,5 @@ ai_far_plans = [[&"low_roundhouse", &"high_kick"], [&"body_roundhouse"], [&"jab"
 signature = &"flying_knee"
 intro_pose = &"mt_ready"
 finishers = PackedStringArray("eight_limbs", "iron_knee")
+wall_finisher = &"iron_corner"
 ai_preferred_range = 110.0

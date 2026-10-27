@@ -102,7 +102,9 @@ func _physics_process(_delta: float) -> void:
 		get_tree().paused = true
 
 
-## The player's finishers (their style's own) plus the environmental ones.
+## The player's finishers: their style's own open-floor, wall and airborne
+## ones, then the classic shared Wall Crush and Air Smash (when the style has
+## its own instead).
 func finisher_kinds() -> Array[FinisherDirector.Kind]:
 	var kinds: Array[FinisherDirector.Kind] = []
 	if player.style != null:
@@ -110,8 +112,10 @@ func finisher_kinds() -> Array[FinisherDirector.Kind]:
 			kinds.append(FinisherDirector.kind_for_id(fid) as FinisherDirector.Kind)
 	if kinds.is_empty():
 		kinds.assign(FinisherDirector.OPEN_FLOOR_KINDS)
-	kinds.append(FinisherDirector.Kind.WALL_CRUSH)
-	kinds.append(FinisherDirector.Kind.AIR_SMASH)
+	for k: FinisherDirector.Kind in [FinisherDirector.wall_kind_for(player.style), FinisherDirector.air_kind_for(player.style),
+			FinisherDirector.Kind.WALL_CRUSH, FinisherDirector.Kind.AIR_SMASH]:
+		if not k in kinds:
+			kinds.append(k)
 	return kinds
 
 

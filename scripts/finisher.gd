@@ -18,7 +18,7 @@ enum Kind { PALM_FLURRY, SPINNING_HEEL, AIR_SMASH, WALL_CRUSH, TORNADO_KICK,
 	FINAL_BELL, EIGHT_COUNT, CYCLONE_360, HEAVENS_HEEL,
 	EIGHT_LIMBS, IRON_KNEE, ONE_INCH_VERDICT, CRIMSON_CRESCENT,
 	HUNDRED_PALMS, DRAGONS_DESCENT, LAST_COMBINATION, KNOCKOUT_RHYTHM,
-	PAAYE_LATHI, SUPER_CHOR }
+	PAAYE_LATHI, SUPER_CHOR, SKYLINE_VERDICT, IRON_CORNER }
 
 const DISPLAY_NAMES: Dictionary = {
 	Kind.PALM_FLURRY: "PALM FLURRY",
@@ -40,6 +40,8 @@ const DISPLAY_NAMES: Dictionary = {
 	Kind.KNOCKOUT_RHYTHM: "KNOCKOUT RHYTHM",
 	Kind.PAAYE_LATHI: "FOOTBALL SHOT",
 	Kind.SUPER_CHOR: "SUPER CHOR",
+	Kind.SKYLINE_VERDICT: "SKYLINE VERDICT",
+	Kind.IRON_CORNER: "IRON CORNER",
 }
 ## Permanent finisher ids (used by MartialArtStyle.finishers).
 const IDS: Dictionary = {
@@ -50,9 +52,14 @@ const IDS: Dictionary = {
 	Kind.CRIMSON_CRESCENT: &"crimson_crescent", Kind.HUNDRED_PALMS: &"hundred_palms",
 	Kind.DRAGONS_DESCENT: &"dragons_descent", Kind.LAST_COMBINATION: &"last_combination",
 	Kind.KNOCKOUT_RHYTHM: &"knockout_rhythm", Kind.PAAYE_LATHI: &"paaye_lathi", Kind.SUPER_CHOR: &"super_chor",
+	Kind.SKYLINE_VERDICT: &"skyline_verdict", Kind.IRON_CORNER: &"iron_corner",
 }
-## Environmental finishers: shared by every style, chosen by situation.
-const ENVIRONMENTAL: Array[Kind] = [Kind.AIR_SMASH, Kind.WALL_CRUSH]
+## Situational finishers: one airborne and one wall finisher per style
+## (MartialArtStyle.air_finisher / wall_finisher); Air Smash and Wall Crush are
+## the shared ones for a style that sets none.
+const AIR_KINDS: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT]
+const WALL_KINDS: Array[Kind] = [Kind.WALL_CRUSH, Kind.IRON_CORNER]
+const ENVIRONMENTAL: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT, Kind.WALL_CRUSH, Kind.IRON_CORNER]
 ## Open-floor finishers for a fighter with no style (tests).
 const OPEN_FLOOR_KINDS: Array[Kind] = [Kind.PALM_FLURRY, Kind.SPINNING_HEEL, Kind.TORNADO_KICK]
 ## Victim this close to the wall behind them -> Wall Crush.
@@ -97,7 +104,7 @@ const POSE_KIND: Dictionary = {
 const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_extend", &"lkick_hit"]
 ## Strike poses thrown with a leg (contact is measured from the feet and knees;
 ## every other strike pose from the hands and elbows).
-const KICK_POSES: Array[StringName] = [&"axe_chop", &"back_extend", &"bodyrh_hit", &"fknee_hit", &"front_extend",
+const KICK_POSES: Array[StringName] = [&"axe_chop", &"back_extend", &"bodyrh_hit", &"fknee_hit", &"front_extend", &"flying_side_kick",
 	&"high_extend", &"jrh_hit", &"knee", &"lkick_hit", &"lowrh_hit", &"punt_hit", &"shook_hit", &"spin_kick",
 	&"sweep_extend", &"thrust_extend", &"tornado_kick", &"lowside_hit"]
 ## Documented contact tolerance: a blow counts as landed when its intended
@@ -122,6 +129,20 @@ const RECOVER_STEP: float = 3.0
 const APPROACH_STEP: float = 5.0
 ## How far into the victim's body outline the authored strike aims (px).
 const APPROACH_DEPTH: float = 4.0
+## Airborne finishers: the victim's flight is retimed at the start so their
+## chest meets the striking limb this many ticks into the "meet" beat. Their
+## relaunch stays within MEET_VY_MIN..MEET_VY_MAX (px/tick, up negative).
+const MEET_LEAD: int = 3
+const MEET_VY_MIN: float = -15.0
+const MEET_VY_MAX: float = 7.0
+## Lowest a victim's root may be met at (px above the floor).
+const MEET_MIN_ALT: float = 40.0
+## Where on the torso the meeting blow aims (0 neck, 1 hip): the upper chest.
+const MEET_CHEST: float = 0.65
+## Fastest the attacker glides (px/tick) toward striking range in the air.
+const GLIDE_MAX: float = 9.0
+## A victim this close to the arena bound is against the wall (impacts crack it).
+const AT_WALL: float = 30.0
 
 ## Last finisher played. Static, so it survives scene reloads (restarts) and the
 ## same finisher is never chosen twice in a row.
@@ -138,6 +159,9 @@ var _clock: int = 0
 var _ko_clock: int = -1
 ## The gap (px) at which each blow landed, for tests and tuning.
 var contact_gaps: Array[float] = []
+## Where on the victim's torso each blow landed: 0 at the neck, 1 at the hip
+## (below 0 = the head, above 1 = the legs; NAN when nothing was drawn).
+var contact_heights: Array[float] = []
 ## The joint (FighterVisual.J_*) the pending blow must land with.
 var _pending_limb: int = -1
 ## The reach assist moved the attacker on the last tick.
@@ -151,6 +175,10 @@ var _index: int = -1
 var _beat_tick: int = 0
 var _dir: int = 1
 var _wall_entry: Array[StringName] = []
+## Index of the airborne meeting blow (-1 if none).
+var _meet: int = -1
+## The victim was stopped by the wall during this beat's push (once per beat).
+var _slammed: bool = false
 
 
 ## Finisher by permanent id (-1 if unknown).
@@ -161,20 +189,37 @@ static func kind_for_id(fid: StringName) -> int:
 	return -1
 
 
-## Picks the finisher that fits the situation: Air Smash for an airborne or
-## launching kill, else Wall Crush near the wall behind the victim, else one of
-## the ATTACKER'S STYLE's own finishers (never another style's), never repeating
-## the previous finisher when there is a choice.
+## The attacker style's airborne finisher (Air Smash when it sets none).
+static func air_kind_for(style: MartialArtStyle) -> Kind:
+	if style != null and style.air_finisher != &"":
+		return kind_for_id(style.air_finisher) as Kind
+	return Kind.AIR_SMASH
+
+
+## The attacker style's wall finisher (Wall Crush when it sets none).
+static func wall_kind_for(style: MartialArtStyle) -> Kind:
+	if style != null and style.wall_finisher != &"":
+		return kind_for_id(style.wall_finisher) as Kind
+	return Kind.WALL_CRUSH
+
+
+## Picks the finisher that fits the situation, always from the ATTACKER'S
+## style (never another style's): its airborne finisher for an airborne or
+## launching kill, else its wall finisher near the wall behind the victim,
+## else one of its own open-floor finishers, never repeating the previous
+## finisher when there is a choice.
 static func choose(atk: Fighter, vic: Fighter, killing_attack: CombatData.Attack, rng: RandomNumberGenerator) -> Kind:
 	var picked: Kind
 	var wall_x := Fighter.ARENA_MAX_X if atk.facing > 0 else Fighter.ARENA_MIN_X
 	var airborne_kill := vic.airborne or (killing_attack != null and killing_attack.launch > 0.0)
 	var near_wall := absf(wall_x - vic.position.x) < WALL_RANGE
+	var air_kind := air_kind_for(atk.style)
+	var wall_kind := wall_kind_for(atk.style)
 	# Situational finishers are likely, not guaranteed, so cornered KOs still vary.
-	if airborne_kill and _last_played != Kind.AIR_SMASH and rng.randf() < AIR_SMASH_CHANCE:
-		picked = Kind.AIR_SMASH
-	elif near_wall and _last_played != Kind.WALL_CRUSH and rng.randf() < WALL_CRUSH_CHANCE:
-		picked = Kind.WALL_CRUSH
+	if airborne_kill and _last_played != air_kind and rng.randf() < AIR_SMASH_CHANCE:
+		picked = air_kind
+	elif near_wall and _last_played != wall_kind and rng.randf() < WALL_CRUSH_CHANCE:
+		picked = wall_kind
 	else:
 		var own: Array[Kind] = []
 		if atk.style != null and not atk.style.finishers.is_empty():
@@ -208,6 +253,7 @@ func _init(finisher_kind: Kind, atk: Fighter, vic: Fighter) -> void:
 		for pose in atk.style.wall_entry:
 			_wall_entry.append(StringName(pose))
 	_beats = _build(kind)
+	_plan_meet()
 	# Room to strike: the bodies start at least MIN_GAP apart (the victim is
 	# shoved back, or the attacker steps back when the victim is at the wall).
 	var gap := (vic.position.x - atk.position.x) * _dir
@@ -285,14 +331,130 @@ func tick() -> Dictionary:
 		_start_beat(_beats[_index])
 	var beat := _beats[_index]
 	_move(attacker, beat.get("atk_move", 0.0), true)
+	if beat.get("glide", false):
+		_glide()
 	if _pending.is_empty():
-		_move(victim, beat.get("def_move", 0.0), false)
+		var pushed := float(beat.get("def_move", 0.0))
+		if beat.get("slam", false) and not _slammed:
+			# Driven all the way into the wall within the beat, however far it is.
+			var bound := Fighter.ARENA_MAX_X if _dir > 0 else Fighter.ARENA_MIN_X
+			var left := maxi(int(beat["ticks"]) - _beat_tick - 2, 1)
+			pushed = maxf(pushed, absf(bound - victim.position.x) / float(left) + 1.0)
+		var before := victim.position.x
+		_move(victim, pushed, false)
+		if beat.get("slam", false):
+			# The knee drives on: the attacker travels with the body.
+			_move(attacker, absf(victim.position.x - before), true)
+		if beat.get("slam", false) and not _slammed and pushed > 0.0 and _at_wall() \
+				and absf(victim.position.x - before) < pushed - 0.5 and event.is_empty():
+			event = _slam()
 		if not _approach_next():
 			_recover_spacing(beat)
 	if not _pending.is_empty() and event.is_empty():
 		event = _try_land()
 	_beat_tick += 1
 	return event
+
+
+## Airborne finishers: retimes the victim's flight (a relaunch on the first
+## beat) so that MEET_LEAD ticks into the "meet" beat their chest is at the
+## height the attacker's striking limb will be at, on the attacker's own
+## predicted jump arc. Both arcs use Fighter's shared gravity.
+func _plan_meet() -> void:
+	for i in _beats.size():
+		if _beats[i].get("meet", false):
+			_meet = i
+			break
+	if _meet < 0:
+		return
+	var t_meet := _sum_ticks(0, _meet) + MEET_LEAD
+	# The attacker's launches, by the tick (1-based) of the beat that sets them.
+	var launches := {}
+	var start := 1
+	for i in _meet + 1:
+		if float(_beats[i].get("atk_vy", 0.0)) != 0.0:
+			launches[start] = float(_beats[i]["atk_vy"])
+		start += int(_beats[i]["ticks"])
+	var atk_y: float = _predict(attacker.position.y, attacker.velocity_y, attacker.airborne, attacker.ground_y, launches, t_meet)[0]
+	# Limb and chest heights above each root, from the authored poses.
+	var limb_y := -100.0
+	var chest_y := -110.0
+	var meet_beat := _beats[_meet]
+	var av := attacker.get_node_or_null("Visual") as FighterVisual
+	var vv := victim.get_node_or_null("Visual") as FighterVisual
+	if av != null:
+		var pose: PackedFloat32Array = av._pose_library.get(StringName(meet_beat.get("atk", &"")), PackedFloat32Array())
+		if pose.size() >= FighterVisual.CHANNELS:
+			var j := av._solve_joints(pose)
+			limb_y = j[_intended_limb(meet_beat, j)].y
+	if vv != null:
+		var vname := StringName(meet_beat.get("def_pre", _beats[0].get("def", &"knock_fly")))
+		var vpose: PackedFloat32Array = vv._pose_library.get(vname, PackedFloat32Array())
+		if vpose.size() >= FighterVisual.CHANNELS:
+			var vj := vv._solve_joints(vpose)
+			chest_y = lerpf(vj[FighterVisual.J_NECK].y, vj[FighterVisual.J_HIP].y, MEET_CHEST)
+	var want := minf(atk_y + limb_y - chest_y, victim.ground_y - MEET_MIN_ALT)
+	# The relaunch that puts the victim there, falling if it can.
+	var best_vy := 0.0
+	var best_score := INF
+	var vy := MEET_VY_MIN
+	while vy <= MEET_VY_MAX:
+		var sim := _predict(victim.position.y, vy, true, victim.ground_y, {}, t_meet)
+		if sim[2]:  # still in the air at the meeting
+			var score := absf(float(sim[0]) - want) + (12.0 if float(sim[1]) < 0.0 else 0.0)
+			if score < best_score:
+				best_score = score
+				best_vy = vy
+		vy += 0.1
+	if best_score < INF:
+		_beats[0]["def_vy"] = best_vy
+
+
+## [y, velocity, still airborne] after `ticks` director ticks: each tick a
+## launch scheduled for it applies first, then gravity (Fighter._apply_motion).
+static func _predict(y: float, vy: float, air: bool, ground: float, launches: Dictionary, ticks: int) -> Array:
+	for t in range(1, ticks + 1):
+		if launches.has(t):
+			vy = launches[t]
+			air = true
+		if air:
+			vy += CombatData.GRAVITY_RISE if vy < 0.0 else CombatData.GRAVITY_FALL
+			y += vy
+			if y >= ground:
+				y = ground
+				air = false
+	return [y, vy, air]
+
+
+## A "glide" beat: in the air, the attacker drifts toward the root gap at which
+## the meeting blow's limb reaches the victim, arriving as it lands.
+func _glide() -> void:
+	if _meet < 0 or _index >= _meet:
+		return
+	var left := int(_beats[_index]["ticks"]) - _beat_tick + _sum_ticks(_index + 1, _meet) + MEET_LEAD
+	var want := _authored_reach(_beats[_meet])
+	if want <= 0.0:
+		return
+	var gap := (victim.position.x - attacker.position.x) * _dir
+	var step := clampf((gap - want) / maxf(float(left), 1.0), -GLIDE_MAX, GLIDE_MAX)
+	var limit := victim.position.x - REACH_MIN_GAP * _dir
+	var x := attacker.position.x + step * _dir
+	attacker.position.x = minf(x, limit) if _dir > 0 else maxf(x, limit)
+	attacker.clamp_to_arena()
+
+
+## The victim is up against the arena wall behind them.
+func _at_wall() -> bool:
+	var bound := Fighter.ARENA_MAX_X if _dir > 0 else Fighter.ARENA_MIN_X
+	return absf(bound - victim.position.x) < AT_WALL
+
+
+## A body driven into the wall by a push (no blow): the wall takes the impact.
+func _slam() -> Dictionary:
+	_slammed = true
+	var at := victim.position + Vector2(0.0, -110.0)
+	return {"pos": at, "power": 2, "final": false, "wall": true, "slam": true, "dir": _dir,
+		"kind": CombatData.ImpactKind.STRAIGHT, "high": false, "style": &""}
 
 
 ## During the beat before a grounded blow: step in until the intended limb's
@@ -422,11 +584,15 @@ func _strike_gap(beat: Dictionary, shift: float = 0.0) -> Array:
 		limbs = [a[FighterVisual.J_FOOT_F], a[FighterVisual.J_FOOT_B], a[FighterVisual.J_KNEE_F], a[FighterVisual.J_KNEE_B]]
 	else:
 		limbs = [a[FighterVisual.J_HAND_F], a[FighterVisual.J_HAND_B], a[FighterVisual.J_ELBOW_F], a[FighterVisual.J_ELBOW_B]]
-	# Victim body as capsules: [from, to, radius].
-	var parts: Array = [[v[FighterVisual.J_HEAD], v[FighterVisual.J_HEAD], HEAD_RADIUS]]
-	if beat.get("contact", &"") != &"head":
+	# Victim body as capsules: [from, to, radius]. "contact" narrows the target:
+	# &"head" the head alone, &"body" the torso alone.
+	var zone: StringName = beat.get("contact", &"")
+	var parts: Array = []
+	if zone != &"body":
+		parts.append([v[FighterVisual.J_HEAD], v[FighterVisual.J_HEAD], HEAD_RADIUS])
+	if zone != &"head":
 		parts.append([v[FighterVisual.J_NECK], v[FighterVisual.J_HIP], BODY_RADIUS])
-		if not high:
+		if not high and zone != &"body":
 			for leg in [[FighterVisual.J_KNEE_F, FighterVisual.J_FOOT_F], [FighterVisual.J_KNEE_B, FighterVisual.J_FOOT_B]]:
 				parts.append([v[FighterVisual.J_HIP], v[leg[0]], 9.0])
 				parts.append([v[leg[0]], v[leg[1]], 7.0])
@@ -446,16 +612,29 @@ func _strike_gap(beat: Dictionary, shift: float = 0.0) -> Array:
 	return [best, point, at]
 
 
+## Height of a point along the victim's drawn torso (0 neck, 1 hip).
+func _torso_height(at: Vector2) -> float:
+	var vv := victim.get_node_or_null("Visual") as FighterVisual
+	if vv == null or vv._last_joints.size() < FighterVisual.JOINTS:
+		return NAN
+	var neck := vv._last_joints[FighterVisual.J_NECK]
+	var hip := vv._last_joints[FighterVisual.J_HIP]
+	var axis := hip - neck
+	return (at - neck).dot(axis) / maxf(axis.length_squared(), 1.0)
+
+
 ## Resolves a blow: the victim reacts (or is knocked out) and the hit event goes
 ## out with the real contact point.
 func _land(beat: Dictionary) -> Dictionary:
 	var gap := _strike_gap(beat)
 	_pending = {}
 	contact_gaps.append(gap[0])
+	contact_heights.append(_torso_height(gap[1]))
 	return _resolve_hit(beat, gap[1])
 
 
 func _start_beat(beat: Dictionary) -> Dictionary:
+	_slammed = false
 	if beat.has("atk"):
 		attacker.script_pose = beat["atk"]
 	attacker.script_flip = beat.get("atk_flip", false)
@@ -519,7 +698,10 @@ func _resolve_hit(beat: Dictionary, contact: Vector2) -> Dictionary:
 					victim.script_pose = &"hitstun_down"
 				_:
 					victim.script_pose = &"hitstun_heavy" if victim.hit_counter % 2 == 0 else &"hitstun"
-	return {"pos": contact, "power": beat.get("power", 1), "final": final, "wall": beat.get("wall", false),
+	# A wall impact needs the body actually against the wall (Wall Crush keeps
+	# its own timing).
+	var wall: bool = beat.get("wall", false) and (_at_wall() or kind == Kind.WALL_CRUSH)
+	return {"pos": contact, "power": beat.get("power", 1), "final": final, "wall": wall,
 		"dir": _dir, "kind": strike_kind, "high": high, "style": beat.get("style", &"")}
 
 
@@ -543,9 +725,13 @@ func _move(fighter: Fighter, speed: float, is_attacker: bool) -> void:
 # the air), wall (impact is against the arena wall), atk_spin (turns this beat),
 # atk_spin_hold (keep the turn), limb (FighterVisual.J_* the blow lands with;
 # default: the authored pose's furthest-reaching hand/elbow or foot/knee),
-# def_pre (victim pose as a blow comes in, before it lands),
+# def_pre (victim pose as a blow comes in, before it lands), contact (&"head"
+# or &"body": the only part of the victim the blow may land on),
 # reach (root gap px for the step-in before a blow, where the authored pose
-# misleads, e.g. a kick thrown mid-spin).
+# misleads, e.g. a kick thrown mid-spin), meet (the airborne victim's flight is
+# timed to meet this blow), glide (the attacker drifts in the air toward the
+# meeting blow's range), slam (this beat's push drives the victim into the
+# wall: an impact when they reach it).
 
 func _build(k: Kind) -> Array[Dictionary]:
 	# Every finisher ends with a short final-blow hold and then a follow-through
@@ -772,6 +958,36 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 16, "atk": &"tornado_kick", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
 					"ko_vy": -13.0, "ko_drift": 15.0, "ko_rolls": 2, "ko_tumble": true},
 				{"ticks": 55, "atk": &"land_crouch", "def": &"knock_fly"},
+			]
+		Kind.SKYLINE_VERDICT:
+			# Karate: sink, push off into a high knee chamber turning side-on,
+			# then the flying side kick, heel first, into the chest of the
+			# falling victim (timed to meet it), rear knee tucked; the victim
+			# is driven diagonally into the floor. Retract, land in the
+			# knife-hand ready stance.
+			return [
+				{"ticks": 8, "atk": &"jump_squat", "def": &"knock_fly"},
+				{"ticks": 11, "atk": &"flying_chamber", "def": &"knock_fly", "atk_vy": -15.0, "glide": true},
+				{"ticks": 12, "atk": &"flying_side_kick", "def": &"knock_fly", "hit": true, "meet": true, "power": 3,
+					"final": true, "limb": FighterVisual.J_FOOT_F, "ko_vy": 9.0, "ko_drift": 12.0, "ko_rolls": 1},
+				{"ticks": 8, "atk": &"flying_chamber", "def": &"knock_fly"},
+				{"ticks": 45, "atk": &"kt_ready", "def": &"knock_fly"},
+			]
+		Kind.IRON_CORNER:
+			# Muay Thai: plant, a driving body knee shoves the victim back into
+			# the corner (the wall cracks as their back hits it), a rising knee
+			# into the folded body, the elbow loads, and a horizontal elbow across
+			# the jaw drops them down the wall. Step back, knee-up stance.
+			return [
+				{"ticks": 8, "atk": &"elbow_load", "def": &"stagger"},
+				{"ticks": 12, "atk": &"fknee_hit", "def": &"hitstun_body", "hit": true, "high": false, "contact": &"body", "power": 2,
+					"atk_move": 4.0, "def_move": 10.0, "slam": true},
+				{"ticks": 8, "atk": &"knee", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "wall": true},
+				{"ticks": 7, "atk": &"elbow_load", "def": &"hitstun_body"},
+				{"ticks": 18, "atk": &"elbow_hit", "def": &"slumped", "hit": true, "power": 3, "final": true, "contact": &"head", "limb": FighterVisual.J_ELBOW_B,
+					"ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
+				{"ticks": 22, "atk": &"guard", "def": &"slumped", "atk_move": -3.2},
+				{"ticks": 30, "atk": &"mt_ready", "def": &"slumped"},
 			]
 		Kind.AIR_SMASH:
 			# Leap together, reach and grab, overhead hammer-fist, spike into the

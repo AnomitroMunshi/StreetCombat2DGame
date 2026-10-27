@@ -224,7 +224,7 @@ func strike(pos: Vector2, dir: Vector2, power: int, final: bool = false) -> void
 ## Blood thrown along a blow: a short spray of droplets (bigger ones first,
 ## a fine mist after) that fall under gravity and stain the floor where they
 ## land.
-func blood(pos: Vector2, dir: Vector2, amount: int) -> void:
+func blood(pos: Vector2, dir: Vector2, amount: int, color: Color = BLOOD_COLOR) -> void:
 	if not BLOOD:
 		return
 	dir = dir.normalized() if dir != Vector2.ZERO else Vector2.RIGHT
@@ -233,7 +233,7 @@ func blood(pos: Vector2, dir: Vector2, amount: int) -> void:
 		var a := dir.angle() + _rng.randfn(0.0, 0.28 if heavy else 0.5) - 0.15 * signf(dir.x)
 		var spd := _rng.randf_range(3.0, 6.5) if heavy else _rng.randf_range(4.0, 9.0)
 		_spawn({"kind": "blood", "pos": pos, "vel": Vector2.from_angle(a) * spd, "gravity": 0.38, "age": 0,
-			"life": 90, "color": BLOOD_COLOR, "size": _rng.randf_range(2.2, 3.4) if heavy else _rng.randf_range(1.0, 1.8)})
+			"life": 90, "color": color, "size": _rng.randf_range(2.2, 3.4) if heavy else _rng.randf_range(1.0, 1.8)})
 
 
 ## A wide motion smear behind a big swing (the Super Chor slap): an arc round
@@ -996,7 +996,7 @@ func _draw() -> void:
 				# A droplet stretched along its motion.
 				var bv2: Vector2 = e["vel"]
 				var bs: float = e["size"]
-				draw_line(pos, pos - bv2 * 0.9, Color(BLOOD_COLOR, 0.9), bs, true)
+				draw_line(pos, pos - bv2 * 0.9, Color(e["color"], 0.9), bs, true)
 				draw_circle(pos, bs * 0.55, BLOOD_DARK)
 			"particle":
 				color.a = 1.0 - t
