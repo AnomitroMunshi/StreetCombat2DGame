@@ -524,6 +524,11 @@ var _jump_squat := PackedFloat32Array([0.3, 0.1, 0.7, 2.7, 0.3, 2.85, 1.05, -0.4
 var _jump_rise := PackedFloat32Array([0.08, -0.05, 1.0, 2.6, 0.6, 2.75, 0.15, 0.1, -0.15, -0.2, 0.0, 0.0])
 var _jump_air := PackedFloat32Array([0.12, 0.05, 0.85, 2.7, 0.45, 2.85, 1.75, -0.5, 1.35, -0.9, 0.0, 0.0])
 var _jump_fall := PackedFloat32Array([0.05, 0.0, 0.8, 2.6, 0.4, 2.7, 0.55, 0.1, -0.2, -0.3, 0.0, 0.0])
+# Travelling jumps: forward = a leap (lead knee driven up, rear leg trailing,
+# leaning in); back = a guarded retreat (upright, rear knee up, lead leg
+# reaching forward for the landing, hands high).
+var _jump_fwd := PackedFloat32Array([0.28, 0.0, 1.05, 2.75, 0.7, 2.85, 1.7, -0.35, -0.35, -1.0, 4.0, 0.0])
+var _jump_back := PackedFloat32Array([-0.12, 0.12, 0.85, 2.95, 0.5, 3.0, 0.95, 0.35, 0.95, -0.9, -3.0, 0.0])
 var _land := PackedFloat32Array([0.3, 0.15, 0.7, 2.7, 0.3, 2.85, 1.05, -0.45, -0.5, -1.25, 0.0, 0.0])
 
 # Crouch: low squat, rear knee near the floor, guard up; and the crouched (low) block.
@@ -1635,7 +1640,13 @@ func _target_pose(t: float) -> PackedFloat32Array:
 				return _blend(_getup_sit, _getup_crouch, smoothstep(0.35, 0.7, g))
 			return _blend(_getup_crouch, _guard, smoothstep(0.7, 1.0, g))
 		Fighter.State.JUMP:
-			return _air_pose() if fighter.airborne else _jump_squat
+			if fighter.airborne:
+				return _air_pose()
+			# Push-off: sink into the squat at once (the chord window can hold
+			# it a few ticks), leaning the way the jump will go.
+			var squat := _blend(_guard, _jump_squat, smoothstep(0.0, 3.0, t + 1.0))
+			squat[TORSO] += 0.08 * float(fighter.move_input * fighter.facing)
+			return squat
 		Fighter.State.LAND:
 			return _blend(_land, _guard, smoothstep(0.0, 1.0, t / maxf(float(fighter.stun_frames), 1.0)))
 		Fighter.State.KO:
@@ -1940,9 +1951,13 @@ func _walk_pose() -> PackedFloat32Array:
 ## Stretch while rising, tuck at the apex, extend the legs while falling.
 func _air_pose() -> PackedFloat32Array:
 	var k := clampf(fighter.velocity_y / 9.0, -1.0, 1.0)
-	var pose := _blend(_jump_air, _jump_rise, -k) if k < 0.0 else _blend(_jump_air, _jump_fall, k)
-	# Lean into the direction of travel.
-	pose[TORSO] += clampf(fighter.jump_vx * fighter.facing * 0.03, -0.14, 0.14)
+	# The shape at the top depends on travel: tuck (neutral), leap (forward)
+	# or guarded retreat (back), blended by the actual air speed so steering
+	# reshapes the body smoothly.
+	var travel := clampf(fighter.jump_vx * fighter.facing / CombatData.JUMP_SPEED_FORWARD, -1.0, 1.0)
+	var top := _blend(_jump_air, _jump_fwd, travel) if travel >= 0.0 else _blend(_jump_air, _jump_back, -travel)
+	var pose := _blend(top, _jump_rise, -k * 0.8) if k < 0.0 else _blend(top, _jump_fall, k * 0.85)
+	pose[TORSO] += clampf(fighter.jump_vx * fighter.facing * 0.02, -0.1, 0.1)
 	return pose
 
 

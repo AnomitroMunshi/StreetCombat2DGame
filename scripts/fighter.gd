@@ -130,6 +130,8 @@ var velocity_x: float = 0.0
 var airborne: bool = false
 var velocity_y: float = 0.0
 var jump_vx: float = 0.0
+## In the air from a voluntary jump (its own arc, see CombatData.JUMP_*).
+var jump_arc: bool = false
 var air_attack_used: bool = false
 # Knockdown / blowback bookkeeping.
 var bounced: bool = false
@@ -508,8 +510,9 @@ func _tick_jump() -> void:
 		var chord_wait := CombatData.POWER_CHORD_WINDOW if style != null and style.has_power() else 0
 		if state_frame >= CombatData.JUMP_SQUAT_FRAMES and space_age >= chord_wait:
 			airborne = true
-			velocity_y = CombatData.JUMP_VELOCITY
-			jump_vx = move_input * CombatData.AIR_SPEED
+			jump_arc = true
+			velocity_y = CombatData.JUMP_LAUNCH
+			jump_vx = move_input * _jump_speed(move_input)
 			jumped.emit(self)
 		return
 	if air_attack_used or buffered_attack == CombatData.AttackType.NONE:
@@ -601,12 +604,25 @@ func _apply_motion() -> void:
 		velocity_x = 0.0
 	if airborne:
 		var controllable := state == State.JUMP or state == State.ATTACK
+		var arc := jump_arc and controllable
+		if not arc:
+			jump_arc = false  # hit out of the jump: the shared physics from here
 		if controllable and move_input != 0:
-			jump_vx = move_toward(jump_vx, move_input * CombatData.AIR_SPEED, CombatData.AIR_CONTROL)
+			var target := move_input * (_jump_speed(move_input) if arc else CombatData.AIR_SPEED)
+			var reversing := arc and jump_vx * move_input < 0.0
+			jump_vx = move_toward(jump_vx, target, CombatData.JUMP_REVERSE_CONTROL if reversing else CombatData.AIR_CONTROL)
+		elif arc:
+			jump_vx *= CombatData.JUMP_RELEASE_DRAG
 		if is_down():
 			jump_vx *= CombatData.AIR_DRAG
 		position.x += jump_vx
-		velocity_y += CombatData.GRAVITY_RISE if velocity_y < 0.0 else CombatData.GRAVITY_FALL
+		if arc:
+			if absf(velocity_y) < CombatData.JUMP_APEX_BAND:
+				velocity_y += CombatData.JUMP_APEX_GRAVITY
+			else:
+				velocity_y += CombatData.JUMP_GRAVITY_RISE if velocity_y < 0.0 else CombatData.JUMP_GRAVITY_FALL
+		else:
+			velocity_y += CombatData.GRAVITY_RISE if velocity_y < 0.0 else CombatData.GRAVITY_FALL
 		position.y += velocity_y
 		if position.y >= ground_y:
 			_land()
@@ -621,8 +637,14 @@ func _apply_motion() -> void:
 		wall_hit.emit(self)
 
 
+## Jump travel speed for a direction (screen -1 / 1): back jumps are shorter.
+func _jump_speed(dir: int) -> float:
+	return CombatData.JUMP_SPEED_FORWARD if dir * facing >= 0 else CombatData.JUMP_SPEED_BACK
+
+
 func _land() -> void:
 	position.y = ground_y
+	jump_arc = false
 	last_impact_speed = velocity_y
 	landed.emit(self)
 	if is_down():

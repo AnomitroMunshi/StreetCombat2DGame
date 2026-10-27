@@ -483,10 +483,15 @@ The full table, including hitboxes, knockback and lunge, is in
   mid-attack.
 - **One hit per swing:** each swing can connect at most once, then its hitbox
   is spent.
-- **Jumping:** 2 ticks of squat, then about 28 ticks in the air, peaking near
-  110 px. Falling uses stronger gravity than rising, so the arc is snappy rather
-  than floaty. Your direction at takeoff sets your momentum. Holding a direction
-  in the air steers slightly, and releasing it keeps your momentum. J, K or L in the air gives
+- **Jumping:** 2 ticks of squat (held up to the 6-tick power-move window),
+  then about 35 ticks in the air: a ~128 px apex with a short hang at the top
+  and a firmer fall. A forward jump travels about 155 px; a back jump is
+  shorter (about 110 px) and reads as a guarded retreat. The body shape
+  follows the travel: a compact tuck straight up, a leap forward, an upright
+  guard going back. Momentum: holding the travel direction keeps full speed;
+  releasing keeps the momentum but it bleeds away slightly; reversing steers
+  at about half the rate (you can stop and drift back, not snap round).
+  Knockbacks, launches and power leaps keep their own physics. J, K or L in the air gives
   your style's air attack, one per jump. If you get hit in the air you pop
   up slightly, which allows juggles. A high enough jump can cross over the
   opponent, because pushboxes only collide when both fighters are close in
@@ -960,6 +965,7 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 | `test_core.gd` | Frame data, combos, block / low block, parry (window, whiff, cooldown, low), perfect dodge, cross-up guard, both facing directions, knockdown, dodge, finisher selection and choreography, audio |
 | `test_input.gd` | Real key mapping: J/K/L with W/S, A/D never modifiers, S crouch, double-tap dash, Q style cycling |
 | `test_finisher_contact.gd` | Every style finisher, both directions: each blow lands with its intended limb within 6 px of the drawn body, exactly once, and completes |
+| `test_jump.gd` | Jump arc (apex, air time), forward vs back distance, reverse/release momentum rules, knockbacks keep shared gravity; both directions |
 | `test_double_kick.gd` | Taekwondo L: 5 + 9 damage, active ticks 9-11 and 21-23, second kick after a whiff, low/standing guard rules, no restart, interrupts, both directions |
 | `test_controls.gd` | Every style x key x facing, every combo branch, Space+J/K chords (order, window, one per press, grounded uppercut), dash rules, guard, parry, jump, signature, pause, restart |
 | `test_stun.gd` | Every stun move both ways, dizzy rules (helpless, drain per hit, recovery, immunity, knockdown clears, mashing) |

@@ -162,8 +162,9 @@ func _initialize() -> void:
 			saw_land = true
 		if saw_land and landed_tick < 0 and a.state == Fighter.State.IDLE:
 			landed_tick = t
-	_check(peak > 90.0 and peak < 130.0, "jump peak height ~118 px (%.0f)" % peak)
-	_check(air_ticks >= 24 and air_ticks <= 32, "airtime ~29 ticks (%d)" % air_ticks)
+	# CombatData.JUMP_*: apex ~130 px with a short hang, about 34 ticks up.
+	_check(peak > 115.0 and peak < 140.0, "jump peak height ~130 px (%.0f)" % peak)
+	_check(air_ticks >= 31 and air_ticks <= 38, "airtime ~34 ticks (%d)" % air_ticks)
 	_check(saw_land and landed_tick > 0, "went through LAND recovery back to IDLE")
 	_check(is_equal_approx(a.position.y, 560.0), "back on the floor exactly")
 
@@ -201,7 +202,7 @@ func _initialize() -> void:
 	p = _make_pair()
 	a = p[0]
 	b = p[1]
-	a.position.x = 450
+	a.position.x = 430  # a jump-in from ~150 px lands the punch on the way down
 	a.ground_y = 560
 	b.ground_y = 560
 	var jp_started := false
@@ -209,7 +210,7 @@ func _initialize() -> void:
 	var jfw := _intent(CombatData.AttackType.NONE, false, 1)
 	jfw.jump = true
 	for t in 60:
-		var ia := jfw if t == 0 else (_intent(CombatData.AttackType.LIGHT) if t == 20 else _intent(CombatData.AttackType.NONE, false, 1))
+		var ia := jfw if t == 0 else (_intent(CombatData.AttackType.LIGHT) if t == 25 else _intent(CombatData.AttackType.NONE, false, 1))
 		var r := _step(a, b, ia, none)
 		if a.airborne and a.current_attack != null and a.current_attack.type == CombatData.AttackType.JUMP_PUNCH:
 			jp_started = true
