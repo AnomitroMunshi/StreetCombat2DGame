@@ -136,10 +136,11 @@ untrained para street fighter.
   a gamchha over the shoulder and rubber sandals. The fighter never raises a
   guard (hands hang loose until Shift), and the idle has finger-pointing,
   a hand on the waist, sleeve tugs and head shakes.
-- **Moves:** open-hand slaps, a flat-footed thrust kick and a two-handed
-  shove.
-  - The shove pushes hard on a clean hit, with one 20% knockdown roll per
-    clean hit. A blocked shove pushes less and never knocks down.
+- **Moves:** open-hand slaps, a heel-led thrust kick and Jor Dhakka, a
+  charging shoulder bash.
+  - Jor Dhakka charges a short, bounded distance, stops on contact and knocks
+    the opponent well back (less on block). It never knocks down, and a miss
+    leaves a long, punishable recovery.
 - **Guard breaker:** the Double-Hand Hammer (W+K) is the only guard breaker
   in the game. Blocking it breaks the guard outright, but a parry still
   beats it, and its long wind-up and recovery make it punishable.
@@ -477,7 +478,7 @@ The full table, including hitboxes, knockback and lunge, is in
   | Overhand (W+K), air attacks | nothing |
 
   Heavy enders never repeat (no cross→cross). The 3rd swing is a finisher
-  with extra knockback and stun. Juggles end with a knockdown on the 3rd hit.
+  with extra knockback and stun. Juggles end with a knockdown on the 4th hit.
 - **Interrupts:** an attack can end early only by being hit, by chaining,
   or (for a jump kick) by landing. You can't walk, block, jump or turn around
   mid-attack.
@@ -503,8 +504,10 @@ The full table, including hitboxes, knockback and lunge, is in
   works as an anti-air against jump-ins. On hit it launches the opponent about
   45 px into the air, and the next attacks in the chain can juggle them. When
   blocked it doesn't launch, and it is the riskiest punch to get blocked.
-- **Knockdown:** the 3rd consecutive hit of a combo knocks the opponent off
-  their feet. They fly back, slam down and bounce (dust and shake), lie down for
+- **Knockdown:** the 4th consecutive hit of a combo knocks the opponent off
+  their feet. Some heavy attacks can also blow the opponent back, but only as
+  a follow-up in a combo or on a counter hit, never as a lone poke (at half
+  their listed chance); signatures and certain-blowback moves always do. They fly back, slam down and bounce (dust and shake), lie down for
   about 0.6 s, then get up in stages: sit up, crouch, stand. While down or
   getting up they can't be hit. A KO uses the same fall and stays down.
 - **Juggle limit:** from the 4th hit of a combo onward, each hit stuns 3 ticks
@@ -984,7 +987,8 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 | `test_double_kick.gd` | Taekwondo L: 5 + 9 damage, active ticks 9-11 and 21-23, second kick after a whiff, low/standing guard rules, no restart, interrupts, both directions |
 | `test_controls.gd` | Every style x key x facing, every combo branch, Space+J/K chords (order, window, one per press, grounded uppercut), dash rules, guard, parry, jump, signature, pause, restart |
 | `test_stun.gd` | Every stun move both ways, dizzy rules (helpless, drain per hit, recovery, immunity, knockdown clears, mashing) |
-| `test_bangla.gd` | Bangla Maar: relaxed stance, every move both ways, the shove's seeded 20% knockdown, guard breaker, Belly Bomb, finishers (limb on the head, fall, slide), speech bubbles and the Bengali font |
+| `test_knockdown.gd` | When hits knock down: lone hits never roll blowback, counter hits and combo follow-ups can (seeded), certain blowbacks always, the 4th combo hit |
+| `test_bangla.gd` | Bangla Maar: relaxed stance, every move both ways, Jor Dhakka (bounded charge, stops on contact, no knockdown), guard breaker, Belly Bomb, finishers (limb on the head, fall, slide), speech bubbles and the Bengali font |
 | `test_training.gd` | Training ground: dummy modes, speeds, pause and step, frame advantage readouts |
 | `test_flow.gd` | Start button, input lock, countdown order and timing, simultaneous unlock, button mashing, restart mid-countdown |
 | `test_match.gd` | A full scripted match against the real AI, KO, then restart |
