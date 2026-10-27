@@ -98,6 +98,10 @@ const SPEECH_MISS_MOVES: Array[StringName] = [&"hammer_fist", &"thrust_kick", &"
 const SPEECH_SLAPS: Array[StringName] = [&"light_slap", &"flying_slap"]
 ## Low-health line below this fraction of max health (once per match).
 const SPEECH_LOW_HEALTH: float = 0.25
+## Result shot: zoom range and camera centre height (floor ~150 px below centre).
+const RESULT_ZOOM_MIN: float = 0.9
+const RESULT_ZOOM_MAX: float = 1.1
+const RESULT_FOCUS_Y: float = 400.0
 const VIEW_MIN := Vector2(-200.0, -200.0)
 const VIEW_MAX := Vector2(1480.0, 920.0)
 const HIT_COLOR := Color(1.0, 0.9, 0.6)
@@ -1479,6 +1483,14 @@ func _process(delta: float) -> void:
 		# Steady, centred pre-fight framing, a little closer for the silhouettes.
 		target_zoom = PREFIGHT_ZOOM
 		target_pos = Vector2((player.position.x + enemy.position.x) * 0.5, PREFIGHT_FOCUS_Y)
+	elif _round_state == RoundState.RESULT:
+		# The result shot: level, wide enough for both bodies, the floor low in
+		# frame so the title sits above the winner and the buttons below.
+		var spread := absf(player.position.x - enemy.position.x)
+		target_zoom = clampf(1180.0 / (spread + 520.0), RESULT_ZOOM_MIN, RESULT_ZOOM_MAX)
+		var half := Vector2(640.0, 360.0) / target_zoom
+		var cx := (player.position.x + enemy.position.x) * 0.5
+		target_pos = Vector2(clampf(cx, VIEW_MIN.x + half.x, VIEW_MAX.x - half.x), RESULT_FOCUS_Y)
 	elif _finisher != null:
 		var attacker := _finisher.attacker
 		var victim := _finisher.victim

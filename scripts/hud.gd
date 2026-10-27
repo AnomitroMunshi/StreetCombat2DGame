@@ -39,6 +39,24 @@ const COLOR_POSTURE := Color(0.98, 0.62, 0.2)
 const COLOR_POSTURE_HIGH := Color(1.0, 0.25, 0.15)
 const COLOR_POSTURE_LOCK := Color(0.6, 0.6, 0.65, 0.6)
 const POPUP_LIFE: float = 0.9
+## Baseline of the K.O. / result headline.
+const HEADLINE_Y: float = 200.0
+## Message lanes under each health bar (baselines): style + HP, signature
+## readiness, the combo counter, then up to POPUP_SLOTS stacked callouts. Each
+## kind of message has its own row, so nothing is ever drawn over another.
+const LANE_READY_Y: float = BAR_Y + 80.0
+const LANE_COMBO_Y: float = BAR_Y + 108.0
+const LANE_POPUP_Y: float = BAR_Y + 136.0
+const LANE_POPUP_STEP: float = 26.0
+const POPUP_SLOTS: int = 3
+const READY_SIZE: int = 18
+const COMBO_SIZE: int = 26
+const POPUP_SIZE: int = 22
+## With the training panels open, the callout lanes move inward between the
+## info panel (left) and the button column (right).
+const TRAINING_LANE_W: float = 255.0
+const TRAINING_LANE_GUTTER: float = 30.0
+const TRAINING_LANE_LEFT: float = 520.0
 ## Focus bar: under the posture bar, filling from the inner end.
 const FOCUS_Y: float = POSTURE_Y + POSTURE_H + 4.0
 const FOCUS_H: float = 5.0
@@ -244,7 +262,7 @@ func _build_training_panels() -> void:
 	_train_panel = PanelContainer.new()
 	_train_panel.add_theme_stylebox_override("panel", _panel_box())
 	_train_panel.position = Vector2(12.0, 132.0)
-	_train_info = _text_label(Vector2(560.0, 0.0))
+	_train_info = _text_label(Vector2(470.0, 0.0))
 	_train_panel.add_child(_train_info)
 	_train_panel.visible = false
 	add_child(_train_panel)
@@ -513,8 +531,40 @@ func hide_speech(fighter: Fighter) -> void:
 	_speech.erase(0 if fighter == _player else 1)
 
 
+## A callout under that fighter's bar: takes the first free row; the same text
+## already showing is refreshed instead of stacked; with every row taken the
+## oldest callout gives way.
 func popup(fighter: Fighter, text: String, color: Color) -> void:
-	_popups.append({"text": text, "side": 0 if fighter == _player else 1, "age": 0.0, "color": color})
+	var side := 0 if fighter == _player else 1
+	var used := {}
+	var oldest := -1
+	for i in _popups.size():
+		var p: Dictionary = _popups[i]
+		if p["side"] != side:
+			continue
+		if p["text"] == text:
+			p["age"] = 0.0
+			p["color"] = color
+			return
+		used[p["slot"]] = true
+		if oldest < 0 or p["age"] > _popups[oldest]["age"]:
+			oldest = i
+	var slot := 0
+	while used.has(slot):
+		slot += 1
+	if slot >= POPUP_SLOTS:
+		slot = _popups[oldest]["slot"]
+		_popups.remove_at(oldest)
+	_popups.append({"text": text, "side": side, "age": 0.0, "color": color, "slot": slot})
+
+
+## The x range of a side's callout lanes: under its bar, or inward while the
+## training panels are open.
+func _lane(side: int) -> Rect2:
+	if is_training_visible():
+		var x := TRAINING_LANE_LEFT if side == 0 else TRAINING_LANE_LEFT + TRAINING_LANE_W + TRAINING_LANE_GUTTER
+		return Rect2(x, 0.0, TRAINING_LANE_W, 0.0)
+	return Rect2(BAR_MARGIN if side == 0 else SCREEN_W - BAR_MARGIN - BAR_WIDTH, 0.0, BAR_WIDTH, 0.0)
 
 
 ## Big centred countdown entry; a new text restarts the pop animation.
@@ -670,7 +720,7 @@ func _draw_gameplay_hud() -> void:
 	_draw_popups()
 	_draw_combo(_enemy, BAR_MARGIN, HORIZONTAL_ALIGNMENT_LEFT)
 	_draw_combo(_player, SCREEN_W - BAR_MARGIN - BAR_WIDTH, HORIZONTAL_ALIGNMENT_RIGHT)
-	if _show_hints:
+	if _show_hints and _headline == "":
 		_canvas.draw_string(_font, Vector2(0.0, 706.0),
 			"A/D move · 2×A/D dash · SPACE jump · J light · K heavy · L technique · W/S + J/K high/low · SPACE + J/K power · F signature · SHIFT block/parry · S+SHIFT low block · R rematch",
 			HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
@@ -685,10 +735,11 @@ func _draw_overlays() -> void:
 		_canvas.draw_rect(Rect2(0.0, 600.0, SCREEN_W, 3.0), _banner_color)
 		_canvas.draw_rect(Rect2(0.0, 649.0, SCREEN_W, 3.0), _banner_color)
 		_shadow_text(Vector2(0.0, 638.0), _banner, 30, HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, COLOR_TEXT)
+	# Upper third: clear of the bars above and the fighters' heads below.
 	if _headline != "":
-		_shadow_text(Vector2(0.0, 300.0), _headline, 72, HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, COLOR_TEXT)
+		_shadow_text(Vector2(0.0, HEADLINE_Y), _headline, 72, HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, COLOR_TEXT)
 	if _subline != "":
-		_shadow_text(Vector2(0.0, 350.0), _subline, 24, HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, COLOR_DIM)
+		_shadow_text(Vector2(0.0, HEADLINE_Y + 42.0), _subline, 24, HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, COLOR_DIM)
 	if _count_text != "":
 		_draw_countdown()
 	_draw_speech()
@@ -759,11 +810,21 @@ func _draw_focus(f: Fighter, x: float, mirrored: bool) -> void:
 	var full := ratio >= 1.0
 	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.008)
 	_canvas.draw_rect(fill, COLOR_FOCUS.lerp(COLOR_FOCUS_FULL, pulse) if full else COLOR_FOCUS)
-	if full and f.style != null and f.style.signature != &"":
+	# Only a fighter who can still use it is told it is ready, and never once
+	# the round is over (K.O. / result).
+	if full and f.style != null and f.style.signature != &"" and f.health > 0 and not f.is_down() and _headline == "":
 		var sig := CombatData.get_attack(CombatData.type_for_id(f.style.signature)).display_name.to_upper()
 		var text := ("SIGNATURE READY - F   " + sig) if f == _player else sig + " READY"
 		var align := HORIZONTAL_ALIGNMENT_RIGHT if mirrored else HORIZONTAL_ALIGNMENT_LEFT
-		_shadow_text(Vector2(x, BAR_Y + 84.0), text, 18, align, BAR_WIDTH, Color(1.0, 0.9, 0.5, 0.75 + 0.25 * pulse))
+		_shadow_text(Vector2(x, LANE_READY_Y), text, _fit_size(text, READY_SIZE, BAR_WIDTH), align, BAR_WIDTH,
+			Color(1.0, 0.9, 0.5, 0.75 + 0.25 * pulse))
+
+
+## Largest font size up to `size` at which `text` fits in `width`.
+func _fit_size(text: String, size: int, width: float) -> int:
+	while size > 11 and _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > width:
+		size -= 1
+	return size
 
 
 ## Bubbles above the speakers' heads: kept on screen, and the second one moved
@@ -789,7 +850,7 @@ func _draw_speech() -> void:
 			if rect.intersects(other.grow(6.0)):
 				rect.position.y = other.position.y - h - 12.0
 		# Never over the result headline / countdown in the middle of the screen.
-		var middle := Rect2(0.0, 220.0, SCREEN_W, 150.0)
+		var middle := Rect2(0.0, HEADLINE_Y - 80.0, SCREEN_W, 130.0)
 		if (_headline != "" or _count_text != "") and rect.intersects(middle):
 			rect.position.y = middle.position.y - h - 8.0
 		placed.append(rect)
@@ -816,12 +877,14 @@ func _draw_speech() -> void:
 func _draw_popups() -> void:
 	for pop in _popups:
 		var t: float = pop["age"] / POPUP_LIFE
-		var x := BAR_MARGIN if pop["side"] == 0 else SCREEN_W - BAR_MARGIN - BAR_WIDTH
+		var lane := _lane(int(pop["side"]))
 		var align := HORIZONTAL_ALIGNMENT_LEFT if pop["side"] == 0 else HORIZONTAL_ALIGNMENT_RIGHT
 		var c: Color = pop["color"]
 		c.a = 1.0 - smoothstep(0.6, 1.0, t)
-		var rise := -10.0 * t
-		_shadow_text(Vector2(x, BAR_Y + 100.0 + rise), pop["text"], 26, align, BAR_WIDTH, c)
+		# Pops in from a little lower and settles on its row (never into the next).
+		var y: float = LANE_POPUP_Y + float(pop["slot"]) * LANE_POPUP_STEP + 6.0 * (1.0 - smoothstep(0.0, 0.12, t))
+		var text: String = pop["text"]
+		_shadow_text(Vector2(lane.position.x, y), text, _fit_size(text, POPUP_SIZE, lane.size.x), align, lane.size.x, c)
 
 
 func _bar_rect(x: float, ratio: float, mirrored: bool) -> Rect2:
@@ -835,7 +898,8 @@ func _draw_combo(victim: Fighter, x: float, align: HorizontalAlignment) -> void:
 	if victim.received_combo < 2 or victim.combo_display_frames <= 0:
 		return
 	var alpha := clampf(victim.combo_display_frames / 20.0, 0.0, 1.0)
-	_shadow_text(Vector2(x, BAR_Y + 62.0), "%d HITS" % victim.received_combo, 30, align, BAR_WIDTH,
+	var lane := _lane(0 if align == HORIZONTAL_ALIGNMENT_LEFT else 1)
+	_shadow_text(Vector2(lane.position.x, LANE_COMBO_Y), "%d HITS" % victim.received_combo, COMBO_SIZE, align, lane.size.x,
 		Color(1.0, 0.85, 0.4, alpha))
 
 
