@@ -100,6 +100,8 @@ const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_exte
 const KICK_POSES: Array[StringName] = [&"axe_chop", &"back_extend", &"bodyrh_hit", &"fknee_hit", &"front_extend",
 	&"high_extend", &"jrh_hit", &"knee", &"lkick_hit", &"lowrh_hit", &"punt_hit", &"shook_hit", &"spin_kick",
 	&"sweep_extend", &"thrust_extend", &"tornado_kick", &"lowside_hit"]
+## Documented contact tolerance: a blow counts as landed when its intended
+## limb is within CONTACT_SLOP px of the victim's drawn body outline.
 ## A blow lands when the striking limb is this close to the victim's drawn body
 ## (px past the body outline), or at its closest approach, and at the latest
 ## IMPACT_MAX_WAIT ticks after its beat starts.
@@ -115,6 +117,11 @@ const REACH_ASSIST: float = 7.0
 const REACH_MIN_GAP: float = 40.0
 ## How fast (px/tick) the attacker steps back out to MIN_GAP after a lunge.
 const RECOVER_STEP: float = 3.0
+## Before a blow, the attacker steps in (px/tick) to the root gap at which the
+## intended limb, in its authored strike pose, meets the victim's body.
+const APPROACH_STEP: float = 5.0
+## How far into the victim's body outline the authored strike aims (px).
+const APPROACH_DEPTH: float = 4.0
 
 ## Last finisher played. Static, so it survives scene reloads (restarts) and the
 ## same finisher is never chosen twice in a row.
@@ -131,6 +138,10 @@ var _clock: int = 0
 var _ko_clock: int = -1
 ## The gap (px) at which each blow landed, for tests and tuning.
 var contact_gaps: Array[float] = []
+## The joint (FighterVisual.J_*) the pending blow must land with.
+var _pending_limb: int = -1
+## The reach assist moved the attacker on the last tick.
+var _pending_stepped: bool = false
 var attacker: Fighter = null
 var victim: Fighter = null
 var done: bool = false
@@ -276,11 +287,66 @@ func tick() -> Dictionary:
 	_move(attacker, beat.get("atk_move", 0.0), true)
 	if _pending.is_empty():
 		_move(victim, beat.get("def_move", 0.0), false)
-		_recover_spacing(beat)
+		if not _approach_next():
+			_recover_spacing(beat)
 	if not _pending.is_empty() and event.is_empty():
 		event = _try_land()
 	_beat_tick += 1
 	return event
+
+
+## During the beat before a grounded blow: step in until the intended limb's
+## authored strike would reach the victim's body. True while stepping in.
+func _approach_next() -> bool:
+	if _index + 1 >= _beats.size() or attacker.airborne or victim.is_down():
+		return false
+	var next := _beats[_index + 1]
+	if not next.get("hit", false) or float(next.get("atk_vy", 0.0)) != 0.0:
+		return false
+	var want := _authored_reach(next)
+	if want <= 0.0:
+		return false
+	var gap := (victim.position.x - attacker.position.x) * _dir
+	if gap <= want + 0.5:
+		return false
+	attacker.position.x += minf(gap - want, APPROACH_STEP) * _dir
+	attacker.clamp_to_arena()
+	return true
+
+
+## Root gap at which a beat's intended limb, in its authored strike pose,
+## reaches APPROACH_DEPTH into the victim's body (0 if unknown).
+func _authored_reach(beat: Dictionary) -> float:
+	if beat.has("reach"):
+		return float(beat["reach"])
+	var av := attacker.get_node_or_null("Visual") as FighterVisual
+	if av == null:
+		return 0.0
+	var pose: PackedFloat32Array = av._pose_library.get(StringName(beat.get("atk", &"")), PackedFloat32Array())
+	if pose.size() < FighterVisual.CHANNELS:
+		return 0.0
+	var joints := av._solve_joints(pose)
+	var limb := _intended_limb(beat, joints)
+	var front := FighterVisual.BODY_HALF if beat.get("high", true) else FighterVisual.BODY_HALF + 2.0
+	return maxf(absf(joints[limb].x) + front - APPROACH_DEPTH, REACH_MIN_GAP)
+
+
+## The limb a blow is thrown with: the beat's "limb" (a FighterVisual.J_*
+## joint), else whichever candidate (feet and knees for kicks, hands and
+## elbows otherwise) the authored strike pose extends furthest from the body.
+func _intended_limb(beat: Dictionary, joints: PackedVector2Array) -> int:
+	if beat.has("limb"):
+		return int(beat["limb"])
+	var cands: Array[int] = [FighterVisual.J_HAND_F, FighterVisual.J_HAND_B, FighterVisual.J_ELBOW_F, FighterVisual.J_ELBOW_B]
+	if StringName(beat.get("atk", &"")) in KICK_POSES:
+		cands = [FighterVisual.J_FOOT_F, FighterVisual.J_FOOT_B, FighterVisual.J_KNEE_F, FighterVisual.J_KNEE_B]
+	var best := cands[0]
+	for c in cands:
+		# Absolute reach: spinning kicks strike with a leg thrown out behind
+		# the authored (unturned) pose.
+		if absf(joints[c].x) > absf(joints[best].x):
+			best = c
+	return best
 
 
 ## After a lunge into a blow, the attacker steps back out to striking distance
@@ -300,10 +366,21 @@ func _try_land() -> Dictionary:
 	var gap := _strike_gap(_pending)
 	var g: float = gap[0]
 	_pending_ticks += 1
+	var stepped := _pending_stepped
+	_pending_stepped = false
 	if g > CONTACT_SLOP:
 		# Out of reach: the attacker carries forward into the blow (a lunge),
-		# never through the victim's body.
+		# never through the victim's body; a limb that has already passed the
+		# body (a victim leaning or doubled over toward the attacker) draws the
+		# attacker back instead.
 		var step := minf(g - CONTACT_SLOP * 0.5, REACH_ASSIST)
+		var g_in: float = _strike_gap(_pending, step)[0]
+		var g_out: float = _strike_gap(_pending, -step)[0]
+		if g_out < g_in:
+			step = -step
+		if minf(g_in, g_out) >= g:
+			step = 0.0
+		_pending_stepped = step != 0.0
 		var limit := victim.position.x - REACH_MIN_GAP * _dir
 		var x := attacker.position.x + step * _dir
 		attacker.position.x = minf(x, limit) if _dir > 0 else maxf(x, limit)
@@ -312,7 +389,9 @@ func _try_land() -> Dictionary:
 	# Spinning and airborne blows swing away before they come round (or drop
 	# from above), so they get longer to arrive and no closest-approach rule.
 	var sweeping: bool = float(_pending.get("atk_spin", 0.0)) > 0.0 or _pending.get("atk_spin_hold", false) 		or attacker.airborne
-	var receding: bool = not sweeping and _pending_ticks > 1 and g > _pending_gap + 0.5
+	# (A gap that grew only because the attacker was just repositioned is not
+	# the limb going past.)
+	var receding: bool = not sweeping and not stepped and _pending_ticks > 1 and g > _pending_gap + 0.5
 	var wait := mini(IMPACT_MAX_WAIT_SWEEP, int(_pending["ticks"]) - 2) if sweeping else IMPACT_MAX_WAIT
 	_pending_gap = minf(_pending_gap, g)
 	if arrived or receding or _pending_ticks >= wait:
@@ -321,19 +400,25 @@ func _try_land() -> Dictionary:
 
 
 ## Closest the attacker's striking limbs are to the victim's drawn body:
-## [gap px past the outline (negative = overlapping), contact point]. Falls back
+## [gap px past the outline (negative = overlapping), contact point, limb
+## position]. Falls back
 ## to the space between the bodies before either has been drawn.
-func _strike_gap(beat: Dictionary) -> Array:
+func _strike_gap(beat: Dictionary, shift: float = 0.0) -> Array:
 	var high: bool = beat.get("high", true)
 	var fallback := (attacker.position + victim.position) * 0.5 + Vector2(0.0, -135.0 if high else -95.0)
 	var av := attacker.get_node_or_null("Visual") as FighterVisual
 	var vv := victim.get_node_or_null("Visual") as FighterVisual
 	if av == null or vv == null or av._last_joints.size() < FighterVisual.JOINTS or vv._last_joints.size() < FighterVisual.JOINTS:
-		return [0.0, fallback]
+		# Not drawn yet: no drawn contact to measure (NAN, recorded as such in
+		# contact_gaps); the blow resolves at the space between the bodies on
+		# its timeout.
+		return [NAN, fallback, fallback]
 	var a := av._last_joints
 	var v := vv._last_joints
 	var limbs: Array[Vector2] = []
-	if StringName(beat.get("atk", &"")) in KICK_POSES:
+	if _pending_limb >= 0:
+		limbs = [a[_pending_limb] + Vector2(shift * _dir, 0.0)]
+	elif StringName(beat.get("atk", &"")) in KICK_POSES:
 		limbs = [a[FighterVisual.J_FOOT_F], a[FighterVisual.J_FOOT_B], a[FighterVisual.J_KNEE_F], a[FighterVisual.J_KNEE_B]]
 	else:
 		limbs = [a[FighterVisual.J_HAND_F], a[FighterVisual.J_HAND_B], a[FighterVisual.J_ELBOW_F], a[FighterVisual.J_ELBOW_B]]
@@ -347,6 +432,7 @@ func _strike_gap(beat: Dictionary) -> Array:
 				parts.append([v[leg[0]], v[leg[1]], 7.0])
 	var best := INF
 	var point := fallback
+	var at := fallback
 	for limb in limbs:
 		for part in parts:
 			var c := Geometry2D.get_closest_point_to_segment(limb, part[0], part[1])
@@ -356,7 +442,8 @@ func _strike_gap(beat: Dictionary) -> Array:
 				# On the body's surface, facing the limb.
 				var out := (limb - c).normalized() if limb.distance_squared_to(c) > 0.01 else Vector2(-_dir, 0.0)
 				point = c + out * float(part[2])
-	return [best, point]
+				at = limb
+	return [best, point, at]
 
 
 ## Resolves a blow: the victim reacts (or is knocked out) and the hit event goes
@@ -382,10 +469,18 @@ func _start_beat(beat: Dictionary) -> Dictionary:
 	if not beat.get("hit", false):
 		_victim_reacts(beat)
 		return {}
+	if beat.has("def_pre"):
+		victim.script_pose = beat["def_pre"]  # how they move as the blow comes in
 	# The blow lands when the limb gets there (see _try_land), not on this tick.
 	_pending = beat
 	_pending_ticks = 0
 	_pending_gap = INF
+	_pending_limb = -1
+	var av := attacker.get_node_or_null("Visual") as FighterVisual
+	if av != null:
+		var pose: PackedFloat32Array = av._pose_library.get(StringName(beat.get("atk", &"")), PackedFloat32Array())
+		if pose.size() >= FighterVisual.CHANNELS:
+			_pending_limb = _intended_limb(beat, av._solve_joints(pose))
 	return {}
 
 
@@ -445,7 +540,12 @@ func _move(fighter: Fighter, speed: float, is_attacker: bool) -> void:
 # Beat keys: ticks, atk/def (pose names), atk_flip, atk_move/def_move (px per tick
 # along the attacker's facing), atk_vy/def_vy (vertical launch at beat start),
 # hit, high, power (1-3), final, ko_vy, ko_drift, ko_rolls, ko_tumble (spin in
-# the air), wall (impact is against the arena wall), atk_spin (turns this beat).
+# the air), wall (impact is against the arena wall), atk_spin (turns this beat),
+# atk_spin_hold (keep the turn), limb (FighterVisual.J_* the blow lands with;
+# default: the authored pose's furthest-reaching hand/elbow or foot/knee),
+# def_pre (victim pose as a blow comes in, before it lands),
+# reach (root gap px for the step-in before a blow, where the authored pose
+# misleads, e.g. a kick thrown mid-spin).
 
 func _build(k: Kind) -> Array[Dictionary]:
 	# Every finisher ends with a short final-blow hold and then a follow-through
@@ -576,7 +676,8 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 5, "atk": &"jab_strike", "def": &"hitstun", "hit": true, "atk_move": 0.8, "def_move": 0.8},
 				{"ticks": 5, "atk": &"bhook_hit", "def": &"hitstun_body", "hit": true, "high": false, "atk_move": 0.8, "def_move": 0.8},
 				{"ticks": 5, "atk": &"rbody_hit", "def": &"hitstun_body", "hit": true, "high": false, "atk_move": 0.8, "def_move": 1.0},
-				{"ticks": 6, "atk": &"uppercut_strike", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 0.5, "def_move": 1.0},
+				{"ticks": 6, "atk": &"uppercut_strike", "def": &"hitstun_up", "def_pre": &"stagger", "hit": true, "power": 2,
+					"atk_move": 0.5, "def_move": 1.0},
 				{"ticks": 12, "atk": &"heavy_windup", "def": &"stagger"},
 				{"ticks": 26, "atk": &"heavy_strike", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
 					"ko_vy": -6.0, "ko_drift": 17.0, "ko_rolls": 0, "ko_tumble": true},
@@ -641,7 +742,8 @@ func _build(k: Kind) -> Array[Dictionary]:
 			# drives them into the floor.
 			return [
 				{"ticks": 10, "atk": &"shook_load", "def": &"stagger", "atk_spin": 0.4},
-				{"ticks": 8, "atk": &"shook_hit", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 1.0, "def_move": 1.2, "atk_spin": 0.6},
+				{"ticks": 8, "atk": &"shook_hit", "def": &"hitstun", "hit": true, "power": 2, "atk_move": 1.0, "def_move": 1.2, "atk_spin": 0.6,
+					"reach": 58.0},
 				{"ticks": 10, "atk": &"jump_rise", "def": &"stagger", "atk_vy": -13.0, "atk_move": 1.5},
 				{"ticks": 6, "atk": &"axe_raise", "def": &"stagger"},
 				{"ticks": 16, "atk": &"axe_chop", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
