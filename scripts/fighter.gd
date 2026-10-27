@@ -626,12 +626,17 @@ func _land() -> void:
 	last_impact_speed = velocity_y
 	landed.emit(self)
 	if is_down():
-		if not bounced:
+		if not bounced and velocity_y >= CombatData.BOUNCE_MIN_IMPACT:
 			# Body slams the floor and bounces once; harder falls bounce higher.
+			# (A gentle drop just settles: no bounce injected into it.)
 			bounced = true
-			velocity_y = minf(CombatData.KNOCKDOWN_BOUNCE_VELOCITY, -velocity_y * 0.4)
+			var rebound := -velocity_y * CombatData.BOUNCE_RESTITUTION
+			if velocity_y >= CombatData.BOUNCE_HARD_IMPACT:
+				rebound = minf(CombatData.KNOCKDOWN_BOUNCE_VELOCITY, rebound)
+			velocity_y = rebound
 			jump_vx *= 0.65 if pending_rolls > 0 else 0.5
 			return
+		bounced = true
 		airborne = false
 		velocity_y = 0.0
 		tumble = false

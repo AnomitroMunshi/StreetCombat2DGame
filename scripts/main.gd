@@ -90,6 +90,9 @@ const SPEECH_TICKS: int = 80
 const SPEECH_VICTORY_TICKS: int = 200
 const SPEECH_COOLDOWN: int = 45
 const SPEECH_URGENT: int = 4
+## The same everyday line (hurt, block, slap, miss) is not said again by the
+## same fighter within this many ticks.
+const SPEECH_LINE_COOLDOWN: int = 300
 const SPEECH_PRIORITY: Dictionary = {"hurt": 1, "block": 1, "slap": 2, "miss_heavy": 2, "match_start": 3,
 	"low_health": 4, "finisher": 5, "victory": 5, "knocked_out": 6}
 ## Moves whose whiff makes the fighter speak (big committal swings).
@@ -1263,6 +1266,10 @@ func _on_fighter_posture_broken(fighter: Fighter) -> void:
 
 ## `fighter` says its style's line for `event`, if it has one and the bubble
 ## rules allow it (see SPEECH_*). Returns true when a bubble was shown.
+## Per fighter: event -> {"tick": last said, "index": last variant}.
+var _speech_said: Dictionary = {}
+
+
 func say(fighter: Fighter, event: String) -> bool:
 	if fighter.style == null or not fighter.style.quotes.has(event):
 		return false
@@ -1273,7 +1280,22 @@ func say(fighter: Fighter, event: String) -> bool:
 			return false  # an equally or more important line is showing
 		if cur["ticks"] <= 0 and cur["quiet"] > 0 and prio < SPEECH_URGENT:
 			return false  # still catching their breath after the last line
-	var text: String = fighter.style.quotes[event]
+	var said: Dictionary = _speech_said.get(fighter, {})
+	if prio < SPEECH_URGENT and said.has(event) and _tick - int(said[event]["tick"]) < SPEECH_LINE_COOLDOWN:
+		return false  # said that a moment ago
+	# A quote is one line or a list of variants (rotated, never twice running).
+	var lines: Variant = fighter.style.quotes[event]
+	var text: String = ""
+	if lines is Array:
+		var options: Array = lines
+		var last: int = said[event]["index"] if said.has(event) else -1
+		var index := (last + 1) % options.size()
+		text = String(options[index])
+		said[event] = {"tick": _tick, "index": index}
+	else:
+		text = String(lines)
+		said[event] = {"tick": _tick, "index": 0}
+	_speech_said[fighter] = said
 	var ticks := SPEECH_VICTORY_TICKS if event == "victory" else SPEECH_TICKS
 	_speech[fighter] = {"event": event, "text": text, "prio": prio, "ticks": ticks, "quiet": 0}
 	hud.show_speech(fighter, text)

@@ -7,8 +7,8 @@ Timestamps are `clip @ seconds`.
 
 - [x] **HUD callouts overlap.** *Fixed in polish batch 1: fixed rows per side (style/HP, READY, combo, 3 callout slots); training lanes move inward.* COUNTER, N HITS, DIZZY!, move names, SIGNATURE READY and "... READY" all draw in the same slot under each health bar (Bangla vs Muay Thai @31.5, Kickbox vs Karate @22–24, Muay Thai vs TKD @21–29). The combo text also covers the style name. Stack them in rows or queue them, and give READY a fixed row.
 - [ ] **Fighters overlap at close range.** *Still open (handoff item 3, staging half): leg stretch fixed in batch 1, silhouette overlap at 60 px spacing not yet addressed.* Bodies interpenetrate by half a torso or more in most exchanges (Boxing vs Bangla @11.5, 14.5, 20–23.5). Widen the push-box and separate the fighters on hit.
-- [ ] **Speech bubbles don't follow the speaker.** The bubble stays where it was spoken when the fighter is knocked down (Bangla vs Muay Thai @17, 29.5; the knocked-out line in Karate vs Bangla @28.5–30).
-- [ ] **Style select shows only 5 of 7 tabs.** Kickboxing and Bangla Maar are hidden behind a horizontal scroll. Fit all 7 (two rows or narrower tabs).
+- [x] **Speech bubbles don't follow the speaker.** *Fixed in polish batch 2: anchored to the drawn head.* The bubble stays where it was spoken when the fighter is knocked down (Bangla vs Muay Thai @17, 29.5; the knocked-out line in Karate vs Bangla @28.5–30).
+- [x] **Style select shows only 5 of 7 tabs.** *Fixed in polish batch 2: 4 + 3 grid, all visible.* Kickboxing and Bangla Maar are hidden behind a horizontal scroll. Fit all 7 (two rows or narrower tabs).
 - [x] **Winner off-screen after a finisher.** *Fixed in polish batch 1: explicit result camera; checked centre and both walls.* In Karate vs Bangla @30.5–32.5 the winner is cut off at the right edge, so the celebration isn't seen. Frame both fighters on the result screen.
 - [x] **The win title covers the winner.** *Fixed in polish batch 1: headline in the upper third; no READY/hint prompts after K.O.* "PLAYER/RIVAL WINS" sits over the winner's body (Muay Thai vs TKD @35.5, TKD vs Kickbox @22).
 
@@ -23,7 +23,7 @@ Timestamps are `clip @ seconds`.
 ## Gameplay feel
 
 - [ ] **Knockdowns are too frequent.** There were 3 in 15 s in TKD vs Kickbox, and that match ended in 23 s. Raise the threshold or require a combo.
-- [ ] **Speech lines repeat** within seconds (শালা শুয়োর!, উফ্!). Add a cooldown per line and rotate through several lines.
+- [~] **Speech lines repeat** *Polish batch 2: per-line 5 s cooldown for everyday lines; quotes may be a list of variants (rotated). Variant lines still to be written.* within seconds (শালা শুয়োর!, উফ্!). Add a cooldown per line and rotate through several lines.
 - [ ] **Bangla Maar's win quote** is a censored swear on every win. Consider a cleaner line or a rotation.
 - [x] **The SIGNATURE READY prompt is easy to miss.** *Already pulses (handoff review); now on its own row.* Pulse it or show a key icon by the Focus bar.
 

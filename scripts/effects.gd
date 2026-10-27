@@ -89,6 +89,31 @@ func get_newest_decal_growth() -> float:
 	return clampf(float(d["age"]) / float(d["grow"]), 0.0, 1.0)
 
 
+## Effects move once per physics tick and are drawn between ticks at the
+## physics interpolation fraction, so they stay smooth at any render rate and
+## in slow motion (fewer ticks per frame). Ages, lifetimes and caps stay
+## tick-driven.
+var _frac: float = 1.0
+
+
+func _process(_delta: float) -> void:
+	_frac = Engine.get_physics_interpolation_fraction()
+	if not _effects.is_empty() or not _debris.is_empty():
+		queue_redraw()
+		if _glow != null:
+			_glow.queue_redraw()
+
+
+## Where an effect is drawn this frame.
+func _drawn_pos(e: Dictionary) -> Vector2:
+	return (e.get("prev", e["pos"]) as Vector2).lerp(e["pos"], _frac)
+
+
+## An effect's age fraction this frame (continuous between ticks).
+func _drawn_t(e: Dictionary) -> float:
+	return clampf((float(e["age"]) - 1.0 + _frac) / float(e["life"]), 0.0, 1.0)
+
+
 func _physics_process(_delta: float) -> void:
 	_tick_destruction()
 	if _glow != null:
@@ -96,6 +121,7 @@ func _physics_process(_delta: float) -> void:
 	for i in range(_effects.size() - 1, -1, -1):
 		var e := _effects[i]
 		e["age"] += 1
+		e["prev"] = e["pos"]  # drawn interpolated between ticks (smooth in slow motion)
 		if e.has("move"):
 			e["pos"] = (e["pos"] as Vector2) + (e["move"] as Vector2)
 		if e["kind"] == "cloud":
@@ -598,6 +624,8 @@ func _tick_destruction() -> void:
 	for i in range(_debris.size() - 1, -1, -1):
 		var c := _debris[i]
 		c["age"] += 1
+		c["prev"] = c["pos"]
+		c["prev_angle"] = c["angle"]
 		var vel: Vector2 = c["vel"]
 		var pos: Vector2 = c["pos"]
 		if pos.y < floor_y or vel != Vector2.ZERO:
@@ -689,14 +717,18 @@ func draw_decals(canvas: CanvasItem) -> void:
 
 
 ## One debris chip or splinter.
-static func _draw_chip(canvas: CanvasItem, c: Dictionary) -> void:
+static func _draw_chip(canvas: CanvasItem, c: Dictionary, at: Vector2 = Vector2.INF, angle: float = INF) -> void:
+	if at == Vector2.INF:
+		at = c["pos"]
+	if angle == INF:
+		angle = c["angle"]
 	var a := 1.0 - smoothstep(0.75, 1.0, float(c["age"]) / DEBRIS_LIFE)
 	var col: Color = c["color"]
 	col.a *= a
 	var s: float = c["size"]
 	if c.has("shape"):
 		var shp: PackedVector2Array = c["shape"]
-		var xf := Transform2D(c["angle"], c["pos"])
+		var xf := Transform2D(angle, at)
 		var poly := xf * shp
 		var lit := PackedVector2Array()
 		for q in shp:
@@ -709,13 +741,13 @@ static func _draw_chip(canvas: CanvasItem, c: Dictionary) -> void:
 		return
 	if c.get("stick", false):
 		# Splinter: a thin tapered sliver.
-		var ax := Vector2.from_angle(c["angle"]) * s * 0.5
+		var ax := Vector2.from_angle(angle) * s * 0.5
 		var nx := Vector2(-ax.y, ax.x).normalized() * 1.8
-		canvas.draw_colored_polygon(PackedVector2Array([c["pos"] - ax, c["pos"] + nx, c["pos"] + ax, c["pos"] - nx]), col)
+		canvas.draw_colored_polygon(PackedVector2Array([at - ax, at + nx, at + ax, at - nx]), col)
 		return
 	var pts2 := PackedVector2Array()
 	for k in 4:
-		pts2.append(c["pos"] + Vector2.from_angle(c["angle"] + k * TAU / 4.0) * s * (1.0 if k % 2 == 0 else 0.6))
+		pts2.append(at + Vector2.from_angle(angle + k * TAU / 4.0) * s * (1.0 if k % 2 == 0 else 0.6))
 	canvas.draw_colored_polygon(pts2, col)
 
 
@@ -724,9 +756,9 @@ func _draw_glow() -> void:
 	for e in _effects:
 		if not e.has("glow"):
 			continue
-		var t := float(e["age"]) / float(e["life"])
+		var t := _drawn_t(e)
 		var color: Color = e["color"]
-		var pos: Vector2 = e["pos"]
+		var pos: Vector2 = _drawn_pos(e)
 		match e["kind"]:
 			"flare":
 				var size: float = e["size"]
@@ -888,13 +920,13 @@ static func _grown_polyline(pts: PackedVector2Array, g: float) -> PackedVector2A
 func _draw() -> void:
 	for c in _debris:
 		if c["vel"] != Vector2.ZERO:
-			_draw_chip(self, c)
+			_draw_chip(self, c, _drawn_pos(c), lerp_angle(c.get("prev_angle", c["angle"]), c["angle"], _frac))
 	for e in _effects:
 		if e.has("glow"):
 			continue
-		var t := float(e["age"]) / float(e["life"])
+		var t := _drawn_t(e)
 		var color: Color = e["color"]
-		var pos: Vector2 = e["pos"]
+		var pos: Vector2 = _drawn_pos(e)
 		match e["kind"]:
 			"spark":
 				color.a = 1.0 - t

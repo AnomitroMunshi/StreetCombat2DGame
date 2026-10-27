@@ -212,6 +212,12 @@ const KNOCKDOWN_COMBO_HITS: int = 3
 const KNOCKDOWN_LAUNCH_VELOCITY: float = -8.0
 const KNOCKDOWN_DRIFT: float = 4.5
 const KNOCKDOWN_BOUNCE_VELOCITY: float = -3.5
+## A body landing slower than this (px/tick) settles without bouncing; up to
+## BOUNCE_HARD_IMPACT it rebounds by restitution alone; harder falls get at
+## least KNOCKDOWN_BOUNCE_VELOCITY (the arcade slam).
+const BOUNCE_MIN_IMPACT: float = 5.0
+const BOUNCE_HARD_IMPACT: float = 10.0
+const BOUNCE_RESTITUTION: float = 0.4
 const KNOCKDOWN_LIE_FRAMES: int = 34
 const GETUP_FRAMES: int = 26
 

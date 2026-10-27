@@ -39,6 +39,9 @@ const COLOR_POSTURE := Color(0.98, 0.62, 0.2)
 const COLOR_POSTURE_HIGH := Color(1.0, 0.25, 0.15)
 const COLOR_POSTURE_LOCK := Color(0.6, 0.6, 0.65, 0.6)
 const POPUP_LIFE: float = 0.9
+## Style select: cards per row and card width (4 x 146 + gaps fits the panel).
+const STYLE_COLUMNS: int = 4
+const STYLE_CARD_W: float = 146.0
 ## Baseline of the K.O. / result headline.
 const HEADLINE_Y: float = 200.0
 ## Message lanes under each health bar (baselines): style + HP, signature
@@ -122,7 +125,7 @@ var _move_info: RichTextLabel = null
 var _train_buttons: VBoxContainer = null
 # Style selection panel: card row (scrolls for big rosters), details, confirm.
 var _select_panel: PanelContainer = null
-var _cards: HBoxContainer = null
+var _cards: GridContainer = null
 var _details: RichTextLabel = null
 var _confirm: Button = null
 var _selected_id: StringName = &""
@@ -391,18 +394,17 @@ func _build_style_panel() -> void:
 	title.add_theme_font_size_override("font_size", 24)
 	title.add_theme_color_override("font_color", COLOR_TEXT)
 	box.add_child(title)
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(0.0, 62.0)
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	box.add_child(scroll)
-	_cards = HBoxContainer.new()
-	_cards.add_theme_constant_override("separation", 8)
-	scroll.add_child(_cards)
+	# Every style visible at once: a grid of STYLE_COLUMNS cards per row.
+	_cards = GridContainer.new()
+	_cards.columns = STYLE_COLUMNS
+	_cards.add_theme_constant_override("h_separation", 8)
+	_cards.add_theme_constant_override("v_separation", 8)
+	box.add_child(_cards)
 	_details = RichTextLabel.new()
 	_details.bbcode_enabled = true
 	_details.fit_content = false
 	_details.scroll_active = true
-	_details.custom_minimum_size = Vector2(0.0, 420.0)
+	_details.custom_minimum_size = Vector2(0.0, 340.0)
 	_details.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_details.add_theme_font_size_override("normal_font_size", 15)
 	_details.add_theme_font_size_override("bold_font_size", 15)
@@ -428,7 +430,7 @@ func show_style_select(styles: Array[MartialArtStyle], selected_id: StringName) 
 	for st in styles:
 		var card := _make_button()
 		card.visible = true
-		card.custom_minimum_size = Vector2(118.0, 54.0)
+		card.custom_minimum_size = Vector2(STYLE_CARD_W, 54.0)
 		card.add_theme_font_size_override("font_size", 15)
 		card.text = "%s\n%s" % [st.display_name.to_upper(), _stars(st.difficulty)]
 		if st.id == selected_id:
@@ -839,7 +841,7 @@ func _draw_speech() -> void:
 		if not is_instance_valid(f):
 			continue
 		var text: String = sp["text"]
-		var head := f.get_global_transform_with_canvas() * Vector2(0.0, -200.0)
+		var head := _speech_anchor(f)
 		var size := _speech_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, SPEECH_FONT_SIZE)
 		var w := size.x + 28.0
 		var h := size.y + 16.0
@@ -872,6 +874,18 @@ func _draw_speech() -> void:
 		if pop > 0.6:
 			_canvas.draw_string(_speech_font, Vector2(shown.position.x + 14.0, shown.position.y + 8.0 + size.y * 0.78), text,
 				HORIZONTAL_ALIGNMENT_LEFT, -1, SPEECH_FONT_SIZE, Color(0.12, 0.08, 0.06, pop))
+
+
+## Screen point just above the speaker's drawn head (follows jumps, falls,
+## rolls and the knocked-out body), or above a standing head before the body
+## has been drawn.
+func _speech_anchor(f: Fighter) -> Vector2:
+	var v := f.get_node_or_null("Visual") as FighterVisual
+	var canvas := f.get_viewport().get_canvas_transform()
+	if v != null and v._last_joints.size() > FighterVisual.J_HEAD:
+		var head: Vector2 = v._last_joints[FighterVisual.J_HEAD] + (f.global_position - v._last_root)
+		return canvas * (head - Vector2(0.0, FighterVisual.HEAD_R + 14.0))
+	return canvas * (f.global_position + Vector2(0.0, -200.0))
 
 
 func _draw_popups() -> void:

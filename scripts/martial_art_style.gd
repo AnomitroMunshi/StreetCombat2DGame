@@ -73,7 +73,8 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 ## the wall, pinning strike, final windup, final blow). Empty = the shared
 ## default (flying knee, cross, double palm).
 @export var wall_entry: PackedStringArray = PackedStringArray()
-## Speech bubbles (presentation): event -> line. Events: match_start, slap,
+## Speech bubbles (presentation): event -> line, or a list of lines said in
+## rotation. Events: match_start, slap,
 ## hurt, block, miss_heavy, low_health, finisher, victory, knocked_out (see
 ## main.gd SPEECH_*).
 ## Empty = this style's fighters never speak.
@@ -188,6 +189,9 @@ func validate() -> PackedStringArray:
 	for event in quotes:
 		if not String(event) in QUOTE_EVENTS:
 			errors.append("unknown speech event %s" % event)
+		var line: Variant = quotes[event]
+		if not (line is String or (line is Array and not (line as Array).is_empty())):
+			errors.append("speech event %s needs a line or a list of lines" % event)
 	if not wall_entry.is_empty() and wall_entry.size() != 5:
 		errors.append("wall_entry needs 5 poses (got %d)" % wall_entry.size())
 	for fid in finishers:
