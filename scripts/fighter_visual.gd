@@ -67,6 +67,9 @@ const TUCK_HIP := Vector2(-34.0, -32.0)
 const TRAIL_INTERVAL: float = 1.0 / 60.0
 const TRAIL_LIFE: float = 0.16
 const TRAIL_MAX: int = 6
+## Ordinary attacks: only the striking limb trails, fainter and shorter.
+const TRAIL_LIMB_ALPHA: float = 0.22
+const TRAIL_LIMB_LIFE: float = 0.6
 ## Ragdoll (per-tick Verlet).
 const RAG_GRAVITY: float = 0.95
 const RAG_DAMPING: float = 0.988
@@ -102,6 +105,9 @@ const WALK_NARROW_REAR: float = 14.0
 ## the hips settle lower (up to MAX_SETTLE px) to keep that bend.
 const KNEE_SOFT: float = 0.95
 const MAX_SETTLE: float = 8.0
+## Most a grounded knee may bend backward (rad): a straight leg, never a
+## hyperextended one.
+const KNEE_REVERSE_MAX: float = 0.07
 ## A committed strike from a long stance sinks the hips further (a lunge).
 const MAX_SETTLE_STRIKE: float = 18.0
 ## Fastest the hips settle or rise for the knee bend (px/s).
@@ -758,7 +764,9 @@ enum { P_UPPER_ARM, P_FOREARM, P_TORSO, P_THIGH, P_SHIN, P_FOOT }
 const OUTFIT_KITS: Array[StringName] = [&"muay_thai", &"karate", &"kung_fu", &"taekwondo", &"kickboxing", &"bangla_maar"]
 const GLOVED_KITS: Array[StringName] = [&"boxing", &"muay_thai", &"kickboxing"]
 const GI_WHITE := Color(0.95, 0.94, 0.9)
-const GI_BLACK := Color(0.14, 0.14, 0.16)
+## The dark-fighter gi/dobok: slate rather than black, so the costume still
+## reads against the dark dojo wall without leaning on the rim glow.
+const GI_BLACK := Color(0.25, 0.27, 0.33)
 const CLOTH_FAR_DARKEN: float = 0.18
 var _outfit: Dictionary = {}
 var _cols: Dictionary = {}
@@ -2238,6 +2246,17 @@ static func _limb_dir(angle: float) -> Vector2:
 
 ## Forward kinematics: joint positions (local, facing right) for a pose.
 func _solve_joints(p: PackedFloat32Array) -> PackedVector2Array:
+	var grounded := not fighter.airborne and not fighter.is_down() and _tuck_amount <= 0.0
+	if grounded:
+		# Knees bend one way: on the ground a shin never folds past its thigh
+		# by more than KNEE_REVERSE_MAX (authored extensions and blends into a
+		# planted leg can otherwise hyperextend). Airborne folds, tucks and
+		# down bodies keep their own shapes.
+		p = p.duplicate()
+		for leg in [[TH_F, SH_F], [TH_B, SH_B]]:
+			var over := wrapf(p[leg[1]] - p[leg[0]], -PI, PI) - KNEE_REVERSE_MAX
+			if over > 0.0:
+				p[leg[1]] -= over
 	var hip := Vector2(p[HIP_X], -AIR_HIP_HEIGHT - p[DROP])
 	# On the ground (or while falling / lying) the supporting foot is planted on
 	# the floor: crouching comes from bending the knees, never from floating.
@@ -2346,7 +2365,7 @@ func _draw() -> void:
 	_draw_trail(accent if trail_accent else front)
 	if _trail_active() and _trail_clock >= TRAIL_INTERVAL:
 		_trail_clock = 0.0
-		_trail.append({"pts": world_joints, "age": 0.0})
+		_trail.append({"pts": world_joints, "age": 0.0, "bones": _trail_bones()})
 		if _trail.size() > TRAIL_MAX:
 			_trail.pop_front()
 
@@ -2414,12 +2433,12 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 	if fighter.rim_glow:
 		# Softer glow while at rest, full glow in action.
 		var calm := fighter.state in [Fighter.State.IDLE, Fighter.State.WALK, Fighter.State.CROUCH, Fighter.State.BLOCK]
-		var k := 0.5 if calm else 1.0
+		var k := 0.35 if calm else 0.7
 		var glow := rim
-		glow.a = 0.16 * k
-		_silhouette(j, forward, back_toe, 7.0, glow, glow)
+		glow.a = 0.14 * k
+		_silhouette(j, forward, back_toe, 5.0, glow, glow)
 		glow.a = 0.4 * k
-		_silhouette(j, forward, back_toe, 4.0, glow, glow)
+		_silhouette(j, forward, back_toe, 2.6, glow, glow)
 	if fighter.state == Fighter.State.FINISHER:
 		# Finisher aura: the attacker glows in its accent colour.
 		var aura := accent
@@ -2989,10 +3008,19 @@ func _torso_extras(j: PackedVector2Array, hip: Vector2, axis: Vector2, length: f
 			# Crossed jacket front: two tapering lapels meeting at the belt (the
 			# dobok's is a black V collar). The belt is drawn over the near leg
 			# (_draw_belt), so the jacket skirt never hides it.
-			var wide := 3.2 if _kit == &"karate" else 6.0
-			var low := hip + axis * length * 0.3 + n * (_torso_edge(0.3).x + grow - 1.0)
-			_ribbon(neck_base + n * 4.0, low, wide, wide * 0.4, _cols["lapel"])
-			_ribbon(neck_base - n * 2.0, hip + axis * length * 0.5 + n * (_torso_edge(0.5).x + grow - 3.0), wide * 0.8, wide * 0.3, _cols["lapel"])
+			if _kit == &"karate":
+				var low := hip + axis * length * 0.3 + n * (_torso_edge(0.3).x + grow - 1.0)
+				_ribbon(neck_base + n * 4.0, low, 3.2, 1.3, _cols["lapel"])
+				_ribbon(neck_base - n * 2.0, hip + axis * length * 0.5 + n * (_torso_edge(0.5).x + grow - 3.0), 2.6, 1.0, _cols["lapel"])
+			else:
+				# Dobok: a pullover with a symmetric V-neck ending mid-chest.
+				var point := hip + axis * length * 0.56 + n * (_torso_edge(0.56).x + grow - 2.0)
+				_ribbon(neck_base + n * 5.0, point, 5.5, 3.0, _cols["lapel"])
+				_ribbon(neck_base - n * 3.0, point, 5.5, 3.0, _cols["lapel"])
+				# The black collar band around the neck: the part of the V that
+				# still reads side-on, above the guard.
+				var collar := hip + axis * length * 0.95
+				_ribbon(collar - n * (_torso_edge(0.95).y + grow), collar + n * (_torso_edge(0.95).x + grow), 6.0, 6.0, _cols["lapel"])
 			_belt_at = [hip, axis, length, n, sway]
 		&"kung_fu":
 			# Mandarin collar, frog buttons down the front, a wide sash tied at the back.
@@ -3573,14 +3601,49 @@ const _BONES: Array[Vector2i] = [
 ]
 
 
+## Bones a trail snapshot shows: the whole body for special motion (signatures,
+## power/leap moves, spins, finishers, dodges, flying bodies), only the
+## striking limb for an ordinary attack, so the pose itself stays dominant.
+func _trail_bones() -> Array:
+	var attack := fighter.current_attack
+	if fighter.state != Fighter.State.ATTACK or attack == null or attack.signature or attack.spin 			or attack.leap_vy != 0.0 or not attack.sequence.is_empty() or fighter.airborne:
+		return []
+	match _attack_joint(attack.type):
+		J_HAND_F:
+			return [Vector2i(J_SHOULDER_F, J_ELBOW_F), Vector2i(J_ELBOW_F, J_HAND_F)]
+		J_HAND_B:
+			return [Vector2i(J_SHOULDER_B, J_ELBOW_B), Vector2i(J_ELBOW_B, J_HAND_B)]
+		J_ELBOW_F:
+			return [Vector2i(J_SHOULDER_F, J_ELBOW_F)]
+		J_ELBOW_B:
+			return [Vector2i(J_SHOULDER_B, J_ELBOW_B)]
+		J_FOOT_F:
+			return [Vector2i(J_HIP_F, J_KNEE_F), Vector2i(J_KNEE_F, J_FOOT_F)]
+		J_FOOT_B:
+			return [Vector2i(J_HIP_B, J_KNEE_B), Vector2i(J_KNEE_B, J_FOOT_B)]
+		J_KNEE_F:
+			return [Vector2i(J_HIP_F, J_KNEE_F)]
+		J_KNEE_B:
+			return [Vector2i(J_HIP_B, J_KNEE_B)]
+	return []
+
+
 func _draw_trail(color: Color) -> void:
 	if _trail.is_empty():
 		return
 	draw_set_transform_matrix(get_global_transform().affine_inverse())
 	for snap in _trail:
 		var pts: PackedVector2Array = snap["pts"]
+		var limb: Array = snap.get("bones", [])
+		var life := TRAIL_LIFE if limb.is_empty() else TRAIL_LIFE * TRAIL_LIMB_LIFE
+		if snap["age"] >= life:
+			continue
 		var c := color
-		c.a = 0.35 * (1.0 - snap["age"] / TRAIL_LIFE)
+		c.a = (0.35 if limb.is_empty() else TRAIL_LIMB_ALPHA) * (1.0 - snap["age"] / life)
+		if not limb.is_empty():
+			for bone: Vector2i in limb:
+				draw_line(pts[bone.x], pts[bone.y], c, LIMB_WIDTH + 2.0, true)
+			continue
 		for bone in _BONES:
 			draw_line(pts[bone.x], pts[bone.y], c, LIMB_WIDTH + 4.0, true)
 		draw_circle(pts[J_HEAD], HEAD_R, c)
