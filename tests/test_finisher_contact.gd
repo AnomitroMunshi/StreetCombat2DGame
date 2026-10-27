@@ -9,10 +9,11 @@ extends SceneTree
 ## passing on the fallback.
 
 const STYLES := {
-	&"boxing": [&"final_bell", &"eight_count"], &"taekwondo": [&"cyclone_360", &"heavens_heel"],
+	&"boxing": [&"final_bell", &"eight_count", &"falling_cross", &"corner_count"],
+	&"taekwondo": [&"cyclone_360", &"heavens_heel", &"skyfall_axe", &"corner_cyclone"],
 	&"muay_thai": [&"eight_limbs", &"iron_knee", &"iron_corner"],
 	&"karate": [&"one_inch_verdict", &"crimson_crescent", &"skyline_verdict"],
-	&"kung_fu": [&"hundred_palms", &"dragons_descent"], &"kickboxing": [&"last_combination", &"knockout_rhythm"],
+	&"kung_fu": [&"hundred_palms", &"dragons_descent"], &"kickboxing": [&"last_combination", &"knockout_rhythm", &"air_breaker", &"corner_breaker"],
 	&"bangla_maar": [&"paaye_lathi", &"super_chor"],
 }
 const START_GAP: float = 120.0
@@ -39,8 +40,12 @@ var _fails: int = 0
 
 
 func _initialize() -> void:
+	# ONLY=<finisher id> runs that finisher's cases alone (tuning).
+	var only := OS.get_environment("ONLY")
 	for style in STYLES:
 		for fid in STYLES[style]:
+			if only != "" and String(fid) != only:
+				continue
 			var k := FinisherDirector.kind_for_id(fid)
 			for left in [false, true]:
 				if k in FinisherDirector.AIR_KINDS:

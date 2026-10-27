@@ -31,7 +31,9 @@ i=0
 for t in "${SUITES[@]}"; do
 	i=$((i + 1))
 	t0=$(date +%s)
-	out=$(timeout 300 "$GODOT" --headless --path . -s "tests/test_$t.gd" 2>&1)
+	limit=300
+	[ "$t" = "finisher_contact" ] && limit=900  # every style finisher x every case
+	out=$(timeout $limit "$GODOT" --headless --path . -s "tests/test_$t.gd" 2>&1)
 	code=$?
 	result=$(echo "$out" | grep -E "^RESULT" | tail -1)
 	if [ $code -ne 0 ] || [ -z "$result" ] || echo "$result" | grep -q FAIL; then
@@ -45,7 +47,7 @@ for t in "${SUITES[@]}"; do
 	say "$(printf '[%d/%d] %-16s %s  %3ds  (%d passed, %d failed)' $i $total "$t" "$status" $(( $(date +%s) - t0 )) $passed_n $failed_n)"
 	if [ "$status" = "FAIL" ]; then
 		echo "$out" | grep -E "FAIL|SCRIPT ERROR|Parse Error" | head -20 | sed 's/^/      /' | tee -a "$LOG"
-		[ $code -eq 124 ] && say "      (timed out after 300 s)"
+		[ $code -eq 124 ] && say "      (timed out after $limit s)"
 	fi
 done
 mins=$(( ($(date +%s) - start) / 60 ))

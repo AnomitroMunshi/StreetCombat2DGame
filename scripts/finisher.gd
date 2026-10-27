@@ -18,7 +18,8 @@ enum Kind { PALM_FLURRY, SPINNING_HEEL, AIR_SMASH, WALL_CRUSH, TORNADO_KICK,
 	FINAL_BELL, EIGHT_COUNT, CYCLONE_360, HEAVENS_HEEL,
 	EIGHT_LIMBS, IRON_KNEE, ONE_INCH_VERDICT, CRIMSON_CRESCENT,
 	HUNDRED_PALMS, DRAGONS_DESCENT, LAST_COMBINATION, KNOCKOUT_RHYTHM,
-	PAAYE_LATHI, SUPER_CHOR, SKYLINE_VERDICT, IRON_CORNER }
+	PAAYE_LATHI, SUPER_CHOR, SKYLINE_VERDICT, IRON_CORNER,
+	FALLING_CROSS, CORNER_COUNT, AIR_BREAKER, CORNER_BREAKER, SKYFALL_AXE, CORNER_CYCLONE }
 
 const DISPLAY_NAMES: Dictionary = {
 	Kind.PALM_FLURRY: "PALM FLURRY",
@@ -42,6 +43,12 @@ const DISPLAY_NAMES: Dictionary = {
 	Kind.SUPER_CHOR: "SUPER CHOR",
 	Kind.SKYLINE_VERDICT: "SKYLINE VERDICT",
 	Kind.IRON_CORNER: "IRON CORNER",
+	Kind.FALLING_CROSS: "FALLING CROSS",
+	Kind.CORNER_COUNT: "THE CORNER COUNT",
+	Kind.AIR_BREAKER: "AIR BREAKER",
+	Kind.CORNER_BREAKER: "CORNER BREAKER",
+	Kind.SKYFALL_AXE: "SKYFALL AXE",
+	Kind.CORNER_CYCLONE: "CORNER CYCLONE",
 }
 ## Permanent finisher ids (used by MartialArtStyle.finishers).
 const IDS: Dictionary = {
@@ -53,13 +60,19 @@ const IDS: Dictionary = {
 	Kind.DRAGONS_DESCENT: &"dragons_descent", Kind.LAST_COMBINATION: &"last_combination",
 	Kind.KNOCKOUT_RHYTHM: &"knockout_rhythm", Kind.PAAYE_LATHI: &"paaye_lathi", Kind.SUPER_CHOR: &"super_chor",
 	Kind.SKYLINE_VERDICT: &"skyline_verdict", Kind.IRON_CORNER: &"iron_corner",
+	Kind.FALLING_CROSS: &"falling_cross", Kind.CORNER_COUNT: &"corner_count",
+	Kind.AIR_BREAKER: &"air_breaker", Kind.CORNER_BREAKER: &"corner_breaker",
+	Kind.SKYFALL_AXE: &"skyfall_axe", Kind.CORNER_CYCLONE: &"corner_cyclone",
 }
 ## Situational finishers: one airborne and one wall finisher per style
 ## (MartialArtStyle.air_finisher / wall_finisher); Air Smash and Wall Crush are
 ## the shared ones for a style that sets none.
-const AIR_KINDS: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT]
-const WALL_KINDS: Array[Kind] = [Kind.WALL_CRUSH, Kind.IRON_CORNER]
-const ENVIRONMENTAL: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT, Kind.WALL_CRUSH, Kind.IRON_CORNER]
+const AIR_KINDS: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT, Kind.FALLING_CROSS, Kind.AIR_BREAKER,
+	Kind.SKYFALL_AXE]
+const WALL_KINDS: Array[Kind] = [Kind.WALL_CRUSH, Kind.IRON_CORNER, Kind.CORNER_COUNT, Kind.CORNER_BREAKER,
+	Kind.CORNER_CYCLONE]
+const ENVIRONMENTAL: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT, Kind.FALLING_CROSS, Kind.AIR_BREAKER,
+	Kind.SKYFALL_AXE, Kind.WALL_CRUSH, Kind.IRON_CORNER, Kind.CORNER_COUNT, Kind.CORNER_BREAKER, Kind.CORNER_CYCLONE]
 ## Open-floor finishers for a fighter with no style (tests).
 const OPEN_FLOOR_KINDS: Array[Kind] = [Kind.PALM_FLURRY, Kind.SPINNING_HEEL, Kind.TORNADO_KICK]
 ## Victim this close to the wall behind them -> Wall Crush.
@@ -104,7 +117,7 @@ const POSE_KIND: Dictionary = {
 const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_extend", &"lkick_hit"]
 ## Strike poses thrown with a leg (contact is measured from the feet and knees;
 ## every other strike pose from the hands and elbows).
-const KICK_POSES: Array[StringName] = [&"axe_chop", &"back_extend", &"bodyrh_hit", &"fknee_hit", &"front_extend", &"flying_side_kick",
+const KICK_POSES: Array[StringName] = [&"axe_chop", &"back_extend", &"back_extend_high", &"bodyrh_hit", &"fknee_hit", &"front_extend", &"flying_side_kick",
 	&"high_extend", &"jrh_hit", &"knee", &"lkick_hit", &"lowrh_hit", &"punt_hit", &"shook_hit", &"spin_kick",
 	&"sweep_extend", &"thrust_extend", &"tornado_kick", &"lowside_hit"]
 ## Documented contact tolerance: a blow counts as landed when its intended
@@ -136,11 +149,16 @@ const MEET_LEAD: int = 3
 const MEET_VY_MIN: float = -15.0
 const MEET_VY_MAX: float = 7.0
 ## Lowest a victim's root may be met at (px above the floor).
-const MEET_MIN_ALT: float = 40.0
-## Where on the torso the meeting blow aims (0 neck, 1 hip): the upper chest.
-const MEET_CHEST: float = 0.65
+const MEET_MIN_ALT: float = 15.0
+## Where on the torso the meeting blow aims (0 neck, 1 hip): the upper chest
+## (a beat's "meet_at" sets its own).
+const MEET_CHEST: float = 0.25
 ## Fastest the attacker glides (px/tick) toward striking range in the air.
 const GLIDE_MAX: float = 9.0
+## Most an airborne victim's body is nudged (px/tick, up or down) toward a blow
+## that is waiting to connect: the plan above gets it close, this absorbs the
+## difference between the planned and the drawn limb.
+const AIR_ASSIST: float = 6.0
 ## A victim this close to the arena bound is against the wall (impacts crack it).
 const AT_WALL: float = 30.0
 
@@ -392,7 +410,7 @@ func _plan_meet() -> void:
 		var vpose: PackedFloat32Array = vv._pose_library.get(vname, PackedFloat32Array())
 		if vpose.size() >= FighterVisual.CHANNELS:
 			var vj := vv._solve_joints(vpose)
-			chest_y = lerpf(vj[FighterVisual.J_NECK].y, vj[FighterVisual.J_HIP].y, MEET_CHEST)
+			chest_y = lerpf(vj[FighterVisual.J_NECK].y, vj[FighterVisual.J_HIP].y, float(meet_beat.get("meet_at", MEET_CHEST)))
 	var want := minf(atk_y + limb_y - chest_y, victim.ground_y - MEET_MIN_ALT)
 	# The relaunch that puts the victim there, falling if it can.
 	var best_vy := 0.0
@@ -543,6 +561,15 @@ func _try_land() -> Dictionary:
 		if minf(g_in, g_out) >= g:
 			step = 0.0
 		_pending_stepped = step != 0.0
+		if victim.airborne and victim.state == Fighter.State.FINISHED:
+			# The falling body drifts into the blow (never through the floor).
+			var dy := minf(g - CONTACT_SLOP * 0.5, AIR_ASSIST)
+			var g_up: float = _strike_gap(_pending, 0.0, -dy)[0]
+			var g_down: float = _strike_gap(_pending, 0.0, dy)[0]
+			if minf(g_up, g_down) < g:
+				var move := -dy if g_up < g_down else dy
+				victim.position.y = minf(victim.position.y + move, victim.ground_y - 1.0)
+				_pending_stepped = true
 		var limit := victim.position.x - REACH_MIN_GAP * _dir
 		var x := attacker.position.x + step * _dir
 		attacker.position.x = minf(x, limit) if _dir > 0 else maxf(x, limit)
@@ -556,6 +583,10 @@ func _try_land() -> Dictionary:
 	var receding: bool = not sweeping and not stepped and _pending_ticks > 1 and g > _pending_gap + 0.5
 	var wait := mini(IMPACT_MAX_WAIT_SWEEP, int(_pending["ticks"]) - 2) if sweeping else IMPACT_MAX_WAIT
 	_pending_gap = minf(_pending_gap, g)
+	# A thrust (strike_delay) only connects once extended, not as the limb
+	# swings up past the body on its way out.
+	if _pending_ticks <= int(_pending.get("strike_delay", 0)):
+		return {}
 	if arrived or receding or _pending_ticks >= wait:
 		return _land(_pending)
 	return {}
@@ -565,7 +596,7 @@ func _try_land() -> Dictionary:
 ## [gap px past the outline (negative = overlapping), contact point, limb
 ## position]. Falls back
 ## to the space between the bodies before either has been drawn.
-func _strike_gap(beat: Dictionary, shift: float = 0.0) -> Array:
+func _strike_gap(beat: Dictionary, shift: float = 0.0, vshift: float = 0.0) -> Array:
 	var high: bool = beat.get("high", true)
 	var fallback := (attacker.position + victim.position) * 0.5 + Vector2(0.0, -135.0 if high else -95.0)
 	var av := attacker.get_node_or_null("Visual") as FighterVisual
@@ -577,6 +608,10 @@ func _strike_gap(beat: Dictionary, shift: float = 0.0) -> Array:
 		return [NAN, fallback, fallback]
 	var a := av._last_joints
 	var v := vv._last_joints
+	if vshift != 0.0:
+		v = v.duplicate()
+		for j in v.size():
+			v[j].y += vshift
 	var limbs: Array[Vector2] = []
 	if _pending_limb >= 0:
 		limbs = [a[_pending_limb] + Vector2(shift * _dir, 0.0)]
@@ -731,7 +766,9 @@ func _move(fighter: Fighter, speed: float, is_attacker: bool) -> void:
 # misleads, e.g. a kick thrown mid-spin), meet (the airborne victim's flight is
 # timed to meet this blow), glide (the attacker drifts in the air toward the
 # meeting blow's range), slam (this beat's push drives the victim into the
-# wall: an impact when they reach it).
+# wall: an impact when they reach it), meet_at (where on the torso the meeting
+# blow aims, 0 neck .. 1 hip; default MEET_CHEST), strike_delay (ticks into a
+# strike before it can connect: a thrust lands extended, not on the way out).
 
 func _build(k: Kind) -> Array[Dictionary]:
 	# Every finisher ends with a short final-blow hold and then a follow-through
@@ -966,10 +1003,10 @@ func _build(k: Kind) -> Array[Dictionary]:
 			# is driven diagonally into the floor. Retract, land in the
 			# knife-hand ready stance.
 			return [
-				{"ticks": 8, "atk": &"jump_squat", "def": &"knock_fly"},
-				{"ticks": 11, "atk": &"flying_chamber", "def": &"knock_fly", "atk_vy": -15.0, "glide": true},
+				{"ticks": 8, "atk": &"jump_squat", "def": &"air_tumble"},
+				{"ticks": 11, "atk": &"flying_chamber", "def": &"air_tumble", "atk_vy": -15.0, "glide": true},
 				{"ticks": 12, "atk": &"flying_side_kick", "def": &"knock_fly", "hit": true, "meet": true, "power": 3,
-					"final": true, "limb": FighterVisual.J_FOOT_F, "ko_vy": 9.0, "ko_drift": 12.0, "ko_rolls": 1},
+					"final": true, "meet_at": 0.33, "limb": FighterVisual.J_FOOT_F, "ko_vy": 9.0, "ko_drift": 12.0, "ko_rolls": 1},
 				{"ticks": 8, "atk": &"flying_chamber", "def": &"knock_fly"},
 				{"ticks": 45, "atk": &"kt_ready", "def": &"knock_fly"},
 			]
@@ -988,6 +1025,96 @@ func _build(k: Kind) -> Array[Dictionary]:
 					"ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
 				{"ticks": 22, "atk": &"guard", "def": &"slumped", "atk_move": -3.2},
 				{"ticks": 30, "atk": &"mt_ready", "def": &"slumped"},
+			]
+		Kind.FALLING_CROSS:
+			# Boxing (hands only): sink under the falling victim, a rising
+			# uppercut into the body as they drop into range (timed to meet
+			# it), then a step in and a short overhand cross down onto the
+			# falling upper body drives them diagonally into the floor.
+			return [
+				{"ticks": 10, "atk": &"heavy_windup", "def": &"air_tumble"},
+				{"ticks": 9, "atk": &"uppercut_strike", "def": &"hitstun_body", "hit": true, "meet": true, "high": false,
+					"contact": &"body", "power": 2, "meet_at": 0.6},
+				{"ticks": 18, "atk": &"overhand_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"atk_move": 1.5, "ko_vy": 9.0, "ko_drift": 10.0, "ko_rolls": 1},
+				{"ticks": 45, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.CORNER_COUNT:
+			# Boxing (hands only): a body hook drives the victim back into the
+			# corner (the wall cracks as their back hits it), a lead hook turns
+			# the head, a dip to load the right hand, then the straight right
+			# through the chin; they slide down the wall. A composed step back.
+			return [
+				{"ticks": 8, "atk": &"rbody_load", "def": &"stagger"},
+				{"ticks": 12, "atk": &"rbody_hit", "def": &"hitstun_body", "hit": true, "high": false, "contact": &"body",
+					"power": 2, "atk_move": 3.0, "def_move": 9.0, "slam": true},
+				{"ticks": 8, "atk": &"lhook_hit", "def": &"hitstun_hook", "hit": true, "contact": &"head", "power": 2, "wall": true},
+				{"ticks": 7, "atk": &"heavy_windup", "def": &"hitstun_hook"},
+				{"ticks": 18, "atk": &"heavy_strike", "def": &"slumped", "hit": true, "power": 3, "final": true,
+					"ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
+				{"ticks": 22, "atk": &"guard", "def": &"slumped", "atk_move": -3.2},
+				{"ticks": 30, "atk": &"guard", "def": &"slumped"},
+			]
+		Kind.AIR_BREAKER:
+			# Kickboxing: jump in, a straight jumping punch to the falling
+			# victim's head (timed to meet it), then, still airborne, a compact
+			# roundhouse, shin to the ribs, knocks them sideways and down. Land
+			# balanced in guard.
+			return [
+				{"ticks": 6, "atk": &"jump_squat", "def": &"air_tumble"},
+				{"ticks": 9, "atk": &"air_punch_load", "def": &"air_tumble", "atk_vy": -14.0, "glide": true},
+				{"ticks": 8, "atk": &"air_punch", "def": &"hitstun", "hit": true, "meet": true, "power": 2, "meet_at": 0.0,
+					"def_vy": -3.0},
+				{"ticks": 16, "atk": &"jrh_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true, "contact": &"body",
+					"high": false, "ko_vy": 6.0, "ko_drift": 13.0, "ko_rolls": 1},
+				{"ticks": 10, "atk": &"land_crouch", "def": &"knock_fly"},
+				{"ticks": 35, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.CORNER_BREAKER:
+			# Kickboxing: jab and cross to the body pin the victim to the wall
+			# (it cracks as their back hits it), a low kick buckles the lead
+			# leg so the head drops, then a high roundhouse to the dropped head;
+			# they collapse down the wall. Punch-to-kick weight transfer.
+			return [
+				{"ticks": 7, "atk": &"jab_strike", "def": &"hitstun_body", "hit": true, "high": false, "contact": &"body",
+					"atk_move": 3.0, "def_move": 9.0, "slam": true},
+				{"ticks": 7, "atk": &"heavy_strike", "def": &"hitstun_body", "hit": true, "high": false, "contact": &"body",
+					"power": 2, "wall": true},
+				{"ticks": 9, "atk": &"lowrh_hit", "def": &"hitstun_leg", "hit": true, "high": false, "power": 2},
+				{"ticks": 7, "atk": &"knee_windup", "def": &"hitstun_leg", "atk_move": -6.0},
+				{"ticks": 18, "atk": &"high_extend", "def": &"slumped", "hit": true, "power": 3, "final": true,
+					"strike_delay": 4, "reach": 110.0, "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
+				{"ticks": 22, "atk": &"guard", "def": &"slumped", "atk_move": -3.2},
+				{"ticks": 30, "atk": &"guard", "def": &"slumped"},
+			]
+		Kind.SKYFALL_AXE:
+			# Taekwondo: hop, the straight leg swings up past the head as the
+			# victim falls into range, then the heel chops straight down onto
+			# the shoulder (timed to meet it) and spikes them into the floor.
+			return [
+				{"ticks": 6, "atk": &"jump_squat", "def": &"air_tumble"},
+				{"ticks": 10, "atk": &"axe_raise", "def": &"air_tumble", "atk_vy": -11.0, "glide": true},
+				{"ticks": 18, "atk": &"axe_chop", "def": &"knock_fly", "hit": true, "meet": true, "power": 3, "final": true,
+					"contact": &"body", "meet_at": 0.0, "limb": FighterVisual.J_FOOT_F, "ko_vy": 14.0, "ko_drift": 3.0, "ko_rolls": 0},
+				{"ticks": 12, "atk": &"land_crouch", "def": &"knock_fly"},
+				{"ticks": 38, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.CORNER_CYCLONE:
+			# Taekwondo: chamber, a body roundhouse drives the victim into the wall (it
+			# cracks as their back hits it), recoil and turn on the planted
+			# foot, the knee chambered over the shoulder, then the spinning
+			# back kick, heel to the sternum; they slump down the wall. Turn
+			# back round to face, re-chambered, feet re-planted.
+			return [
+				{"ticks": 6, "atk": &"knee_windup", "def": &"stagger"},
+				{"ticks": 12, "atk": &"bodyrh_hit", "def": &"hitstun_body", "hit": true, "high": false, "contact": &"body",
+					"power": 2, "atk_move": 3.0, "def_move": 9.0, "slam": true},
+				{"ticks": 10, "atk": &"spin_windup", "def": &"hitstun", "atk_spin": 0.5},
+				{"ticks": 4, "atk": &"back_chamber", "def": &"hitstun", "atk_spin_hold": true},
+				{"ticks": 18, "atk": &"back_extend_high", "def": &"slumped", "hit": true, "power": 3, "final": true,
+					"contact": &"body", "limb": FighterVisual.J_FOOT_B, "strike_delay": 3, "ko_vy": -2.0, "ko_drift": 0.0, "wall": true, "atk_spin_hold": true},
+				{"ticks": 12, "atk": &"back_chamber", "def": &"slumped", "atk_spin": 0.5},
+				{"ticks": 34, "atk": &"guard", "def": &"slumped", "atk_move": -2.0},
 			]
 		Kind.AIR_SMASH:
 			# Leap together, reach and grab, overhead hammer-fist, spike into the
