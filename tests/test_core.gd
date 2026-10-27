@@ -225,12 +225,17 @@ func _initialize() -> void:
 	b = p[1]
 	a.ground_y = 560
 	b.ground_y = 560
-	var kseq := {0: CombatData.AttackType.LIGHT, 3: CombatData.AttackType.LIGHT, 13: CombatData.AttackType.BACKHAND}
+	# KNOCKDOWN_COMBO_HITS hits in a row (each landing while still in hitstun).
+	var kd_hits := {}
+	for k in CombatData.KNOCKDOWN_COMBO_HITS:
+		kd_hits[k * 8] = true
 	var states_seen: Array[int] = []
 	var bounced_seen := false
 	var whiff_while_down := false
-	for t in 140:
-		_step(a, b, _intent(kseq.get(t, CombatData.AttackType.NONE)), none)
+	for t in 160:
+		if kd_hits.has(t):
+			b.receive_hit(CombatData.get_attack(CombatData.AttackType.LIGHT), a, 1)
+		_step(a, b, none, none)
 		if states_seen.is_empty() or states_seen[-1] != b.state:
 			states_seen.append(b.state)
 		if b.state == Fighter.State.KNOCKDOWN and b.bounced:
@@ -243,7 +248,7 @@ func _initialize() -> void:
 	for s in states_seen:
 		names.append(Fighter.State.keys()[s])
 	var seq_ok := names.find("KNOCKDOWN") >= 0 and names.find("GETUP") > names.find("KNOCKDOWN") and names[-1] == "IDLE"
-	_check(seq_ok, "3rd hit -> KNOCKDOWN -> GETUP -> IDLE (%s)" % [names])
+	_check(seq_ok, "hit %d of a combo -> KNOCKDOWN -> GETUP -> IDLE (%s)" % [CombatData.KNOCKDOWN_COMBO_HITS, names])
 	_check(bounced_seen, "body bounced on landing")
 	_check(whiff_while_down, "cannot be hit while knocked down")
 	_check(is_equal_approx(b.position.y, 560.0) and not b.airborne, "back on feet at floor level")

@@ -210,7 +210,13 @@ const LANDING_FRAMES: int = 3
 const LANDING_FRAMES_AFTER_AIR_ATTACK: int = 7
 ## Knockdown: the Nth consecutive hit of a combo knocks the opponent off their feet.
 ## They fly back, bounce once, lie down, then get up. Untouchable while down/rising.
-const KNOCKDOWN_COMBO_HITS: int = 3
+const KNOCKDOWN_COMBO_HITS: int = 4
+## A heavy hit's random blowback (chance under 1) needs this many hits in the
+## combo (or a counter hit); certain blowbacks (1.0) always apply.
+const BLOWBACK_MIN_COMBO: int = 2
+## Scales every uncertain blowback chance (the per-move values stay as authored
+## relative weights); certain ones (1.0) are untouched.
+const BLOWBACK_CHANCE_SCALE: float = 0.5
 const KNOCKDOWN_LAUNCH_VELOCITY: float = -8.0
 const KNOCKDOWN_DRIFT: float = 4.5
 const KNOCKDOWN_BOUNCE_VELOCITY: float = -3.5

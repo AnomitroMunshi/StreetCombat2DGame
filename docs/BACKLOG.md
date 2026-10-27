@@ -22,7 +22,7 @@ Timestamps are `clip @ seconds`.
 
 ## Gameplay feel
 
-- [ ] **Knockdowns are too frequent.** There were 3 in 15 s in TKD vs Kickbox, and that match ended in 23 s. Raise the threshold or require a combo.
+- [x] **Knockdowns are too frequent.** *Batch 4: measured over 84 AI-vs-AI matches 7.4 -> 2.7 knockdowns per fight-minute. Random blowback now needs a combo follow-up or a counter hit (lone hits never), uncertain chances scaled by 0.5, combo knockdown at 4 hits; certain blowbacks unchanged. tests/test_knockdown.gd. Matches still average ~16 s: a damage/balance question.* There were 3 in 15 s in TKD vs Kickbox, and that match ended in 23 s. Raise the threshold or require a combo.
 - [~] **Speech lines repeat** *Polish batch 2: per-line 5 s cooldown for everyday lines; quotes may be a list of variants (rotated). Variant lines still to be written.* within seconds (শালা শুয়োর!, উফ্!). Add a cooldown per line and rotate through several lines.
 - [ ] **Bangla Maar's win quote** is a censored swear on every win. Consider a cleaner line or a rotation.
 - [x] **The SIGNATURE READY prompt is easy to miss.** *Already pulses (handoff review); now on its own row.* Pulse it or show a key icon by the Focus bar.
