@@ -66,9 +66,13 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 @export var ai_close_plans: Array = []
 @export var ai_far_plans: Array = []
 @export var ai_preferred_range: float = 95.0
-## The style's own open-floor finishers (FinisherDirector ids). Air Smash and
-## Wall Crush are environmental and shared by every style.
+## The style's own open-floor finishers (FinisherDirector ids).
 @export var finishers: PackedStringArray = PackedStringArray()
+## The style's airborne finisher (an airborne or launching kill) and wall
+## finisher (victim near the wall behind them), FinisherDirector ids. Empty =
+## the shared Air Smash / Wall Crush.
+@export var air_finisher: StringName = &""
+@export var wall_finisher: StringName = &""
 ## Wall Crush strikes in this style (5 pose names: windup, entry strike into
 ## the wall, pinning strike, final windup, final blow). Empty = the shared
 ## default (flying knee, cross, double palm).
@@ -208,6 +212,10 @@ func validate() -> PackedStringArray:
 			errors.append("unknown finisher %s" % fid)
 		elif fk in FinisherDirector.ENVIRONMENTAL:
 			errors.append("finisher %s is environmental (shared), not a style finisher" % fid)
+	if air_finisher != &"" and not FinisherDirector.kind_for_id(air_finisher) in FinisherDirector.AIR_KINDS:
+		errors.append("air_finisher %s is not an airborne finisher" % air_finisher)
+	if wall_finisher != &"" and not FinisherDirector.kind_for_id(wall_finisher) in FinisherDirector.WALL_KINDS:
+		errors.append("wall_finisher %s is not a wall finisher" % wall_finisher)
 	for plan in ai_close_plans + ai_far_plans:
 		for i in plan.size():
 			if not plan[i] in mine:

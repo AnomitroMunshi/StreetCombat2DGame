@@ -389,7 +389,7 @@ func _initialize() -> void:
 			a.ground_y = 560
 			b.ground_y = 560
 			# Mirror the setup around the arena centre for the left-facing run.
-			if kind == FinisherDirector.Kind.WALL_CRUSH:
+			if kind in FinisherDirector.WALL_KINDS:
 				b.position.x = Fighter.ARENA_MAX_X - 120.0 if side == 1 else Fighter.ARENA_MIN_X + 120.0
 			else:
 				b.position.x = 640.0 + side * 40.0

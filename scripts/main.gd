@@ -149,6 +149,8 @@ var _last_event: String = "-"
 var _fx_rng := RandomNumberGenerator.new()
 var _finisher_rng := RandomNumberGenerator.new()
 var _finisher: FinisherDirector = null
+## The finisher's event this tick ({} if none; tests read it).
+var _last_finisher_event: Dictionary = {}
 var _follow_victim: bool = false
 ## Where the knockout blow landed (world), for the KO shot.
 var _ko_focus := Vector2.INF
@@ -282,6 +284,7 @@ func _physics_process(_delta: float) -> void:
 		_hitstop -= 1
 	elif _round_state == RoundState.FINISHER:
 		var event := _finisher.tick()
+		_last_finisher_event = event
 		player.tick()
 		enemy.tick()
 		# Shared cinematic speed: every finisher plays at its beats' speeds.
@@ -447,7 +450,7 @@ func _training_finisher(kind: FinisherDirector.Kind) -> void:
 	for f: Fighter in [player, enemy]:
 		f.stop_combat()
 		f.velocity_x = 0.0
-	if kind == FinisherDirector.Kind.WALL_CRUSH:
+	if kind in FinisherDirector.WALL_KINDS:
 		enemy.position.x = Fighter.ARENA_MAX_X - 110.0
 	else:
 		enemy.position.x = clampf(enemy.position.x, Fighter.ARENA_MIN_X + 200.0, Fighter.ARENA_MAX_X - 200.0)
@@ -455,7 +458,7 @@ func _training_finisher(kind: FinisherDirector.Kind) -> void:
 	for f: Fighter in [player, enemy]:
 		f.face_opponent()
 		f.reset_physics_interpolation()
-	if kind == FinisherDirector.Kind.AIR_SMASH:
+	if kind in FinisherDirector.AIR_KINDS:
 		enemy.scripted_launch(-6.0)
 	enemy.health = 0
 	_start_finisher(player, enemy, kind)
@@ -1000,6 +1003,13 @@ func _finisher_feedback(event: Dictionary) -> void:
 	if event["wall"]:
 		_wall_impact(Vector2(_wall_face_x(event["dir"]), pos.y), power)
 		_wall_dent = Vector2(_wall_face_x(event["dir"]) + event["dir"] * 10.0, pos.y)
+	if event.get("slam", false):
+		# Driven back into the wall (no blow): the wall and the body take it.
+		_hitstop = maxi(_hitstop, 2)
+		_shake(8, 4.0)
+		_kick_camera(fdir, 5.0)
+		audio.play(&"body_fall", 0.0)
+		return
 	_finisher_kind_fx(pos, fdir, power, event["final"])
 	var hit_dir := CombatData.dir_for_kind(event.get("kind", CombatData.ImpactKind.STRAIGHT), event["dir"])
 	if event["final"] and event.get("style", &"") != &"":
@@ -1010,7 +1020,7 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_kick_camera(hit_dir, 14.0)
 		fx.strike(pos, hit_dir, 3, true)
 		if event.get("high", true):
-			fx.blood(pos, hit_dir + Vector2(0.0, -0.35), 16)
+			fx.blood(pos, hit_dir + Vector2(0.0, -0.35), 16, fx.BLOOD_DARK if event["wall"] else fx.BLOOD_COLOR)
 		hud.flash(0.1)  # a beat of light, never a white-out over the blow
 		audio.play(&"hit_heavy", 3.0)
 		audio.play(&"ko_boom")
@@ -1024,7 +1034,7 @@ func _finisher_feedback(event: Dictionary) -> void:
 		_shake(3 + power * 2, 1.5 + power * 1.5)
 		fx.strike(pos, hit_dir, power)
 		if power >= 2 and event.get("high", true):
-			fx.blood(pos, hit_dir + Vector2(0.0, -0.3), 4)
+			fx.blood(pos, hit_dir + Vector2(0.0, -0.3), 4, fx.BLOOD_DARK if event["wall"] else fx.BLOOD_COLOR)
 		_kick_camera(hit_dir, 3.0 + power * 3.0)
 		_finisher_hit_sound(power, event)
 		_camera_punch += 0.015 * power
@@ -1098,7 +1108,7 @@ func _finisher_ambient() -> void:
 			if atk.airborne and not _fin_attacker_air:
 				fx.ground_ring(Vector2(atk.position.x, FLOOR_Y), 80.0, 18)
 				fx.dust_cloud(Vector2(atk.position.x, FLOOR_Y), 1.1, 40, 8)
-		FinisherDirector.Kind.WALL_CRUSH:
+		FinisherDirector.Kind.WALL_CRUSH, FinisherDirector.Kind.IRON_CORNER:
 			# Grit keeps trickling out of the cracked pillar.
 			if _wall_dent != Vector2.INF and _tick % 5 == 0:
 				fx.debris(_wall_dent + Vector2(0.0, _fx_rng.randf_range(-12.0, 12.0)), 1, PILLAR_LIGHT, 1.0, 0.0)

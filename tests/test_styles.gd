@@ -214,6 +214,45 @@ func _initialize() -> void:
 			wall_n += 1
 	_check(wall_n > 30, "near the wall: Wall Crush still has priority (%d/100)" % wall_n)
 
+	print("[style air and wall finishers]")
+	# Each style's own contextual finisher, chosen from the ATTACKER's style
+	# whatever the rival's; a repeat falls back to that style's own finishers.
+	for case in [[&"karate", true, FinisherDirector.Kind.SKYLINE_VERDICT], [&"muay_thai", false, FinisherDirector.Kind.IRON_CORNER]]:
+		var st := StyleRegistry.by_id(case[0])
+		p = _pair(st, 80.0)
+		a = p[0]
+		var cv: Fighter = p[1]
+		cv.set_style(StyleRegistry.by_id(&"boxing"))
+		if case[1]:
+			cv.airborne = true
+		else:
+			cv.position.x = Fighter.ARENA_MAX_X - 60.0
+			a.position.x = cv.position.x - 80.0
+		var own_n := 0
+		var foreign := 0
+		var allowed: Array = [case[2]]
+		for fid in st.finishers:
+			allowed.append(FinisherDirector.kind_for_id(fid))
+		var back_to_back := 0
+		var prev_k := -1
+		for i in 100:
+			var k := FinisherDirector.choose(a, cv, null, rng)
+			if k == case[2]:
+				own_n += 1
+			if not k in allowed:
+				foreign += 1
+			if k == prev_k:
+				back_to_back += 1
+			prev_k = k
+		_check(own_n > 30 and foreign == 0 and back_to_back == 0,
+			"%s: its own %s, else its own finishers, never twice running (%d/100, %d foreign)" % [case[0], FinisherDirector.DISPLAY_NAMES[case[2]], own_n, foreign])
+		a.queue_free()
+		cv.queue_free()
+	var bad_ctx := StyleRegistry.by_id(&"karate").duplicate() as MartialArtStyle
+	bad_ctx.air_finisher = &"iron_corner"
+	bad_ctx.wall_finisher = &"skyline_verdict"
+	_check(bad_ctx.validate().size() == 2, "an air or wall finisher of the wrong kind is reported (%s)" % [bad_ctx.validate()])
+
 	print("[boxing power]")
 	for case in [[CombatData.AttackType.REAR_HOOK, 40.0], [CombatData.AttackType.OVERHAND, 50.0], [CombatData.AttackType.BODY_HOOK, 30.0]]:
 		p = _pair(null, 80.0)
