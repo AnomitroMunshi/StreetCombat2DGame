@@ -11,3 +11,6 @@ export_credentials.cfg
 .DS_Store
 Thumbs.db
 .vscode/settings.json
+
+# Test runner progress log
+tests/last_run.log
