@@ -23,6 +23,9 @@ const BAR_HEIGHT: float = 20.0
 const BAR_MARGIN: float = 48.0
 const BAR_Y: float = 44.0
 const COLOR_ROUND_WON := Color(1.0, 0.8, 0.25)
+const TOP_SHADE_HEIGHT: float = 125.0
+const TOP_SHADE_ALPHA: float = 0.5
+
 const TRAIL_DRAIN_PER_SEC: float = 0.5
 const LETTERBOX_HEIGHT: float = 62.0
 const FLASH_DECAY_PER_SEC: float = 3.5
@@ -717,6 +720,12 @@ func _on_canvas_draw() -> void:
 
 
 func _draw_gameplay_hud() -> void:
+	# A soft dark fade behind the bars and labels, so they read over any stage
+	# (a bright sunset sky included).
+	var shade := Color(0.0, 0.0, 0.0, TOP_SHADE_ALPHA)
+	_canvas.draw_polygon(PackedVector2Array([Vector2(0.0, 0.0), Vector2(SCREEN_W, 0.0),
+		Vector2(SCREEN_W, TOP_SHADE_HEIGHT), Vector2(0.0, TOP_SHADE_HEIGHT)]),
+		PackedColorArray([shade, shade, Color(shade, 0.0), Color(shade, 0.0)]))
 	_draw_bar(_player, BAR_MARGIN, false, _trail[0])
 	_draw_bar(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, true, _trail[1])
 	_draw_round_pips(0, BAR_MARGIN, false)
@@ -798,11 +807,15 @@ func _draw_bar(f: Fighter, x: float, mirrored: bool, trail: float) -> void:
 	var swatch_x := x + BAR_WIDTH - 12.0 if not mirrored else x
 	_canvas.draw_rect(Rect2(swatch_x, BAR_Y - 24.0, 12.0, 12.0), f.accent_color)
 	var hp_align := HORIZONTAL_ALIGNMENT_LEFT if mirrored else HORIZONTAL_ALIGNMENT_RIGHT
+	_canvas.draw_string_outline(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 36.0), "%d / %d" % [f.health, f.max_health],
+		hp_align, BAR_WIDTH, 14, 4, Color(0.0, 0.0, 0.0, 0.7))
 	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 36.0), "%d / %d" % [f.health, f.max_health],
 		hp_align, BAR_WIDTH, 14, COLOR_DIM)
 	# Stance name on the opposite side of the HP readout.
 	var stance_align := HORIZONTAL_ALIGNMENT_RIGHT if mirrored else HORIZONTAL_ALIGNMENT_LEFT
 	var style_label := f.style.display_name.to_upper() if f.style != null else Stances.stance_name(f.stance)
+	_canvas.draw_string_outline(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 36.0), style_label,
+		stance_align, BAR_WIDTH, 14, 4, Color(0.0, 0.0, 0.0, 0.7))
 	_canvas.draw_string(_font, Vector2(x, BAR_Y + BAR_HEIGHT + 36.0), style_label,
 		stance_align, BAR_WIDTH, 14, f.accent_color.lerp(COLOR_TEXT, 0.4))
 

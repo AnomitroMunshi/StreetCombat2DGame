@@ -33,6 +33,10 @@ const GLOW_HOT := Color(1.0, 0.95, 0.8)
 const GLOW_BLUE := Color(0.35, 0.65, 1.0)
 const MAX_EFFECTS: int = 260
 const MAX_DECALS: int = 140
+## Painted damage decals for the current stage's surfaces, from
+## load_decal_set(); empty = the drawn (procedural) cracks and craters.
+## "floor": craters, "scuff": a light floor mark, "wall": wall impacts.
+var decal_set: Dictionary = {}
 const DEBRIS_LIFE: int = 150
 const CRACK_GROW_TICKS: int = 14
 const CRACK_COLOR := Color(0.06, 0.045, 0.04, 0.85)
@@ -386,6 +390,14 @@ func crack(pos: Vector2, size: float, vertical: bool, branches: int = 6) -> void
 ## never spills onto the paper walls. Higher `power` = bigger dent, more and
 ## longer cracks. Repeated hits on the same spot stack up.
 func wall_crack(pos: Vector2, power: int, clip: Rect2) -> void:
+	if not decal_set.is_empty():
+		# A painted wall impact (1:2), kept on the struck surface (`clip`).
+		var h := 80.0 + power * 30.0
+		pos.x = clampf(pos.x, clip.position.x + 6.0, clip.end.x - 6.0)
+		_add_decal({"kind": "tex", "tex": _pick(decal_set["wall"]), "age": 0, "grow": 3, "clip": clip,
+			"rect": Rect2(pos - Vector2(h * 0.25, h * 0.5), Vector2(h * 0.5, h))})
+		decals_changed.emit()
+		return
 	pos.x = clampf(pos.x, clip.position.x + 6.0, clip.end.x - 6.0)
 	var r := 6.0 + power * 4.5
 	var dent := PackedVector2Array()
@@ -451,6 +463,14 @@ func wall_crack(pos: Vector2, power: int, clip: Rect2) -> void:
 ## run along the planks (wood splits with the grain), thick at the hole and
 ## thinning out. Higher `power` = bigger hole, more and longer cracks.
 func floor_break(pos: Vector2, power: int) -> void:
+	if not decal_set.is_empty():
+		# A painted crater (4:1, already seen at the floor's low angle),
+		# centred on the impact; one variant kept for its whole life.
+		var w := 170.0 + power * 45.0
+		_add_decal({"kind": "tex", "tex": _pick(decal_set["floor"]), "age": 0, "grow": 5, "clip": Rect2(),
+			"rect": Rect2(pos - Vector2(w * 0.5, w * 0.125), Vector2(w, w * 0.25))})
+		decals_changed.emit()
+		return
 	var r := 30.0 + power * 12.0
 	var hole := PackedVector2Array()
 	for i in 14:
@@ -648,11 +668,56 @@ func _tick_destruction() -> void:
 
 # --- Drawing ------------------------------------------------------------------
 
+## A light scuff where a body slid or landed hard (painted sets only).
+func floor_scuff(pos: Vector2, strength: float) -> void:
+	if decal_set.is_empty():
+		return
+	var w := clampf(90.0 + strength * 6.0, 90.0, 200.0)
+	_add_decal({"kind": "tex", "tex": decal_set["scuff"], "age": 0, "grow": 4, "clip": Rect2(),
+		"rect": Rect2(pos - Vector2(w * 0.5, w * 0.125), Vector2(w, w * 0.25))})
+	decals_changed.emit()
+
+
+## The painted decals in a folder (floor_impact_01..03, floor_scuff_light,
+## wall_impact_01..03).
+static func load_decal_set(folder: String) -> Dictionary:
+	var d := {"floor": [], "wall": []}
+	for i in range(1, 4):
+		d["floor"].append(load("%s/floor_impact_%02d.png" % [folder, i]))
+		d["wall"].append(load("%s/wall_impact_%02d.png" % [folder, i]))
+	d["scuff"] = load(folder + "/floor_scuff_light.png")
+	return d
+
+
+func _pick(textures: Array) -> Texture2D:
+	return textures[_rng.randi_range(0, textures.size() - 1)]
+
+
+## A painted decal: grows a little and fades in, clipped to its surface.
+func _draw_tex_decal(canvas: CanvasItem, d: Dictionary, g: float) -> void:
+	var rect: Rect2 = d["rect"]
+	var s := lerpf(0.8, 1.0, g)
+	var r := Rect2(rect.get_center() - rect.size * s * 0.5, rect.size * s)
+	var tex: Texture2D = d["tex"]
+	var src := Rect2(Vector2.ZERO, tex.get_size())
+	var clip: Rect2 = d["clip"]
+	if clip.has_area():
+		var inter := r.intersection(clip)
+		if not inter.has_area():
+			return
+		src = Rect2(src.position + (inter.position - r.position) / r.size * src.size, inter.size / r.size * src.size)
+		r = inter
+	canvas.draw_texture_rect_region(tex, r, src, Color(1.0, 1.0, 1.0, g))
+
+
 ## Called by the arena's _draw so cracks and craters sit under the fighters.
 func draw_decals(canvas: CanvasItem) -> void:
 	for d in _decals:
 		var g := clampf(float(d["age"]) / float(d["grow"]), 0.0, 1.0)
 		if g <= 0.0:
+			continue
+		if d["kind"] == "tex":
+			_draw_tex_decal(canvas, d, g)
 			continue
 		if d["kind"] == "crater":
 			_draw_floor_hole(canvas, d, g)
