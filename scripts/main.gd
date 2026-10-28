@@ -1001,6 +1001,9 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 		# Blocked at the wrong height: say why the guard did not hold.
 		hud.popup(attacker_of(defender), "LOW!" if defender.last_hit_wrong_height == &"low" else "OVERHEAD!",
 			Color(1.0, 0.6, 0.3))
+	if result == CombatData.HitResult.HIT and defender.thrown_off_balance:
+		hud.popup(attacker_of(defender), "OFF BALANCE!", Color(1.0, 0.6, 0.3))
+		_shake(10, 5.0)
 	if result == CombatData.HitResult.HIT and defender.last_hit_counter:
 		hud.popup(attacker_of(defender), "COUNTER", Color(1.0, 0.8, 0.35))
 		fx.ring(contact, Color(1.0, 0.8, 0.35), 34.0, 10)
