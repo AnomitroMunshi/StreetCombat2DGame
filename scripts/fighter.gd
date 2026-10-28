@@ -253,6 +253,8 @@ var last_hit_low: bool = false
 ## attack against a standing block) or &"overhead" (an overhead against a
 ## crouching block); &"" otherwise.
 var last_hit_wrong_height: StringName = &""
+## The last hit threw this fighter off balance (CombatData.Attack.off_balance).
+var thrown_off_balance: bool = false
 ## The last clean hit was a heavy strike (10+ damage): a bigger reaction.
 var last_hit_heavy: bool = false
 ## How the last clean hit travelled (CombatData.ImpactKind): picks the reaction.
@@ -1138,6 +1140,7 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	var overhead := attack.overhead or attacker.airborne
 	var right_height := (not attack.low or crouch_held) and not (overhead and crouch_held)
 	last_hit_wrong_height = &""
+	thrown_off_balance = false
 	if is_parry_active() and facing_attacker and right_height:
 		return _parry(attacker, push_dir, attack)
 	var guarding := (state == State.BLOCK and state_frame >= CombatData.BLOCK_STARTUP_FRAMES) \
@@ -1219,6 +1222,12 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 	elif attack.stun > 0 and dizzy_immunity <= 0:
 		dizzy_left = attack.stun
 		dizzied.emit(self)
+	if attack.off_balance > 0 and not airborne and dizzy_left <= 0:
+		# Knocked off balance: reeling (open to counter hits), the knockback kept.
+		_enter_state(State.STAGGER)
+		stun_frames = attack.off_balance
+		thrown_off_balance = true
+		return CombatData.HitResult.HIT
 	_enter_state(State.HITSTUN)
 	var base_stun := attack.hitstun + (CombatData.FINISHER_HITSTUN_BONUS if finisher else 0)
 	stun_frames = maxi(base_stun - CombatData.COMBO_HITSTUN_DECAY * maxi(received_combo - CombatData.MAX_COMBO_CHAIN, 0), CombatData.MIN_COMBO_HITSTUN)

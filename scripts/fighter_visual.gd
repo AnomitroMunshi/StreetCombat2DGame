@@ -437,6 +437,12 @@ var _victory_t0: float = 0.0
 # Light slap: the lead hand drawn back low and wide, then swung across the cheek.
 var _slap_wind := PackedFloat32Array([0.0, 0.1, 0.2, -0.3, 0.2, 0.4, 0.3, 0.0, -0.25, -0.3, -4.0, 0.0, 0.0, 10.0])
 var _slap_hit := PackedFloat32Array([0.25, -0.05, 1.75, 1.95, 0.2, 0.45, 0.32, 0.0, -0.3, -0.35, 8.0, 0.0, 0.3, -6.0])
+# Street punch (Bangla Maar J): the lead fist cocked back by the cheek with the
+# chin up, then thrown loose and wide with the shoulder behind it, the torso
+# leaning in further than a trained jab, and drawn back.
+var _street_wind := PackedFloat32Array([0.05, -0.05, 0.6, 3.0, 0.4, 2.7, 0.35, 0.0, -0.3, -0.35, -5.0, 0.0, 0.0, 12.0])
+var _street_hit := PackedFloat32Array([0.38, -0.1, 1.68, 1.85, 0.35, 2.6, 0.4, 0.0, -0.4, -0.4, 9.0, 0.0, 0.4, -4.0])
+var _street_follow := PackedFloat32Array([0.3, -0.05, 1.3, 2.4, 0.35, 2.6, 0.38, 0.0, -0.35, -0.38, 6.0, 0.0, 0.3, 2.0])
 var _slap_follow := PackedFloat32Array([0.3, -0.1, 2.0, 2.6, 0.2, 0.45, 0.32, 0.0, -0.3, -0.35, 9.0, 0.0, 0.35, -8.0])
 # Front thrust kick: arms flung up for balance, a flat-footed shove of a kick.
 var _thrust_chamber := PackedFloat32Array([-0.3, 0.2, 1.6, 2.3, 1.3, 2.0, 1.9, 0.2, -0.3, -0.25, -2.0, 6.0, 0.2, 4.0])
@@ -671,12 +677,16 @@ var _dk_low_hit := PackedFloat32Array([-0.35, 0.25, 1.1, 2.9, -0.3, 0.0, 0.15, 0
 var _dk_plant := PackedFloat32Array([0.1, 0.1, 1.0, 2.8, 0.7, 2.9, -0.35, -0.55, 0.45, 0.15, 6.0, 4.0, 0.3, -4.0])
 var _dk_mid_chamber := PackedFloat32Array([-0.1, 0.15, 1.0, 2.8, 0.7, 2.9, 1.4, -0.6, 0.25, 0.05, 6.0, 4.0, 0.7, 2.0])
 var _dk_mid_hit := PackedFloat32Array([-0.6, 0.45, -0.2, 0.1, 1.0, 2.8, 1.62, 1.7, 0.2, 0.05, 8.0, 0.0, 1.0, 6.0])
-# Jor Dhakka: lean in and brace (knees bent, lead shoulder turned in, arms
-# tucked), a running stride (rear leg swinging through), the drive with the
-# lead shoulder leading and the rear arm flung back, a stumbling follow-through.
-var _jd_brace := PackedFloat32Array([0.35, -0.1, 0.4, 2.2, 0.6, 2.5, 0.75, -0.35, -0.55, -0.9, -6.0, 10.0, 0.2, 16.0])
-var _jd_stride := PackedFloat32Array([0.5, -0.15, 0.35, 2.2, -0.2, 0.3, -0.3, -0.7, 0.9, -0.4, 2.0, 8.0, 0.4, 20.0])
-var _jd_drive := PackedFloat32Array([0.62, -0.25, 0.3, 2.3, -0.6, -0.3, 0.95, -0.05, -0.75, -1.0, 12.0, 8.0, 0.8, 24.0])
+# Jor Dhakka (after a Wario-style shoulder charge): sink and load low with both
+# fists folded up in front; a running stride (front knee driving up, rear leg
+# pushing off straight behind) with the torso pitched forward; then the drive:
+# lowest, most committed lean with the head tucked behind the lead shoulder,
+# the front foot planting on a bent knee and the rear leg fully extended
+# through the hit. The lead (near) arm stays tucked so the near shoulder
+# strikes (the left one charging right, the right one charging left).
+var _jd_brace := PackedFloat32Array([0.45, -0.1, -0.1, 2.9, 0.3, 2.7, 0.9, -0.3, -0.5, -1.0, -8.0, 16.0, 0.3, 18.0])
+var _jd_stride := PackedFloat32Array([0.65, -0.2, -0.1, 2.95, 0.5, 2.6, 1.4, 0.1, -0.9, -0.8, 2.0, 10.0, 0.5, 24.0])
+var _jd_drive := PackedFloat32Array([0.78, -0.3, -0.15, 2.95, 0.45, 2.7, 1.0, 0.1, -0.95, -0.95, 12.0, 12.0, 0.8, 28.0])
 var _jd_follow := PackedFloat32Array([0.35, 0.1, 1.2, 2.2, 0.3, 1.2, 0.55, -0.2, -0.35, -0.6, 8.0, 4.0, 0.3, 10.0])
 ## Intro poses that stand on one leg (the feet are not planted on the floor).
 const ONE_LEG_POSES: Array[StringName] = [&"mt_ready", &"kf_crane"]
@@ -1088,6 +1098,9 @@ func _ready() -> void:
 		CombatData.AttackType.LEAPING_ROUNDHOUSE: [
 			[S, 0.3, _jump_squat, EASE_SMOOTH], [S, 0.85, _lrh_load, EASE_SMOOTH], [A, 0.0, _lrh_hit, EASE_IN],
 			[A, 1.0, _lrh_hit, EASE_LINEAR], [R, 0.45, _lrh_load, EASE_OUT]],
+		CombatData.AttackType.STREET_PUNCH: [
+			[S, 0.55, _street_wind, EASE_SMOOTH], [A, 0.0, _street_hit, EASE_IN], [A, 1.0, _street_hit, EASE_LINEAR],
+			[R, 0.45, _street_follow, EASE_OUT]],
 		CombatData.AttackType.LIGHT_SLAP: [
 			[S, 0.55, _slap_wind, EASE_SMOOTH], [A, 0.0, _slap_hit, EASE_IN], [A, 1.0, _slap_follow, EASE_LINEAR],
 			[R, 0.45, _slap_follow, EASE_OUT]],
@@ -2763,7 +2776,7 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 		var across := Vector2(-along.y, along.x)
 		var wrist := hand - along * 8.5
 		draw_line(wrist - across * 6.5, wrist + across * 6.5, Color(0.95, 0.94, 0.9), 4.0, true)
-	if _kit == &"bangla_maar" or _open_arm:
+	if (_kit == &"bangla_maar" and not _bangla_fist()) or _open_arm:
 		_open_hand(hand, along, inside.normalized(), pad, fill)
 		return
 	_capsule(hand - along * 1.5 * g, hand + along * 5.5 * g, 7.0 * g + pad, 8.0 * g + pad, fill)
@@ -2773,6 +2786,12 @@ func _arm(shoulder: Vector2, elbow: Vector2, hand: Vector2, pad: float, color: C
 		var side := -inside.normalized()
 		draw_circle(hand + along * 2.0 * g - side * 3.5, 5.0 * g, fill.darkened(0.25), true, -1.0, true)
 		draw_circle(hand + along * 3.0 * g + side * 3.0, 3.2, Color(1.0, 1.0, 1.0, 0.45), true, -1.0, true)
+
+
+## Bangla Maar fights open-handed except when it throws its street punch.
+func _bangla_fist() -> bool:
+	return fighter.state == Fighter.State.ATTACK and fighter.current_attack != null \
+		and fighter.current_attack.type == CombatData.AttackType.STREET_PUNCH
 
 
 ## Open hand (slaps, shoves, pointing): a palm, four short fingers fanned a

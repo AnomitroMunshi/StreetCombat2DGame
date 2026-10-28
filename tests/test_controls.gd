@@ -28,7 +28,7 @@ const SPEC: Dictionary = {
 	&"kickboxing": {&"light": &"jab", &"heavy": &"cross", &"technique": &"body_roundhouse", &"up_light": &"uppercut",
 		&"up_heavy": &"high_kick", &"down_light": &"body_hook", &"down_heavy": &"low_roundhouse", &"F": &"breaker_combo",
 		&"power_light": &"superman_punch", &"power_heavy": &"leaping_roundhouse"},
-	&"bangla_maar": {&"light": &"light_slap", &"heavy": &"thrust_kick", &"technique": &"jor_dhakka",
+	&"bangla_maar": {&"light": &"street_punch", &"heavy": &"thrust_kick", &"technique": &"jor_dhakka",
 		&"up_light": &"head_elbow", &"up_heavy": &"hammer_fist", &"down_light": &"stomach_shot", &"down_heavy": &"leg_kick",
 		&"F": &"belly_bomb", &"power_light": &"flying_slap", &"power_heavy": &"flying_chest_kick"},
 }

@@ -27,7 +27,7 @@ input_map = {
 &"down_heavy": &"leg_kick",
 &"down_light": &"stomach_shot",
 &"heavy": &"thrust_kick",
-&"light": &"light_slap",
+&"light": &"street_punch",
 &"technique": &"jor_dhakka",
 &"up_heavy": &"hammer_fist",
 &"up_light": &"head_elbow"
@@ -38,13 +38,13 @@ air_map = {
 &"technique": &"jump_punch"
 }
 chains = {
-&"head_elbow": [&"light_slap", &"jor_dhakka"],
-&"leg_kick": [&"light_slap", &"thrust_kick"],
-&"light_slap": [&"light_slap", &"stomach_shot", &"thrust_kick", &"head_elbow", &"jor_dhakka"],
-&"stomach_shot": [&"light_slap", &"head_elbow", &"leg_kick"]
+&"head_elbow": [&"street_punch", &"jor_dhakka"],
+&"leg_kick": [&"street_punch", &"thrust_kick"],
+&"street_punch": [&"street_punch", &"stomach_shot", &"thrust_kick", &"head_elbow", &"jor_dhakka"],
+&"stomach_shot": [&"street_punch", &"head_elbow", &"leg_kick"]
 }
-ai_close_plans = [[&"light_slap", &"light_slap", &"stomach_shot"], [&"light_slap", &"head_elbow"], [&"stomach_shot", &"head_elbow"], [&"light_slap", &"stomach_shot", &"leg_kick"], [&"leg_kick", &"light_slap"], [&"hammer_fist"], [&"light_slap", &"jor_dhakka"], [&"head_elbow", &"light_slap"]]
-ai_far_plans = [[&"thrust_kick"], [&"leg_kick"], [&"flying_slap"], [&"flying_chest_kick"], [&"light_slap", &"thrust_kick"], [&"jor_dhakka"]]
+ai_close_plans = [[&"street_punch", &"street_punch", &"stomach_shot"], [&"street_punch", &"head_elbow"], [&"stomach_shot", &"head_elbow"], [&"street_punch", &"stomach_shot", &"leg_kick"], [&"leg_kick", &"street_punch"], [&"hammer_fist"], [&"street_punch", &"jor_dhakka"], [&"head_elbow", &"street_punch"]]
+ai_far_plans = [[&"thrust_kick"], [&"leg_kick"], [&"flying_slap"], [&"flying_chest_kick"], [&"street_punch", &"thrust_kick"], [&"jor_dhakka"]]
 wall_entry = PackedStringArray("push_load", "push_hit", "stomach_hit", "hammer_raise", "hammer_hit")
 quotes = {
 "block": "জোর নেই গায়ে?",

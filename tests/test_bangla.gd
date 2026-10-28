@@ -93,7 +93,7 @@ func _initialize() -> void:
 	_check(guard[2] < 0.9 and guard[4] < 0.9, "relaxed stance: neither hand raised into a guard (ua %.2f / %.2f)" % [guard[2], guard[4]])
 
 	print("[every move, both directions]")
-	for mid in [&"light_slap", &"thrust_kick", &"jor_dhakka", &"head_elbow", &"hammer_fist", &"stomach_shot", &"leg_kick",
+	for mid in [&"street_punch", &"thrust_kick", &"jor_dhakka", &"head_elbow", &"hammer_fist", &"stomach_shot", &"leg_kick",
 			&"flying_slap", &"flying_chest_kick", &"belly_bomb"]:
 		var res := []
 		for side in [1, -1]:
@@ -136,11 +136,27 @@ func _initialize() -> void:
 			"closes in, heavy knockback, space made (attacker +%.0f, defender +%.0f, gap %.0f, %s)" % [res["attacker"], res["defender"], res["gap"], dir])
 		_check(res["after_hit"] < 1.0, "the charge stops on contact: no chasing the body (%.1f px, %s)" % [res["after_hit"], dir])
 		var blk := _charge(jd, 150.0, side, true)
-		_check(blk["result"] == "BLOCKED" and blk["defender"] < res["defender"] * 0.7 and not blk["down"],
-			"blocked: reduced push, never a knockdown (%.0f vs %.0f px, %s)" % [blk["defender"], res["defender"], dir])
+		_check(blk["result"] == "GUARD_BREAK" and not blk["down"],
+			"blocked: the charge breaks the guard, never a knockdown (%s, %s)" % [blk["result"], dir])
 		var miss := _charge(jd, 260.0, side, false)
 		_check(miss["hits"] == 0 and miss["attacker"] > 60.0 and miss["attacker"] < 110.0,
 			"a miss: bounded charge (%.0f px), no hit (%s)" % [miss["attacker"], dir])
+	print("[jor dhakka: off balance]")
+	for side in [1, -1]:
+		var po := _pair(80.0, side, 21)
+		var r0 := po[1].receive_hit(jd, po[0], 1)
+		_check(r0 == CombatData.HitResult.HIT and po[1].state == Fighter.State.STAGGER and po[1].stun_frames == jd.off_balance
+			and po[1].thrown_off_balance, "a clean hit throws them off balance for %d ticks (facing %d, %s)" % [jd.off_balance, side, po[1].get_state_name()])
+		_check(absf(po[1].velocity_x) > 5.0, "the knockback is kept while they reel (%.1f px/tick)" % po[1].velocity_x)
+		po[1].receive_hit(CombatData.get_attack(CombatData.AttackType.STREET_PUNCH), po[0], 1)
+		_check(po[1].last_hit_counter, "a follow-up on the reeling opponent is a counter hit")
+		_free(po)
+	var pq := _pair(80.0, 1, 22)
+	pq[1].block_held = true
+	pq[1].parry_buffer_frames = 3
+	pq[1].call("_enter_block")
+	_check(pq[1].receive_hit(jd, pq[0], 1) == CombatData.HitResult.PARRIED, "a parry still beats Jor Dhakka")
+	_free(pq)
 	var p3 := _pair(80.0, 1, 3)
 	p3[1].call("_enter_state", Fighter.State.DODGE)
 	p3[1].state_frame = CombatData.DODGE_INVULN_START
@@ -155,7 +171,7 @@ func _initialize() -> void:
 		for m in st2.moves():
 			if CombatData.get_attack(CombatData.type_for_id(m)).guard_break:
 				only += 1 if st2.id == &"bangla_maar" else 100
-	_check(only == 1, "exactly one guard breaker in the game, and it is Bangla Maar's hammer")
+	_check(only == 2, "exactly two guard breakers in the game, both Bangla Maar's: the hammer and Jor Dhakka (%d)" % only)
 	for side in [1, -1]:
 		var pg := _pair(80.0, side)
 		var g := pg[1]

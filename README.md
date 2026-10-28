@@ -85,7 +85,7 @@ finishers:
 | **Kung Fu** | Flowing counters, palm chains and sweeps. | Straight Palm · Double Palm · Push Kick | Rising Palm · High Backfist | Low Palm · Leg Sweep | Leaping Spinning Backfist · Flying Axe Kick | Flowing Palm Barrage | Hundred Palms · Dragon's Descent |
 | **Taekwondo** | Long-range kicking. | Jab · Side Kick · Double Kick | Rising Punch · High Roundhouse | Body Punch · Axe Kick | Jumping Backfist · Jumping Spinning Hook Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
 | **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Superman Punch · Jumping Roundhouse Kick | Breaker Combination | Last Combination · Knockout Rhythm |
-| **Bangla Maar** (parody) | Untrained para street fighting: loose hands, slaps, shoves, a big mouth. | Light Slap · Front Thrust Kick · Jor Dhakka | Head Elbow · Double-Hand Hammer | Stomach Shot · Leg Kick | Flying Slap · Flying Chest Kick | Belly Bomb | Football Shot · Super Chor |
+| **Bangla Maar** (parody) | Untrained para street fighting: loose hands, slaps, shoves, a big mouth. | Street Punch · Front Thrust Kick · Jor Dhakka | Head Elbow · Double-Hand Hammer | Stomach Shot · Leg Kick | Flying Slap · Flying Chest Kick | Belly Bomb | Football Shot · Super Chor |
 
 **Power moves (Space + J / Space + K).** Press Space and J (or K) together,
 or one right after the other in either order, within 6 ticks (0.1 s,
@@ -147,14 +147,18 @@ untrained para street fighter.
   a gamchha over the shoulder and rubber sandals. The fighter never raises a
   guard (hands hang loose until Shift), and the idle has finger-pointing,
   a hand on the waist, sleeve tugs and head shakes.
-- **Moves:** open-hand slaps, a heel-led thrust kick and Jor Dhakka, a
-  charging shoulder bash.
+- **Moves:** a loose street punch (J, closed fist), open-hand slaps, a
+  heel-led thrust kick and Jor Dhakka, a charging shoulder bash.
   - Jor Dhakka charges a short, bounded distance, stops on contact and knocks
-    the opponent well back (less on block). It never knocks down, and a miss
-    leaves a long, punishable recovery.
-- **Guard breaker:** the Double-Hand Hammer (W+K) is the only guard breaker
-  in the game. Blocking it breaks the guard outright, but a parry still
-  beats it, and its long wind-up and recovery make it punishable.
+    the opponent well back. It never knocks down, and a miss leaves a long,
+    punishable recovery.
+  - It **breaks guard**: blocking it breaks the guard outright.
+  - A clean hit throws the opponent **OFF BALANCE**: they reel for 40 ticks
+    and can't act, and any follow-up counts as a counter hit.
+- **Guard breakers:** the Double-Hand Hammer (W+K) and Jor Dhakka (L) are
+  the only guard breakers in the game. Blocking them breaks the guard
+  outright, but a parry or a dodge still beats them, and their long wind-up
+  and recovery make them punishable.
 - **Belly Bomb (F):** a step back, a crouch, then a leap belly-first into
   the opponent with a bounce off. It knocks them flying; a miss leaves a
   long recovery.
@@ -467,9 +471,9 @@ Air (J / K / L while jumping): Jump Kick, Jump Punch. Finishers: Last Combinatio
 
 | Key | Move | Frames | Damage | Notes |
 |---|---|---|---|---|
-| J | Light Slap | 5 / 2 / 11 | 6 |  |
+| J | Street Punch | 5 / 2 / 11 | 6 | closed fist, loose and wide |
 | K | Front Thrust Kick | 9 / 4 / 18 | 10 | heel to the stomach; re-chambers up close |
-| L | Jor Dhakka | 12 / 4 / 26 | 9 | charging shoulder bash: bounded charge (~90 px on a miss) that stops on contact, heavy knockback, no knockdown, punishable |
+| L | Jor Dhakka | 12 / 4 / 26 | 11 | charging shoulder bash: bounded charge (~90 px on a miss) that stops on contact, heavy knockback, **guard breaker**, a clean hit leaves them **off balance** (40 ticks), no knockdown, punishable |
 | W+J | Head Elbow | 8 / 3 / 17 | 11 |  |
 | W+K | Double-Hand Hammer | 15 / 4 / 25 | 15 | stuns, **guard breaker** |
 | S+J | Stomach Shot | 7 / 3 / 14 | 8 |  |

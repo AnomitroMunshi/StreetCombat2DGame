@@ -24,7 +24,7 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	LIGHT_SLAP, THRUST_KICK, DOUBLE_PUSH, HEAD_ELBOW, HAMMER_FIST, STOMACH_SHOT, PARA_LEG_KICK,
 	DOUBLE_KICK, DOUBLE_KICK_LOW, DOUBLE_KICK_MID,
 	JOR_DHAKKA,
-	FLYING_SLAP, FLYING_CHEST_KICK, BELLY_BOMB }
+	FLYING_SLAP, FLYING_CHEST_KICK, BELLY_BOMB, STREET_PUNCH }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
 ## part): strikes travel into range like real footwork instead of being thrown
@@ -38,7 +38,7 @@ const STEP_IN: Dictionary = {
 	&"chain_palms": 10.0, &"side_kick": 14.0, &"front_kick": 12.0, &"high_kick": 6.0,
 	&"body_roundhouse": 8.0, &"low_roundhouse": 6.0, &"low_side_kick": 12.0, &"axe_kick": 8.0,
 	&"rising_elbow": 8.0, &"body_straight": 14.0, &"body_punch": 20.0, &"low_palm": 14.0,
-	&"light_slap": 14.0, &"thrust_kick": 10.0, &"double_push": 14.0, &"jor_dhakka": 14.0, &"head_elbow": 10.0, &"hammer_fist": 16.0,
+	&"light_slap": 14.0, &"street_punch": 14.0, &"thrust_kick": 10.0, &"double_push": 14.0, &"jor_dhakka": 14.0, &"head_elbow": 10.0, &"hammer_fist": 16.0,
 	&"stomach_shot": 12.0, &"leg_kick": 8.0,
 }
 ## A grounded strike stops travelling (step-in and lunge) once the opponent is
@@ -874,6 +874,15 @@ const ATTACK_TABLE: Dictionary = {
 		"knockback": 2.5, "lunge": 0.8, "hitstop": 5,
 		"hitbox": Rect2(26.0, -162.0, 52.0, 30.0),
 	},
+	# Street punch (J): a loose, wide, unschooled lead-hand punch thrown with
+	# the shoulder behind it and the chin up; same speed as the old slap.
+	AttackType.STREET_PUNCH: {
+		"id": &"street_punch", "name": "Street Punch", "posture": 6.0,
+		"startup": 5, "active": 2, "recovery": 11, "cancel_window": 9,
+		"damage": 6, "hitstun": 16, "blockstun": 10,
+		"knockback": 2.8, "lunge": 1.0, "hitstop": 5,
+		"hitbox": Rect2(26.0, -160.0, 54.0, 30.0),
+	},
 	# Front thrust kick: a flat-footed shove of a kick into the stomach.
 	AttackType.THRUST_KICK: {
 		"id": &"thrust_kick", "name": "Front Thrust Kick", "posture": 16.0,
@@ -898,12 +907,16 @@ const ATTACK_TABLE: Dictionary = {
 	# ("charge": no chasing the body it just knocked away). One shoulder hit,
 	# heavy knockback (reduced on block), no random knockdown; a long recovery
 	# leaves it wide open on a miss.
+	# Smashes straight through a raised guard (guard_break) and throws a cleanly
+	# hit opponent off balance (off_balance: reeling, counter-hittable) on top
+	# of the knockback. Slow to start and punishable on a miss.
 	AttackType.JOR_DHAKKA: {
-		"id": &"jor_dhakka", "name": "Jor Dhakka", "posture": 16.0, "charge": true,
+		"id": &"jor_dhakka", "name": "Jor Dhakka", "posture": 16.0, "charge": true, "guard_break": true,
+		"off_balance": 40,
 		"startup": 12, "active": 4, "recovery": 26, "cancel_window": 0,
-		"damage": 9, "hitstun": 20, "blockstun": 14,
-		"knockback": 14.0, "lunge": 4.5, "hitstop": 7,
-		"hitbox": Rect2(12.0, -134.0, 46.0, 56.0),
+		"damage": 11, "hitstun": 20, "blockstun": 14,
+		"knockback": 14.0, "lunge": 4.5, "hitstop": 10,
+		"hitbox": Rect2(4.0, -140.0, 40.0, 54.0),
 	},
 	# Head elbow: the rear elbow swung round at head height.
 	AttackType.HEAD_ELBOW: {
@@ -1088,6 +1101,9 @@ class Attack extends RefCounted:
 	var backstep_ticks: int = 0
 	## Breaks a blocking opponent's guard outright (parries still beat it).
 	var guard_break: bool = false
+	## A clean hit throws the opponent off balance: they reel (STAGGER, open to
+	## counter hits) for this many ticks instead of the usual hitstun (0 = no).
+	var off_balance: int = 0
 	## Rebounds off the target on contact; landing lag after a contact.
 	var bounce: bool = false
 	var hit_land_lag: int = 0
@@ -1166,6 +1182,7 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.backstep_ticks = row.get("backstep_ticks", 0)
 	attack.bounce = row.get("bounce", false)
 	attack.guard_break = row.get("guard_break", false)
+	attack.off_balance = row.get("off_balance", 0)
 	attack.hit_land_lag = row.get("hit_land_lag", 0)
 	_attack_cache[type] = attack
 	return attack
