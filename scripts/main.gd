@@ -1727,43 +1727,13 @@ func _refresh_presentation() -> void:
 # --- Drawing ------------------------------------------------------------------
 
 func _draw() -> void:
-	# Minimal training hall. Drawn oversized so camera shake never shows edges.
-	var wall := Color(0.17, 0.145, 0.13)
-	draw_rect(Rect2(-200.0, -200.0, 1680.0, 1120.0), wall)
-	draw_rect(Rect2(-200.0, 96.0, 1680.0, 18.0), Color(0.09, 0.075, 0.065))
-	var x := -110.0
-	while x < 1400.0:
-		var panel := Rect2(x + 12.0, 128.0, 136.0, 280.0)
-		draw_rect(panel, Color(0.33, 0.28, 0.23))
-		draw_rect(panel.grow(-6.0), Color(0.42, 0.36, 0.29))
-		for i in range(1, 3):
-			var gx := panel.position.x + panel.size.x * i / 3.0
-			draw_line(Vector2(gx, panel.position.y), Vector2(gx, panel.end.y), Color(0.25, 0.21, 0.17), 3.0)
-		for j in range(1, 4):
-			var gy := panel.position.y + panel.size.y * j / 4.0
-			draw_line(Vector2(panel.position.x, gy), Vector2(panel.end.x, gy), Color(0.25, 0.21, 0.17), 3.0)
-		draw_rect(Rect2(x, 114.0, 12.0, FLOOR_Y - 114.0), Color(0.1, 0.085, 0.075))
-		x += 160.0
-	draw_rect(Rect2(-200.0, 408.0, 1680.0, 14.0), Color(0.1, 0.085, 0.075))
-	draw_rect(Rect2(-200.0, 422.0, 1680.0, FLOOR_Y - 422.0), Color(0.22, 0.185, 0.16))
+	# The dojo backdrop (wall, windows, corner props, floor): see DojoStage.
+	DojoStage.draw(self, FLOOR_Y)
 
 	# Hanging banner with an abstract emblem.
 	draw_rect(Rect2(604.0, 114.0, 72.0, 190.0), Color(0.42, 0.13, 0.11))
 	draw_colored_polygon(PackedVector2Array([Vector2(604, 304), Vector2(676, 304), Vector2(640, 324)]), Color(0.42, 0.13, 0.11))
 	draw_arc(Vector2(640.0, 190.0), 22.0, 0.3, TAU - 0.3, 32, Color(0.85, 0.75, 0.6), 4.0, true)
-
-	# Wooden floor with a training mat.
-	draw_rect(Rect2(-200.0, FLOOR_Y, 1680.0, 400.0), Color(0.3, 0.23, 0.17))
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(150, FLOOR_Y), Vector2(1130, FLOOR_Y), Vector2(1230, 760), Vector2(50, 760)]),
-		Color(0.38, 0.3, 0.22))
-	var plank_y := FLOOR_Y + 12.0
-	var gap := 12.0
-	while plank_y < 760.0:
-		draw_line(Vector2(-200.0, plank_y), Vector2(1480.0, plank_y), Color(0.0, 0.0, 0.0, 0.18), 2.0)
-		gap *= 1.45
-		plank_y += gap
-	draw_line(Vector2(-200.0, FLOOR_Y), Vector2(1480.0, FLOOR_Y), Color(0.55, 0.43, 0.32), 3.0)
 
 	# Solid pillars mark the arena edges (the walls fighters get pinned against).
 	for side in [-1.0, 1.0]:
