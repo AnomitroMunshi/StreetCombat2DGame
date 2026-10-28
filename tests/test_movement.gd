@@ -106,6 +106,7 @@ class Driver extends Node:
 					ai.parry_chance = 0.0
 					ai.dodge_chance = 0.0
 					ai.anti_air_chance = 0.0  # this scenario is about the guard, not anti-air
+					e.x_cooldown = CombatData.X_COOLDOWN_FRAMES  # keep the held-guard fixture from starting an X move
 				ai.set("_state", EnemyAI.AIState.BLOCK)
 				ai.set("_timer", 100)
 				if f >= 2 and f < 40: Input.action_press("move_right")

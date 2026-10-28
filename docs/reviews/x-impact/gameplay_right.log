@@ -2,20 +2,20 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 OpenGL API 3.3.0 Core Profile Context 26.10.1.261008 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon RX 6600 XT
 
 Movie Maker mode enabled, recording movie in 1280×720 @ 60 FPS...
-{"cooldown_seconds":10,"hits":[{"damage":9,"id":"dempsey_hook_left","tick":50},{"damage":9,"id":"dempsey_hook_right","tick":75}],"peak_air_travel":0.0,"peak_travel":105.526611328125,"side":1,"style":"boxing"}
-{"cooldown_seconds":15,"hits":[{"damage":18,"id":"thai_roundhouse","tick":46}],"peak_air_travel":61.7384643554688,"peak_travel":139.70654296875,"side":1,"style":"muay_thai"}
-{"cooldown_seconds":10,"hits":[{"damage":18,"id":"step_back_spinning_backfist","tick":44}],"peak_air_travel":0.0,"peak_travel":87.2224731445313,"side":1,"style":"karate"}
-{"cooldown_seconds":10,"hits":[{"damage":18,"id":"scorpion_kick","tick":44}],"peak_air_travel":0.0,"peak_travel":37.2156372070313,"side":1,"style":"kung_fu"}
-{"cooldown_seconds":15,"hits":[{"damage":6,"id":"triple_kick_body_one","tick":38},{"damage":6,"id":"triple_kick_body_two","tick":47},{"damage":6,"id":"triple_kick_head","tick":56}],"peak_air_travel":0.0,"peak_travel":47.876953125,"side":1,"style":"taekwondo"}
-{"cooldown_seconds":15,"hits":[{"damage":18,"id":"big_foot","tick":50}],"peak_air_travel":300.541076660156,"peak_travel":368.725769042969,"side":1,"style":"kickboxing"}
-{"cooldown_seconds":15,"hits":[{"damage":18,"id":"dropkick","tick":50}],"peak_air_travel":153.694641113281,"peak_travel":196.758605957031,"side":1,"style":"bangla_maar"}
+{"cooldown_seconds":10,"hits":[{"damage":9,"head_recoil_px":6.42913818359375,"id":"dempsey_hook_left","tick":50,"x_flinch":false},{"damage":9,"head_recoil_px":31.1911010742188,"id":"dempsey_hook_right","tick":75,"x_flinch":false}],"peak_air_travel":0.0,"peak_travel":105.526611328125,"side":1,"style":"boxing"}
+{"cooldown_seconds":15,"hits":[{"damage":18,"head_recoil_px":5.12646484375,"id":"thai_roundhouse","tick":46,"x_flinch":false}],"peak_air_travel":61.7384643554688,"peak_travel":139.70654296875,"side":1,"style":"muay_thai"}
+{"cooldown_seconds":10,"hits":[{"damage":18,"head_recoil_px":60.68017578125,"id":"step_back_spinning_backfist","tick":44,"x_flinch":true}],"peak_air_travel":0.0,"peak_travel":87.2224731445313,"side":1,"style":"karate"}
+{"cooldown_seconds":10,"hits":[{"damage":18,"head_recoil_px":63.4050903320313,"id":"scorpion_kick","tick":44,"x_flinch":true}],"peak_air_travel":0.0,"peak_travel":37.2156372070313,"side":1,"style":"kung_fu"}
+{"cooldown_seconds":15,"hits":[{"damage":6,"head_recoil_px":-4.3612060546875,"id":"triple_kick_body_one","tick":38,"x_flinch":false},{"damage":6,"head_recoil_px":-22.7469482421875,"id":"triple_kick_body_two","tick":47,"x_flinch":false},{"damage":6,"head_recoil_px":-10.3829956054688,"id":"triple_kick_head","tick":56,"x_flinch":false}],"peak_air_travel":0.0,"peak_travel":47.876953125,"side":1,"style":"taekwondo"}
+{"cooldown_seconds":15,"hits":[{"damage":18,"head_recoil_px":-1.95806884765625,"id":"big_foot","tick":50,"x_flinch":false}],"peak_air_travel":300.541076660156,"peak_travel":368.725769042969,"side":1,"style":"kickboxing"}
+{"cooldown_seconds":15,"hits":[{"damage":18,"head_recoil_px":3.75225830078125,"id":"dropkick","tick":50,"x_flinch":false}],"peak_air_travel":153.694641113281,"peak_travel":196.758605957031,"side":1,"style":"bangla_maar"}
 RESULT: PASS real-scene X impact review, 0 failures
 --------------------------------------------------------------------------------
 Done recording movie at path: D:\firstGame\docs\reviews\x-impact\gameplay_right.avi
-1402 frames at 60 FPS (movie length: 00:00:23:22), recorded in 00:00:38 (60% of real-time speed).
-CPU render time: 2.42 seconds (average: 1.73 ms/frame)
-GPU render time: 2.11 seconds (average: 1.50 ms/frame)
-Encoding time: 11.52 seconds (average: 8.22 ms/frame)
+1402 frames at 60 FPS (movie length: 00:00:23:22), recorded in 00:00:40 (57% of real-time speed).
+CPU render time: 2.53 seconds (average: 1.81 ms/frame)
+GPU render time: 2.66 seconds (average: 1.90 ms/frame)
+Encoding time: 12.30 seconds (average: 8.77 ms/frame)
 --------------------------------------------------------------------------------
 WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for details).
    at: cleanup (core/object/object.cpp:2536)

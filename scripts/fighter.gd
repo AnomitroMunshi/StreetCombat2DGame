@@ -263,6 +263,8 @@ var thrown_off_balance: bool = false
 var last_hit_heavy: bool = false
 ## How the last clean hit travelled (CombatData.ImpactKind): picks the reaction.
 var last_hit_kind: int = CombatData.ImpactKind.STRAIGHT
+## Presentation context for the current clean-hit reaction; defenses never set it.
+var last_hit_attack_id: StringName = &""
 ## Scripted (finisher) presentation: named pose for the visual, optional turn-around.
 var script_pose: StringName = &"guard"
 var script_flip: bool = false
@@ -1192,6 +1194,7 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 		stun_frames = attack.blockstun
 		return CombatData.HitResult.BLOCKED
 
+	last_hit_attack_id = attack.id
 	# Counter hit: caught reeling from a parry or in the startup of an attack.
 	last_hit_counter = state == State.STAGGER or (state == State.ATTACK and get_phase() == Phase.STARTUP)
 	if last_hit_counter:

@@ -12,6 +12,7 @@ class Driver extends Node:
 	var row: Dictionary = {}
 	var target_start := 0.0
 	var seen_hits := 0
+	var baseline_head := 0.0
 	func _physics_process(_delta: float) -> void:
 		Input.action_release("x_move")
 		var index := frame / 200
@@ -43,13 +44,18 @@ class Driver extends Node:
 			target_start = main.enemy.position.x
 			seen_hits = main.enemy.hit_counter
 			row = {"style": st.id, "side": side, "cooldown_seconds": CombatData.get_attack(st.resolve(&"x_move", false)).x_cooldown_frames / CombatData.TICK_RATE, "peak_travel": 0.0, "peak_air_travel": 0.0, "hits": []}
+		if local == 20:
+			var joints: PackedVector2Array = main.enemy.get_node("Visual").get("_last_joints")
+			baseline_head = (joints[FighterVisual.J_HEAD].x - main.enemy.position.x) * main.enemy.facing
 		if local == 24:
 			Input.action_press("x_move")
 		if local > 24:
 			if main.enemy.hit_counter > seen_hits:
 				seen_hits = main.enemy.hit_counter
 				var attack: CombatData.Attack = main.player.current_attack
-				row["hits"].append({"tick": local, "id": attack.id if attack != null else &"", "damage": attack.damage if attack != null else 0})
+				var joints: PackedVector2Array = main.enemy.get_node("Visual").get("_last_joints")
+				var head_local: float = (joints[FighterVisual.J_HEAD].x - main.enemy.position.x) * main.enemy.facing
+				row["hits"].append({"tick": local, "id": attack.id if attack != null else &"", "damage": attack.damage if attack != null else 0, "head_recoil_px": baseline_head - head_local, "x_flinch": main.enemy.get_node("Visual").call("_has_x_flinch")})
 			row["peak_travel"] = maxf(row["peak_travel"], (main.enemy.position.x - target_start) * side)
 			if main.enemy.airborne:
 				row["peak_air_travel"] = maxf(row["peak_air_travel"], (main.enemy.position.x - target_start) * side)
@@ -57,6 +63,8 @@ class Driver extends Node:
 			var damage := 0
 			for contact in row["hits"]: damage += contact["damage"]
 			if damage != 18: failures += 1
+			if row["style"] in [&"karate", &"kung_fu"]:
+				if not row["hits"][0]["x_flinch"] or row["hits"][0]["head_recoil_px"] < 20.0: failures += 1
 			if row["style"] == &"kickboxing" and row["peak_air_travel"] < 250.0: failures += 1
 			if row["style"] == &"bangla_maar" and row["peak_air_travel"] < 140.0: failures += 1
 			rows.append(row)

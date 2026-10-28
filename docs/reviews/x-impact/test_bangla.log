@@ -68,7 +68,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
   ok   whiffed hammer: the miss line (বেঁচে গেলি!)
 [FOOTBALL SHOT]
   ok   finisher line: জয় মা কালী!
-  ok   Paaye Lathi: lying on the floor, head towards the attacker (head (631.7026, 541.4822), hip (707.0788, 549.7958))
+  ok   Paaye Lathi: lying on the floor, head towards the attacker (head (631.7026, 541.4802), hip (707.0788, 549.7938))
   ok   Paaye Lathi: the punt lands with the foot on the head (20 px)
   ok   FOOTBALL SHOT knocks out
   ok   FOOTBALL SHOT: the body slides along the floor
@@ -79,3 +79,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
   ok   SUPER CHOR knocks out
   ok   SUPER CHOR: the body slides along the floor
 RESULT: PASS (0 failures)
+WARNING: 13 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

@@ -618,6 +618,12 @@ var _hitstun := PackedFloat32Array([-0.45, -0.4, 0.2, 0.9, -0.3, 0.4, 0.3, 0.0, 
 var _hitstun_body := PackedFloat32Array([0.5, 0.35, 0.35, 1.9, 0.25, 1.7, 0.55, -0.2, -0.45, -0.5, -8.0, 14.0])
 # Heavy head hit: head and shoulders whipped back and twisted, arms flung.
 var _hitstun_heavy := PackedFloat32Array([-0.62, -0.6, -0.35, 0.4, -0.55, 0.1, 0.25, 0.05, -0.55, -0.25, -10.0, 8.0, 0.0, -4.0])
+# These X head strikes show their snap at contact, including the hit freeze.
+# Scorpion tips the chin back; the spinning backfist also twists the shoulders.
+var _x_scorpion_snap := PackedFloat32Array([-0.58, -0.85, 1.45, 2.35, 0.35, 1.3, 0.8, -0.45, -0.55, -0.85, -9.0, 0.0, 0.1, 6.0])
+var _x_backfist_snap := PackedFloat32Array([-0.66, -0.6, 0.35, 1.3, -0.35, 0.7, 0.75, -0.45, -0.6, -0.9, -10.0, 0.0, 0.25, -24.0])
+var _x_scorpion_reel := PackedFloat32Array([-0.25, -0.35, 0.6, 1.5, 0.1, 1.1, 0.8, -0.45, -0.55, -0.85, -5.0, 0.0, 0.05, 4.0])
+var _x_backfist_reel := PackedFloat32Array([-0.3, -0.25, 0.4, 1.35, -0.05, 1.0, 0.75, -0.45, -0.6, -0.9, -5.0, 0.0, 0.1, -12.0])
 # Launched (uppercut / air hit): arched back, arms thrown up, legs trailing.
 # Directional head reactions (heavy; light ones blend halfway from the guard).
 # Hook: the head whips round and down, the shoulders turn with it, a cross-step.
@@ -1324,7 +1330,7 @@ func _process(delta: float) -> void:
 		# First frame: start in the target pose instead of springing into it.
 		_pose_ready = true
 		_pose = target.duplicate()
-	elif fighter.state == Fighter.State.ATTACK or (fighter.state == Fighter.State.LAND and fighter.landing_attack_id == &"dropkick"):
+	elif fighter.state == Fighter.State.ATTACK or (fighter.state == Fighter.State.LAND and fighter.landing_attack_id == &"dropkick") or _has_x_flinch():
 		if fighter.state == Fighter.State.ATTACK:
 			target = _limit_reach(target)
 		# Attack timelines are continuous (they start from _swing_from), so follow
@@ -1678,6 +1684,8 @@ func _update_down_amount(t: float) -> void:
 ## strike drives in without the head going through the body (the contact-aware
 ## reach then still puts the fist on target). Spins and leaps keep their shape.
 func _close_yield(pose: PackedFloat32Array) -> PackedFloat32Array:
+	if _has_x_flinch():
+		return pose  # its wall-fitted recoil already owns the body position
 	var opp := fighter.opponent
 	if opp == null or fighter.airborne or opp.airborne or fighter.is_down() or opp.is_down() 			or fighter.state in [Fighter.State.FINISHER, Fighter.State.FINISHED, Fighter.State.EVADE_ROLL]:
 		return pose
@@ -1755,6 +1763,8 @@ func _target_pose(t: float) -> PackedFloat32Array:
 		Fighter.State.GUARD_RELEASE:
 			return _blend(_block, _guard, smoothstep(0.0, 1.0, t / maxf(float(fighter.stun_frames), 1.0)))
 		Fighter.State.HITSTUN:
+			if _has_x_flinch():
+				return _x_flinch_pose(t)
 			return _recover(_reaction_pose(), _guard, t, fighter.stun_frames)
 		Fighter.State.KNOCKDOWN:
 			if _is_balled():
@@ -2045,6 +2055,58 @@ func _thai_hip_turn(t: float) -> float:
 		return PI * 0.7 * smoothstep(0.0, 0.36, u)
 	return PI * 0.7 * (1.0 - smoothstep(0.36, 0.9, u))
 
+
+## A clean grounded hit only: stale move context never changes a block,
+## parry, launch, knockdown or the next ordinary strike's reaction.
+func _has_x_flinch() -> bool:
+	return fighter.state == Fighter.State.HITSTUN and not fighter.airborne \
+		and fighter.last_hit_attack_id in [&"scorpion_kick", &"step_back_spinning_backfist"]
+
+
+## Hold the head snap for six simulation ticks, reel on softened knees, then
+## bring the guard back within the ordinary hitstun already paid by the move.
+func _x_flinch_pose(t: float) -> PackedFloat32Array:
+	var scorpion := fighter.last_hit_attack_id == &"scorpion_kick"
+	var snap := _x_scorpion_snap if scorpion else _x_backfist_snap
+	var reel := _x_scorpion_reel if scorpion else _x_backfist_reel
+	var duration := maxf(float(fighter.stun_frames), 1.0)
+	var hold_end := minf(6.0, duration * 0.3)
+	var reel_end := minf(12.0, duration * 0.6)
+	var pose: PackedFloat32Array
+	if t <= hold_end:
+		pose = snap.duplicate()
+	elif t < reel_end:
+		pose = _blend(snap, reel, smoothstep(hold_end, reel_end, t))
+	else:
+		pose = _blend(reel, _guard, smoothstep(reel_end, duration, t))
+	return _fit_x_flinch_wall(pose)
+
+
+## At a pillar the recoil compresses into the available room. Blending joint
+## angles keeps the head and shoulder shapes inside without moving the root
+## or shortening bones; open-floor reactions retain their complete snap.
+func _fit_x_flinch_wall(pose: PackedFloat32Array) -> PackedFloat32Array:
+	if _x_flinch_fits(pose):
+		return pose
+	var lo := 0.0
+	var hi := 1.0
+	for n in 9:
+		var mid := (lo + hi) * 0.5
+		if _x_flinch_fits(_blend(pose, _guard, mid)):
+			hi = mid
+		else:
+			lo = mid
+	return _blend(pose, _guard, hi)
+
+
+func _x_flinch_fits(pose: PackedFloat32Array) -> bool:
+	var j := _solve_joints(pose)
+	for part: Vector2 in [Vector2(J_HEAD, HEAD_R), Vector2(J_NECK, 8.0),
+			Vector2(J_SHOULDER_F, 11.0), Vector2(J_SHOULDER_B, 11.0)]:
+		var x := fighter.position.x + j[int(part.x)].x * fighter.facing
+		if x - part.y < Fighter.ARENA_MIN_X - 20.0 or x + part.y > Fighter.ARENA_MAX_X + 20.0:
+			return false
+	return true
 
 ## Hit reaction by where, how and how hard the hit landed: launched (in the
 ## air), legs (knee buckles), head (by direction: straight whip back, hook

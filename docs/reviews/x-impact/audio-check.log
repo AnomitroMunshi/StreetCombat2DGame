@@ -15,8 +15,8 @@ Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'D:\firstGame\docs\reviews\x-impact\clip
     minor_version   : 512
     compatible_brands: isomiso2avc1mp41
     encoder         : Lavf61.7.100
-  Duration: 00:00:23.37, start: 0.000000, bitrate: 2412 kb/s
-  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuvj420p(pc, bt470bg/unknown/unknown, progressive), 1280x720 [SAR 1:1 DAR 16:9], 2230 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
+  Duration: 00:00:23.37, start: 0.000000, bitrate: 2411 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuvj420p(pc, bt470bg/unknown/unknown, progressive), 1280x720 [SAR 1:1 DAR 16:9], 2229 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
       Metadata:
         handler_name    : VideoHandler
         vendor_id       : [0][0][0][0]
@@ -25,7 +25,7 @@ Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'D:\firstGame\docs\reviews\x-impact\clip
       Metadata:
         handler_name    : SoundHandler
         vendor_id       : [0][0][0][0]
-[Parsed_volumedetect_0 @ 000002c0f34cb340] n_samples: 0
+[Parsed_volumedetect_0 @ 00000240b64679c0] n_samples: 0
 Stream mapping:
   Stream #0:1 -> #0:0 (aac (native) -> pcm_s16le (native))
 Press [q] to stop, [?] for help
@@ -40,13 +40,13 @@ Output #0, null, to 'pipe:':
         handler_name    : SoundHandler
         vendor_id       : [0][0][0][0]
         encoder         : Lavc61.19.100 pcm_s16le
-[Parsed_volumedetect_0 @ 000002c0f1cc1d40] n_samples: 2244608
-[Parsed_volumedetect_0 @ 000002c0f1cc1d40] mean_volume: -19.5 dB
-[Parsed_volumedetect_0 @ 000002c0f1cc1d40] max_volume: -0.4 dB
-[Parsed_volumedetect_0 @ 000002c0f1cc1d40] histogram_0db: 4
-[Parsed_volumedetect_0 @ 000002c0f1cc1d40] histogram_1db: 82
-[Parsed_volumedetect_0 @ 000002c0f1cc1d40] histogram_2db: 395
-[Parsed_volumedetect_0 @ 000002c0f1cc1d40] histogram_3db: 531
-[Parsed_volumedetect_0 @ 000002c0f1cc1d40] histogram_4db: 1537
-[out#0/null @ 000002c0f34a6580] video:0KiB audio:4384KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
-size=N/A time=00:00:23.38 bitrate=N/A speed=1.56e+03x
+[Parsed_volumedetect_0 @ 00000240b4c31d40] n_samples: 2244608
+[Parsed_volumedetect_0 @ 00000240b4c31d40] mean_volume: -19.5 dB
+[Parsed_volumedetect_0 @ 00000240b4c31d40] max_volume: -0.4 dB
+[Parsed_volumedetect_0 @ 00000240b4c31d40] histogram_0db: 4
+[Parsed_volumedetect_0 @ 00000240b4c31d40] histogram_1db: 82
+[Parsed_volumedetect_0 @ 00000240b4c31d40] histogram_2db: 395
+[Parsed_volumedetect_0 @ 00000240b4c31d40] histogram_3db: 531
+[Parsed_volumedetect_0 @ 00000240b4c31d40] histogram_4db: 1537
+[out#0/null @ 00000240b64de180] video:0KiB audio:4384KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+size=N/A time=00:00:23.38 bitrate=N/A speed=1.41e+03x

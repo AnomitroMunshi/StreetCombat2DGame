@@ -1,5 +1,17 @@
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
+ok kung_fu clean hit retains move-specific flinch context with ordinary hitstun facing1
+ok flinch keeps normal damage and cooldown
+ok flinch context persists during ordinary reaction
+ok next ordinary clean hit replaces special flinch context
+ok kung_fu block does not trigger clean flinch facing1
+ok kung_fu parry does not trigger clean flinch facing1
+ok karate clean hit retains move-specific flinch context with ordinary hitstun facing1
+ok flinch keeps normal damage and cooldown
+ok flinch context persists during ordinary reaction
+ok next ordinary clean hit replaces special flinch context
+ok karate block does not trigger clean flinch facing1
+ok karate parry does not trigger clean flinch facing1
 ok Big Foot airborne travel facing 1: { "travel": 368.725830078125, "air_travel": 300.541076660156, "peak_height": 38.25, "times": [25], "damage": 18, "cooldown": 751, "attack_airborne": false, "knocked_down": true }
 ok long launch pays 15-second cooldown
 ok Dropkick airborne travel facing 1: { "travel": 196.758605957031, "air_travel": 153.694641113281, "peak_height": 25.8999633789063, "times": [25], "damage": 18, "cooldown": 751, "attack_airborne": true, "knocked_down": true }
@@ -16,6 +28,18 @@ ok block avoids forceful launch bangla_maar facing1
 ok block avoids forceful launch muay_thai facing1
 ok Karate travels during faster spin while already in range: 48.0
 ok travelling Karate respects opposing body
+ok kung_fu clean hit retains move-specific flinch context with ordinary hitstun facing-1
+ok flinch keeps normal damage and cooldown
+ok flinch context persists during ordinary reaction
+ok next ordinary clean hit replaces special flinch context
+ok kung_fu block does not trigger clean flinch facing-1
+ok kung_fu parry does not trigger clean flinch facing-1
+ok karate clean hit retains move-specific flinch context with ordinary hitstun facing-1
+ok flinch keeps normal damage and cooldown
+ok flinch context persists during ordinary reaction
+ok next ordinary clean hit replaces special flinch context
+ok karate block does not trigger clean flinch facing-1
+ok karate parry does not trigger clean flinch facing-1
 ok Big Foot airborne travel facing -1: { "travel": 368.725799560547, "air_travel": 300.541076660156, "peak_height": 38.25, "times": [25], "damage": 18, "cooldown": 751, "attack_airborne": false, "knocked_down": true }
 ok long launch pays 15-second cooldown
 ok Dropkick airborne travel facing -1: { "travel": 196.758758544922, "air_travel": 153.694793701172, "peak_height": 25.8999633789063, "times": [25], "damage": 18, "cooldown": 751, "attack_airborne": true, "knocked_down": true }

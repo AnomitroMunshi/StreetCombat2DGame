@@ -601,7 +601,7 @@ KEY_SHIFT = 4194325  block bound to shift: true
   ok   perfect dodge skips the recovery (free at tick 12 < 16)
 [procedural audio]
   ok   all 20 sound effects synthesized
-  ok   background music rendered and playing (1335 ms)
+  ok   background music rendered and playing (1265 ms)
   ok   fight music loop: 16 bars at 140 BPM = 27.43 s (27.43 s)
 RESULT: PASS (0 failures)
 WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).

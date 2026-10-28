@@ -67,8 +67,40 @@ func simulate(style: StringName, side: int, blocking: bool = false, move: Combat
 		f.free()
 	return out
 
+func check_flinch_context(style: StringName, side: int) -> void:
+	for defense in [&"clean",&"block",&"parry"]:
+		var p := pair(style,side)
+		var a := p[0]
+		var b := p[1]
+		var intent := CombatData.Intent.new()
+		intent.slot = &"x_move"
+		a.push_intent(intent)
+		a.tick()
+		var attack := a.current_attack
+		if defense != &"clean":
+			b.call("_enter_state",Fighter.State.BLOCK)
+			b.state_frame = CombatData.BLOCK_STARTUP_FRAMES
+			b.block_held = true
+			if defense == &"parry":
+				b.parry_window = 4
+		var result := b.receive_hit(attack,a,1)
+		if defense == &"clean":
+			check(result == CombatData.HitResult.HIT and b.last_hit_attack_id == attack.id and b.state == Fighter.State.HITSTUN and b.stun_frames == attack.hitstun and not b.airborne,"%s clean hit retains move-specific flinch context with ordinary hitstun facing%d" %[style,side])
+			check(b.health == b.max_health - 18 and a.x_cooldown == 600,"flinch keeps normal damage and cooldown")
+			b.tick()
+			check(b.last_hit_attack_id == attack.id and b.state == Fighter.State.HITSTUN,"flinch context persists during ordinary reaction")
+			b.receive_hit(CombatData.get_attack(CombatData.AttackType.LIGHT),a,1)
+			check(b.last_hit_attack_id == &"jab","next ordinary clean hit replaces special flinch context")
+		else:
+			var expected := CombatData.HitResult.BLOCKED if defense == &"block" else CombatData.HitResult.PARRIED
+			check(result == expected and b.last_hit_attack_id == &"" and b.health == b.max_health and a.x_cooldown == 600,"%s %s does not trigger clean flinch facing%d" %[style,defense,side])
+		for f in p:
+			f.free()
+
 func _initialize() -> void:
 	for side in [1,-1]:
+		check_flinch_context(&"kung_fu",side)
+		check_flinch_context(&"karate",side)
 		var big := simulate(&"kickboxing",side)
 		check(big.damage==18 and big.air_travel>=250.0 and big.air_travel<=350.0,"Big Foot airborne travel facing %d: %s" %[side,big])
 		check(big.cooldown==900-149,"long launch pays 15-second cooldown")
