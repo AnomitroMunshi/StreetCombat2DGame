@@ -14,6 +14,8 @@ const STYLES := {
 	&"muay_thai": [&"eight_limbs", &"iron_knee", &"iron_corner"],
 	&"karate": [&"one_inch_verdict", &"crimson_crescent", &"skyline_verdict"],
 	&"kung_fu": [&"hundred_palms", &"dragons_descent", &"descending_dragon_palm", &"wall_of_palms"], &"kickboxing": [&"last_combination", &"knockout_rhythm", &"air_breaker", &"corner_breaker"],
+	&"capoeira": [&"rodas_end", &"handstand_havoc", &"sky_wheel", &"corner_carnival"],
+	&"jeet_kune_do": [&"one_inch_ending", &"no_second_chance", &"dragon_intercept", &"end_of_line"],
 	&"bangla_maar": [&"paaye_lathi", &"super_chor", &"bangla_air_smash", &"deowal_dhakka"],
 }
 const START_GAP: float = 120.0

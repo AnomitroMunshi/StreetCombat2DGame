@@ -55,10 +55,18 @@ func _run() -> void:
 	_check(playing == 1, "after the crossfade only one track plays (%d)" % playing)
 	_check(AudioServer.get_bus_index(GameAudio.MUSIC_BUS) >= 0, "music has its own bus")
 
-	print("[every style has its own track]")
+	print("[existing tracks and new-style procedural fallback]")
 	for st in StyleRegistry.all():
-		_check(GameAudio.MUSIC_FILES.has(st.id) and ResourceLoader.exists(GameAudio.MUSIC_FILES[st.id][0]),
-			"%s has its own track" % st.id)
+		if st.id in [&"capoeira", &"jeet_kune_do"]:
+			audio.set_music(st.id)
+			var ready_at := Time.get_ticks_msec()
+			while not audio.get_music_stream() is AudioStreamWAV and Time.get_ticks_msec() - ready_at < 20000:
+				await process_frame
+			_check(not GameAudio.MUSIC_FILES.has(st.id) and audio.get_music_id() == st.id and audio.get_music_stream() is AudioStreamWAV,
+				"%s uses the documented procedural loop until its own music is supplied" % st.id)
+		else:
+			_check(GameAudio.MUSIC_FILES.has(st.id) and ResourceLoader.exists(GameAudio.MUSIC_FILES[st.id][0]),
+				"%s retains its own track" % st.id)
 
 	print("[styles without a track fall back]")
 	main.call("change_style")

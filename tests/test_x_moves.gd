@@ -49,7 +49,7 @@ func _initialize() -> void:
 	for style in StyleRegistry.all():
 		var type := style.resolve(&"x_move",false)
 		var attack := CombatData.get_attack(type)
-		var cooldown := 900 if style.id in [&"kickboxing",&"bangla_maar",&"muay_thai",&"taekwondo"] else 600
+		var cooldown := 900 if style.id in [&"kickboxing",&"bangla_maar",&"muay_thai",&"taekwondo",&"capoeira",&"jeet_kune_do"] else 600
 		check(attack.x_cooldown_frames == cooldown, "%s selected cooldown %d ticks" % [style.id,cooldown])
 		check(attack.x_move and not attack.signature and attack.cancel_window == 0, "%s X independent committed move" % style.id)
 		var total := attack.damage

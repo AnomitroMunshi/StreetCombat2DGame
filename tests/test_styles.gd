@@ -385,8 +385,8 @@ func _initialize() -> void:
 	_check(sig_res in [CombatData.HitResult.BLOCKED, CombatData.HitResult.GUARD_BREAK] and guard_b.health == 100,
 		"a signature can be blocked (%s, no damage)" % CombatData.HitResult.keys()[sig_res])
 
-	print("[all six styles]")
-	_check(StyleRegistry.count() == 7, "seven styles registered (%d)" % StyleRegistry.count())
+	print("[all nine styles]")
+	_check(StyleRegistry.count() == 9, "nine styles registered (%d)" % StyleRegistry.count())
 	_check(StyleRegistry.default_style().id == &"kickboxing", "kickboxing is the default all-rounder")
 	var sig_ids := {}
 	var fin_ids := {}
@@ -587,7 +587,8 @@ func _initialize() -> void:
 	root.add_child(main)
 	current_scene = main
 	await process_frame
-	for rival_id in [&"boxing", &"taekwondo", &"muay_thai", &"karate", &"kung_fu", &"kickboxing", &"bangla_maar"]:
+	for rival_style in StyleRegistry.all():
+		var rival_id := rival_style.id
 		var pl: Fighter = main.get_node("Player")
 		var en: Fighter = main.get_node("Enemy")
 		main.call("select_style", &"taekwondo" if rival_id != &"taekwondo" else &"boxing")

@@ -43,9 +43,9 @@ const COLOR_POSTURE := Color(0.98, 0.62, 0.2)
 const COLOR_POSTURE_HIGH := Color(1.0, 0.25, 0.15)
 const COLOR_POSTURE_LOCK := Color(0.6, 0.6, 0.65, 0.6)
 const POPUP_LIFE: float = 0.9
-## Style select: cards per row and card width (4 x 146 + gaps fits the panel).
-const STYLE_COLUMNS: int = 4
-const STYLE_CARD_W: float = 146.0
+## Nine styles fit in three rows; wider cards keep full style names legible.
+const STYLE_COLUMNS: int = 3
+const STYLE_CARD_W: float = 192.0
 ## Baseline of the K.O. / result headline.
 const HEADLINE_Y: float = 200.0
 ## Message lanes under each health bar (baselines): style + HP, signature
@@ -412,7 +412,7 @@ func _build_style_panel() -> void:
 	_details.bbcode_enabled = true
 	_details.fit_content = false
 	_details.scroll_active = true
-	_details.custom_minimum_size = Vector2(0.0, 340.0)
+	_details.custom_minimum_size = Vector2(0.0, 250.0)
 	_details.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_details.add_theme_font_size_override("normal_font_size", 15)
 	_details.add_theme_font_size_override("bold_font_size", 15)

@@ -88,7 +88,7 @@ func _initialize() -> void:
 	var st := StyleRegistry.by_id(&"bangla_maar")
 	print("[style]")
 	_check(st != null and st.validate().is_empty(), "Bangla Maar is registered and valid")
-	_check(StyleRegistry.count() == 7, "seven styles (%d)" % StyleRegistry.count())
+	_check(StyleRegistry.count() == 9, "nine styles (%d)" % StyleRegistry.count())
 	var guard := Stances.pose(st.stance)
 	_check(guard[2] < 0.9 and guard[4] < 0.9, "relaxed stance: neither hand raised into a guard (ua %.2f / %.2f)" % [guard[2], guard[4]])
 

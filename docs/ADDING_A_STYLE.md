@@ -10,7 +10,7 @@ Styles are data. The match code never checks a style's name.
 3. **Style file.** Copy `styles/boxing.tres` to `styles/<id>.tres` and set:
    - `id`: permanent; saves refer to it.
    - `order`, `display_name`, `description`, `category`, `difficulty`, `strengths`, `weaknesses`, `stance`.
-   - `input_map` and `air_map`: slot → move id. The slots are listed in `MartialArtStyle`: J `light`, K `heavy`, L `technique`, `up_light` / `up_heavy` (W), `down_light` / `down_heavy` (S), and the Space chords `power_light` / `power_heavy` (ground only, never in `air_map`).
+   - `input_map` and `air_map`: slot → move id. The slots are listed in `MartialArtStyle`: J `light`, K `heavy`, L `technique`, `up_light` / `up_heavy` (W), `down_light` / `down_heavy` (S), the Space chords `power_light` / `power_heavy`, and X `x_move` (ground only, never in `air_map`). X attacks set `x_move: true` and their own `x_cooldown_frames`; keep normal defense and committed recovery.
    - `quotes` (optional): speech-bubble lines by event (`match_start`, `slap`, `hurt`, `block`, `miss_heavy`, `low_health`, `victory`).
    - `move_names` (optional): the style's own name for a shared move, for example karate's `jab` is its "Straight Punch".
    - `chains`: move id → the move ids it may cancel into on contact.
@@ -29,6 +29,12 @@ Styles are data. The match code never checks a style's name.
    - an AI plan that isn't a legal chain,
    - an air-only move mapped to a ground slot.
 
-The new style then appears in the selection roster. The card row scrolls, so the roster can grow. Both the player and the AI rival can use it, and the `Fighter` gate keeps every fighter inside its own moveset.
+The new style then appears in the selection roster. The selector currently fits nine styles in a three-column grid; its details scroll while all cards and the confirm button stay visible. Test the layout before expanding beyond nine. Both the player and the AI rival can use it, and the `Fighter` gate keeps every fighter inside its own moveset.
 
 **Not covered by data alone.** Throws, grips, clinches and ground positions (Judo, Wrestling, BJJ, Sambo, Hapkido locks) need a synchronized two-fighter interaction subsystem. See `docs/M6.5_ARCHITECTURE.md` §4.
+
+## Integration checks
+
+Update the independent published mappings in `tests/test_controls.gd`, explicit roster counts in `test_styles.gd` and `test_bangla.gd`, and finisher IDs in `test_finisher_contact.gd`. Registry-driven signature, X, training and census checks automatically include a new resource. Keep both facing directions and wall contact coverage.
+
+The AI reads plans and ranges from the resource. Anti-air first uses its established legal moves, then the style's rising/high slots if none match; verify the chosen strike can reach an airborne opponent. Add dedicated music to `GameAudio.MUSIC_FILES` only when an actual track exists. Capoeira and Jeet Kune Do currently use the existing procedural loop; this is an explicit fallback, not bespoke music.

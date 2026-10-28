@@ -174,6 +174,14 @@ func compute_intent() -> CombatData.Intent:
 		_anti_air_rolled = true
 		var aa := _first_legal([CombatData.AttackType.UPPERCUT, CombatData.AttackType.HIGH_KICK,
 			CombatData.AttackType.FRONT_KICK, CombatData.AttackType.LIGHT])
+		if aa == CombatData.AttackType.NONE and _me.style != null:
+			# New styles can supply their own rising/high strikes through the
+			# standard slots without joining a hardcoded list of move types.
+			for slot in [&"up_light", &"up_heavy"]:
+				var candidate := _me.style.resolve(slot, false)
+				if candidate != CombatData.AttackType.NONE and not CombatData.get_attack(candidate).no_strike:
+					aa = candidate
+					break
 		if _rng.randf() < anti_air_chance and aa != CombatData.AttackType.NONE:
 			_enter(AIState.SPACING, 20)
 			intent.attack = aa
