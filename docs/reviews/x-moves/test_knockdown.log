@@ -1,11 +1,21 @@
-Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
-
-[Flying Double-Palm Strike: 45% blowback]
-  ok   a lone hit never knocks down (0 / 300)
-  ok   as a counter hit it can (75 / 300, expected ~68)
-  ok   as a combo follow-up it can (75 / 300, expected ~68)
-[Gazelle Hook: certain blowback]
-  ok   a certain blowback always knocks down, even alone
-[combo]
-  ok   hit 4 of a combo knocks down, not before (["HITSTUN", "HITSTUN", "HITSTUN", "KNOCKDOWN"])
-RESULT: PASS (0 failures)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+
+[Flying Double-Palm Strike: 45% blowback]
+
+  ok   a lone hit never knocks down (0 / 300)
+
+  ok   as a counter hit it can (75 / 300, expected ~68)
+
+  ok   as a combo follow-up it can (75 / 300, expected ~68)
+
+[Gazelle Hook: certain blowback]
+
+  ok   a certain blowback always knocks down, even alone
+
+[combo]
+
+  ok   hit 4 of a combo knocks down, not before (["HITSTUN", "HITSTUN", "HITSTUN", "KNOCKDOWN"])
+
+RESULT: PASS (0 failures)

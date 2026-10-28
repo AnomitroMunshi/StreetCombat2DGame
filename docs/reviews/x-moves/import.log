@@ -1,28 +1,53 @@
-Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
-
-[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
-[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
-[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
-[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
-[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
-[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
-[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
-[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
-[0m
-[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (9 steps)[39m[0m
-[   0% ] [90m[1mupdate_scripts_classes[22m | CombatData[39m[0m
-[  10% ] [90m[1mupdate_scripts_classes[22m | EnemyAI[39m[0m
-[  20% ] [90m[1mupdate_scripts_classes[22m | Fighter[39m[0m
-[  30% ] [90m[1mupdate_scripts_classes[22m | FighterVisual[39m[0m
-[  40% ] [90m[1mupdate_scripts_classes[22m | MartialArtStyle[39m[0m
-[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
-[  60% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
-[  70% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
-[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
-[92m[ DONE ][39m [1mupdate_scripts_classes[22m
-[0m
-[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
-[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
-[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
-[92m[ DONE ][39m [1mloading_editor_layout[22m
-[0m
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+
+[   0% ] first_scan_filesystem | Started Project initialization (5 steps)
+
+[   0% ] first_scan_filesystem | Scanning file structure...
+
+[  16% ] first_scan_filesystem | Loading global class names...
+
+[  33% ] first_scan_filesystem | Verifying GDExtensions...
+
+[  50% ] first_scan_filesystem | Creating autoload scripts...
+
+[  66% ] first_scan_filesystem | Initializing plugins...
+
+[  83% ] first_scan_filesystem | Starting file scan...
+
+[ DONE ] first_scan_filesystem
+
+
+
+[   0% ] update_scripts_classes | Started Registering global classes... (9 steps)
+
+[   0% ] update_scripts_classes | CombatData
+
+[  10% ] update_scripts_classes | EnemyAI
+
+[  20% ] update_scripts_classes | Fighter
+
+[  30% ] update_scripts_classes | FighterVisual
+
+[  40% ] update_scripts_classes | MartialArtStyle
+
+[  50% ] update_scripts_classes |
+
+[  60% ] update_scripts_classes |
+
+[  70% ] update_scripts_classes |
+
+[  80% ] update_scripts_classes |
+
+[ DONE ] update_scripts_classes
+
+
+
+[   0% ] loading_editor_layout | Started Loading editor (5 steps)
+
+[   0% ] loading_editor_layout | Loading editor layout...
+
+[  16% ] loading_editor_layout | Loading docks...
+
+[ DONE ] loading_editor_layout

@@ -1,29 +1,57 @@
-Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
-
-  ok   game launches in style selection (STYLE_SELECT)
-  ok   style cards shown, no START yet
-  ok   picking a card previews that style on the player
-  ok   the rival never has the player's style
-  ok   confirm -> PRE_MATCH with START MATCH and CHANGE STYLE
-  ok   mashing keys before START: nobody moves, attacks or leaves IDLE
-  ok   fighters stay on their pre-match spots
-  ok   button hides on click
-  ok   style is locked once the match starts
-  ok   no combat action by either side before FIGHT
-  ok   both fighters reached their start marks before the countdown
-  ok   pre-fight poses played: relaxed, salute (player), glare (rival)
-  ok   player and rival start in different stances
-  ok   countdown order 3, 2, 1, FIGHT! (["3", "2", "1", "FIGHT!"])
-  ok   one second (60 ticks) per number ([160, 220, 280, 340])
-  ok   FIGHT! appears on the unlock tick
-  ok   player can act right at FIGHT (attack on +2)
-  ok   restart (rematch) returns to PRE_MATCH with full health
-  ok   rematch keeps the chosen style
-  ok   second match counting down (COUNTDOWN 2)
-  ok   restart mid-countdown: stays in PRE_MATCH, the old countdown never fires
-  ok   START MATCH is offered again
-  ok   both fighters idle
-  ok   posture reset on restart
-  ok   no crossing / roll state survives a restart
-  ok   focus resets on restart
-RESULT: PASS (0 failures)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+
+  ok   game launches in style selection (STYLE_SELECT)
+
+  ok   style cards shown, no START yet
+
+  ok   picking a card previews that style on the player
+
+  ok   the rival never has the player's style
+
+  ok   confirm -> PRE_MATCH with START MATCH and CHANGE STYLE
+
+  ok   mashing keys before START: nobody moves, attacks or leaves IDLE
+
+  ok   fighters stay on their pre-match spots
+
+  ok   button hides on click
+
+  ok   style is locked once the match starts
+
+  ok   no combat action by either side before FIGHT
+
+  ok   both fighters reached their start marks before the countdown
+
+  ok   pre-fight poses played: relaxed, salute (player), glare (rival)
+
+  ok   player and rival start in different stances
+
+  ok   countdown order 3, 2, 1, FIGHT! (["3", "2", "1", "FIGHT!"])
+
+  ok   one second (60 ticks) per number ([160, 220, 280, 340])
+
+  ok   FIGHT! appears on the unlock tick
+
+  ok   player can act right at FIGHT (attack on +2)
+
+  ok   restart (rematch) returns to PRE_MATCH with full health
+
+  ok   rematch keeps the chosen style
+
+  ok   second match counting down (COUNTDOWN 2)
+
+  ok   restart mid-countdown: stays in PRE_MATCH, the old countdown never fires
+
+  ok   START MATCH is offered again
+
+  ok   both fighters idle
+
+  ok   posture reset on restart
+
+  ok   no crossing / roll state survives a restart
+
+  ok   focus resets on restart
+
+RESULT: PASS (0 failures)

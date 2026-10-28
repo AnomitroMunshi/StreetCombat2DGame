@@ -1,20 +1,39 @@
-Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
-
-[2-0: the match ends after round 2]
-  ok   a match round starts at 200 health
-  ok   round 1 to the player: on to round 2 (COUNTDOWN, round 2, wins [1, 0])
-  ok   both back up at full health
-  ok   focus carries over between rounds (40)
-  ok   both back on their start marks
-  ok   ROUND 2 is called (round_2)
-  ok   then FIGHT, after the round call (80 ticks)
-  ok   2-0: straight to the result, no third round (RESULT, wins [2, 0])
-  ok   the player wins the match
-  ok   K.O. called once per round
-[1-1: a final round decides it]
-  ok   1-1: round 3 (COUNTDOWN, wins [1, 1])
-  ok   FINAL ROUND is called
-  ok   the rival takes the final round and the match ([1, 2])
-[training has no rounds]
-  ok   no round pips in training
-RESULT: PASS (0 failures)
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+
+[2-0: the match ends after round 2]
+
+  ok   a match round starts at 200 health
+
+  ok   round 1 to the player: on to round 2 (COUNTDOWN, round 2, wins [1, 0])
+
+  ok   both back up at full health
+
+  ok   focus carries over between rounds (40)
+
+  ok   both back on their start marks
+
+  ok   ROUND 2 is called (round_2)
+
+  ok   then FIGHT, after the round call (80 ticks)
+
+  ok   2-0: straight to the result, no third round (RESULT, wins [2, 0])
+
+  ok   the player wins the match
+
+  ok   K.O. called once per round
+
+[1-1: a final round decides it]
+
+  ok   1-1: round 3 (COUNTDOWN, wins [1, 1])
+
+  ok   FINAL ROUND is called
+
+  ok   the rival takes the final round and the match ([1, 2])
+
+[training has no rounds]
+
+  ok   no round pips in training
+
+RESULT: PASS (0 failures)
