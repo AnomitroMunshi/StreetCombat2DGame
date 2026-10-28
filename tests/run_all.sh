@@ -32,7 +32,7 @@ for t in "${SUITES[@]}"; do
 	i=$((i + 1))
 	t0=$(date +%s)
 	limit=300
-	[ "$t" = "finisher_contact" ] && limit=900  # every style finisher x every case
+	[ "$t" = "finisher_contact" ] && limit=1500  # every style finisher x every case
 	out=$(timeout $limit "$GODOT" --headless --path . -s "tests/test_$t.gd" 2>&1)
 	code=$?
 	result=$(echo "$out" | grep -E "^RESULT" | tail -1)

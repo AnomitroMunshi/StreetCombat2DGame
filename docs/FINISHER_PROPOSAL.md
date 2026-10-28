@@ -1,6 +1,6 @@
 # Style finishers — proposal for approval
 
-Status: **approved 2026-10-27; batches 5a (Karate, Muay Thai) and 5b (Boxing, Kickboxing, Taekwondo) built; 5c (Kung Fu, Bangla Maar) next.** Covers backlog FIN-STYLE-01..04, FIN-FEEL-01..06 and KAR-AIR-REF-01..03.
+Status: **approved 2026-10-27; batches 5a (Karate, Muay Thai) and 5b (Boxing, Kickboxing, Taekwondo) built; 5c (Kung Fu, Bangla Maar) built: every style has its own air and wall finisher.** Covers backlog FIN-STYLE-01..04, FIN-FEEL-01..06 and KAR-AIR-REF-01..03.
 Mark each row ✅ / ✏️ (change) / ❌ in the approval table at the end.
 
 ## What changes
@@ -271,6 +271,20 @@ below are what was measured, which in places differs from the proposal's wording
   - `strike_delay` lets a thrust connect only once extended, not on its way out.
 
 Clips (normal speed and quarter speed): `docs/reviews/2026-10-27-finisher-batch5b/`.
+
+## Batch 5c: timing sheet
+
+| Finisher | Beats (ticks) | Where the blows land |
+|---|---|---|
+| **DESCENDING DRAGON PALM** (Kung Fu air) | wind-up 10 · rising palm 9 (meets the fall, lifts them) · leap 8 · **hammer-palm 18** · land 12 · crane 40 | palm to the belly (0.8–1.06), hammer-palm at the top of the chest (−0.2 to −0.28), then a spike |
+| **WALL OF PALMS** (Kung Fu wall) | wind-up 6 · palm 10 (slams) · palm 6 · palm 6 · sink 10 · **double palm 18** · step back 20 · salute 30 | body, head, chest, then the double palm to the chest (0.5–0.6) |
+| **AIR SMASH** (Bangla Maar air, `bangla_air_smash`) | run-up 8 · leap with fists overhead 10 (glide) · **hammer 18** (meets the fall) · land 10 · stumble 14 · guard 30 | head and shoulders (−0.06 to 0.0), then a spike |
+| **DEOWAL DHAKKA** (Bangla Maar wall) | brace 8 · **Jor Dhakka** charge 12 (slams) · stagger off 8 · slap wind-up 9 (steps back to make room) · **slap 18** · follow-through 16 · glare 34 | shoulder to the chest (0.3–0.55), slap to the head (−0.47 to −0.55) |
+
+The shared Air Smash and Wall Crush are now training-only, renamed CLASSIC AIR SMASH and CLASSIC WALL CRUSH, so
+Bangla Maar's own Air Smash has the name to itself.
+
+Clips: `docs/reviews/2026-10-28-finisher-batch5c/`.
 
 ## Approval table
 

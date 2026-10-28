@@ -860,8 +860,9 @@ func _ready() -> void:
 		&"palm_windup": _palm_windup, &"palm_strike": _palm_strike, &"spin_windup": _spin_windup,
 		&"spin_kick": _spin_kick, &"knee_windup": _knee_windup, &"knee": _knee, &"slumped": _slumped,
 		&"tornado_windup": _tornado_windup, &"tornado_chamber": _tornado_chamber, &"tornado_kick": _tornado_kick,
-		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare, &"mt_ready": _mt_ready, &"kt_ready": _kt_ready, &"flying_chamber": _flying_chamber, &"flying_side_kick": _flying_side_kick,
-		&"air_tumble": _air_tumble, &"air_punch_load": _jump_punch_windup, &"air_punch": _jump_punch_strike,
+		&"relaxed": _relaxed, &"salute": _salute, &"glare": _glare, &"mt_ready": _mt_ready, &"kt_ready": _kt_ready, &"kf_crane": _guard, &"flying_chamber": _flying_chamber, &"flying_side_kick": _flying_side_kick,
+		&"air_tumble": _air_tumble, &"hammer_palm": _hammer_strike,
+		&"jd_brace": _jd_brace, &"jd_drive": _jd_drive, &"jd_follow": _jd_follow, &"air_punch_load": _jump_punch_windup, &"air_punch": _jump_punch_strike,
 		# Style finishers reuse the move poses.
 		&"lhook_hit": _lhook_hit, &"rhook_hit": _rhook_hit, &"bhook_load": _bhook_load, &"bhook_hit": _bhook_hit,
 		&"overhand_hit": _overhand_hit, &"slip_dip": _slip_dip, &"uppercut_windup": _uppercut_windup,

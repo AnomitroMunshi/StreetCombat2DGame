@@ -19,13 +19,14 @@ enum Kind { PALM_FLURRY, SPINNING_HEEL, AIR_SMASH, WALL_CRUSH, TORNADO_KICK,
 	EIGHT_LIMBS, IRON_KNEE, ONE_INCH_VERDICT, CRIMSON_CRESCENT,
 	HUNDRED_PALMS, DRAGONS_DESCENT, LAST_COMBINATION, KNOCKOUT_RHYTHM,
 	PAAYE_LATHI, SUPER_CHOR, SKYLINE_VERDICT, IRON_CORNER,
-	FALLING_CROSS, CORNER_COUNT, AIR_BREAKER, CORNER_BREAKER, SKYFALL_AXE, CORNER_CYCLONE }
+	FALLING_CROSS, CORNER_COUNT, AIR_BREAKER, CORNER_BREAKER, SKYFALL_AXE, CORNER_CYCLONE,
+	DESCENDING_DRAGON_PALM, WALL_OF_PALMS, BANGLA_AIR_SMASH, DEOWAL_DHAKKA }
 
 const DISPLAY_NAMES: Dictionary = {
 	Kind.PALM_FLURRY: "PALM FLURRY",
 	Kind.SPINNING_HEEL: "SPINNING HEEL KICK",
-	Kind.AIR_SMASH: "AIR SMASH",
-	Kind.WALL_CRUSH: "WALL CRUSH",
+	Kind.AIR_SMASH: "CLASSIC AIR SMASH",
+	Kind.WALL_CRUSH: "CLASSIC WALL CRUSH",
 	Kind.TORNADO_KICK: "TORNADO KICK 360",
 	Kind.FINAL_BELL: "THE FINAL BELL",
 	Kind.EIGHT_COUNT: "EIGHT-COUNT",
@@ -49,6 +50,10 @@ const DISPLAY_NAMES: Dictionary = {
 	Kind.CORNER_BREAKER: "CORNER BREAKER",
 	Kind.SKYFALL_AXE: "SKYFALL AXE",
 	Kind.CORNER_CYCLONE: "CORNER CYCLONE",
+	Kind.DESCENDING_DRAGON_PALM: "DESCENDING DRAGON PALM",
+	Kind.WALL_OF_PALMS: "WALL OF PALMS",
+	Kind.BANGLA_AIR_SMASH: "AIR SMASH",
+	Kind.DEOWAL_DHAKKA: "DEOWAL DHAKKA",
 }
 ## Permanent finisher ids (used by MartialArtStyle.finishers).
 const IDS: Dictionary = {
@@ -63,16 +68,19 @@ const IDS: Dictionary = {
 	Kind.FALLING_CROSS: &"falling_cross", Kind.CORNER_COUNT: &"corner_count",
 	Kind.AIR_BREAKER: &"air_breaker", Kind.CORNER_BREAKER: &"corner_breaker",
 	Kind.SKYFALL_AXE: &"skyfall_axe", Kind.CORNER_CYCLONE: &"corner_cyclone",
+	Kind.DESCENDING_DRAGON_PALM: &"descending_dragon_palm", Kind.WALL_OF_PALMS: &"wall_of_palms",
+	Kind.BANGLA_AIR_SMASH: &"bangla_air_smash", Kind.DEOWAL_DHAKKA: &"deowal_dhakka",
 }
 ## Situational finishers: one airborne and one wall finisher per style
 ## (MartialArtStyle.air_finisher / wall_finisher); Air Smash and Wall Crush are
 ## the shared ones for a style that sets none.
 const AIR_KINDS: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT, Kind.FALLING_CROSS, Kind.AIR_BREAKER,
-	Kind.SKYFALL_AXE]
+	Kind.SKYFALL_AXE, Kind.DESCENDING_DRAGON_PALM, Kind.BANGLA_AIR_SMASH]
 const WALL_KINDS: Array[Kind] = [Kind.WALL_CRUSH, Kind.IRON_CORNER, Kind.CORNER_COUNT, Kind.CORNER_BREAKER,
-	Kind.CORNER_CYCLONE]
+	Kind.CORNER_CYCLONE, Kind.WALL_OF_PALMS, Kind.DEOWAL_DHAKKA]
 const ENVIRONMENTAL: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT, Kind.FALLING_CROSS, Kind.AIR_BREAKER,
-	Kind.SKYFALL_AXE, Kind.WALL_CRUSH, Kind.IRON_CORNER, Kind.CORNER_COUNT, Kind.CORNER_BREAKER, Kind.CORNER_CYCLONE]
+	Kind.SKYFALL_AXE, Kind.DESCENDING_DRAGON_PALM, Kind.BANGLA_AIR_SMASH, Kind.WALL_CRUSH, Kind.IRON_CORNER,
+	Kind.CORNER_COUNT, Kind.CORNER_BREAKER, Kind.CORNER_CYCLONE, Kind.WALL_OF_PALMS, Kind.DEOWAL_DHAKKA]
 ## Open-floor finishers for a fighter with no style (tests).
 const OPEN_FLOOR_KINDS: Array[Kind] = [Kind.PALM_FLURRY, Kind.SPINNING_HEEL, Kind.TORNADO_KICK]
 ## Victim this close to the wall behind them -> Wall Crush.
@@ -109,7 +117,7 @@ const POSE_KIND: Dictionary = {
 	&"uppercut_strike": CombatData.ImpactKind.RISING, &"knee": CombatData.ImpactKind.RISING,
 	&"fknee_hit": CombatData.ImpactKind.RISING, &"rpalm_hit": CombatData.ImpactKind.RISING,
 	&"axe_chop": CombatData.ImpactKind.DOWNWARD, &"overhand_hit": CombatData.ImpactKind.DOWNWARD,
-	&"hammer_strike": CombatData.ImpactKind.DOWNWARD, &"rbody_hit": CombatData.ImpactKind.HOOK,
+	&"hammer_strike": CombatData.ImpactKind.DOWNWARD, &"hammer_palm": CombatData.ImpactKind.DOWNWARD, &"rbody_hit": CombatData.ImpactKind.HOOK,
 	&"mega_slap_hit": CombatData.ImpactKind.HOOK, &"slap_hit": CombatData.ImpactKind.HOOK,
 	&"punt_hit": CombatData.ImpactKind.STRAIGHT, &"hammer_hit": CombatData.ImpactKind.DOWNWARD,
 }
@@ -1115,6 +1123,71 @@ func _build(k: Kind) -> Array[Dictionary]:
 					"contact": &"body", "limb": FighterVisual.J_FOOT_B, "strike_delay": 3, "ko_vy": -2.0, "ko_drift": 0.0, "wall": true, "atk_spin_hold": true},
 				{"ticks": 12, "atk": &"back_chamber", "def": &"slumped", "atk_spin": 0.5},
 				{"ticks": 34, "atk": &"guard", "def": &"slumped", "atk_move": -2.0},
+			]
+		Kind.DESCENDING_DRAGON_PALM:
+			# Kung Fu: the weight flows back with a circular wind-up, a rising
+			# palm under the falling victim's chest (timed to meet it) lifts
+			# them, then a leap and a downward hammer-palm onto the chest
+			# drives them flat into the floor. Land on one leg, into the crane.
+			return [
+				{"ticks": 10, "atk": &"palm_windup", "def": &"air_tumble"},
+				{"ticks": 9, "atk": &"palm_lead", "def": &"knock_fly", "hit": true, "meet": true, "power": 2, "contact": &"body",
+					"meet_at": 0.4, "def_vy": -7.0},
+				{"ticks": 8, "atk": &"jump_rise", "def": &"knock_fly", "atk_vy": -11.0, "atk_move": 2.0},
+				{"ticks": 18, "atk": &"hammer_palm", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"contact": &"body", "ko_vy": 14.0, "ko_drift": 2.0, "ko_rolls": 0},
+				{"ticks": 12, "atk": &"land_crouch", "def": &"knock_fly"},
+				{"ticks": 40, "atk": &"kf_crane", "def": &"knock_fly"},
+			]
+		Kind.WALL_OF_PALMS:
+			# Kung Fu: three short alternating palms flowing into each other,
+			# the first driving the victim back into the wall (it cracks as
+			# their back hits it), a sink with both palms drawn to the hip,
+			# then the double palm to the chest; they slide down the wall.
+			# Close with the fist-in-palm salute.
+			return [
+				{"ticks": 6, "atk": &"palm_windup", "def": &"stagger"},
+				{"ticks": 10, "atk": &"palm_lead", "def": &"hitstun_body", "hit": true, "contact": &"body", "power": 1,
+					"atk_move": 3.0, "def_move": 9.0, "slam": true},
+				{"ticks": 6, "atk": &"palm_rear", "def": &"hitstun_body", "hit": true, "contact": &"body", "power": 1, "wall": true},
+				{"ticks": 6, "atk": &"palm_lead", "def": &"hitstun", "hit": true, "power": 2, "wall": true},
+				{"ticks": 10, "atk": &"palm_windup", "def": &"stagger"},
+				{"ticks": 18, "atk": &"palm_strike", "def": &"slumped", "hit": true, "power": 3, "final": true,
+					"contact": &"body", "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
+				{"ticks": 20, "atk": &"guard", "def": &"slumped", "atk_move": -3.0},
+				{"ticks": 30, "atk": &"salute", "def": &"slumped"},
+			]
+		Kind.BANGLA_AIR_SMASH:
+			# Bangla Maar (strikes only, no grab): a messy run-up and an
+			# overconfident leap, both fists locked overhead, a reckless
+			# double-hand hammer onto the falling victim (timed to meet it)
+			# spikes them into the floor; the attacker lands heavily,
+			# stumbles, then recovers.
+			return [
+				{"ticks": 8, "atk": &"hammer_windup", "def": &"air_tumble", "atk_move": 2.5},
+				{"ticks": 10, "atk": &"hammer_raise", "def": &"air_tumble", "atk_vy": -13.0, "glide": true},
+				{"ticks": 18, "atk": &"hammer_hit", "def": &"knock_fly", "hit": true, "meet": true, "power": 3, "final": true,
+					"meet_at": 0.0, "ko_vy": 15.0, "ko_drift": 3.0, "ko_rolls": 0},
+				{"ticks": 10, "atk": &"land_crouch", "def": &"knock_fly"},
+				{"ticks": 14, "atk": &"stagger", "def": &"knock_fly", "atk_move": 1.0},
+				{"ticks": 30, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.DEOWAL_DHAKKA:
+			# Bangla Maar: brace, the Jor Dhakka shoulder charge slams the
+			# victim into the wall (it cracks as their back hits it) and the
+			# attacker staggers off the impact, a huge wind-up, then the giant
+			# open-hand slap; the head spins along the wall and they drop.
+			# A gloating glare to finish.
+			return [
+				{"ticks": 8, "atk": &"jd_brace", "def": &"stagger"},
+				{"ticks": 12, "atk": &"jd_drive", "def": &"hitstun_body", "hit": true, "contact": &"body", "power": 2,
+					"atk_move": 5.0, "def_move": 10.0, "slam": true},
+				{"ticks": 8, "atk": &"jd_follow", "def": &"hitstun_body", "atk_move": -2.0},
+				{"ticks": 9, "atk": &"mega_slap_wind", "def": &"stagger", "atk_move": -7.0},
+				{"ticks": 18, "atk": &"mega_slap_hit", "def": &"slumped", "hit": true, "power": 3, "final": true,
+					"contact": &"head", "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
+				{"ticks": 16, "atk": &"mega_slap_follow", "def": &"slumped"},
+				{"ticks": 34, "atk": &"glare", "def": &"slumped", "atk_move": -2.0},
 			]
 		Kind.AIR_SMASH:
 			# Leap together, reach and grab, overhead hammer-fist, spike into the

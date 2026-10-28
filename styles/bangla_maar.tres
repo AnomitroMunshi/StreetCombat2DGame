@@ -59,4 +59,6 @@ quotes = {
 }
 signature = &"belly_bomb"
 finishers = PackedStringArray("paaye_lathi", "super_chor")
+air_finisher = &"bangla_air_smash"
+wall_finisher = &"deowal_dhakka"
 ai_preferred_range = 95.0
