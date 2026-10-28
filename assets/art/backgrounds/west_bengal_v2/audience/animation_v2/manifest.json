@@ -1,0 +1,98 @@
+[
+  {
+    "id": "maar_sala",
+    "sheet": "maar_sala_sheet.png",
+    "animated_preview": "maar_sala_animated.png",
+    "frame_size": [
+      512,
+      512
+    ],
+    "sheet_size": [
+      2048,
+      512
+    ],
+    "hframes": 4,
+    "vframes": 1,
+    "frame_order": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "duration_ms": [
+      240,
+      180,
+      260,
+      200
+    ],
+    "loop": true,
+    "foot_anchor_px": [
+      256,
+      480
+    ]
+  },
+  {
+    "id": "jio_pagla",
+    "sheet": "jio_pagla_sheet.png",
+    "animated_preview": "jio_pagla_animated.png",
+    "frame_size": [
+      512,
+      512
+    ],
+    "sheet_size": [
+      2048,
+      512
+    ],
+    "hframes": 4,
+    "vframes": 1,
+    "frame_order": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "duration_ms": [
+      255,
+      195,
+      275,
+      215
+    ],
+    "loop": true,
+    "foot_anchor_px": [
+      256,
+      480
+    ]
+  },
+  {
+    "id": "khela_hobe",
+    "sheet": "khela_hobe_sheet.png",
+    "animated_preview": "khela_hobe_animated.png",
+    "frame_size": [
+      512,
+      512
+    ],
+    "sheet_size": [
+      2048,
+      512
+    ],
+    "hframes": 4,
+    "vframes": 1,
+    "frame_order": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "duration_ms": [
+      270,
+      210,
+      290,
+      230
+    ],
+    "loop": true,
+    "foot_anchor_px": [
+      256,
+      480
+    ]
+  }
+]

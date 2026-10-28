@@ -265,6 +265,26 @@ finishers (see [Finishers](#finishers)).
 
 A kill on an airborne opponent, or one near a wall, still takes priority.
 
+**Stages.**
+- **The dojo** is the default and training stage. The plain warm plaster
+  behind the fighters keeps dark and white costumes readable.
+- **The Kolkata street (West Bengal):** only when **you** fight as Bangla
+  Maar. A Bangla Maar rival alone doesn't unlock it, and training stays in the
+  dojo. Each match picks one of two backdrops:
+  - Howrah Bridge over the Hooghly;
+  - Victoria Memorial beyond its gardens.
+
+  On the street:
+  - The **tea stall** (চায়ের আড্ডা) on the left and the **shopfront** on the
+    right are the walls, and wall finishers crack their plaster.
+  - Three **cheering crowds** with placards ("maar sala", "Jio pagla",
+    "khela hobe!") watch from behind the parapet.
+  - A **cycle rickshaw** is parked by the shop.
+  - A **bench with tea cups** and a **crate** break once when a body slams
+    down next to them, and stay broken until a rematch.
+- **Floor and wall damage** uses painted decals: broken boards in the dojo,
+  cracked paving and plaster on the street.
+
 **Air and wall finishers.** Each style is getting its own airborne finisher
 (the opponent was in the air) and wall finisher (the opponent was near the
 wall behind them), chosen from the attacker's style. These are set by the
@@ -1055,6 +1075,7 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 | `test_movement.gd` | Jump cross-ups (both directions, moving rival, simultaneous jumps, walls), forward/backward roll, close slip-past, walking never passes, back hits after crossing, AI reaction delay |
 | `test_rounds.gd` | Best of 3: a finisher every round, full health and start marks between rounds, Focus carried over, ROUND 2 / FINAL ROUND then FIGHT, 2-0 ends the match, 1-1 goes to a final round, no rounds in training |
 | `test_guard.gd` | Guard heights: standing block stops everything but lows, low block everything but overheads (incl. any attack thrown in the air); LOW / OVERHEAD recorded |
+| `test_stage.gd` | Stage choice (Kolkata only for a player Bangla Maar; rival-only, training and style select stay in the dojo), stone vs wood decals, walls at the arena bounds, props break once from strong nearby impacts (what stands on them falls too), reset |
 
 The V0.3 plan and audit are in `docs/V0.3_PLAN.md`. M6.5 design and merge
 review: `docs/M6.5_ARCHITECTURE.md`, `docs/M6.5_REVIEW.md`,

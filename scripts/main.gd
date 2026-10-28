@@ -189,6 +189,14 @@ var _pause_message: Array = ["", ""]
 # cracks), whether the attacker was airborne last tick (takeoff dust), and the
 # last x of each skidding body (floor scuff marks).
 var _wall_dent := Vector2.INF
+## The Kolkata street (player Bangla Maar only, never training); null = dojo.
+var stage: WestBengalStage = null
+const DECALS_WOOD: String = "res://assets/art/decals/dojo_wood_v1"
+const DECALS_STONE: String = "res://assets/art/decals/west_bengal_v1"
+const STONE_LIGHT := Color(0.7, 0.66, 0.6)
+const STONE_DARK := Color(0.42, 0.4, 0.37)
+const PLASTER_LIGHT := Color(0.86, 0.8, 0.66)
+const PLASTER_DARK := Color(0.55, 0.5, 0.42)
 ## Effects held back a few game ticks (hitstop does not count), so a knockout
 ## blow's own contact reads before what it sets off: [ticks left, Callable].
 var _fx_queue: Array = []
@@ -243,6 +251,9 @@ func _ready() -> void:
 		f.signature_started.connect(_on_signature_started)
 		f.parried.connect(_on_fighter_parried)
 	fx.decals_changed.connect(queue_redraw)
+	# Painted stage art is drawn scaled down: smooth it with mipmaps.
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	fx.decal_set = FxLayer.load_decal_set(DECALS_WOOD)
 	# Pause: this node and the HUD keep running (input, the pause screen); the
 	# fighters and effects freeze with the tree.
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -360,6 +371,7 @@ func start_training() -> void:
 	training.name = "Training"
 	add_child(training)
 	training.setup(player, enemy)
+	_apply_stage()  # training is always the dojo
 	# Keep reading input and drawing while the tree is paused.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	hud.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -607,8 +619,45 @@ func confirm_style() -> void:
 	_show_ready()
 
 
+## The stage follows the PLAYER's confirmed style: the Kolkata street for
+## Bangla Maar (a Bangla Maar rival alone never unlocks it), else the dojo;
+## training and style select are always the dojo. Picked before the match and
+## kept for all of it (rounds included).
+func _apply_stage() -> void:
+	var want := training == null and _round_state != RoundState.STYLE_SELECT \
+		and player.style != null and player.style.id == &"bangla_maar"
+	if want and stage == null:
+		stage = WestBengalStage.new()
+		stage.name = "Stage"
+		add_child(stage)
+		move_child(stage, 0)  # under the fighters (later children draw on top)
+		stage.setup(&"howrah" if _finisher_rng.randf() < 0.5 else &"victoria", FLOOR_Y)
+		stage.on_prop_broken = _on_prop_broken
+		fx.decal_set = FxLayer.load_decal_set(DECALS_STONE)
+	elif not want and stage != null:
+		stage.queue_free()
+		stage = null
+		fx.decal_set = FxLayer.load_decal_set(DECALS_WOOD)
+	queue_redraw()
+
+
+func get_stage_name() -> String:
+	return "west_bengal_%s" % stage.variant if stage != null else "dojo"
+
+
+## A stage prop broke: its material flies, a crack of wood or clay.
+func _on_prop_broken(p: Dictionary) -> void:
+	var r: Rect2 = p["rect"]
+	var col := WestBengalStage.prop_color(p["id"])
+	fx.chunks(r.get_center(), 8, col, 6.0, 0.0, 0.9, 3.0, 7.0)
+	fx.dust_cloud(Vector2(r.get_center().x, FLOOR_Y), 0.7, 35, 6)
+	audio.play(&"guard_break" if p["id"] == &"cups" else &"wall_hit", -8.0)
+	queue_redraw()
+
+
 func _show_ready() -> void:
 	_set_round_state(RoundState.PRE_MATCH)
+	_apply_stage()
 	hud.hide_style_select()
 	player.prefight_pose = &"relaxed"
 	hud.set_message("%s  vs  %s" % [player.style.display_name.to_upper(), enemy.style.display_name.to_upper()],
@@ -620,6 +669,7 @@ func _show_ready() -> void:
 func change_style() -> void:
 	if _round_state == RoundState.PRE_MATCH:
 		_set_round_state(RoundState.STYLE_SELECT)
+		_apply_stage()
 		hud.show_button(&"")
 		hud.set_message("", "")
 		player.prefight_pose = &""
@@ -1162,7 +1212,7 @@ func _finisher_ambient() -> void:
 		FinisherDirector.Kind.WALL_CRUSH, FinisherDirector.Kind.IRON_CORNER:
 			# Grit keeps trickling out of the cracked pillar.
 			if _wall_dent != Vector2.INF and _tick % 5 == 0:
-				fx.debris(_wall_dent + Vector2(0.0, _fx_rng.randf_range(-12.0, 12.0)), 1, PILLAR_LIGHT, 1.0, 0.0)
+				fx.debris(_wall_dent + Vector2(0.0, _fx_rng.randf_range(-12.0, 12.0)), 1, _wall_light(), 1.0, 0.0)
 	_fin_attacker_air = atk.airborne
 
 
@@ -1316,10 +1366,14 @@ func _on_fighter_landed(fighter: Fighter) -> void:
 	fx.particles(floor_pos + Vector2(0.0, -6.0), Color(0.78, 0.68, 0.56), 6, 2.5 + speed * 0.2, 14)
 	audio.play(&"body_fall", minf(-4.0 + speed * 0.4, 2.0))
 	_shake(8, 3.0 + speed * 0.3)
+	if stage != null:
+		stage.impact(fighter.position.x, speed)
 	if speed > 6.0:
 		# Heavy landing: a dust burst and a few bits of floor kicked up.
 		fx.dust_cloud(floor_pos, 1.0 + speed * 0.05, 50, 8)
-		fx.chunks(floor_pos + Vector2(0.0, -4.0), 3, FLOOR_WOOD, 4.0 + speed * 0.2, 0.0, 1.0, 3.0, 6.0)
+		fx.chunks(floor_pos + Vector2(0.0, -4.0), 3, _floor_main(), 4.0 + speed * 0.2, 0.0, 1.0, 3.0, 6.0)
+		if not fighter.spiked:
+			fx.floor_scuff(floor_pos + Vector2(0.0, 14.0), speed)
 	if speed > 12.0 and fighter.spiked:
 		# Spiked into the floor: crater, radial cracks growing out of it,
 		# splintered floorboards, a dust burst and a floor shockwave.
@@ -1329,9 +1383,10 @@ func _on_fighter_landed(fighter: Fighter) -> void:
 		# Impact burst: light rays up out of the floor, big chunks of board
 		# thrown high, splinters, a billowing dust cloud and a shockwave.
 		fx.flare(centre + Vector2(0.0, -10.0), 2, fx.GLOW_WARM, -PI * 0.5)
-		fx.chunks(centre + Vector2(0.0, -6.0), 14, FLOOR_WOOD, 12.0, 0.0, 0.85, 7.0, 15.0)
-		fx.chunks(centre + Vector2(0.0, -6.0), 10, WOOD_COLOR, 8.0, 0.0, 1.1, 4.0, 8.0)
-		fx.splinters(centre + Vector2(0.0, -4.0), 16, FLOOR_WOOD, 11.0, 0.0, 0.9)
+		fx.chunks(centre + Vector2(0.0, -6.0), 14, _floor_main(), 12.0, 0.0, 0.85, 7.0, 15.0)
+		fx.chunks(centre + Vector2(0.0, -6.0), 10, _floor_second(), 8.0, 0.0, 1.1, 4.0, 8.0)
+		if stage == null:
+			fx.splinters(centre + Vector2(0.0, -4.0), 16, FLOOR_WOOD, 11.0, 0.0, 0.9)  # wood splits; paving chips
 		# Dust kept low and short so the body in the crater stays readable.
 		fx.dust_cloud(floor_pos, 1.4, 45, 8)
 		fx.ground_ring(floor_pos, 150.0, 24)
@@ -1529,8 +1584,11 @@ func _wall_face_x(dir: int) -> float:
 	return Fighter.ARENA_MAX_X + 20.0 if dir > 0 else Fighter.ARENA_MIN_X - 20.0
 
 
-## The pillar on `side` (-1 left, +1 right), as drawn in _draw.
+## The pillar on `side` (-1 left, +1 right), as drawn in _draw (on the
+## street: the stall or the shopfront).
 func _pillar_rect(side: int) -> Rect2:
+	if stage != null:
+		return stage.wall_rects(FLOOR_Y)[0 if side < 0 else 1]
 	var edge := Fighter.ARENA_MIN_X - 20.0 if side < 0 else Fighter.ARENA_MAX_X + 20.0
 	var outer := edge - 46.0 if side < 0 else edge
 	return Rect2(outer, 96.0, 46.0, FLOOR_Y + 6.0 - 96.0)
@@ -1543,13 +1601,15 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 	var side := -1 if pos.x < 640.0 else 1
 	var pillar := _pillar_rect(side)
 	var hit := Vector2(pos.x + side * 10.0, pos.y)
+	if stage != null:
+		stage.impact(pos.x, 6.0 + power * 3.0)
 	fx.wall_crack(hit, power, pillar)
 	fx.ring(hit, Color(1.0, 0.95, 0.85), 40.0 + power * 12.0, 14)
-	fx.particles(hit, PILLAR_LIGHT, 6 + power * 3, 4.0, 18)
+	fx.particles(hit, _wall_light(), 6 + power * 3, 4.0, 18)
 	# Chunks of the pillar break off and fall: big pieces in the pillar's wood
 	# colours, flung inward off the face.
-	fx.chunks(hit, 2 + power * 3, PILLAR_LIGHT, 3.0 + power * 1.4, -side * 0.9, 0.9, 4.0 + power, 8.0 + power * 2.0)
-	fx.chunks(hit, 1 + power * 2, PILLAR_DARK, 2.0 + power, -side * 0.6, 0.8, 4.0, 9.0)
+	fx.chunks(hit, 2 + power * 3, _wall_light(), 3.0 + power * 1.4, -side * 0.9, 0.9, 4.0 + power, 8.0 + power * 2.0)
+	fx.chunks(hit, 1 + power * 2, _wall_dark(), 2.0 + power, -side * 0.6, 0.8, 4.0, 9.0)
 	if power >= 3:
 		# Only the knockout impact flares; build-up hits against the wall
 		# keep the bodies in front of it readable (cracks and chunks carry them).
@@ -1564,6 +1624,23 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 	hud.flash(0.12)
 	_camera_punch += 0.03
 
+
+
+## Floor debris colours: boards in the dojo, paving on the street.
+func _floor_main() -> Color:
+	return STONE_LIGHT if stage != null else FLOOR_WOOD
+
+
+func _floor_second() -> Color:
+	return STONE_DARK if stage != null else WOOD_COLOR
+
+
+func _wall_light() -> Color:
+	return PLASTER_LIGHT if stage != null else PILLAR_LIGHT
+
+
+func _wall_dark() -> Color:
+	return PLASTER_DARK if stage != null else PILLAR_DARK
 
 func _trail_rolling_dust() -> void:
 	if _tick % 4 != 0:
@@ -1730,6 +1807,11 @@ func _refresh_presentation() -> void:
 # --- Drawing ------------------------------------------------------------------
 
 func _draw() -> void:
+	if stage != null:
+		# The Kolkata street: backdrop, walls, rickshaw and props.
+		stage.draw_back(self, FLOOR_Y)
+		fx.draw_decals(self)
+		return
 	# The dojo backdrop (wall, windows, corner props, floor): see DojoStage.
 	DojoStage.draw(self, FLOOR_Y)
 
