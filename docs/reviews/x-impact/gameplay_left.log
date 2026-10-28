@@ -1,0 +1,23 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 Core Profile Context 26.10.1.261008 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon RX 6600 XT
+
+Movie Maker mode enabled, recording movie in 1280×720 @ 60 FPS...
+{"cooldown_seconds":10,"hits":[{"damage":9,"id":"dempsey_hook_left","tick":50},{"damage":9,"id":"dempsey_hook_right","tick":75}],"peak_air_travel":0.0,"peak_travel":105.526611328125,"side":-1,"style":"boxing"}
+{"cooldown_seconds":15,"hits":[{"damage":18,"id":"thai_roundhouse","tick":46}],"peak_air_travel":61.7384643554688,"peak_travel":139.70654296875,"side":-1,"style":"muay_thai"}
+{"cooldown_seconds":10,"hits":[{"damage":18,"id":"step_back_spinning_backfist","tick":44}],"peak_air_travel":0.0,"peak_travel":87.2224731445313,"side":-1,"style":"karate"}
+{"cooldown_seconds":10,"hits":[{"damage":18,"id":"scorpion_kick","tick":44}],"peak_air_travel":0.0,"peak_travel":37.2156372070313,"side":-1,"style":"kung_fu"}
+{"cooldown_seconds":15,"hits":[{"damage":6,"id":"triple_kick_body_one","tick":38},{"damage":6,"id":"triple_kick_body_two","tick":47},{"damage":6,"id":"triple_kick_head","tick":56}],"peak_air_travel":0.0,"peak_travel":47.876953125,"side":-1,"style":"taekwondo"}
+{"cooldown_seconds":15,"hits":[{"damage":18,"id":"big_foot","tick":50}],"peak_air_travel":300.541046142578,"peak_travel":368.725799560547,"side":-1,"style":"kickboxing"}
+{"cooldown_seconds":15,"hits":[{"damage":18,"id":"dropkick","tick":50}],"peak_air_travel":153.694641113281,"peak_travel":196.758605957031,"side":-1,"style":"bangla_maar"}
+RESULT: PASS real-scene X impact review, 0 failures
+--------------------------------------------------------------------------------
+Done recording movie at path: D:\firstGame\docs\reviews\x-impact\gameplay_left.avi
+1402 frames at 60 FPS (movie length: 00:00:23:22), recorded in 00:00:37 (62% of real-time speed).
+CPU render time: 2.57 seconds (average: 1.83 ms/frame)
+GPU render time: 1.96 seconds (average: 1.39 ms/frame)
+Encoding time: 11.43 seconds (average: 8.15 ms/frame)
+--------------------------------------------------------------------------------
+WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

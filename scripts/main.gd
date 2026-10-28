@@ -387,7 +387,8 @@ func _move_list_text() -> String:
 	for row in player.style.move_list():
 		lines.append("[color=#f2c14e]%s[/color]  %s" % [row[0], row[1]])
 	if player.style.input_map.has(&"x_move"):
-		lines.append("X: 10 s cooldown, no Focus. Block, parry or evade.")
+		var x_attack := CombatData.get_attack(player.style.resolve(&"x_move", false))
+		lines.append("X: %d s cooldown, no Focus. Block, parry or evade." % (x_attack.x_cooldown_frames / CombatData.TICK_RATE))
 	if player.style.signature != &"":
 		lines.append("[color=#f2c14e]F[/color]  %s (full Focus)" % CombatData.get_attack(
 			CombatData.type_for_id(player.style.signature)).display_name)
@@ -1017,7 +1018,7 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 		CombatData.HitResult.HIT:
 			var striker := attacker_of(defender)
 			var dir := CombatData.impact_dir(attack.type, striker.facing)
-			var tier := 3 if finisher else CombatData.impact_tier(attack.damage)
+			var tier := 3 if finisher else maxi(CombatData.impact_tier(attack.damage), attack.impact_power)
 			_hitstop = maxi(_hitstop, attack.hitstop + (3 if finisher else 0))
 			# Light hits barely move the frame; heavy ones shake and kick it.
 			_shake(attack.hitstop + 2, 0.8 + tier * tier * 0.9 + (3.0 if finisher else 0.0))
@@ -1338,7 +1339,7 @@ func _bodies_at_rest() -> bool:
 # --- Fighter event feedback (presentation only) -------------------------------
 
 func _on_attack_started(fighter: Fighter, attack: CombatData.Attack) -> void:
-	audio.play(&"whoosh_heavy" if attack.damage >= 10 else &"whoosh_light", -5.0, 0.1)
+	audio.play(&"whoosh_heavy" if attack.damage >= 10 or attack.impact_power >= 2 else &"whoosh_light", -5.0, 0.1)
 	if training != null and fighter == player:
 		training.on_attack_started(attack)
 

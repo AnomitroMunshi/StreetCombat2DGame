@@ -1,0 +1,19 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[full meter: walks in and throws it]
+  ok   boxing: signature within 4 s from 320 px against a passive opponent (120 ticks)
+  ok   muay_thai: signature within 4 s from 320 px against a passive opponent (111 ticks)
+  ok   karate: signature within 4 s from 320 px against a passive opponent (98 ticks)
+  ok   kung_fu: signature within 4 s from 320 px against a passive opponent (117 ticks)
+  ok   taekwondo: signature within 4 s from 320 px against a passive opponent (105 ticks)
+  ok   kickboxing: signature within 4 s from 320 px against a passive opponent (148 ticks)
+  ok   bangla_maar: signature within 4 s from 320 px against a passive opponent (169 ticks)
+[an opening draws it out]
+  ok   boxing: dizzy opponent in range -> signature at once (0 ticks)
+  ok   muay_thai: dizzy opponent in range -> signature at once (0 ticks)
+  ok   karate: dizzy opponent in range -> signature at once (0 ticks)
+  ok   kung_fu: dizzy opponent in range -> signature at once (0 ticks)
+  ok   taekwondo: dizzy opponent in range -> signature at once (0 ticks)
+  ok   kickboxing: dizzy opponent in range -> signature at once (0 ticks)
+  ok   bangla_maar: dizzy opponent in range -> signature at once (0 ticks)
+RESULT: PASS (0 failures)

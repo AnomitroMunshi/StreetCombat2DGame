@@ -37,6 +37,9 @@ func run() -> void:
 			root.add_child(training)
 			training.setup(me, target)
 			check(training.info_text().contains(st.move_name(st.input_map[&"x_move"])) and training.info_text().contains("READY"), "%s: training names ready X" % st.id)
+			var cooldown_seconds := CombatData.get_attack(st.resolve(&"x_move", false)).x_cooldown_frames / CombatData.TICK_RATE
+			check(training.info_text().contains("(%d s, no Focus)" % cooldown_seconds), "%s: training displays correct per-move total cooldown" % st.id)
+			check(Hud._style_details(st).contains("%d s cooldown" % cooldown_seconds), "%s: roster displays correct per-move cooldown" % st.id)
 			me.x_cooldown = 300
 			check(training.info_text().contains("5.0 s"), "%s: training shows simulation cooldown" % st.id)
 			training.free()
@@ -59,7 +62,10 @@ func run() -> void:
 	Input.action_release("x_move")
 	var keys := InputMap.action_get_events("x_move")
 	check(keys.size() == 1 and (keys[0] as InputEventKey).physical_keycode == KEY_X, "physical X is mapped")
-	check(String(main.call("_move_list_text")).contains("10 s cooldown, no Focus"), "training move list explains X rules")
+	for st in StyleRegistry.all():
+		main.player.set_style(st)
+		var seconds := CombatData.get_attack(st.resolve(&"x_move", false)).x_cooldown_frames / CombatData.TICK_RATE
+		check(String(main.call("_move_list_text")).contains("%d s cooldown, no Focus" % seconds), "%s training move list explains actual X cooldown" % st.id)
 	main.queue_free()
 	await process_frame
 	print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])

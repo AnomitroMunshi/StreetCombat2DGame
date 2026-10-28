@@ -1,0 +1,659 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  ok   boxing final_bell right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing final_bell right: completes
+  ok   boxing final_bell right: each of 3 blows lands once (3)
+  ok   boxing final_bell right: every blow within 6 px of the body (worst 4.4)
+  ok   boxing final_bell left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing final_bell left: completes
+  ok   boxing final_bell left: each of 3 blows lands once (3)
+  ok   boxing final_bell left: every blow within 6 px of the body (worst 4.4)
+  ok   boxing eight_count right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing eight_count right: completes
+  ok   boxing eight_count right: each of 7 blows lands once (7)
+  ok   boxing eight_count right: every blow within 6 px of the body (worst 5.8)
+  ok   boxing eight_count left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing eight_count left: completes
+  ok   boxing eight_count left: each of 7 blows lands once (7)
+  ok   boxing eight_count left: every blow within 6 px of the body (worst 5.8)
+  ok   boxing falling_cross right (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross right (gap 70, vy -9): completes
+  ok   boxing falling_cross right (gap 70, vy -9): each of 2 blows lands once (2)
+  ok   boxing falling_cross right (gap 70, vy -9): every blow within 6 px of the body (worst 2.8)
+  ok   boxing falling_cross right (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   boxing falling_cross right (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross right (gap 120, vy -9): completes
+  ok   boxing falling_cross right (gap 120, vy -9): each of 2 blows lands once (2)
+  ok   boxing falling_cross right (gap 120, vy -9): every blow within 6 px of the body (worst 2.6)
+  ok   boxing falling_cross right (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   boxing falling_cross right (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross right (gap 70, vy -2): completes
+  ok   boxing falling_cross right (gap 70, vy -2): each of 2 blows lands once (2)
+  ok   boxing falling_cross right (gap 70, vy -2): every blow within 6 px of the body (worst 2.8)
+  ok   boxing falling_cross right (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   boxing falling_cross right (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross right (gap 120, vy -2): completes
+  ok   boxing falling_cross right (gap 120, vy -2): each of 2 blows lands once (2)
+  ok   boxing falling_cross right (gap 120, vy -2): every blow within 6 px of the body (worst 2.6)
+  ok   boxing falling_cross right (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   boxing falling_cross right (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross right (gap 70, vy +5): completes
+  ok   boxing falling_cross right (gap 70, vy +5): each of 2 blows lands once (2)
+  ok   boxing falling_cross right (gap 70, vy +5): every blow within 6 px of the body (worst 2.8)
+  ok   boxing falling_cross right (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   boxing falling_cross right (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross right (gap 120, vy +5): completes
+  ok   boxing falling_cross right (gap 120, vy +5): each of 2 blows lands once (2)
+  ok   boxing falling_cross right (gap 120, vy +5): every blow within 6 px of the body (worst 2.6)
+  ok   boxing falling_cross right (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   boxing falling_cross left (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross left (gap 70, vy -9): completes
+  ok   boxing falling_cross left (gap 70, vy -9): each of 2 blows lands once (2)
+  ok   boxing falling_cross left (gap 70, vy -9): every blow within 6 px of the body (worst 2.8)
+  ok   boxing falling_cross left (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   boxing falling_cross left (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross left (gap 120, vy -9): completes
+  ok   boxing falling_cross left (gap 120, vy -9): each of 2 blows lands once (2)
+  ok   boxing falling_cross left (gap 120, vy -9): every blow within 6 px of the body (worst 2.6)
+  ok   boxing falling_cross left (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   boxing falling_cross left (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross left (gap 70, vy -2): completes
+  ok   boxing falling_cross left (gap 70, vy -2): each of 2 blows lands once (2)
+  ok   boxing falling_cross left (gap 70, vy -2): every blow within 6 px of the body (worst 2.8)
+  ok   boxing falling_cross left (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   boxing falling_cross left (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross left (gap 120, vy -2): completes
+  ok   boxing falling_cross left (gap 120, vy -2): each of 2 blows lands once (2)
+  ok   boxing falling_cross left (gap 120, vy -2): every blow within 6 px of the body (worst 2.6)
+  ok   boxing falling_cross left (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   boxing falling_cross left (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross left (gap 70, vy +5): completes
+  ok   boxing falling_cross left (gap 70, vy +5): each of 2 blows lands once (2)
+  ok   boxing falling_cross left (gap 70, vy +5): every blow within 6 px of the body (worst 2.8)
+  ok   boxing falling_cross left (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   boxing falling_cross left (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing falling_cross left (gap 120, vy +5): completes
+  ok   boxing falling_cross left (gap 120, vy +5): each of 2 blows lands once (2)
+  ok   boxing falling_cross left (gap 120, vy +5): every blow within 6 px of the body (worst 2.6)
+  ok   boxing falling_cross left (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   boxing corner_count right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing corner_count right (60 px from the wall): completes
+  ok   boxing corner_count right (60 px from the wall): each of 3 blows lands once (3)
+  ok   boxing corner_count right (60 px from the wall): every blow within 6 px of the body (worst 1.0)
+  ok   boxing corner_count right (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   boxing corner_count right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing corner_count right (110 px from the wall): completes
+  ok   boxing corner_count right (110 px from the wall): each of 3 blows lands once (3)
+  ok   boxing corner_count right (110 px from the wall): every blow within 6 px of the body (worst 2.7)
+  ok   boxing corner_count right (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   boxing corner_count right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing corner_count right (160 px from the wall): completes
+  ok   boxing corner_count right (160 px from the wall): each of 3 blows lands once (3)
+  ok   boxing corner_count right (160 px from the wall): every blow within 6 px of the body (worst 2.7)
+  ok   boxing corner_count right (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   boxing corner_count left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing corner_count left (60 px from the wall): completes
+  ok   boxing corner_count left (60 px from the wall): each of 3 blows lands once (3)
+  ok   boxing corner_count left (60 px from the wall): every blow within 6 px of the body (worst 1.0)
+  ok   boxing corner_count left (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   boxing corner_count left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing corner_count left (110 px from the wall): completes
+  ok   boxing corner_count left (110 px from the wall): each of 3 blows lands once (3)
+  ok   boxing corner_count left (110 px from the wall): every blow within 6 px of the body (worst 1.0)
+  ok   boxing corner_count left (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   boxing corner_count left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   boxing corner_count left (160 px from the wall): completes
+  ok   boxing corner_count left (160 px from the wall): each of 3 blows lands once (3)
+  ok   boxing corner_count left (160 px from the wall): every blow within 6 px of the body (worst 2.7)
+  ok   boxing corner_count left (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   taekwondo cyclone_360 right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo cyclone_360 right: completes
+  ok   taekwondo cyclone_360 right: each of 3 blows lands once (3)
+  ok   taekwondo cyclone_360 right: every blow within 6 px of the body (worst -1.8)
+  ok   taekwondo cyclone_360 left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo cyclone_360 left: completes
+  ok   taekwondo cyclone_360 left: each of 3 blows lands once (3)
+  ok   taekwondo cyclone_360 left: every blow within 6 px of the body (worst -1.8)
+  ok   taekwondo heavens_heel right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo heavens_heel right: completes
+  ok   taekwondo heavens_heel right: each of 2 blows lands once (2)
+  ok   taekwondo heavens_heel right: every blow within 6 px of the body (worst 1.5)
+  ok   taekwondo heavens_heel left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo heavens_heel left: completes
+  ok   taekwondo heavens_heel left: each of 2 blows lands once (2)
+  ok   taekwondo heavens_heel left: every blow within 6 px of the body (worst 1.5)
+  ok   taekwondo skyfall_axe right (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe right (gap 70, vy -9): completes
+  ok   taekwondo skyfall_axe right (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe right (gap 70, vy -9): every blow within 6 px of the body (worst -2.0)
+  ok   taekwondo skyfall_axe right (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe right (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe right (gap 120, vy -9): completes
+  ok   taekwondo skyfall_axe right (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe right (gap 120, vy -9): every blow within 6 px of the body (worst 4.5)
+  ok   taekwondo skyfall_axe right (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe right (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe right (gap 70, vy -2): completes
+  ok   taekwondo skyfall_axe right (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe right (gap 70, vy -2): every blow within 6 px of the body (worst -2.0)
+  ok   taekwondo skyfall_axe right (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe right (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe right (gap 120, vy -2): completes
+  ok   taekwondo skyfall_axe right (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe right (gap 120, vy -2): every blow within 6 px of the body (worst 4.5)
+  ok   taekwondo skyfall_axe right (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe right (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe right (gap 70, vy +5): completes
+  ok   taekwondo skyfall_axe right (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe right (gap 70, vy +5): every blow within 6 px of the body (worst -2.0)
+  ok   taekwondo skyfall_axe right (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe right (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe right (gap 120, vy +5): completes
+  ok   taekwondo skyfall_axe right (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe right (gap 120, vy +5): every blow within 6 px of the body (worst 4.5)
+  ok   taekwondo skyfall_axe right (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe left (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe left (gap 70, vy -9): completes
+  ok   taekwondo skyfall_axe left (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe left (gap 70, vy -9): every blow within 6 px of the body (worst -2.0)
+  ok   taekwondo skyfall_axe left (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe left (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe left (gap 120, vy -9): completes
+  ok   taekwondo skyfall_axe left (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe left (gap 120, vy -9): every blow within 6 px of the body (worst 4.5)
+  ok   taekwondo skyfall_axe left (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe left (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe left (gap 70, vy -2): completes
+  ok   taekwondo skyfall_axe left (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe left (gap 70, vy -2): every blow within 6 px of the body (worst -2.0)
+  ok   taekwondo skyfall_axe left (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe left (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe left (gap 120, vy -2): completes
+  ok   taekwondo skyfall_axe left (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe left (gap 120, vy -2): every blow within 6 px of the body (worst 4.5)
+  ok   taekwondo skyfall_axe left (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe left (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe left (gap 70, vy +5): completes
+  ok   taekwondo skyfall_axe left (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe left (gap 70, vy +5): every blow within 6 px of the body (worst -2.0)
+  ok   taekwondo skyfall_axe left (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   taekwondo skyfall_axe left (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo skyfall_axe left (gap 120, vy +5): completes
+  ok   taekwondo skyfall_axe left (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   taekwondo skyfall_axe left (gap 120, vy +5): every blow within 6 px of the body (worst 4.5)
+  ok   taekwondo skyfall_axe left (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   taekwondo corner_cyclone right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo corner_cyclone right (60 px from the wall): completes
+  ok   taekwondo corner_cyclone right (60 px from the wall): each of 2 blows lands once (2)
+  ok   taekwondo corner_cyclone right (60 px from the wall): every blow within 6 px of the body (worst 5.9)
+  ok   taekwondo corner_cyclone right (60 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   taekwondo corner_cyclone right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo corner_cyclone right (110 px from the wall): completes
+  ok   taekwondo corner_cyclone right (110 px from the wall): each of 2 blows lands once (2)
+  ok   taekwondo corner_cyclone right (110 px from the wall): every blow within 6 px of the body (worst 5.9)
+  ok   taekwondo corner_cyclone right (110 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   taekwondo corner_cyclone right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo corner_cyclone right (160 px from the wall): completes
+  ok   taekwondo corner_cyclone right (160 px from the wall): each of 2 blows lands once (2)
+  ok   taekwondo corner_cyclone right (160 px from the wall): every blow within 6 px of the body (worst 5.9)
+  ok   taekwondo corner_cyclone right (160 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   taekwondo corner_cyclone left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo corner_cyclone left (60 px from the wall): completes
+  ok   taekwondo corner_cyclone left (60 px from the wall): each of 2 blows lands once (2)
+  ok   taekwondo corner_cyclone left (60 px from the wall): every blow within 6 px of the body (worst 5.9)
+  ok   taekwondo corner_cyclone left (60 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   taekwondo corner_cyclone left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo corner_cyclone left (110 px from the wall): completes
+  ok   taekwondo corner_cyclone left (110 px from the wall): each of 2 blows lands once (2)
+  ok   taekwondo corner_cyclone left (110 px from the wall): every blow within 6 px of the body (worst 5.9)
+  ok   taekwondo corner_cyclone left (110 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   taekwondo corner_cyclone left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   taekwondo corner_cyclone left (160 px from the wall): completes
+  ok   taekwondo corner_cyclone left (160 px from the wall): each of 2 blows lands once (2)
+  ok   taekwondo corner_cyclone left (160 px from the wall): every blow within 6 px of the body (worst 5.9)
+  ok   taekwondo corner_cyclone left (160 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   muay_thai eight_limbs right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai eight_limbs right: completes
+  ok   muay_thai eight_limbs right: each of 5 blows lands once (5)
+  ok   muay_thai eight_limbs right: every blow within 6 px of the body (worst 0.5)
+  ok   muay_thai eight_limbs left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai eight_limbs left: completes
+  ok   muay_thai eight_limbs left: each of 5 blows lands once (5)
+  ok   muay_thai eight_limbs left: every blow within 6 px of the body (worst 0.5)
+  ok   muay_thai iron_knee right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai iron_knee right: completes
+  ok   muay_thai iron_knee right: each of 3 blows lands once (3)
+  ok   muay_thai iron_knee right: every blow within 6 px of the body (worst 4.1)
+  ok   muay_thai iron_knee left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai iron_knee left: completes
+  ok   muay_thai iron_knee left: each of 3 blows lands once (3)
+  ok   muay_thai iron_knee left: every blow within 6 px of the body (worst 4.1)
+  ok   muay_thai iron_corner right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai iron_corner right (60 px from the wall): completes
+  ok   muay_thai iron_corner right (60 px from the wall): each of 3 blows lands once (3)
+  ok   muay_thai iron_corner right (60 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   muay_thai iron_corner right (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   muay_thai iron_corner right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai iron_corner right (110 px from the wall): completes
+  ok   muay_thai iron_corner right (110 px from the wall): each of 3 blows lands once (3)
+  ok   muay_thai iron_corner right (110 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   muay_thai iron_corner right (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   muay_thai iron_corner right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai iron_corner right (160 px from the wall): completes
+  ok   muay_thai iron_corner right (160 px from the wall): each of 3 blows lands once (3)
+  ok   muay_thai iron_corner right (160 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   muay_thai iron_corner right (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   muay_thai iron_corner left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai iron_corner left (60 px from the wall): completes
+  ok   muay_thai iron_corner left (60 px from the wall): each of 3 blows lands once (3)
+  ok   muay_thai iron_corner left (60 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   muay_thai iron_corner left (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   muay_thai iron_corner left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai iron_corner left (110 px from the wall): completes
+  ok   muay_thai iron_corner left (110 px from the wall): each of 3 blows lands once (3)
+  ok   muay_thai iron_corner left (110 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   muay_thai iron_corner left (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   muay_thai iron_corner left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   muay_thai iron_corner left (160 px from the wall): completes
+  ok   muay_thai iron_corner left (160 px from the wall): each of 3 blows lands once (3)
+  ok   muay_thai iron_corner left (160 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   muay_thai iron_corner left (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   karate one_inch_verdict right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate one_inch_verdict right: completes
+  ok   karate one_inch_verdict right: each of 2 blows lands once (2)
+  ok   karate one_inch_verdict right: every blow within 6 px of the body (worst 1.6)
+  ok   karate one_inch_verdict left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate one_inch_verdict left: completes
+  ok   karate one_inch_verdict left: each of 2 blows lands once (2)
+  ok   karate one_inch_verdict left: every blow within 6 px of the body (worst 1.6)
+  ok   karate crimson_crescent right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate crimson_crescent right: completes
+  ok   karate crimson_crescent right: each of 3 blows lands once (3)
+  ok   karate crimson_crescent right: every blow within 6 px of the body (worst -3.2)
+  ok   karate crimson_crescent left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate crimson_crescent left: completes
+  ok   karate crimson_crescent left: each of 3 blows lands once (3)
+  ok   karate crimson_crescent left: every blow within 6 px of the body (worst -3.2)
+  ok   karate skyline_verdict right (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict right (gap 70, vy -9): completes
+  ok   karate skyline_verdict right (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   karate skyline_verdict right (gap 70, vy -9): every blow within 6 px of the body (worst -3.6)
+  ok   karate skyline_verdict right (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   karate skyline_verdict right (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict right (gap 120, vy -9): completes
+  ok   karate skyline_verdict right (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   karate skyline_verdict right (gap 120, vy -9): every blow within 6 px of the body (worst 1.5)
+  ok   karate skyline_verdict right (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   karate skyline_verdict right (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict right (gap 70, vy -2): completes
+  ok   karate skyline_verdict right (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   karate skyline_verdict right (gap 70, vy -2): every blow within 6 px of the body (worst -3.6)
+  ok   karate skyline_verdict right (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   karate skyline_verdict right (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict right (gap 120, vy -2): completes
+  ok   karate skyline_verdict right (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   karate skyline_verdict right (gap 120, vy -2): every blow within 6 px of the body (worst 1.5)
+  ok   karate skyline_verdict right (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   karate skyline_verdict right (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict right (gap 70, vy +5): completes
+  ok   karate skyline_verdict right (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   karate skyline_verdict right (gap 70, vy +5): every blow within 6 px of the body (worst -3.6)
+  ok   karate skyline_verdict right (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   karate skyline_verdict right (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict right (gap 120, vy +5): completes
+  ok   karate skyline_verdict right (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   karate skyline_verdict right (gap 120, vy +5): every blow within 6 px of the body (worst 1.5)
+  ok   karate skyline_verdict right (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   karate skyline_verdict left (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict left (gap 70, vy -9): completes
+  ok   karate skyline_verdict left (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   karate skyline_verdict left (gap 70, vy -9): every blow within 6 px of the body (worst -3.6)
+  ok   karate skyline_verdict left (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   karate skyline_verdict left (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict left (gap 120, vy -9): completes
+  ok   karate skyline_verdict left (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   karate skyline_verdict left (gap 120, vy -9): every blow within 6 px of the body (worst 1.5)
+  ok   karate skyline_verdict left (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   karate skyline_verdict left (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict left (gap 70, vy -2): completes
+  ok   karate skyline_verdict left (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   karate skyline_verdict left (gap 70, vy -2): every blow within 6 px of the body (worst -3.6)
+  ok   karate skyline_verdict left (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   karate skyline_verdict left (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict left (gap 120, vy -2): completes
+  ok   karate skyline_verdict left (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   karate skyline_verdict left (gap 120, vy -2): every blow within 6 px of the body (worst 1.5)
+  ok   karate skyline_verdict left (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   karate skyline_verdict left (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict left (gap 70, vy +5): completes
+  ok   karate skyline_verdict left (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   karate skyline_verdict left (gap 70, vy +5): every blow within 6 px of the body (worst -3.6)
+  ok   karate skyline_verdict left (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   karate skyline_verdict left (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate skyline_verdict left (gap 120, vy +5): completes
+  ok   karate skyline_verdict left (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   karate skyline_verdict left (gap 120, vy +5): every blow within 6 px of the body (worst 1.5)
+  ok   karate skyline_verdict left (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   kung_fu hundred_palms right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu hundred_palms right: completes
+  ok   kung_fu hundred_palms right: each of 7 blows lands once (7)
+  ok   kung_fu hundred_palms right: every blow within 6 px of the body (worst 5.9)
+  ok   kung_fu hundred_palms left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu hundred_palms left: completes
+  ok   kung_fu hundred_palms left: each of 7 blows lands once (7)
+  ok   kung_fu hundred_palms left: every blow within 6 px of the body (worst 5.9)
+  ok   kung_fu dragons_descent right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu dragons_descent right: completes
+  ok   kung_fu dragons_descent right: each of 3 blows lands once (3)
+  ok   kung_fu dragons_descent right: every blow within 6 px of the body (worst 5.6)
+  ok   kung_fu dragons_descent left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu dragons_descent left: completes
+  ok   kung_fu dragons_descent left: each of 3 blows lands once (3)
+  ok   kung_fu dragons_descent left: every blow within 6 px of the body (worst 5.6)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -9): completes
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -9): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -9): every blow within 6 px of the body (worst 0.2)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -9): completes
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -9): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -9): every blow within 6 px of the body (worst 5.7)
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -2): completes
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -2): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -2): every blow within 6 px of the body (worst 0.2)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -2): completes
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -2): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -2): every blow within 6 px of the body (worst 5.7)
+  ok   kung_fu descending_dragon_palm right (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm right (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy +5): completes
+  ok   kung_fu descending_dragon_palm right (gap 70, vy +5): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy +5): every blow within 6 px of the body (worst 0.2)
+  ok   kung_fu descending_dragon_palm right (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm right (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm right (gap 120, vy +5): completes
+  ok   kung_fu descending_dragon_palm right (gap 120, vy +5): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm right (gap 120, vy +5): every blow within 6 px of the body (worst 5.7)
+  ok   kung_fu descending_dragon_palm right (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -9): completes
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -9): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -9): every blow within 6 px of the body (worst 0.2)
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -9): completes
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -9): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -9): every blow within 6 px of the body (worst 5.7)
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -2): completes
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -2): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -2): every blow within 6 px of the body (worst 0.2)
+  ok   kung_fu descending_dragon_palm left (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -2): completes
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -2): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -2): every blow within 6 px of the body (worst 5.7)
+  ok   kung_fu descending_dragon_palm left (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm left (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm left (gap 70, vy +5): completes
+  ok   kung_fu descending_dragon_palm left (gap 70, vy +5): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm left (gap 70, vy +5): every blow within 6 px of the body (worst 0.2)
+  ok   kung_fu descending_dragon_palm left (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   kung_fu descending_dragon_palm left (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu descending_dragon_palm left (gap 120, vy +5): completes
+  ok   kung_fu descending_dragon_palm left (gap 120, vy +5): each of 2 blows lands once (2)
+  ok   kung_fu descending_dragon_palm left (gap 120, vy +5): every blow within 6 px of the body (worst 5.7)
+  ok   kung_fu descending_dragon_palm left (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   kung_fu wall_of_palms right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu wall_of_palms right (60 px from the wall): completes
+  ok   kung_fu wall_of_palms right (60 px from the wall): each of 4 blows lands once (4)
+  ok   kung_fu wall_of_palms right (60 px from the wall): every blow within 6 px of the body (worst -6.9)
+  ok   kung_fu wall_of_palms right (60 px from the wall): the wall cracks only with the body against it (4 impacts, 0 early)
+  ok   kung_fu wall_of_palms right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu wall_of_palms right (110 px from the wall): completes
+  ok   kung_fu wall_of_palms right (110 px from the wall): each of 4 blows lands once (4)
+  ok   kung_fu wall_of_palms right (110 px from the wall): every blow within 6 px of the body (worst -7.3)
+  ok   kung_fu wall_of_palms right (110 px from the wall): the wall cracks only with the body against it (4 impacts, 0 early)
+  ok   kung_fu wall_of_palms right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu wall_of_palms right (160 px from the wall): completes
+  ok   kung_fu wall_of_palms right (160 px from the wall): each of 4 blows lands once (4)
+  ok   kung_fu wall_of_palms right (160 px from the wall): every blow within 6 px of the body (worst -7.1)
+  ok   kung_fu wall_of_palms right (160 px from the wall): the wall cracks only with the body against it (4 impacts, 0 early)
+  ok   kung_fu wall_of_palms left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu wall_of_palms left (60 px from the wall): completes
+  ok   kung_fu wall_of_palms left (60 px from the wall): each of 4 blows lands once (4)
+  ok   kung_fu wall_of_palms left (60 px from the wall): every blow within 6 px of the body (worst -6.9)
+  ok   kung_fu wall_of_palms left (60 px from the wall): the wall cracks only with the body against it (4 impacts, 0 early)
+  ok   kung_fu wall_of_palms left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu wall_of_palms left (110 px from the wall): completes
+  ok   kung_fu wall_of_palms left (110 px from the wall): each of 4 blows lands once (4)
+  ok   kung_fu wall_of_palms left (110 px from the wall): every blow within 6 px of the body (worst -6.9)
+  ok   kung_fu wall_of_palms left (110 px from the wall): the wall cracks only with the body against it (4 impacts, 0 early)
+  ok   kung_fu wall_of_palms left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kung_fu wall_of_palms left (160 px from the wall): completes
+  ok   kung_fu wall_of_palms left (160 px from the wall): each of 4 blows lands once (4)
+  ok   kung_fu wall_of_palms left (160 px from the wall): every blow within 6 px of the body (worst -7.3)
+  ok   kung_fu wall_of_palms left (160 px from the wall): the wall cracks only with the body against it (4 impacts, 0 early)
+  ok   kickboxing last_combination right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing last_combination right: completes
+  ok   kickboxing last_combination right: each of 5 blows lands once (5)
+  ok   kickboxing last_combination right: every blow within 6 px of the body (worst 1.5)
+  ok   kickboxing last_combination left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing last_combination left: completes
+  ok   kickboxing last_combination left: each of 5 blows lands once (5)
+  ok   kickboxing last_combination left: every blow within 6 px of the body (worst 1.5)
+  ok   kickboxing knockout_rhythm right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing knockout_rhythm right: completes
+  ok   kickboxing knockout_rhythm right: each of 5 blows lands once (5)
+  ok   kickboxing knockout_rhythm right: every blow within 6 px of the body (worst 5.4)
+  ok   kickboxing knockout_rhythm left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing knockout_rhythm left: completes
+  ok   kickboxing knockout_rhythm left: each of 5 blows lands once (5)
+  ok   kickboxing knockout_rhythm left: every blow within 6 px of the body (worst 5.4)
+  ok   kickboxing air_breaker right (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 70, vy -9): completes
+  ok   kickboxing air_breaker right (gap 70, vy -9): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 70, vy -9): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker right (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 120, vy -9): completes
+  ok   kickboxing air_breaker right (gap 120, vy -9): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 120, vy -9): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker right (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 70, vy -2): completes
+  ok   kickboxing air_breaker right (gap 70, vy -2): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 70, vy -2): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker right (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 120, vy -2): completes
+  ok   kickboxing air_breaker right (gap 120, vy -2): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 120, vy -2): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker right (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 70, vy +5): completes
+  ok   kickboxing air_breaker right (gap 70, vy +5): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 70, vy +5): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker right (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 120, vy +5): completes
+  ok   kickboxing air_breaker right (gap 120, vy +5): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 120, vy +5): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker right (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 70, vy -9): completes
+  ok   kickboxing air_breaker left (gap 70, vy -9): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 70, vy -9): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker left (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 120, vy -9): completes
+  ok   kickboxing air_breaker left (gap 120, vy -9): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 120, vy -9): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker left (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 70, vy -2): completes
+  ok   kickboxing air_breaker left (gap 70, vy -2): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 70, vy -2): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker left (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 120, vy -2): completes
+  ok   kickboxing air_breaker left (gap 120, vy -2): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 120, vy -2): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker left (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 70, vy +5): completes
+  ok   kickboxing air_breaker left (gap 70, vy +5): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 70, vy +5): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker left (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 120, vy +5): completes
+  ok   kickboxing air_breaker left (gap 120, vy +5): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 120, vy +5): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker left (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   kickboxing corner_breaker right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker right (60 px from the wall): completes
+  ok   kickboxing corner_breaker right (60 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker right (60 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker right (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker right (110 px from the wall): completes
+  ok   kickboxing corner_breaker right (110 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker right (110 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker right (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker right (160 px from the wall): completes
+  ok   kickboxing corner_breaker right (160 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker right (160 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker right (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker left (60 px from the wall): completes
+  ok   kickboxing corner_breaker left (60 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker left (60 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker left (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker left (110 px from the wall): completes
+  ok   kickboxing corner_breaker left (110 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker left (110 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker left (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker left (160 px from the wall): completes
+  ok   kickboxing corner_breaker left (160 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker left (160 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker left (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   bangla_maar paaye_lathi right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar paaye_lathi right: completes
+  ok   bangla_maar paaye_lathi right: each of 2 blows lands once (2)
+  ok   bangla_maar paaye_lathi right: every blow within 6 px of the body (worst 1.3)
+  ok   bangla_maar paaye_lathi left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar paaye_lathi left: completes
+  ok   bangla_maar paaye_lathi left: each of 2 blows lands once (2)
+  ok   bangla_maar paaye_lathi left: every blow within 6 px of the body (worst 1.3)
+  ok   bangla_maar super_chor right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar super_chor right: completes
+  ok   bangla_maar super_chor right: each of 2 blows lands once (2)
+  ok   bangla_maar super_chor right: every blow within 6 px of the body (worst -1.6)
+  ok   bangla_maar super_chor left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar super_chor left: completes
+  ok   bangla_maar super_chor left: each of 2 blows lands once (2)
+  ok   bangla_maar super_chor left: every blow within 6 px of the body (worst -1.6)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -9): completes
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -9): every blow within 6 px of the body (worst 4.8)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -9): completes
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -9): every blow within 6 px of the body (worst 5.8)
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -2): completes
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -2): every blow within 6 px of the body (worst 4.8)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -2): completes
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -2): every blow within 6 px of the body (worst 5.8)
+  ok   bangla_maar bangla_air_smash right (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash right (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy +5): completes
+  ok   bangla_maar bangla_air_smash right (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy +5): every blow within 6 px of the body (worst 4.8)
+  ok   bangla_maar bangla_air_smash right (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash right (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash right (gap 120, vy +5): completes
+  ok   bangla_maar bangla_air_smash right (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash right (gap 120, vy +5): every blow within 6 px of the body (worst 5.8)
+  ok   bangla_maar bangla_air_smash right (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -9): completes
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -9): every blow within 6 px of the body (worst 4.8)
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -9): completes
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -9): every blow within 6 px of the body (worst 5.8)
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -2): completes
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -2): every blow within 6 px of the body (worst 4.8)
+  ok   bangla_maar bangla_air_smash left (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -2): completes
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -2): every blow within 6 px of the body (worst 5.8)
+  ok   bangla_maar bangla_air_smash left (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash left (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash left (gap 70, vy +5): completes
+  ok   bangla_maar bangla_air_smash left (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash left (gap 70, vy +5): every blow within 6 px of the body (worst 4.8)
+  ok   bangla_maar bangla_air_smash left (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   bangla_maar bangla_air_smash left (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar bangla_air_smash left (gap 120, vy +5): completes
+  ok   bangla_maar bangla_air_smash left (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   bangla_maar bangla_air_smash left (gap 120, vy +5): every blow within 6 px of the body (worst 5.8)
+  ok   bangla_maar bangla_air_smash left (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   bangla_maar deowal_dhakka right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar deowal_dhakka right (60 px from the wall): completes
+  ok   bangla_maar deowal_dhakka right (60 px from the wall): each of 2 blows lands once (2)
+  ok   bangla_maar deowal_dhakka right (60 px from the wall): every blow within 6 px of the body (worst 5.2)
+  ok   bangla_maar deowal_dhakka right (60 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   bangla_maar deowal_dhakka right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar deowal_dhakka right (110 px from the wall): completes
+  ok   bangla_maar deowal_dhakka right (110 px from the wall): each of 2 blows lands once (2)
+  ok   bangla_maar deowal_dhakka right (110 px from the wall): every blow within 6 px of the body (worst 5.2)
+  ok   bangla_maar deowal_dhakka right (110 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   bangla_maar deowal_dhakka right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar deowal_dhakka right (160 px from the wall): completes
+  ok   bangla_maar deowal_dhakka right (160 px from the wall): each of 2 blows lands once (2)
+  ok   bangla_maar deowal_dhakka right (160 px from the wall): every blow within 6 px of the body (worst 5.2)
+  ok   bangla_maar deowal_dhakka right (160 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   bangla_maar deowal_dhakka left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar deowal_dhakka left (60 px from the wall): completes
+  ok   bangla_maar deowal_dhakka left (60 px from the wall): each of 2 blows lands once (2)
+  ok   bangla_maar deowal_dhakka left (60 px from the wall): every blow within 6 px of the body (worst 5.2)
+  ok   bangla_maar deowal_dhakka left (60 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   bangla_maar deowal_dhakka left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar deowal_dhakka left (110 px from the wall): completes
+  ok   bangla_maar deowal_dhakka left (110 px from the wall): each of 2 blows lands once (2)
+  ok   bangla_maar deowal_dhakka left (110 px from the wall): every blow within 6 px of the body (worst 5.2)
+  ok   bangla_maar deowal_dhakka left (110 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+  ok   bangla_maar deowal_dhakka left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   bangla_maar deowal_dhakka left (160 px from the wall): completes
+  ok   bangla_maar deowal_dhakka left (160 px from the wall): each of 2 blows lands once (2)
+  ok   bangla_maar deowal_dhakka left (160 px from the wall): every blow within 6 px of the body (worst 5.2)
+  ok   bangla_maar deowal_dhakka left (160 px from the wall): the wall cracks only with the body against it (2 impacts, 0 early)
+RESULT: PASS (0 failures)
+WARNING: 14 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

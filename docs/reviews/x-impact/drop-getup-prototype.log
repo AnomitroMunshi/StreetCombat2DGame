@@ -1,0 +1,100 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 Core Profile Context 26.10.1.261008 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon RX 6600 XT
+
+{"attacker_travel":0.0,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":0.0}],"damage":18,"gap":70.0,"peak_air_travel":0.0,"peak_target_travel":37.2156372070313,"recovered_tick":53,"side":1,"style":"kung_fu","target_end_x":697.215637207031,"wall":false,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":5.999755859375,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":3.79571533203125}],"damage":18,"gap":90.0,"peak_air_travel":0.0,"peak_target_travel":37.2156372070313,"recovered_tick":53,"side":1,"style":"kung_fu","target_end_x":717.215637207031,"wall":false,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":1.7999267578125,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":0.0}],"damage":18,"gap":81.8,"peak_air_travel":0.0,"peak_target_travel":37.2156372070313,"recovered_tick":53,"side":1,"style":"kung_fu","target_end_x":709.015625,"wall":false,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":0.0,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":0.0}],"damage":18,"gap":70.0,"peak_air_travel":0.0,"peak_target_travel":5.0,"recovered_tick":53,"side":1,"style":"kung_fu","target_end_x":1190.0,"wall":true,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":5.999755859375,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":3.7957763671875}],"damage":18,"gap":90.0,"peak_air_travel":0.0,"peak_target_travel":5.0,"recovered_tick":53,"side":1,"style":"kung_fu","target_end_x":1190.0,"wall":true,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":1.199951171875,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":0.0}],"damage":18,"gap":81.8,"peak_air_travel":0.0,"peak_target_travel":5.0,"recovered_tick":53,"side":1,"style":"kung_fu","target_end_x":1190.0,"wall":true,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":0.0,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":0.0}],"damage":18,"gap":70.0,"peak_air_travel":0.0,"peak_target_travel":37.2156066894531,"recovered_tick":53,"side":-1,"style":"kung_fu","target_end_x":482.784393310547,"wall":false,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":5.999755859375,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":3.79571533203125}],"damage":18,"gap":90.0,"peak_air_travel":0.0,"peak_target_travel":37.2156066894531,"recovered_tick":53,"side":-1,"style":"kung_fu","target_end_x":462.784393310547,"wall":false,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":1.7999267578125,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":0.0}],"damage":18,"gap":81.8,"peak_air_travel":0.0,"peak_target_travel":37.2156066894531,"recovered_tick":53,"side":-1,"style":"kung_fu","target_end_x":470.984405517578,"wall":false,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":0.0,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":0.0}],"damage":18,"gap":70.0,"peak_air_travel":0.0,"peak_target_travel":5.0,"recovered_tick":53,"side":-1,"style":"kung_fu","target_end_x":90.0,"wall":true,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":6.00006103515625,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":3.79551696777344}],"damage":18,"gap":90.0,"peak_air_travel":0.0,"peak_target_travel":5.0,"recovered_tick":53,"side":-1,"style":"kung_fu","target_end_x":90.0,"wall":true,"windows":{"scorpion_kick":[18,18]}}
+{"attacker_travel":1.20001220703125,"contacts":[{"damage":18,"id":"scorpion_kick","tick":18,"visible_gap":0.0}],"damage":18,"gap":81.8,"peak_air_travel":0.0,"peak_target_travel":5.0,"recovered_tick":53,"side":-1,"style":"kung_fu","target_end_x":90.0,"wall":true,"windows":{"scorpion_kick":[18,18]}}
+FLOOR {"head_clearance":1.770263671875,"hip_clearance":7.5,"side":1,"tick":40}
+FLOOR {"head_clearance":6.39208984375,"hip_clearance":14.3630981445313,"side":1,"tick":50}
+FLOOR {"head_clearance":12.7091674804688,"hip_clearance":16.726806640625,"side":1,"tick":60}
+FLOOR {"head_clearance":99.7763061523438,"hip_clearance":50.1187438964844,"side":1,"tick":75}
+FLOOR {"head_clearance":89.4796142578125,"hip_clearance":41.8848266601563,"side":1,"tick":85}
+FLOOR {"head_clearance":81.4100036621094,"hip_clearance":41.828369140625,"side":1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":70.0,"peak_air_travel":153.694641113281,"peak_target_travel":196.758605957031,"recovered_tick":100,"side":1,"style":"bangla_maar","target_end_x":856.758605957031,"wall":false,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":6.5299072265625,"hip_clearance":14.5575561523438,"side":1,"tick":40}
+FLOOR {"head_clearance":6.8128662109375,"hip_clearance":14.9569091796875,"side":1,"tick":50}
+FLOOR {"head_clearance":26.3073120117188,"hip_clearance":18.92041015625,"side":1,"tick":60}
+FLOOR {"head_clearance":100.424652099609,"hip_clearance":45.5240478515625,"side":1,"tick":75}
+FLOOR {"head_clearance":74.2168579101563,"hip_clearance":41.6206665039063,"side":1,"tick":85}
+FLOOR {"head_clearance":104.109100341797,"hip_clearance":51.1240234375,"side":1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":90.0,"peak_air_travel":153.694641113281,"peak_target_travel":196.758605957031,"recovered_tick":100,"side":1,"style":"bangla_maar","target_end_x":876.758605957031,"wall":false,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":1.76885986328125,"hip_clearance":7.5,"side":1,"tick":40}
+FLOOR {"head_clearance":6.54931640625,"hip_clearance":14.5848999023438,"side":1,"tick":50}
+FLOOR {"head_clearance":12.7257690429688,"hip_clearance":16.702880859375,"side":1,"tick":60}
+FLOOR {"head_clearance":98.68408203125,"hip_clearance":49.7195129394531,"side":1,"tick":75}
+FLOOR {"head_clearance":89.7544250488281,"hip_clearance":41.8846435546875,"side":1,"tick":85}
+FLOOR {"head_clearance":81.1225280761719,"hip_clearance":41.8297729492188,"side":1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":140.0,"peak_air_travel":153.694641113281,"peak_target_travel":196.758605957031,"recovered_tick":100,"side":1,"style":"bangla_maar","target_end_x":926.758605957031,"wall":false,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":1.80224609375,"hip_clearance":7.5,"side":1,"tick":40}
+FLOOR {"head_clearance":6.33355712890625,"hip_clearance":14.280517578125,"side":1,"tick":50}
+FLOOR {"head_clearance":12.6651611328125,"hip_clearance":16.7195434570313,"side":1,"tick":60}
+FLOOR {"head_clearance":98.222900390625,"hip_clearance":49.5709838867188,"side":1,"tick":75}
+FLOOR {"head_clearance":89.9692687988281,"hip_clearance":41.8732299804688,"side":1,"tick":85}
+FLOOR {"head_clearance":80.8031005859375,"hip_clearance":41.731201171875,"side":1,"tick":95}
+{"attacker_travel":75.0,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":70.0,"peak_air_travel":5.0,"peak_target_travel":5.0,"recovered_tick":100,"side":1,"style":"bangla_maar","target_end_x":1105.0,"wall":true,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":1.8221435546875,"hip_clearance":7.5,"side":1,"tick":40}
+FLOOR {"head_clearance":6.34747314453125,"hip_clearance":14.3001098632813,"side":1,"tick":50}
+FLOOR {"head_clearance":12.9843139648438,"hip_clearance":16.7889404296875,"side":1,"tick":60}
+FLOOR {"head_clearance":98.8705139160156,"hip_clearance":49.7698669433594,"side":1,"tick":75}
+FLOOR {"head_clearance":88.9402465820313,"hip_clearance":41.8683471679688,"side":1,"tick":85}
+FLOOR {"head_clearance":81.0129089355469,"hip_clearance":41.8226928710938,"side":1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":90.0,"peak_air_travel":5.0,"peak_target_travel":5.0,"recovered_tick":100,"side":1,"style":"bangla_maar","target_end_x":1105.0,"wall":true,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":1.84588623046875,"hip_clearance":7.5,"side":1,"tick":40}
+FLOOR {"head_clearance":6.41912841796875,"hip_clearance":14.4012451171875,"side":1,"tick":50}
+FLOOR {"head_clearance":12.9478149414063,"hip_clearance":16.771484375,"side":1,"tick":60}
+FLOOR {"head_clearance":101.615173339844,"hip_clearance":50.8515014648438,"side":1,"tick":75}
+FLOOR {"head_clearance":88.7025756835938,"hip_clearance":41.8779907226563,"side":1,"tick":85}
+FLOOR {"head_clearance":81.7020263671875,"hip_clearance":41.90380859375,"side":1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":140.0,"peak_air_travel":5.0,"peak_target_travel":5.0,"recovered_tick":100,"side":1,"style":"bangla_maar","target_end_x":1105.0,"wall":true,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":1.868896484375,"hip_clearance":7.5,"side":-1,"tick":40}
+FLOOR {"head_clearance":6.297607421875,"hip_clearance":14.2297973632813,"side":-1,"tick":50}
+FLOOR {"head_clearance":12.7453002929688,"hip_clearance":16.7427368164063,"side":-1,"tick":60}
+FLOOR {"head_clearance":98.4681396484375,"hip_clearance":49.6977844238281,"side":-1,"tick":75}
+FLOOR {"head_clearance":88.6435546875,"hip_clearance":41.838623046875,"side":-1,"tick":85}
+FLOOR {"head_clearance":80.5592651367188,"hip_clearance":41.77685546875,"side":-1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":70.0,"peak_air_travel":153.694854736328,"peak_target_travel":196.758819580078,"recovered_tick":100,"side":-1,"style":"bangla_maar","target_end_x":323.241180419922,"wall":false,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":6.534912109375,"hip_clearance":14.5646362304688,"side":-1,"tick":40}
+FLOOR {"head_clearance":6.8128662109375,"hip_clearance":14.9569702148438,"side":-1,"tick":50}
+FLOOR {"head_clearance":26.6605224609375,"hip_clearance":18.9645385742188,"side":-1,"tick":60}
+FLOOR {"head_clearance":101.733032226563,"hip_clearance":46.1649780273438,"side":-1,"tick":75}
+FLOOR {"head_clearance":74.2092895507813,"hip_clearance":41.6201782226563,"side":-1,"tick":85}
+FLOOR {"head_clearance":105.233612060547,"hip_clearance":52.0317687988281,"side":-1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":90.0,"peak_air_travel":153.694854736328,"peak_target_travel":196.758819580078,"recovered_tick":100,"side":-1,"style":"bangla_maar","target_end_x":303.241180419922,"wall":false,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":1.67718505859375,"hip_clearance":7.5,"side":-1,"tick":40}
+FLOOR {"head_clearance":6.52398681640625,"hip_clearance":14.5492553710938,"side":-1,"tick":50}
+FLOOR {"head_clearance":12.5969848632813,"hip_clearance":16.6792602539063,"side":-1,"tick":60}
+FLOOR {"head_clearance":100.353881835938,"hip_clearance":50.4094848632813,"side":-1,"tick":75}
+FLOOR {"head_clearance":86.9333801269531,"hip_clearance":41.7921752929688,"side":-1,"tick":85}
+FLOOR {"head_clearance":81.2493286132813,"hip_clearance":41.9752197265625,"side":-1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":140.0,"peak_air_travel":153.694854736328,"peak_target_travel":196.758804321289,"recovered_tick":100,"side":-1,"style":"bangla_maar","target_end_x":253.241195678711,"wall":false,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":1.6055908203125,"hip_clearance":7.5,"side":-1,"tick":40}
+FLOOR {"head_clearance":6.55908203125,"hip_clearance":14.5986938476563,"side":-1,"tick":50}
+FLOOR {"head_clearance":12.4476318359375,"hip_clearance":16.6665649414063,"side":-1,"tick":60}
+FLOOR {"head_clearance":98.7127685546875,"hip_clearance":49.7538452148438,"side":-1,"tick":75}
+FLOOR {"head_clearance":88.12646484375,"hip_clearance":41.8327026367188,"side":-1,"tick":85}
+FLOOR {"head_clearance":81.9998168945313,"hip_clearance":42.054931640625,"side":-1,"tick":95}
+{"attacker_travel":75.0,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":70.0,"peak_air_travel":5.0,"peak_target_travel":5.0,"recovered_tick":100,"side":-1,"style":"bangla_maar","target_end_x":175.0,"wall":true,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":1.71331787109375,"hip_clearance":7.5,"side":-1,"tick":40}
+FLOOR {"head_clearance":6.53033447265625,"hip_clearance":14.5581665039063,"side":-1,"tick":50}
+FLOOR {"head_clearance":12.9859619140625,"hip_clearance":16.7723388671875,"side":-1,"tick":60}
+FLOOR {"head_clearance":99.4475708007813,"hip_clearance":49.9603576660156,"side":-1,"tick":75}
+FLOOR {"head_clearance":88.6851196289063,"hip_clearance":41.87451171875,"side":-1,"tick":85}
+FLOOR {"head_clearance":82.4643249511719,"hip_clearance":41.9890747070313,"side":-1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":90.0,"peak_air_travel":5.0,"peak_target_travel":5.0,"recovered_tick":100,"side":-1,"style":"bangla_maar","target_end_x":175.0,"wall":true,"windows":{"dropkick":[24,24]}}
+FLOOR {"head_clearance":1.78125,"hip_clearance":7.5,"side":-1,"tick":40}
+FLOOR {"head_clearance":6.408203125,"hip_clearance":14.3858642578125,"side":-1,"tick":50}
+FLOOR {"head_clearance":12.6839599609375,"hip_clearance":16.7169189453125,"side":-1,"tick":60}
+FLOOR {"head_clearance":99.9749755859375,"hip_clearance":50.2458190917969,"side":-1,"tick":75}
+FLOOR {"head_clearance":87.5132446289063,"hip_clearance":41.8179321289063,"side":-1,"tick":85}
+FLOOR {"head_clearance":81.6011352539063,"hip_clearance":41.912109375,"side":-1,"tick":95}
+{"attacker_travel":76.5,"contacts":[{"damage":18,"id":"dropkick","tick":24,"visible_gap":0.0}],"damage":18,"gap":140.0,"peak_air_travel":5.0,"peak_target_travel":5.0,"recovered_tick":100,"side":-1,"style":"bangla_maar","target_end_x":175.0,"wall":true,"windows":{"dropkick":[24,24]}}
+RESULT: PASS X rendered contact census: 24 cases, 0 failures

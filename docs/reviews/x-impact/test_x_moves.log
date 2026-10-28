@@ -1,0 +1,235 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ok boxing selected cooldown 600 ticks
+ok boxing X independent committed move
+ok boxing total 18 damage
+ok boxing starts full cooldown without Focus
+ok boxing facing 1 wall false hits 18 ([1, 1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok boxing starts full cooldown without Focus
+ok boxing facing 1 wall true hits 18 ([1, 1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok boxing starts full cooldown without Focus
+ok boxing facing -1 wall false hits 18 ([1, 1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok boxing starts full cooldown without Focus
+ok boxing facing -1 wall true hits 18 ([1, 1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok X never spends Focus
+ok boxing normal block ([2, 2])
+ok blocked cooldown persists
+ok boxing no armour; interruption retains cooldown
+ok boxing direct AI attack pays cooldown
+ok sequence child cannot be requested directly
+ok sequence child cannot be requested directly
+ok boxing parry interrupts with cooldown intact
+ok boxing evade avoids X without refund
+ok boxing whiff still waits its full cooldown
+ok cooldown expires at its authored duration
+ok ready X starts again
+ok new match fighter starts ready
+ok airborne X cannot turn into free attack
+ok muay_thai selected cooldown 900 ticks
+ok muay_thai X independent committed move
+ok muay_thai total 18 damage
+ok muay_thai starts full cooldown without Focus
+ok muay_thai facing 1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok muay_thai starts full cooldown without Focus
+ok muay_thai facing 1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok muay_thai starts full cooldown without Focus
+ok muay_thai facing -1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok muay_thai starts full cooldown without Focus
+ok muay_thai facing -1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok X never spends Focus
+ok muay_thai normal block ([2])
+ok blocked cooldown persists
+ok muay_thai no armour; interruption retains cooldown
+ok muay_thai direct AI attack pays cooldown
+ok muay_thai parry interrupts with cooldown intact
+ok muay_thai evade avoids X without refund
+ok muay_thai whiff still waits its full cooldown
+ok cooldown expires at its authored duration
+ok ready X starts again
+ok new match fighter starts ready
+ok airborne X cannot turn into free attack
+ok karate selected cooldown 600 ticks
+ok karate X independent committed move
+ok karate total 18 damage
+ok karate starts full cooldown without Focus
+ok karate facing 1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok karate starts full cooldown without Focus
+ok karate facing 1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok karate starts full cooldown without Focus
+ok karate facing -1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok karate starts full cooldown without Focus
+ok karate facing -1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok X never spends Focus
+ok karate normal block ([2])
+ok blocked cooldown persists
+ok karate no armour; interruption retains cooldown
+ok karate direct AI attack pays cooldown
+ok karate parry interrupts with cooldown intact
+ok karate evade avoids X without refund
+ok karate whiff still waits its full cooldown
+ok cooldown expires at its authored duration
+ok ready X starts again
+ok new match fighter starts ready
+ok airborne X cannot turn into free attack
+ok kung_fu selected cooldown 600 ticks
+ok kung_fu X independent committed move
+ok kung_fu total 18 damage
+ok kung_fu starts full cooldown without Focus
+ok kung_fu facing 1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok kung_fu starts full cooldown without Focus
+ok kung_fu facing 1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok kung_fu starts full cooldown without Focus
+ok kung_fu facing -1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok kung_fu starts full cooldown without Focus
+ok kung_fu facing -1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok X never spends Focus
+ok kung_fu normal block ([2])
+ok blocked cooldown persists
+ok kung_fu no armour; interruption retains cooldown
+ok kung_fu direct AI attack pays cooldown
+ok kung_fu parry interrupts with cooldown intact
+ok kung_fu evade avoids X without refund
+ok kung_fu whiff still waits its full cooldown
+ok cooldown expires at its authored duration
+ok ready X starts again
+ok new match fighter starts ready
+ok airborne X cannot turn into free attack
+ok taekwondo selected cooldown 900 ticks
+ok taekwondo X independent committed move
+ok taekwondo total 18 damage
+ok taekwondo starts full cooldown without Focus
+ok taekwondo facing 1 wall false hits 18 ([1, 1, 1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok taekwondo starts full cooldown without Focus
+ok taekwondo facing 1 wall true hits 18 ([1, 1, 1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok taekwondo starts full cooldown without Focus
+ok taekwondo facing -1 wall false hits 18 ([1, 1, 1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok taekwondo starts full cooldown without Focus
+ok taekwondo facing -1 wall true hits 18 ([1, 1, 1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok X never spends Focus
+ok taekwondo normal block ([2, 2, 2])
+ok blocked cooldown persists
+ok taekwondo no armour; interruption retains cooldown
+ok taekwondo direct AI attack pays cooldown
+ok sequence child cannot be requested directly
+ok sequence child cannot be requested directly
+ok sequence child cannot be requested directly
+ok taekwondo parry interrupts with cooldown intact
+ok taekwondo evade avoids X without refund
+ok taekwondo whiff still waits its full cooldown
+ok cooldown expires at its authored duration
+ok ready X starts again
+ok new match fighter starts ready
+ok airborne X cannot turn into free attack
+ok kickboxing selected cooldown 900 ticks
+ok kickboxing X independent committed move
+ok kickboxing total 18 damage
+ok kickboxing starts full cooldown without Focus
+ok kickboxing facing 1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok kickboxing starts full cooldown without Focus
+ok kickboxing facing 1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok kickboxing starts full cooldown without Focus
+ok kickboxing facing -1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok kickboxing starts full cooldown without Focus
+ok kickboxing facing -1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok X never spends Focus
+ok kickboxing normal block ([2])
+ok blocked cooldown persists
+ok kickboxing no armour; interruption retains cooldown
+ok kickboxing direct AI attack pays cooldown
+ok kickboxing parry interrupts with cooldown intact
+ok kickboxing evade avoids X without refund
+ok kickboxing whiff still waits its full cooldown
+ok cooldown expires at its authored duration
+ok ready X starts again
+ok new match fighter starts ready
+ok airborne X cannot turn into free attack
+ok bangla_maar selected cooldown 900 ticks
+ok bangla_maar X independent committed move
+ok bangla_maar total 18 damage
+ok bangla_maar starts full cooldown without Focus
+ok bangla_maar facing 1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok bangla_maar starts full cooldown without Focus
+ok bangla_maar facing 1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok bangla_maar starts full cooldown without Focus
+ok bangla_maar facing -1 wall false hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok bangla_maar starts full cooldown without Focus
+ok bangla_maar facing -1 wall true hits 18 ([1])
+ok round stop preserves cooldown
+ok cooldown rejects repeat
+ok X never spends Focus
+ok bangla_maar normal block ([2])
+ok blocked cooldown persists
+ok bangla_maar no armour; interruption retains cooldown
+ok bangla_maar direct AI attack pays cooldown
+ok bangla_maar parry interrupts with cooldown intact
+ok bangla_maar evade avoids X without refund
+ok bangla_maar whiff still waits its full cooldown
+ok cooldown expires at its authored duration
+ok ready X starts again
+ok new match fighter starts ready
+ok airborne X cannot turn into free attack
+ok custom style rejects X sequence child slot mapping
+ok power chord cannot inject X child even through forged custom style
+ok central gate rejects unauthorized child start
+ok dropkick lands into explicit 70-tick self-fall and get-up
+ok attack/jump/dodge/signature/block cannot cancel the self-fall/get-up
+ok get-up retains cooldown without spending Focus
+ok guard can resume only after full get-up
+ok self-fall/get-up stays vulnerable without cooldown refund
+ok real round reset preserves both X cooldowns
+X moves failures: 0
+RESULT: PASS

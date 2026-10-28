@@ -88,22 +88,22 @@ finishers:
 | **Bangla Maar** (parody) | Untrained para street fighting: loose hands, slaps, shoves, a big mouth. | Street Punch · Front Thrust Kick · Jor Dhakka | Head Elbow · Double-Hand Hammer | Stomach Shot · Leg Kick | Flying Slap · Flying Chest Kick | Belly Bomb | Football Shot · Super Chor |
 
 **X moves.** Each style has one committed heavy technique on **X**, independent
-of Focus. Each deals 18 total damage and starts a 10-second cooldown as soon
+of Focus. Each deals 18 total damage and starts its cooldown as soon
 as it begins, including a block or whiff. Interruption and repeated presses
 keep the cooldown. It carries between rounds and resets for a new match.
 X starts on the ground, has no armour or combo cancels, and follows normal
 block, parry and evade rules. Both health bars show X readiness; training
 and the move list show the technique.
 
-| Style | X move |
-|---|---|
-| Boxing | Dempsey Roll (two alternating hooks, 9 + 9) |
-| Muay Thai | Retreating Jump Elbow |
-| Karate | Step-Back Spinning Backfist |
-| Kung Fu | Butterfly Kick |
-| Taekwondo | Triple Kick (body, body, head: 6 + 6 + 6) |
-| Kickboxing | Big Foot (short airborne knockback) |
-| Bangla Maar | Dropkick |
+| Style | X move | Cooldown |
+|---|---|---|
+| Boxing | Dempsey Roll (two alternating hooks, 9 + 9) | 10 s |
+| Muay Thai | Thai Roundhouse Kick (Tae Chiang) | 15 s |
+| Karate | Step-Back Spinning Backfist | 10 s |
+| Kung Fu | Scorpion Kick | 10 s |
+| Taekwondo | Triple Kick (body, body, head: 6 + 6 + 6) | 15 s |
+| Kickboxing | Big Foot (long airborne knockback) | 15 s |
+| Bangla Maar | Dropkick (strong airborne shove) | 15 s |
 
 **Power moves (Space + J / Space + K).** Press Space and J (or K) together,
 or one right after the other in either order, within 6 ticks (0.1 s,

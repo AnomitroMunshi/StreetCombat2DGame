@@ -220,7 +220,8 @@ func info_text() -> String:
 	if player.style != null and player.style.input_map.has(&"x_move"):
 		var x_name := player.style.move_name(player.style.input_map[&"x_move"])
 		var status := "READY" if player.x_cooldown <= 0 else "%.1f s" % (float(player.x_cooldown) / CombatData.TICK_RATE)
-		lines.append("X  [b]%s[/b]  [color=#f2c14e]%s[/color]  (10 s, no Focus)" % [x_name, status])
+		var x_attack := CombatData.get_attack(player.style.resolve(&"x_move", false))
+		lines.append("X  [b]%s[/b]  [color=#f2c14e]%s[/color]  (%d s, no Focus)" % [x_name, status, x_attack.x_cooldown_frames / CombatData.TICK_RATE])
 	var parent := _sequence_of(last_move) if last_move != null else null
 	if parent != null:
 		# A multi-strike technique reads as one move: every active window, the
@@ -235,7 +236,7 @@ func info_text() -> String:
 			actives.append(str(subs[i].active))
 			damages.append(str(subs[i].damage))
 			if i > 0:
-				gaps.append(str(CombatData.SEQUENCE_GAP + subs[i].startup))
+				gaps.append(str(subs[i - 1].sequence_gap + subs[i].startup))
 		lines.append("Last move  [b]%s[/b] (%s)   startup %d  active %s  gap %s  recovery %d   damage %s" % [parent.display_name,
 			last_move.display_name, subs[0].startup, "+".join(actives), "/".join(gaps), subs[-1].recovery, "+".join(damages)])
 		lines.append("Result  [color=#f2c14e]%s[/color]   %s" % [last_result, advantage_text])

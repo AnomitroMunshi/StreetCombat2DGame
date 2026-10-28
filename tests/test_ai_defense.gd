@@ -23,13 +23,16 @@ class Driver extends Node:
 		var main := tree.current_scene
 		if frame == 1:
 			main.call("select_style", &"taekwondo")  # readable side kicks to parry
+			# Pin the moveset as well as the seeded decision stream: random rival
+			# styles change range, pressure and interruption opportunities.
+			var rival := main.get_node("Enemy") as Fighter
+			rival.set_style(StyleRegistry.by_id(&"kickboxing"))
 			main.call("start_match", true)
 			# This test is about defensive choices: a patient rival, so most kicks
 			# meet a guard (or a parry) rather than a trade.
 			var ai := main.get_node("EnemyAI") as EnemyAI
 			ai.aggression = 0.2
-			# The rival's style is random and styles tune their defence: this
-			# test checks the AI's default defensive mix, so pin it.
+			# Pin the default defensive mix independently of style tuning.
 			ai.block_chance = 0.5
 			ai.parry_chance = 0.15
 			ai.dodge_chance = 0.12

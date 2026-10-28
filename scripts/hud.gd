@@ -489,7 +489,8 @@ static func _style_details(st: MartialArtStyle) -> String:
 		t += "[cell][color=#f2c14e]%s  [/color][/cell][cell]%s      [/cell]" % [row[0], row[1]]
 	t += "[/table]\n"
 	if st.input_map.has(&"x_move"):
-		t += "[color=#b9a98f]X: 10 s cooldown, no Focus. Block, parry or evade.[/color]\n"
+		var x_attack := CombatData.get_attack(st.resolve(&"x_move", false))
+		t += "[color=#b9a98f]X: %d s cooldown, no Focus. Block, parry or evade.[/color]\n" % (x_attack.x_cooldown_frames / CombatData.TICK_RATE)
 	if st.signature != &"":
 		t += "[b]SIGNATURE[/b] (F at full Focus)  [color=#f2c14e]%s[/color]\n" % CombatData.get_attack(CombatData.type_for_id(st.signature)).display_name
 	if not st.finishers.is_empty():
@@ -867,7 +868,7 @@ func _draw_focus(f: Fighter, x: float, mirrored: bool) -> void:
 			Color(1.0, 0.9, 0.5, 0.75 + 0.25 * pulse))
 
 
-## Both fighters expose the same cooldown, measured in simulation ticks.
+## Each fighter exposes remaining cooldown, measured in simulation ticks.
 func _draw_x_move(f: Fighter, x: float, mirrored: bool) -> void:
 	if f.style == null or not f.style.input_map.has(&"x_move"):
 		return

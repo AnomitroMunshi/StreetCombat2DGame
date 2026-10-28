@@ -575,14 +575,22 @@ func _tick_attack() -> void:
 	if attack.rehit > 0 and state_frame > attack.startup and state_frame < strike_end \
 			and (state_frame - attack.startup) % attack.rehit == 0:
 		swing_has_hit = false  # multi-hit: the hitbox re-arms
-	if not _sequence.is_empty() and state_frame >= strike_end + CombatData.SEQUENCE_GAP:
+	if not _sequence.is_empty() and state_frame >= strike_end + attack.sequence_gap:
 		# Next strike of the sequence, whether the last one landed or not.
 		_start_attack(_sequence.pop_front(), combo_step, false, true)
 		return
 	if state_frame < strike_end:
 		# Signatures keep chasing through their own knockback (up to body contact).
 		var in_range := not airborne and _in_strike_range(attack, in_signature)
-		if not in_range and not (attack.charge and swing_has_hit):
+		if attack.travel_start >= 0:
+			if state_frame >= attack.travel_start and not airborne:
+				var travel := attack.lunge
+				if opponent != null and not opponent.is_crossing():
+					var gap := (opponent.position.x - position.x) * facing
+					if gap >= 0.0:
+						travel = minf(travel, maxf(0.0, gap - PUSH_HALF_WIDTH * 2.0))
+				position.x += travel * facing
+		elif not in_range and not (attack.charge and swing_has_hit):
 			position.x += attack.lunge * facing
 		if attack.step > 0.0 and not airborne and state_frame < attack.startup and not in_range:
 			var s := float(attack.startup)
@@ -1025,7 +1033,7 @@ func _start_attack(type: CombatData.AttackType, step: int, turn_to_opponent: boo
 	if chosen.x_move:
 		if x_cooldown > 0 or airborne:
 			return
-		x_cooldown = CombatData.X_COOLDOWN_FRAMES
+		x_cooldown = chosen.x_cooldown_frames
 	if not chosen.sequence.is_empty():
 		# A sequence: queue its strikes and start the first one.
 		_sequence.clear()

@@ -27,7 +27,7 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	FLYING_SLAP, FLYING_CHEST_KICK, BELLY_BOMB, STREET_PUNCH,
 	DEMPSEY_ROLL, DEMPSEY_HOOK_LEFT, DEMPSEY_HOOK_RIGHT, RETREATING_JUMP_ELBOW,
 	STEP_BACK_SPINNING_BACKFIST, BUTTERFLY_KICK, TRIPLE_KICK, TRIPLE_KICK_BODY_ONE,
-	TRIPLE_KICK_BODY_TWO, TRIPLE_KICK_HEAD, BIG_FOOT, DROPKICK }
+	TRIPLE_KICK_BODY_TWO, TRIPLE_KICK_HEAD, BIG_FOOT, DROPKICK, SCORPION_KICK, THAI_ROUNDHOUSE }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
 ## part): strikes travel into range like real footwork instead of being thrown
@@ -1029,14 +1029,14 @@ const ATTACK_TABLE: Dictionary = {
 		"id": &"dempsey_hook_left", "name": "Dempsey Roll (lead hook)", "x_move": false, "x_strike": true,
 		"startup": 24, "active": 4, "recovery": 10, "cancel_window": 0,
 		"damage": 9, "hitstun": 24, "blockstun": 16, "posture": 16.0,
-		"knockback": 1.0, "lunge": 1.0, "hitstop": 8,
+		"knockback": 1.0, "lunge": 1.0, "hitstop": 10, "impact_power": 2,
 		"hitbox": Rect2(25.0, -170.0, 47.0, 65.0),
 	},
 	AttackType.DEMPSEY_HOOK_RIGHT: {
 		"id": &"dempsey_hook_right", "name": "Dempsey Roll (rear hook)", "x_move": false, "x_strike": true,
 		"startup": 8, "active": 4, "recovery": 30, "cancel_window": 0,
 		"damage": 9, "hitstun": 24, "blockstun": 16, "posture": 16.0,
-		"knockback": 6.0, "lunge": 1.0, "hitstop": 8,
+		"knockback": 16.0, "lunge": 1.0, "hitstop": 14, "impact_power": 3,
 		"hitbox": Rect2(25.0, -170.0, 47.0, 65.0),
 	},
 	AttackType.RETREATING_JUMP_ELBOW: {
@@ -1048,10 +1048,10 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	AttackType.STEP_BACK_SPINNING_BACKFIST: {
 		"id": &"step_back_spinning_backfist", "name": "Step-Back Spinning Backfist", "x_move": true, "x_strike": false,
-		"startup": 28, "active": 5, "recovery": 32, "cancel_window": 0,
+		"startup": 18, "active": 5, "recovery": 32, "cancel_window": 0,
 		"damage": 18, "hitstun": 24, "blockstun": 16, "posture": 16.0,
-		"knockback": 6.0, "lunge": 1.2, "hitstop": 8,
-		"hitbox": Rect2(28.0, -182.0, 66.0, 62.0), "backstep": 26.0, "backstep_ticks": 10, "spin": true,
+		"knockback": 14.0, "lunge": 4.0, "travel_start": 6, "impact_power": 3, "hitstop": 8,
+		"hitbox": Rect2(28.0, -182.0, 66.0, 62.0), "backstep": 16.0, "backstep_ticks": 6, "spin": true,
 	},
 	AttackType.BUTTERFLY_KICK: {
 		"id": &"butterfly_kick", "name": "Butterfly Kick", "x_move": true, "x_strike": false,
@@ -1061,46 +1061,63 @@ const ATTACK_TABLE: Dictionary = {
 		"hitbox": Rect2(22.0, -130.0, 74.0, 65.0), "leap": -9.0, "leap_at": 14, "leap_vx": 2.0, "spin": true,
 	},
 	AttackType.TRIPLE_KICK: {
-		"id": &"triple_kick", "name": "Triple Kick", "x_move": true, "x_strike": false,
-		"startup": 22, "active": 3, "recovery": 32, "cancel_window": 0,
+		"id": &"triple_kick", "name": "Triple Kick", "x_move": true, "x_cooldown_frames": 900, "x_strike": false,
+		"startup": 12, "active": 3, "recovery": 24, "cancel_window": 0,
 		"damage": 0, "hitstun": 24, "blockstun": 16, "posture": 16.0,
 		"knockback": 4.0, "lunge": 0.5, "hitstop": 8,
 		"hitbox": Rect2(28.0, -138.0, 50.0, 55.0), "sequence": [&"triple_kick_body_one", &"triple_kick_body_two", &"triple_kick_head"],
 	},
 	AttackType.TRIPLE_KICK_BODY_ONE: {
 		"id": &"triple_kick_body_one", "name": "Triple Kick (first body)", "x_move": false, "x_strike": true,
-		"startup": 22, "active": 3, "recovery": 8, "cancel_window": 0,
+		"startup": 12, "active": 3, "recovery": 8, "cancel_window": 0,
 		"damage": 6, "hitstun": 24, "blockstun": 16, "posture": 16.0,
-		"knockback": 0.5, "lunge": 1.0, "hitstop": 8,
+		"knockback": 0.5, "lunge": 1.0, "hitstop": 2, "sequence_gap": 1,
 		"hitbox": Rect2(28.0, -138.0, 50.0, 55.0),
 	},
 	AttackType.TRIPLE_KICK_BODY_TWO: {
 		"id": &"triple_kick_body_two", "name": "Triple Kick (second body)", "x_move": false, "x_strike": true,
-		"startup": 6, "active": 3, "recovery": 8, "cancel_window": 0,
+		"startup": 3, "active": 3, "recovery": 8, "cancel_window": 0,
 		"damage": 6, "hitstun": 24, "blockstun": 16, "posture": 16.0,
-		"knockback": 0.5, "lunge": 1.0, "hitstop": 8,
+		"knockback": 0.5, "lunge": 1.0, "hitstop": 2, "sequence_gap": 1,
 		"hitbox": Rect2(28.0, -138.0, 50.0, 55.0),
 	},
 	AttackType.TRIPLE_KICK_HEAD: {
 		"id": &"triple_kick_head", "name": "Triple Kick (head)", "x_move": false, "x_strike": true,
-		"startup": 7, "active": 4, "recovery": 32, "cancel_window": 0,
+		"startup": 3, "active": 4, "recovery": 24, "cancel_window": 0,
 		"damage": 6, "hitstun": 24, "blockstun": 16, "posture": 16.0,
-		"knockback": 7.0, "lunge": 1.0, "hitstop": 8,
+		"knockback": 7.0, "lunge": 1.0, "hitstop": 6, "impact_power": 2,
 		"hitbox": Rect2(28.0, -198.0, 50.0, 60.0),
 	},
 	AttackType.BIG_FOOT: {
-		"id": &"big_foot", "name": "Big Foot", "x_move": true, "x_strike": false,
+		"id": &"big_foot", "name": "Big Foot", "x_move": true, "x_cooldown_frames": 900, "x_strike": false,
 		"startup": 24, "active": 5, "recovery": 34, "cancel_window": 0,
 		"damage": 18, "hitstun": 24, "blockstun": 16, "posture": 16.0,
-		"knockback": 8.0, "lunge": 0.8, "hitstop": 8,
-		"hitbox": Rect2(28.0, -144.0, 62.0, 62.0), "launch": 6.0,
+		"knockback": 8.0, "lunge": 0.8, "hitstop": 12,
+		"hitbox": Rect2(28.0, -144.0, 62.0, 62.0), "blowback_chance": 1.0, "blowback_vx": 16.0, "blowback_vy": -9.0, "blowback_rolls": 0, "impact_power": 3,
 	},
 	AttackType.DROPKICK: {
-		"id": &"dropkick", "name": "Dropkick", "x_move": true, "x_strike": false,
+		"id": &"dropkick", "name": "Dropkick", "x_move": true, "x_cooldown_frames": 900, "x_strike": false,
 		"startup": 24, "active": 6, "recovery": 40, "cancel_window": 0,
 		"damage": 18, "hitstun": 24, "blockstun": 16, "posture": 16.0,
-		"knockback": 8.0, "lunge": 0.0, "hitstop": 8,
-		"hitbox": Rect2(28.0, -128.0, 68.0, 62.0), "leap": -9.0, "leap_at": 14, "leap_vx": 4.5,
+		"knockback": 8.0, "lunge": 0.0, "hitstop": 12,
+		"hitbox": Rect2(28.0, -128.0, 68.0, 62.0), "blowback_chance": 1.0, "blowback_vx": 10.0, "blowback_vy": -7.5, "blowback_rolls": 0, "impact_power": 3, "leap": -9.0, "leap_at": 14, "leap_vx": 4.5, "land_lag": 70,
+	},
+
+	AttackType.SCORPION_KICK: {
+		"id": &"scorpion_kick", "name": "Scorpion Kick", "x_move": true,
+		"startup": 18, "active": 5, "recovery": 30, "cancel_window": 0,
+		"damage": 18, "hitstun": 24, "blockstun": 16, "posture": 16.0,
+		"knockback": 6.0, "lunge": 0.6, "hitstop": 9, "impact_power": 2,
+		"hitbox": Rect2(22.0, -185.0, 50.0, 60.0),
+	},
+
+	AttackType.THAI_ROUNDHOUSE: {
+		"id": &"thai_roundhouse", "name": "Thai Roundhouse Kick (Tae Chiang)", "x_move": true, "x_cooldown_frames": 900,
+		"startup": 20, "active": 5, "recovery": 30, "cancel_window": 0,
+		"damage": 18, "hitstun": 26, "blockstun": 16, "posture": 16.0,
+		"knockback": 16.0, "lunge": 1.2, "hitstop": 14, "impact_power": 3,
+		"blowback_chance": 1.0, "blowback_vx": 8.0, "blowback_vy": -5.0, "blowback_rolls": 0,
+		"hitbox": Rect2(28.0, -165.0, 58.0, 60.0),
 	},
 
 }
@@ -1144,6 +1161,12 @@ class Attack extends RefCounted:
 	## Step-in distance (STEP_IN).
 	var step: float = 0.0
 	var hitstop: int = 0
+	## Presentation force independent of health damage; 0 uses normal damage tier.
+	var impact_power: int = 0
+	## Pause before the next strike of a sequence; shared default preserves old moves.
+	var sequence_gap: int = SEQUENCE_GAP
+	## Committed grounded travel begins here; -1 uses ordinary range-limited lunge.
+	var travel_start: int = -1
 	var posture: float = 0.0
 	var launch: float = 0.0
 	var knockdown: bool = false
@@ -1169,6 +1192,8 @@ class Attack extends RefCounted:
 	## Signature technique (F at full Focus).
 	var signature: bool = false
 	var x_move: bool = false
+	## Independent cooldown starts when the X move begins, before sequence expansion.
+	var x_cooldown_frames: int = X_COOLDOWN_FRAMES
 	var x_strike: bool = false
 	## Leaves the ground at the start of the move with this vertical velocity.
 	var leap_vy: float = 0.0
@@ -1243,6 +1268,9 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.lunge = row["lunge"]
 	attack.step = STEP_IN.get(row["id"], 0.0)
 	attack.hitstop = row["hitstop"]
+	attack.impact_power = row.get("impact_power", 0)
+	attack.sequence_gap = row.get("sequence_gap", SEQUENCE_GAP)
+	attack.travel_start = row.get("travel_start", -1)
 	attack.posture = row["posture"]
 	attack.launch = row.get("launch", 0.0)
 	attack.knockdown = row.get("knockdown", false)
@@ -1260,6 +1288,7 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.spin_turns = row.get("spin_turns", 1.0)
 	attack.signature = row.get("signature", false)
 	attack.x_move = row.get("x_move", false)
+	attack.x_cooldown_frames = row.get("x_cooldown_frames", X_COOLDOWN_FRAMES)
 	attack.x_strike = row.get("x_strike", false)
 	attack.leap_vy = row.get("leap", 0.0)
 	attack.land_lag = row.get("land_lag", 0)
@@ -1316,7 +1345,9 @@ static func id_for_type(type: AttackType) -> StringName:
 
 static func impact_kind(type: AttackType) -> ImpactKind:
 	match type:
-		AttackType.DEMPSEY_HOOK_LEFT, AttackType.DEMPSEY_HOOK_RIGHT, AttackType.STEP_BACK_SPINNING_BACKFIST, AttackType.BUTTERFLY_KICK, AttackType.RETREATING_JUMP_ELBOW:
+		AttackType.SCORPION_KICK:
+			return ImpactKind.DOWNWARD
+		AttackType.THAI_ROUNDHOUSE, AttackType.DEMPSEY_HOOK_LEFT, AttackType.DEMPSEY_HOOK_RIGHT, AttackType.STEP_BACK_SPINNING_BACKFIST, AttackType.BUTTERFLY_KICK, AttackType.RETREATING_JUMP_ELBOW:
 			return ImpactKind.HOOK
 		AttackType.LEAD_HOOK, AttackType.REAR_HOOK, AttackType.BODY_HOOK, AttackType.BACKHAND, 				AttackType.KNIFE_HAND, AttackType.ELBOW, AttackType.HIGH_KICK, AttackType.BODY_ROUNDHOUSE, 				AttackType.LOW_ROUNDHOUSE, AttackType.SPIN_HOOK_KICK, AttackType.JUMP_ROUNDHOUSE, 				AttackType.JUMP_SPIN_KICK, AttackType.TORNADO_540, AttackType.SPIN_COUNTER_KICK, AttackType.GAZELLE_HOOK:
 			return ImpactKind.HOOK

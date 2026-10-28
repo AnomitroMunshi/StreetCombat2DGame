@@ -1,0 +1,115 @@
+[
+	{
+		"cooldown_seconds": 10,
+		"hits": [
+			{
+				"damage": 9,
+				"id": "dempsey_hook_left",
+				"tick": 50
+			},
+			{
+				"damage": 9,
+				"id": "dempsey_hook_right",
+				"tick": 75
+			}
+		],
+		"peak_air_travel": 0.0,
+		"peak_travel": 105.526611328125,
+		"side": -1,
+		"style": "boxing"
+	},
+	{
+		"cooldown_seconds": 15,
+		"hits": [
+			{
+				"damage": 18,
+				"id": "thai_roundhouse",
+				"tick": 46
+			}
+		],
+		"peak_air_travel": 61.7384643554688,
+		"peak_travel": 139.70654296875,
+		"side": -1,
+		"style": "muay_thai"
+	},
+	{
+		"cooldown_seconds": 10,
+		"hits": [
+			{
+				"damage": 18,
+				"id": "step_back_spinning_backfist",
+				"tick": 44
+			}
+		],
+		"peak_air_travel": 0.0,
+		"peak_travel": 87.2224731445313,
+		"side": -1,
+		"style": "karate"
+	},
+	{
+		"cooldown_seconds": 10,
+		"hits": [
+			{
+				"damage": 18,
+				"id": "scorpion_kick",
+				"tick": 44
+			}
+		],
+		"peak_air_travel": 0.0,
+		"peak_travel": 37.2156372070313,
+		"side": -1,
+		"style": "kung_fu"
+	},
+	{
+		"cooldown_seconds": 15,
+		"hits": [
+			{
+				"damage": 6,
+				"id": "triple_kick_body_one",
+				"tick": 38
+			},
+			{
+				"damage": 6,
+				"id": "triple_kick_body_two",
+				"tick": 47
+			},
+			{
+				"damage": 6,
+				"id": "triple_kick_head",
+				"tick": 56
+			}
+		],
+		"peak_air_travel": 0.0,
+		"peak_travel": 47.876953125,
+		"side": -1,
+		"style": "taekwondo"
+	},
+	{
+		"cooldown_seconds": 15,
+		"hits": [
+			{
+				"damage": 18,
+				"id": "big_foot",
+				"tick": 50
+			}
+		],
+		"peak_air_travel": 300.541046142578,
+		"peak_travel": 368.725799560547,
+		"side": -1,
+		"style": "kickboxing"
+	},
+	{
+		"cooldown_seconds": 15,
+		"hits": [
+			{
+				"damage": 18,
+				"id": "dropkick",
+				"tick": 50
+			}
+		],
+		"peak_air_travel": 153.694641113281,
+		"peak_travel": 196.758605957031,
+		"side": -1,
+		"style": "bangla_maar"
+	}
+]

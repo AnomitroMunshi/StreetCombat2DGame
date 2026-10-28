@@ -199,7 +199,8 @@ func compute_intent() -> CombatData.Intent:
 			var move := CombatData.get_attack(x_type)
 			if not move.sequence.is_empty():
 				move = CombatData.get_attack(CombatData.type_for_id(move.sequence[0]))
-			var reach := move.hitbox.end.x + move.step + move.lunge * move.startup - move.backstep
+			var travel_ticks := move.startup if move.travel_start < 0 else maxi(0, move.startup - move.travel_start)
+			var reach := move.hitbox.end.x + move.step + move.lunge * travel_ticks - move.backstep
 			if move.leap_vy != 0.0:
 				reach += move.leap_vx * maxi(0, move.startup - move.leap_at)
 			if dist > 50.0 and dist < reach:
