@@ -143,6 +143,8 @@ const LIMB_RADIUS: float = 6.0
 ## closest its root may come to the victim's while doing so.
 const REACH_ASSIST: float = 7.0
 const REACH_MIN_GAP: float = 40.0
+## Step-in added before a finisher whose first beat is already a strike.
+const LEAD_IN_TICKS: int = 6
 ## How fast (px/tick) the attacker steps back out to MIN_GAP after a lunge.
 const RECOVER_STEP: float = 3.0
 ## Before a blow, the attacker steps in (px/tick) to the root gap at which the
@@ -279,6 +281,11 @@ func _init(finisher_kind: Kind, atk: Fighter, vic: Fighter) -> void:
 		for pose in atk.style.wall_entry:
 			_wall_entry.append(StringName(pose))
 	_beats = _build(kind)
+	if _beats[0].get("hit", false):
+		# An opening strike gets a short step-in first (there is no beat
+		# before it to approach in), so it lands on contact, not on the end
+		# of its own beat.
+		_beats.push_front({"ticks": LEAD_IN_TICKS, "atk": &"guard"})
 	_plan_meet()
 	# Room to strike: the bodies start at least MIN_GAP apart (the victim is
 	# shoved back, or the attacker steps back when the victim is at the wall).

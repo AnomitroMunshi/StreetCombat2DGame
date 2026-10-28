@@ -437,7 +437,7 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	# Overhand: looping rear hand over the top. Slow, big, an ender.
 	AttackType.OVERHAND: {
-		"id": &"overhand", "name": "Overhand", "stun": 75, "posture": 18.0,
+		"id": &"overhand", "name": "Overhand", "stun": 75, "posture": 18.0, "overhead": true,
 		"startup": 13, "active": 3, "recovery": 22, "cancel_window": 0,
 		"damage": 15, "hitstun": 24, "blockstun": 16,
 		"knockback": 9.0, "lunge": 2.2, "hitstop": 9,
@@ -482,7 +482,7 @@ const ATTACK_TABLE: Dictionary = {
 	# --- Taekwondo ------------------------------------------------------------
 	# Axe kick: the straight leg rises high and chops down onto the head/guard.
 	AttackType.AXE_KICK: {
-		"id": &"axe_kick", "name": "Axe Kick", "stun": 75, "posture": 20.0,
+		"id": &"axe_kick", "name": "Axe Kick", "stun": 75, "posture": 20.0, "overhead": true,
 		"startup": 12, "active": 3, "recovery": 20, "cancel_window": 0,
 		"damage": 14, "hitstun": 22, "blockstun": 15,
 		"knockback": 4.0, "lunge": 0.8, "hitstop": 8,
@@ -858,7 +858,7 @@ const ATTACK_TABLE: Dictionary = {
 	# rises straight at the apex and the heel chops down onto the head.
 	# Heavy guard damage; long landing recovery.
 	AttackType.FLYING_AXE_KICK: {
-		"id": &"flying_axe_kick", "name": "Flying Axe Kick", "stun": 100, "posture": 32.0,
+		"id": &"flying_axe_kick", "name": "Flying Axe Kick", "stun": 100, "posture": 32.0, "overhead": true,
 		"leap": -10.0, "leap_at": 4, "leap_vx": 4.5,
 		"startup": 12, "active": 5, "recovery": 25, "cancel_window": 0,
 		"damage": 17, "hitstun": 26, "blockstun": 18,
@@ -916,7 +916,7 @@ const ATTACK_TABLE: Dictionary = {
 	# Double-hand hammer: both fists clasped high overhead, brought down on the
 	# head. Bangla Maar's guard breaker: blocking it breaks the guard.
 	AttackType.HAMMER_FIST: {
-		"id": &"hammer_fist", "name": "Double-Hand Hammer", "stun": 80, "posture": 22.0, "guard_break": true,
+		"id": &"hammer_fist", "name": "Double-Hand Hammer", "stun": 80, "posture": 22.0, "guard_break": true, "overhead": true,
 		"startup": 15, "active": 4, "recovery": 25, "cancel_window": 0,
 		"damage": 15, "hitstun": 24, "blockstun": 16,
 		"knockback": 6.5, "lunge": 1.5, "hitstop": 10,
@@ -1047,6 +1047,9 @@ class Attack extends RefCounted:
 	var knockdown: bool = false
 	## Low attacks can only be blocked crouching (low block).
 	var low: bool = false
+	## Overheads come down from above and beat a crouching (low) block: they
+	## must be blocked standing. Every attack thrown in the air counts as one.
+	var overhead: bool = false
 	var blowback_chance: float = 0.0
 	var blowback_vx: float = 0.0
 	var blowback_vy: float = 0.0
@@ -1137,6 +1140,7 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.launch = row.get("launch", 0.0)
 	attack.knockdown = row.get("knockdown", false)
 	attack.low = row.get("low", false)
+	attack.overhead = row.get("overhead", false)
 	attack.blowback_chance = row.get("blowback_chance", 0.0)
 	attack.blowback_vx = row.get("blowback_vx", 0.0)
 	attack.blowback_vy = row.get("blowback_vy", 0.0)

@@ -1502,7 +1502,9 @@ func _trail_active() -> bool:
 			var f := fighter.state_frame
 			return f >= int(attack.startup * 0.6) and f < attack.startup + attack.active + 3
 		Fighter.State.FINISHER:
-			return true
+			# Only motion the eye cannot follow (leaps, spins): rapid grounded
+			# strikes stay clean so the striking hand reads at contact.
+			return fighter.airborne or fighter.script_spin_rate != 0.0 or fighter.script_spin_hold
 		Fighter.State.DODGE:
 			return fighter.is_evading()
 		Fighter.State.KNOCKDOWN, Fighter.State.KO, Fighter.State.FINISHED:

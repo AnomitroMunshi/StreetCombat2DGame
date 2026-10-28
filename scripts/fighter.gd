@@ -249,6 +249,10 @@ var hit_counter: int = 0
 var last_hit_high: bool = true
 ## The last clean hit was at the legs (sweeps): the body falls feet-first.
 var last_hit_low: bool = false
+## The guard was up but at the wrong height for the last hit: &"low" (a low
+## attack against a standing block) or &"overhead" (an overhead against a
+## crouching block); &"" otherwise.
+var last_hit_wrong_height: StringName = &""
 ## The last clean hit was a heavy strike (10+ damage): a bigger reaction.
 var last_hit_heavy: bool = false
 ## How the last clean hit travelled (CombatData.ImpactKind): picks the reaction.
@@ -1128,13 +1132,19 @@ func receive_hit(attack: CombatData.Attack, attacker: Fighter, step: int) -> Com
 		if current_attack.deflect and not attack.low:
 			return CombatData.HitResult.WHIFF  # turned aside by the hands
 	var facing_attacker := facing == -push_dir
-	# Low attacks (sweeps) must be blocked (or parried) low: S + Shift.
-	var right_height := not attack.low or crouch_held
+	# Guard heights: low attacks (sweeps) must be blocked (or parried) low,
+	# S + Shift; overheads (and anything thrown in the air) must be blocked
+	# standing. Everything else is blocked at either height.
+	var overhead := attack.overhead or attacker.airborne
+	var right_height := (not attack.low or crouch_held) and not (overhead and crouch_held)
+	last_hit_wrong_height = &""
 	if is_parry_active() and facing_attacker and right_height:
 		return _parry(attacker, push_dir, attack)
 	var guarding := (state == State.BLOCK and state_frame >= CombatData.BLOCK_STARTUP_FRAMES) \
 		or (state == State.BLOCKSTUN and block_held) or state == State.PARRY
 	if not right_height:
+		if guarding and facing_attacker:
+			last_hit_wrong_height = &"low" if attack.low else &"overhead"
 		guarding = false
 	if guarding and facing_attacker:
 		block_counter += 1
