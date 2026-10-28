@@ -281,12 +281,21 @@ style's `air_finisher` and `wall_finisher`. So far:
   chops down onto the shoulder and spikes them into the floor.
 - **Taekwondo, Corner Cyclone:** a body roundhouse into the wall, a turn on
   the planted foot, then a spinning back kick to the midsection.
+- **Kung Fu, Descending Dragon Palm:** a rising palm lifts the falling
+  opponent, then a leap and a downward hammer-palm drives them flat into the
+  floor; the attacker lands in the crane.
+- **Kung Fu, Wall of Palms:** three flowing alternating palms (the first
+  drives them into the wall), then a double palm to the chest and a salute.
+- **Bangla Maar, Air Smash:** a messy run-up and a leap, then a reckless
+  double-hand hammer spikes the falling opponent, with no grab. The attacker
+  lands heavily and stumbles.
+- **Bangla Maar, Deowal Dhakka (দেওয়াল ধাক্কা):** the Jor Dhakka shoulder charge
+  slams them into the wall, then a huge slap and a gloating glare.
 
-Kung Fu and Bangla Maar still use the classic shared pair, Air Smash and Wall
-Crush, which training also keeps as extra entries for every style. Wall Crush uses **your style's strikes** (the style's `wall_entry`): a
-boxer charges in with a rear hook and finishes with an overhand, Karate drives
-reverse punches, Kung Fu palms. Muay Thai keeps the classic flying knee and
-double palm.
+Every style now has its own pair. The old shared finishers are only in
+training, as **CLASSIC AIR SMASH** and **CLASSIC WALL CRUSH**, after the
+style's own entries. Classic Wall Crush uses your style's strikes (the style's
+`wall_entry`).
 
 The AI rival also punishes you when you're stuck in an attack's recovery
 within its reach. That keeps short-range styles (Boxing, Kung Fu)

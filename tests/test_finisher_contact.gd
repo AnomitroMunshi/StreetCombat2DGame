@@ -13,8 +13,8 @@ const STYLES := {
 	&"taekwondo": [&"cyclone_360", &"heavens_heel", &"skyfall_axe", &"corner_cyclone"],
 	&"muay_thai": [&"eight_limbs", &"iron_knee", &"iron_corner"],
 	&"karate": [&"one_inch_verdict", &"crimson_crescent", &"skyline_verdict"],
-	&"kung_fu": [&"hundred_palms", &"dragons_descent"], &"kickboxing": [&"last_combination", &"knockout_rhythm", &"air_breaker", &"corner_breaker"],
-	&"bangla_maar": [&"paaye_lathi", &"super_chor"],
+	&"kung_fu": [&"hundred_palms", &"dragons_descent", &"descending_dragon_palm", &"wall_of_palms"], &"kickboxing": [&"last_combination", &"knockout_rhythm", &"air_breaker", &"corner_breaker"],
+	&"bangla_maar": [&"paaye_lathi", &"super_chor", &"bangla_air_smash", &"deowal_dhakka"],
 }
 const START_GAP: float = 120.0
 ## Airborne cases: the victim's vertical speed when the finisher starts

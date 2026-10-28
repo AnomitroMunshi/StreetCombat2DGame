@@ -231,7 +231,9 @@ func _initialize() -> void:
 	for case in [[&"karate", true, FinisherDirector.Kind.SKYLINE_VERDICT], [&"muay_thai", false, FinisherDirector.Kind.IRON_CORNER],
 			[&"boxing", true, FinisherDirector.Kind.FALLING_CROSS], [&"boxing", false, FinisherDirector.Kind.CORNER_COUNT],
 			[&"kickboxing", true, FinisherDirector.Kind.AIR_BREAKER], [&"kickboxing", false, FinisherDirector.Kind.CORNER_BREAKER],
-			[&"taekwondo", true, FinisherDirector.Kind.SKYFALL_AXE], [&"taekwondo", false, FinisherDirector.Kind.CORNER_CYCLONE]]:
+			[&"taekwondo", true, FinisherDirector.Kind.SKYFALL_AXE], [&"taekwondo", false, FinisherDirector.Kind.CORNER_CYCLONE],
+			[&"kung_fu", true, FinisherDirector.Kind.DESCENDING_DRAGON_PALM], [&"kung_fu", false, FinisherDirector.Kind.WALL_OF_PALMS],
+			[&"bangla_maar", true, FinisherDirector.Kind.BANGLA_AIR_SMASH], [&"bangla_maar", false, FinisherDirector.Kind.DEOWAL_DHAKKA]]:
 		var st := StyleRegistry.by_id(case[0])
 		p = _pair(st, 80.0)
 		a = p[0]

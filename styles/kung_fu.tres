@@ -53,4 +53,6 @@ wall_entry = PackedStringArray("palm_windup", "palm_lead", "palm_rear", "palm_wi
 signature = &"palm_barrage"
 intro_pose = &"kf_crane"
 finishers = PackedStringArray("hundred_palms", "dragons_descent")
+air_finisher = &"descending_dragon_palm"
+wall_finisher = &"wall_of_palms"
 ai_preferred_range = 105.0
