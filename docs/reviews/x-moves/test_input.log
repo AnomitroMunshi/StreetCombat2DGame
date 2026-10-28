@@ -1,0 +1,35 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  ok   player and rival have different martial arts
+  ok   J alone -> light (light)
+  ok   K alone -> heavy (heavy)
+  ok   L alone -> technique (technique)
+  ok   W + J -> up_light (up_light)
+  ok   W + K -> up_heavy (up_heavy)
+  ok   S + J -> down_light (down_light)
+  ok   S + K -> down_heavy (down_heavy)
+  ok   A + J -> light (A is never a modifier) (light)
+  ok   D + K -> heavy (D is never a modifier) (heavy)
+  ok   W + S + J -> up_light (W wins) (up_light)
+  ok   W + L -> technique (L has no variants) (technique)
+  ok   S alone -> crouch (no attack) ()
+  ok   S alone crouches
+  ok   W alone does nothing (no jump) ()
+  ok   W alone is not a jump
+  ok   double-tap D -> player dodges (state DODGE)
+  ok   taps 20 frames apart -> no dodge
+  ok   Q during a match does not change the locked style or stance
+  ok   player style is remembered for restarts
+  ok   holding S -> player crouches
+  ok   S + Shift -> low block
+  ok   releasing S stands back up
+  ok   jump is bound to Space only
+  ok   styles still differ at the end of the test
+  ok   standing + away + K -> side kick, no back kick (Side Kick #1 STARTUP 0/30)
+  ok   walking toward + W + K -> high roundhouse (High Kick #1 STARTUP 0/28)
+  ok   pressing Shift opens a parry window (BLOCK f2  PARRY 2  pcd 27)
+RESULT: PASS (0 failures)
+WARNING: 9 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

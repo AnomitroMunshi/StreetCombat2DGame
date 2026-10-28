@@ -1,0 +1,17 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[standing block]
+  ok   stops a mid (jab)
+  ok   stops an overhead (overhand)
+  ok   stops an overhead (axe kick)
+  ok   stops a jump attack
+  ok   loses to a low (sweep), recorded as LOW ([1, &"low"])
+[low block]
+  ok   stops a mid (jab)
+  ok   stops a low (sweep)
+  ok   loses to an overhead (overhand), recorded as OVERHEAD ([1, &"overhead"])
+  ok   loses to an overhead (axe kick)
+  ok   loses to a jump attack (thrown in the air)
+[data]
+  ok   overheads: overhand, axe kick, flying axe kick, double-hand hammer ([&"overhand", &"axe_kick", &"flying_axe_kick", &"hammer_fist"])
+RESULT: PASS (0 failures)

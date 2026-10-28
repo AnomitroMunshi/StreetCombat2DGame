@@ -386,6 +386,8 @@ func _move_list_text() -> String:
 	var lines := PackedStringArray(["[b]%s MOVES[/b]" % player.style.display_name.to_upper()])
 	for row in player.style.move_list():
 		lines.append("[color=#f2c14e]%s[/color]  %s" % [row[0], row[1]])
+	if player.style.input_map.has(&"x_move"):
+		lines.append("X: 10 s cooldown, no Focus. Block, parry or evade.")
 	if player.style.signature != &"":
 		lines.append("[color=#f2c14e]F[/color]  %s (full Focus)" % CombatData.get_attack(
 			CombatData.type_for_id(player.style.signature)).display_name)
@@ -815,6 +817,8 @@ func _read_player_intent() -> CombatData.Intent:
 	intent.slot = attack_slot(Input.is_action_just_pressed("attack_light"),
 		Input.is_action_just_pressed("attack_heavy"), Input.is_action_just_pressed("attack_technique"),
 		Input.is_action_pressed("mod_up"), Input.is_action_pressed("mod_down"))
+	if Input.is_action_just_pressed("x_move"):
+		intent.slot = &"x_move"
 	return intent
 
 

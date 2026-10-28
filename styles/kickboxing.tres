@@ -23,6 +23,7 @@ ai_tuning = {
 "punish_chance": 0.55
 }
 input_map = {
+&"x_move": &"big_foot",
 &"power_heavy": &"leaping_roundhouse",
 &"power_light": &"superman_punch",
 &"down_heavy": &"low_roundhouse",

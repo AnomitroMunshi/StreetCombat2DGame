@@ -70,8 +70,8 @@ The rival always gets a different style. Styles are **locked** once the match
 starts. After a match, **REMATCH** (or **R**) keeps your style, and
 **CHANGE STYLE** returns to the selection screen.
 
-Every style uses the same seven attack keys (J, K, L, and W or S held with J
-or K), but each key does something different in each style. **A style can never use a move outside its own set**, whether through a
+Every style shares J/K/L, W/S modifiers, Space+J/K power chords and X,
+but each key does something different in each style. **A style can never use a move outside its own set**, whether through a
 key, the AI, a combo or a jump. The style screen lists every move with its key.
 
 Each style has its own moves, combos, signature (F at full Focus) and two
@@ -86,6 +86,24 @@ finishers:
 | **Taekwondo** | Long-range kicking. | Jab · Side Kick · Double Kick | Rising Punch · High Roundhouse | Body Punch · Axe Kick | Jumping Backfist · Jumping Spinning Hook Kick | 540 Tornado Kick | Cyclone 360 · Heaven's Heel |
 | **Kickboxing** (default) | The balanced all-rounder: punches flow into kicks. | Jab · Cross · Body Roundhouse | Uppercut · High Kick | Body Hook · Low Kick | Superman Punch · Jumping Roundhouse Kick | Breaker Combination | Last Combination · Knockout Rhythm |
 | **Bangla Maar** (parody) | Untrained para street fighting: loose hands, slaps, shoves, a big mouth. | Street Punch · Front Thrust Kick · Jor Dhakka | Head Elbow · Double-Hand Hammer | Stomach Shot · Leg Kick | Flying Slap · Flying Chest Kick | Belly Bomb | Football Shot · Super Chor |
+
+**X moves.** Each style has one committed heavy technique on **X**, independent
+of Focus. Each deals 18 total damage and starts a 10-second cooldown as soon
+as it begins, including a block or whiff. Interruption and repeated presses
+keep the cooldown. It carries between rounds and resets for a new match.
+X starts on the ground, has no armour or combo cancels, and follows normal
+block, parry and evade rules. Both health bars show X readiness; training
+and the move list show the technique.
+
+| Style | X move |
+|---|---|
+| Boxing | Dempsey Roll (two alternating hooks, 9 + 9) |
+| Muay Thai | Retreating Jump Elbow |
+| Karate | Step-Back Spinning Backfist |
+| Kung Fu | Butterfly Kick |
+| Taekwondo | Triple Kick (body, body, head: 6 + 6 + 6) |
+| Kickboxing | Big Foot (short airborne knockback) |
+| Bangla Maar | Dropkick |
 
 **Power moves (Space + J / Space + K).** Press Space and J (or K) together,
 or one right after the other in either order, within 6 ticks (0.1 s,

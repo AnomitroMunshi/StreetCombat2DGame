@@ -17,7 +17,7 @@ extends Resource
 ## `air_map` uses the same slots for attacks started in the air.
 
 const SLOTS: Array[StringName] = [&"light", &"heavy", &"technique",
-	&"up_light", &"up_heavy", &"down_light", &"down_heavy", &"power_light", &"power_heavy"]
+	&"up_light", &"up_heavy", &"down_light", &"down_heavy", &"power_light", &"power_heavy", &"x_move"]
 const POWER_SLOTS: Array[StringName] = [&"power_light", &"power_heavy"]
 const SLOT_FALLBACK: Dictionary = {
 	&"up_light": &"light", &"down_light": &"light",
@@ -27,7 +27,7 @@ const SLOT_FALLBACK: Dictionary = {
 const SLOT_KEYS: Dictionary = {
 	&"light": "J", &"heavy": "K", &"technique": "L",
 	&"up_light": "W+J", &"up_heavy": "W+K", &"down_light": "S+J", &"down_heavy": "S+K",
-	&"power_light": "Space+J", &"power_heavy": "Space+K",
+	&"power_light": "Space+J", &"power_heavy": "Space+K", &"x_move": "X",
 }
 ## Known combat categories (metadata for the roster and future subsystems).
 const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"clinching",
@@ -165,6 +165,8 @@ func validate() -> PackedStringArray:
 				errors.append("unknown slot %s" % slot)
 			if CombatData.type_for_id(table[slot]) == CombatData.AttackType.NONE:
 				errors.append("unknown move %s" % table[slot])
+			elif CombatData.get_attack(CombatData.type_for_id(table[slot])).x_strike:
+				errors.append("sequence child %s cannot be mapped to a key" % table[slot])
 	for slot in air_map:
 		if slot in POWER_SLOTS:
 			errors.append("power slot %s is a ground chord, not an air slot" % slot)

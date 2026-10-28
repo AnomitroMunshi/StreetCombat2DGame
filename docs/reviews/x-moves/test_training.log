@@ -1,0 +1,33 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  ok   TRAINING is offered beside START MATCH
+  ok   TRAINING starts the fight at once
+  ok   training panels shown
+  ok   both fighters are kept at 1 HP minimum
+  ok   last move readout: Jab
+  ok   result readout: HIT (HIT)
+  ok   frame advantage measured on hit (+2 on hit)
+  ok   frame data shown (startup)
+  ok   a lethal hit leaves the dummy at 1 HP, no finisher (hp 1)
+  ok   health refills once the action settles
+  ok   dummy mode cycles to BLOCK ALL
+  ok   the blocking dummy blocks (BLOCKED)
+  ok   frame advantage measured on block (-4 on blocked)
+  ok   pause freezes the game
+  ok   step advances exactly one frame (1)
+  ok   unpaused
+  ok   speed: 50%
+  ok   speed cycles back to 100%
+  ok   dummy back to STAND
+  ok   PLAY FINISHER starts the selected finisher
+  ok   the finisher actually slows the simulation (cinematic speed)
+  ok   a finisher played (LAST COMBINATION)
+  ok   after the finisher both are back, fresh, in training
+  ok   game speed restored after the finisher (ticks 60)
+  ok   EXIT returns to the pre-match screen (PRE_MATCH)
+  ok   nothing left paused or slowed
+RESULT: PASS (0 failures)
+WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

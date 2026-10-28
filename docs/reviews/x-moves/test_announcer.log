@@ -1,0 +1,23 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[countdown]
+  ok   clip three exists
+  ok   clip two exists
+  ok   clip one exists
+  ok   clip fight exists
+  ok   clip ko exists
+  ok   clip round_2 exists
+  ok   clip final_round exists
+  ok   paused: the countdown voice waits
+  ok   3, 2, 1, FIGHT! once each, in order ([&"three", &"two", &"one", &"fight"])
+  ok   FIGHT is said on the tick the fighters unlock
+  ok   nothing more during the fight
+[K.O.]
+  ok   K.O. is announced once when the round ends
+[training]
+  ok   training starts without a countdown voice ([])
+RESULT: PASS (0 failures)
+WARNING: 8 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

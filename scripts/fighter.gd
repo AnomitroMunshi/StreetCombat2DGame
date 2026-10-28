@@ -225,6 +225,10 @@ var rejected_attacks: int = 0
 ## Focus meter (CombatData.FOCUS_*): full = the style's signature on F.
 var focus: float = 0.0
 var signature_buffer: int = 0
+## Independent match resource; round reset deliberately preserves it.
+var x_cooldown: int = 0
+## The completed aerial move, retained only through its landing recovery.
+var landing_attack_id: StringName = &""
 var _block_focus_cd: int = 0
 ## Focus from taking hits inside the current FOCUS_HURT_WINDOW, and the ticks
 ## left in it.
@@ -312,7 +316,7 @@ func push_intent(intent: CombatData.Intent) -> void:
 			buffered_slot = slot
 			buffer_frames = CombatData.INPUT_BUFFER_FRAMES
 	elif intent.attack != CombatData.AttackType.NONE:
-		if style != null and not style.allows(intent.attack):
+		if CombatData.get_attack(intent.attack).x_strike or (style != null and not style.allows(intent.attack)):
 			rejected_attacks += 1
 		else:
 			buffered_attack = intent.attack
@@ -374,6 +378,8 @@ func stop_combat() -> void:
 # --- Simulation ---------------------------------------------------------------
 
 func tick() -> void:
+	if x_cooldown > 0:
+		x_cooldown -= 1
 	if flash_frames > 0:
 		flash_frames -= 1
 	if combo_display_frames > 0:
@@ -543,6 +549,8 @@ func _tick_jump() -> void:
 ## Which air attack a press becomes. With a style: its air_map (by slot, or by
 ## whether the ground move was a kick); without: the legacy jump kick / punch.
 func _air_move_for(ground: CombatData.AttackType, slot: StringName) -> CombatData.AttackType:
+	if CombatData.get_attack(ground).x_move or CombatData.get_attack(ground).x_strike:
+		return CombatData.AttackType.NONE
 	if CombatData.get_attack(ground).air_only and (style == null or style.allows(ground)):
 		return ground
 	var kick := CombatData.attack_name(ground).contains("KICK") or ground == CombatData.AttackType.SWEEP
@@ -569,7 +577,7 @@ func _tick_attack() -> void:
 		swing_has_hit = false  # multi-hit: the hitbox re-arms
 	if not _sequence.is_empty() and state_frame >= strike_end + CombatData.SEQUENCE_GAP:
 		# Next strike of the sequence, whether the last one landed or not.
-		_start_attack(_sequence.pop_front(), combo_step, false)
+		_start_attack(_sequence.pop_front(), combo_step, false, true)
 		return
 	if state_frame < strike_end:
 		# Signatures keep chasing through their own knockback (up to body contact).
@@ -708,6 +716,7 @@ func _land() -> void:
 			# A leaping move with no fixed landing lag: the landing runs out the
 			# rest of its own frame data (startup + active + recovery).
 			lag = maxi(lag, current_attack.total_frames() - state_frame)
+		landing_attack_id = current_attack.id if current_attack != null else &""
 		current_attack = null
 		_clear_sequence()
 		combo_step = 0
@@ -859,6 +868,10 @@ func _consume_buffered_attack(step: int) -> bool:
 	buffered_attack = CombatData.AttackType.NONE
 	buffered_slot = &""
 	buffer_frames = 0
+	if CombatData.get_attack(type).x_move and (x_cooldown > 0 or airborne or step != 1):
+		return false
+	if CombatData.get_attack(type).x_strike:
+		return false
 	if CombatData.get_attack(type).air_only:
 		return false  # an air-only move pressed on the ground does nothing
 	_start_attack(type, step, true)
@@ -1001,11 +1014,18 @@ func _consume_jump() -> bool:
 	return true
 
 
-func _start_attack(type: CombatData.AttackType, step: int, turn_to_opponent: bool) -> void:
+func _start_attack(type: CombatData.AttackType, step: int, turn_to_opponent: bool, sequence_continuation: bool = false) -> void:
 	attack_slot = &""
 	if turn_to_opponent:
 		face_opponent()
 	var chosen := CombatData.get_attack(type)
+	if chosen.x_strike and not sequence_continuation:
+		rejected_attacks += 1
+		return
+	if chosen.x_move:
+		if x_cooldown > 0 or airborne:
+			return
+		x_cooldown = CombatData.X_COOLDOWN_FRAMES
 	if not chosen.sequence.is_empty():
 		# A sequence: queue its strikes and start the first one.
 		_sequence.clear()
@@ -1092,6 +1112,8 @@ func is_mid_sequence() -> bool:
 
 
 func _enter_state(new_state: State) -> void:
+	if new_state != State.LAND:
+		landing_attack_id = &""
 	state = new_state
 	state_frame = 0
 	if new_state in [State.KNOCKDOWN, State.KO, State.FINISHED, State.FINISHER]:

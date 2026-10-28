@@ -217,6 +217,10 @@ func info_text() -> String:
 	lines.append("Dummy [color=#f2c14e]%s[/color]   Speed [color=#f2c14e]%d%%[/color]%s   Focus %s" % [
 		DUMMY_NAMES[dummy_mode], roundi(speed() * 100.0), "   [color=#ff8a6a]PAUSED[/color]" if paused else "",
 		"[color=#f2c14e]unlimited[/color]" if infinite_focus else "normal"])
+	if player.style != null and player.style.input_map.has(&"x_move"):
+		var x_name := player.style.move_name(player.style.input_map[&"x_move"])
+		var status := "READY" if player.x_cooldown <= 0 else "%.1f s" % (float(player.x_cooldown) / CombatData.TICK_RATE)
+		lines.append("X  [b]%s[/b]  [color=#f2c14e]%s[/color]  (10 s, no Focus)" % [x_name, status])
 	var parent := _sequence_of(last_move) if last_move != null else null
 	if parent != null:
 		# A multi-strike technique reads as one move: every active window, the
