@@ -1405,6 +1405,10 @@ func get_hitbox_world() -> Rect2:
 
 
 func get_hurtbox_world() -> Rect2:
+	if state == State.ATTACK and current_attack != null and current_attack.pose_hurtbox.has_area() and state_frame >= current_attack.hurtbox_start and state_frame <= current_attack.hurtbox_end:
+		var pose_box := current_attack.pose_hurtbox
+		var local_x := pose_box.position.x if facing == 1 else -pose_box.end.x
+		return Rect2(position + Vector2(local_x, pose_box.position.y), pose_box.size)
 	var box := HURTBOX_CROUCH if is_crouched() else HURTBOX
 	if state == State.EVADE_ROLL:
 		box = HURTBOX_ROLL

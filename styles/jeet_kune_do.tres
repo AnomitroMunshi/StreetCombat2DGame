@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="MartialArtStyle" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/martial_art_style.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+id = &"jeet_kune_do"
+order = 9
+display_name = "Jeet Kune Do"
+description = "Bai Jong mobility and direct interception. Lead straight and stop kicks control distance; compact hand combinations flow into decisive side kicks."
+category = &"hybrid"
+difficulty = 3
+strengths = PackedStringArray("Fast direct lead straight", "Hand-to-foot interception chains", "Explosive committed straight on X")
+weaknesses = PackedStringArray("Heavy bursts are punishable", "High hook needs a clear opening", "No automatic traps or invulnerability")
+stance = 12
+kit = &"jeet_kune_do"
+step_scale = 1.15
+ai_preferred_range = 100.0
+ai_tuning = {"aggression": 0.6, "dodge_chance": 0.2, "parry_chance": 0.24}
+move_names = {&"cross": "Rear Cross", &"side_kick": "Side Kick", &"low_roundhouse": "Low Shin Kick", &"jump_punch": "Jump Straight", &"jump_kick": "Jump Side Kick"}
+input_map = {
+&"light": &"jkd_lead_straight",
+&"heavy": &"cross",
+&"technique": &"side_kick",
+&"up_light": &"rising_elbow",
+&"up_heavy": &"jkd_high_hook",
+&"down_light": &"body_straight",
+&"down_heavy": &"low_roundhouse",
+&"power_light": &"jkd_jump_straight",
+&"power_heavy": &"flying_side_kick",
+&"x_move": &"dragons_burst"
+}
+air_map = {&"light": &"jump_punch", &"heavy": &"jump_kick", &"technique": &"jkd_air_front"}
+chains = {
+&"jkd_lead_straight": [&"cross", &"body_straight", &"low_roundhouse", &"side_kick"],
+&"cross": [&"jkd_lead_straight", &"low_roundhouse", &"side_kick"],
+&"body_straight": [&"cross", &"side_kick"],
+&"low_roundhouse": [&"jkd_lead_straight", &"jkd_high_hook"],
+&"side_kick": [&"jkd_lead_straight"]
+}
+ai_close_plans = [[&"jkd_lead_straight", &"cross", &"side_kick"], [&"jkd_lead_straight", &"body_straight", &"cross"], [&"low_roundhouse", &"jkd_high_hook"]]
+ai_far_plans = [[&"side_kick"], [&"jkd_jump_straight"], [&"flying_side_kick"], [&"jkd_lead_straight", &"side_kick"]]
+signature = &"intercepting_fury"
+finishers = PackedStringArray("one_inch_ending", "no_second_chance")
+air_finisher = &"dragon_intercept"
+wall_finisher = &"end_of_line"

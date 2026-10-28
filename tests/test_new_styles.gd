@@ -1,0 +1,141 @@
+extends SceneTree
+## Two new styles: legal data, committed resources and real contacts.
+var fails := 0
+func check(ok: bool, label: String) -> void:
+	print(("ok " if ok else "FAIL ") + label)
+	if not ok:
+		fails += 1
+
+func pair(style_id: StringName, side: int) -> Array[Fighter]:
+	var a := Fighter.new()
+	var b := Fighter.new()
+	root.add_child(a)
+	root.add_child(b)
+	a.position = Vector2(640-side*40,560)
+	b.position = Vector2(640+side*40,560)
+	a.ground_y=560
+	b.ground_y=560
+	a.opponent=b
+	b.opponent=a
+	a.face_opponent()
+	b.face_opponent()
+	a.set_style(StyleRegistry.by_id(style_id))
+	b.set_style(StyleRegistry.by_id(&"kickboxing"))
+	return [a,b]
+
+func play(a: Fighter, b: Fighter, ticks: int, block: bool = false) -> Array:
+	var hits: Array=[]
+	for tick in ticks:
+		var intent:=CombatData.Intent.new()
+		intent.block=block
+		intent.crouch=a.current_attack!=null and a.current_attack.low
+		b.push_intent(intent)
+		a.tick()
+		b.tick()
+		if a.current_attack!=null and a.is_hitbox_active() and not a.swing_has_hit and a.get_hitbox_world().intersects(b.get_hurtbox_world()):
+			var attack:=a.current_attack
+			var result:=b.receive_hit(attack,a,1)
+			a.confirm_hit(result)
+			hits.append([attack.id,result])
+	return hits
+
+func free_pair(p: Array[Fighter]) -> void:
+	for f in p:
+		f.free()
+
+func _initialize() -> void:
+	check(StyleRegistry.count()==9 and StyleRegistry.rejected().is_empty(),"nine registered styles without rejected data")
+	for sid in [&"capoeira",&"jeet_kune_do"]:
+		var style:=StyleRegistry.by_id(sid)
+		check(style!=null and style.validate().is_empty(),"%s validates" %sid)
+		if style==null:
+			continue
+		check(style.stance>=11 and Stances.pose(style.stance).size()==14,"new append-only stance has all pose channels")
+		for slot in MartialArtStyle.SLOTS:
+			check(style.resolve(slot,false)!=CombatData.AttackType.NONE,"%s maps %s" %[sid,slot])
+		var signature:=CombatData.get_attack(CombatData.type_for_id(style.signature))
+		var total:=0
+		for child in signature.sequence:
+			var attack:=CombatData.get_attack(CombatData.type_for_id(child))
+			total+=attack.damage
+			check(attack.x_strike and style.allows(attack.type),"signature child is internal and style-legal")
+		check(signature.signature and total==24,"%s signature sums exactly24" %sid)
+		var x:=CombatData.get_attack(style.resolve(&"x_move",false))
+		check(x.damage==18 and x.x_cooldown_frames==900 and not x.signature,"%s X18 damage,15 seconds,no Focus" %sid)
+		for side in [1,-1]:
+			var p:=pair(sid,side)
+			p[0].focus=CombatData.FOCUS_MAX
+			var intent:=CombatData.Intent.new()
+			intent.signature=true
+			p[0].push_intent(intent)
+			var hits:=play(p[0],p[1],150)
+			check(p[1].health==p[1].max_health-24 and hits.size()==signature.sequence.size(),"%s F all strikes24 damage facing%d (%s)" %[sid,side,hits])
+			check(p[0].focus==0 and p[0].x_cooldown==0,"F spends Focus exactly once and leaves X ready")
+			free_pair(p)
+			p=pair(sid,side)
+			intent=CombatData.Intent.new()
+			intent.slot=&"x_move"
+			p[0].push_intent(intent)
+			hits=play(p[0],p[1],100)
+			check(p[1].health==p[1].max_health-18 and hits.size()==1 and p[0].x_cooldown==801,"%s X single contact and committed cooldown facing%d" %[sid,side])
+			free_pair(p)
+			p=pair(sid,side)
+			p[0].push_intent(intent)
+			hits=play(p[0],p[1],100,true)
+			check(p[1].health==p[1].max_health and hits.size()==1 and hits[0][1]==CombatData.HitResult.BLOCKED,"%s X normal block facing%d" %[sid,side])
+			free_pair(p)
+			p=pair(sid,side)
+			p[0].push_intent(intent)
+			p[0].tick()
+			p[1].call("_enter_state",Fighter.State.BLOCK)
+			p[1].parry_window=4
+			check(p[1].receive_hit(p[0].current_attack,p[0],1)==CombatData.HitResult.PARRIED and p[0].x_cooldown==900,"%s X parry without cooldown refund" %sid)
+			free_pair(p)
+			p=pair(sid,side)
+			p[0].focus=CombatData.FOCUS_MAX
+			intent=CombatData.Intent.new()
+			intent.signature=true
+			p[0].push_intent(intent)
+			p[0].tick()
+			p[0].receive_hit(CombatData.get_attack(CombatData.AttackType.LIGHT),p[1],1)
+			check(p[0].state==Fighter.State.HITSTUN and not p[0].is_mid_sequence(),"%s signature interrupt drops remaining strikes" %sid)
+			intent=CombatData.Intent.new()
+			intent.attack=CombatData.type_for_id(signature.sequence[0])
+			p[0].push_intent(intent)
+			check(p[0].buffered_attack==CombatData.AttackType.NONE,"signature children cannot be directly injected")
+			free_pair(p)
+		for side in [1,-1]:
+			for slot in MartialArtStyle.SLOTS:
+				var p:=pair(sid,side)
+				var intent:=CombatData.Intent.new()
+				intent.slot=slot
+				p[0].push_intent(intent)
+				var mapped:=CombatData.get_attack(style.resolve(slot,false))
+				var contacts:=play(p[0],p[1],100)
+				check(p[1].health==p[1].max_health-mapped.damage and contacts.size()==1,"%s %s actual single contact matches damage facing%d" %[sid,slot,side])
+				free_pair(p)
+		# Another martial art cannot inject any of this style's exclusive X/F moves.
+		var wrong:=pair(&"boxing",1)
+		var raw:=CombatData.Intent.new()
+		raw.attack=x.type
+		wrong[0].push_intent(raw)
+		check(wrong[0].buffered_attack==CombatData.AttackType.NONE and wrong[0].rejected_attacks==1,"foreign style rejects %s X" %sid)
+		free_pair(wrong)
+	for side in [1,-1]:
+		var p:=pair(&"capoeira",side)
+		var intent:=CombatData.Intent.new()
+		intent.slot=&"technique"
+		p[0].push_intent(intent)
+		p[0].tick()
+		var standing:=p[0].get_hurtbox_world()
+		for tick in 9:
+			p[0].tick()
+		var support:=p[0].get_hurtbox_world()
+		check(support.size.x>standing.size.x and support.size.y<standing.size.y and p[0].can_be_hit(),"hand-supported Capoeira uses wider authored hurtbox without invulnerability")
+		p[0].call("_enter_state",Fighter.State.IDLE)
+		check(p[0].get_hurtbox_world().size==standing.size,"support hurtbox clears outside authored attack")
+		free_pair(p)
+	for kick in [CombatData.AttackType.CAP_SPIN_HEEL,CombatData.AttackType.CAP_CARTWHEEL,CombatData.AttackType.CAP_CRESCENT,CombatData.AttackType.CAP_LOW_SWEEP,CombatData.AttackType.JKD_HIGH_HOOK]:
+		check(CombatData.focus_for_hit(CombatData.get_attack(kick),false)==CombatData.FOCUS_KICK,"new kicks use the existing kick Focus gain")
+	print("RESULT: PASS" if fails==0 else "RESULT: FAIL (%d)" %fails)
+	quit(0 if fails==0 else 1)

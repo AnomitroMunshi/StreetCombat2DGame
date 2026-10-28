@@ -10,7 +10,7 @@ extends RefCounted
 ## (body rotation) gives each stance its own silhouette.
 
 ## APPEND-ONLY (style files refer to stances by index).
-enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNTER, TAEKWONDO, KICKBOXING, STREET }
+enum Kind { BLADED, SQUARED, BOXING, MUAY_THAI, KARATE, KUNG_FU, GRAPPLER, COUNTER, TAEKWONDO, KICKBOXING, STREET, CAPOEIRA, JEET_KUNE_DO }
 
 ## name, guard pose, southpaw (right foot forward), and the active idle (the
 ## looping fighting movement in neutral; presentation only):
@@ -100,6 +100,17 @@ const DATA: Dictionary = {
 		# Squatting down with the hands still loose (no fists up).
 		"crouch": [0.4, 0.1, 0.7, 1.2, 0.5, 1.0, 1.25, -0.25, 0.5, -1.5, 0.0, 0.0, 0.0, 3.0],
 	},
+	Kind.CAPOEIRA: {
+		"name": "GINGA", "southpaw": false,
+		"idle": {"hz": 1.25, "bob": 4.0, "shape": "sine", "shift": 10.0, "shift_hz": 0.65, "heel": 1.5, "lead_heel": 1.0, "shoulder": 4.0, "guard": 0.12, "sway": 0.09, "head": 0.02},
+		"pose": [0.25, 0.08, 1.25, 2.3, 0.65, 2.65, 0.8, -0.3, -0.7, -0.5, 0.0, 3.0, 0.0, 14.0],
+	},
+	Kind.JEET_KUNE_DO: {
+		"name": "BAI JONG", "southpaw": true,
+		"idle": {"hz": 1.8, "bob": 2.0, "shape": "snap", "shift": 4.0, "shift_hz": 0.8, "heel": 3.0, "lead_heel": 1.0, "shoulder": 1.5, "guard": 0.04, "sway": 0.02, "head": 0.02, "rear_heel": 3.0},
+		"pose": [0.12, 0.12, 1.4, 2.05, 0.8, 2.95, 0.65, -0.15, -0.6, -0.35, 0.0, 1.0, 0.0, 17.0],
+	},
+
 }
 
 ## The player's stance survives restarts (scene reloads).
