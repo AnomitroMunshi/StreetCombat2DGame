@@ -1,0 +1,47 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[data]
+  ok   Taekwondo L is the Double Kick
+  ok   first kick: startup 9, active 3, 5 damage, low
+  ok   second kick: active 3, recovery 20, 9 damage, mid
+  ok   one technique, two strikes
+  ok   shared low / body roundhouse damage unchanged
+  ok   muay_thai cannot use the double kick strikes
+  ok   kickboxing cannot use the double kick strikes
+  ok   karate cannot use the double kick strikes
+  ok   its strikes are legal for Taekwondo
+[facing right]
+  ok   two separate strikes ({ &"double_kick_low": [9, 9], &"double_kick_mid": [21, 21] })
+  ok   exactly two hits: 5 then 9 ([[&"double_kick_low", 1, 5], [&"double_kick_mid", 1, 9]])
+  ok   14 damage in total
+  ok   two kicks alone never knock down
+  ok   back to neutral after the recovery
+  ok   repeat presses mid-move: no restart ([[&"double_kick_low", 1, 5], [&"double_kick_mid", 1, 9]])
+  ok   first active window ticks 9-11 ({ &"double_kick_low": [9, 11], &"double_kick_mid": [21, 23] })
+  ok   first whiffs: second kick still comes, active ticks 21-23 after a 9-tick transfer
+  ok   standing guard: low kick beats it, mid kick follows in its hitstun ([[&"double_kick_low", 1, 5], [&"double_kick_mid", 1, 9]])
+  ok   standing guard vs Double Kick (low): HIT
+  ok   standing guard vs Double Kick (mid): BLOCKED
+  ok   low guard: low kick blocked, mid kick still thrown ([[&"double_kick_low", 2, 0], [&"double_kick_mid", 2, 0]])
+  ok   interrupted at tick 4: no further strike (0 hits)
+  ok   interrupted at tick 10: no further strike (1 hits)
+  ok   interrupted at tick 15: no further strike (1 hits)
+  ok   interrupted at tick 19: no further strike (1 hits)
+[facing left]
+  ok   two separate strikes ({ &"double_kick_low": [9, 9], &"double_kick_mid": [21, 21] })
+  ok   exactly two hits: 5 then 9 ([[&"double_kick_low", 1, 5], [&"double_kick_mid", 1, 9]])
+  ok   14 damage in total
+  ok   two kicks alone never knock down
+  ok   back to neutral after the recovery
+  ok   repeat presses mid-move: no restart ([[&"double_kick_low", 1, 5], [&"double_kick_mid", 1, 9]])
+  ok   first active window ticks 9-11 ({ &"double_kick_low": [9, 11], &"double_kick_mid": [21, 23] })
+  ok   first whiffs: second kick still comes, active ticks 21-23 after a 9-tick transfer
+  ok   standing guard: low kick beats it, mid kick follows in its hitstun ([[&"double_kick_low", 1, 5], [&"double_kick_mid", 1, 9]])
+  ok   standing guard vs Double Kick (low): HIT
+  ok   standing guard vs Double Kick (mid): BLOCKED
+  ok   low guard: low kick blocked, mid kick still thrown ([[&"double_kick_low", 2, 0], [&"double_kick_mid", 2, 0]])
+  ok   interrupted at tick 4: no further strike (0 hits)
+  ok   interrupted at tick 10: no further strike (1 hits)
+  ok   interrupted at tick 15: no further strike (1 hits)
+  ok   interrupted at tick 19: no further strike (1 hits)
+RESULT: PASS (0 failures)

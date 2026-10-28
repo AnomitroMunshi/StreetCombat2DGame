@@ -49,6 +49,8 @@ func _initialize() -> void:
 	for style in StyleRegistry.all():
 		var type := style.resolve(&"x_move",false)
 		var attack := CombatData.get_attack(type)
+		var cooldown := 900 if style.id in [&"kickboxing",&"bangla_maar",&"muay_thai",&"taekwondo"] else 600
+		check(attack.x_cooldown_frames == cooldown, "%s selected cooldown %d ticks" % [style.id,cooldown])
 		check(attack.x_move and not attack.signature and attack.cancel_window == 0, "%s X independent committed move" % style.id)
 		var total := attack.damage
 		for sub in attack.sequence:
@@ -61,7 +63,7 @@ func _initialize() -> void:
 				var b := p[1]
 				press(a)
 				a.tick()
-				check(a.x_cooldown == 600 and a.focus == 0.0, "%s starts full cooldown without Focus" % style.id)
+				check(a.x_cooldown == cooldown and a.focus == 0.0, "%s starts full cooldown without Focus" % style.id)
 				var hits := run(a,b,110)
 				check(b.health == b.max_health - 18, "%s facing %d wall %s hits 18 (%s)" % [style.id,side,wall,hits])
 				var cd := a.x_cooldown
@@ -94,7 +96,7 @@ func _initialize() -> void:
 		raw.attack = type
 		p[0].push_intent(raw)
 		p[0].tick()
-		check(p[0].x_cooldown == 600, "%s direct AI attack pays cooldown" % style.id)
+		check(p[0].x_cooldown == cooldown, "%s direct AI attack pays cooldown" % style.id)
 		for sub in attack.sequence:
 			raw.attack = CombatData.type_for_id(sub)
 			p[0].push_intent(raw)
@@ -108,7 +110,7 @@ func _initialize() -> void:
 		p[1].call("_enter_state",Fighter.State.BLOCK)
 		p[1].parry_window = 4
 		var parried := p[1].receive_hit(strike,p[0],1)
-		check(parried == CombatData.HitResult.PARRIED and p[0].x_cooldown == 600 and not p[0].is_mid_sequence(), "%s parry interrupts with cooldown intact" % style.id)
+		check(parried == CombatData.HitResult.PARRIED and p[0].x_cooldown == cooldown and not p[0].is_mid_sequence(), "%s parry interrupts with cooldown intact" % style.id)
 		for f in p:
 			f.free()
 		p = pair(style,1)
@@ -117,20 +119,20 @@ func _initialize() -> void:
 		p[1].call("_enter_state",Fighter.State.DODGE)
 		p[1].state_frame = CombatData.DODGE_INVULN_START
 		var evaded := p[1].receive_hit(p[0].current_attack,p[0],1)
-		check(evaded == CombatData.HitResult.WHIFF and p[1].health == p[1].max_health and p[0].x_cooldown == 600, "%s evade avoids X without refund" % style.id)
+		check(evaded == CombatData.HitResult.WHIFF and p[1].health == p[1].max_health and p[0].x_cooldown == cooldown, "%s evade avoids X without refund" % style.id)
 		for f in p:
 			f.free()
 		p = pair(style,1)
 		p[1].position.x += 500.0
 		press(p[0])
 		p[0].tick()
-		run(p[0],p[1],599)
-		check(p[0].x_cooldown == 1 and p[1].health == p[1].max_health, "%s whiff still waits all 600 ticks" % style.id)
+		run(p[0],p[1],cooldown - 1)
+		check(p[0].x_cooldown == 1 and p[1].health == p[1].max_health, "%s whiff still waits its full cooldown" % style.id)
 		p[0].tick()
-		check(p[0].x_cooldown == 0, "cooldown expires after 600 ticks")
+		check(p[0].x_cooldown == 0, "cooldown expires at its authored duration")
 		press(p[0])
 		p[0].tick()
-		check(p[0].x_cooldown == 600, "ready X starts again")
+		check(p[0].x_cooldown == cooldown, "ready X starts again")
 		for f in p:
 			f.free()
 		p = pair(style,1)
@@ -163,12 +165,36 @@ func _initialize() -> void:
 		f.free()
 	var landing := pair(StyleRegistry.by_id(&"bangla_maar"),1)
 	press(landing[0])
+	for t in 60:
+		landing[0].tick()
+		if landing[0].state == Fighter.State.LAND:
+			break
+	check(landing[0].state == Fighter.State.LAND and landing[0].landing_attack_id == &"dropkick" and landing[0].stun_frames == 70, "dropkick lands into explicit 70-tick self-fall and get-up")
+	var committed := true
+	for t in 69:
+		var cancel := CombatData.Intent.new()
+		cancel.slot = &"light"
+		cancel.jump = true
+		cancel.dodge = 1
+		cancel.signature = true
+		cancel.block = true
+		landing[0].focus = CombatData.FOCUS_MAX
+		landing[0].push_intent(cancel)
+		landing[0].tick()
+		committed = committed and landing[0].state == Fighter.State.LAND and not landing[0].airborne and landing[0].landing_attack_id == &"dropkick" and not landing[0].is_evading()
+	check(committed, "attack/jump/dodge/signature/block cannot cancel the self-fall/get-up")
+	check(landing[0].x_cooldown > 0 and landing[0].focus == CombatData.FOCUS_MAX, "get-up retains cooldown without spending Focus")
+	landing[0].tick()
+	check(landing[0].state == Fighter.State.IDLE and landing[0].landing_attack_id == &"", "guard can resume only after full get-up")
+	for f in landing:
+		f.free()
+	landing = pair(StyleRegistry.by_id(&"bangla_maar"),1)
+	press(landing[0])
 	for t in 45:
 		landing[0].tick()
-	check(landing[0].state == Fighter.State.LAND and landing[0].landing_attack_id == &"dropkick", "dropkick retains landing visual during committed recovery")
-	for t in 50:
-		landing[0].tick()
-	check(landing[0].landing_attack_id == &"", "landing visual clears after recovery")
+	var recovery_cd := landing[0].x_cooldown
+	var recovery_hit := landing[0].receive_hit(CombatData.get_attack(CombatData.AttackType.LIGHT),landing[1],1)
+	check(recovery_hit == CombatData.HitResult.HIT and landing[0].state == Fighter.State.HITSTUN and landing[0].x_cooldown == recovery_cd, "self-fall/get-up stays vulnerable without cooldown refund")
 	for f in landing:
 		f.free()
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
