@@ -11,7 +11,7 @@ LOG="tests/last_run.log"
 : > "$LOG"
 say() { echo "$1" | tee -a "$LOG"; }
 SUITES=(core knockdown jump music announcer input controls stun bangla flow match ai_finisher finisher_contact
-	double_kick ai_defense movement styles training rounds)
+	double_kick ai_defense movement styles training rounds guard)
 total=${#SUITES[@]}
 failed=0
 passed_n=0

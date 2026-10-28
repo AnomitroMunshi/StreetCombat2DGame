@@ -571,9 +571,18 @@ The full table, including hitboxes, knockback and lunge, is in
   The high kick and high backfist whiff over you, but the jab, cross and mid kicks
   still hit. You can't walk while crouched, but you can attack, jump or dodge
   straight out of it.
-- **Low block (S + Shift):** sweeps and low kicks are low attacks, so a standing block does
-  not stop them. Only a low block does. The low block also blocks everything
-  else. The AI low-blocks when it sees a sweep coming.
+- **Guard heights:**
+  - **Low block (S + Shift):** stops everything except overheads. Sweeps and
+    low kicks are low attacks, so a standing block doesn't stop them; only a
+    low block does.
+  - **Standing block (Shift):** stops everything except lows.
+  - **Overheads** come down from above and beat a low block: the Overhand,
+    Axe Kick, Flying Axe Kick and Double-Hand Hammer, plus every attack thrown
+    while jumping.
+  - When your guard is at the wrong height, the attacker gets a **LOW!** or
+    **OVERHEAD!** popup.
+  - The AI low-blocks when it sees a sweep coming, and stands up to block
+    overheads.
 - **Changing sides:** there are three ways to get behind the opponent.
   - **Jump** over them from normal range. A forward jump clears them once your
     feet are 60 px up and your centre passes theirs.
@@ -1041,6 +1050,7 @@ GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.
 | `test_styles.gd` | Style registry (seven styles) and validation, Boxing cannot kick, air moves and combos follow the style, signatures, finishers, Focus (including from hits taken), AI rivals never use an illegal move and Bangla Maar's never spams the shove |
 | `test_movement.gd` | Jump cross-ups (both directions, moving rival, simultaneous jumps, walls), forward/backward roll, close slip-past, walking never passes, back hits after crossing, AI reaction delay |
 | `test_rounds.gd` | Best of 3: a finisher every round, full health and start marks between rounds, Focus carried over, ROUND 2 / FINAL ROUND then FIGHT, 2-0 ends the match, 1-1 goes to a final round, no rounds in training |
+| `test_guard.gd` | Guard heights: standing block stops everything but lows, low block everything but overheads (incl. any attack thrown in the air); LOW / OVERHEAD recorded |
 
 The V0.3 plan and audit are in `docs/V0.3_PLAN.md`. M6.5 design and merge
 review: `docs/M6.5_ARCHITECTURE.md`, `docs/M6.5_REVIEW.md`,

@@ -189,6 +189,11 @@ var _pause_message: Array = ["", ""]
 # cracks), whether the attacker was airborne last tick (takeoff dust), and the
 # last x of each skidding body (floor scuff marks).
 var _wall_dent := Vector2.INF
+## Effects held back a few game ticks (hitstop does not count), so a knockout
+## blow's own contact reads before what it sets off: [ticks left, Callable].
+var _fx_queue: Array = []
+## Ticks a final blow's wall impact follows the blow itself.
+const FINAL_WALL_FX_DELAY: int = 4
 var _fin_attacker_air: bool = false
 var _skid_prev_x: Dictionary = {}
 ## Developer overlay: recent contact points {pos, age, gap} (gap = distance from
@@ -325,6 +330,7 @@ func _physics_process(_delta: float) -> void:
 		elif _round_state == RoundState.KO:
 			_tick_round_over()
 	_tick_slowmo()
+	_tick_fx_queue()
 	if training != null and _round_state == RoundState.FIGHTING:
 		training.after_tick()
 	_trail_rolling_dust()
@@ -485,6 +491,7 @@ func _training_finisher(kind: FinisherDirector.Kind) -> void:
 
 ## Both fighters back on their marks, fresh, ready to go again.
 func _reset_training() -> void:
+	_fx_queue.clear()
 	_finisher = null
 	_follow_victim = false
 	_ko_focus = Vector2.INF
@@ -990,6 +997,10 @@ func _hit_feedback(result: CombatData.HitResult, attack: CombatData.Attack, step
 			audio.play(&"hit_heavy", 2.0)
 			hud.flash(0.5)
 			_camera_punch += 0.05
+	if (result == CombatData.HitResult.HIT or result == CombatData.HitResult.KO) and defender.last_hit_wrong_height != &"":
+		# Blocked at the wrong height: say why the guard did not hold.
+		hud.popup(attacker_of(defender), "LOW!" if defender.last_hit_wrong_height == &"low" else "OVERHEAD!",
+			Color(1.0, 0.6, 0.3))
 	if result == CombatData.HitResult.HIT and defender.last_hit_counter:
 		hud.popup(attacker_of(defender), "COUNTER", Color(1.0, 0.8, 0.35))
 		fx.ring(contact, Color(1.0, 0.8, 0.35), 34.0, 10)
@@ -1033,7 +1044,12 @@ func _finisher_feedback(event: Dictionary) -> void:
 	var pos: Vector2 = event["pos"]
 	var fdir := Vector2(float(event["dir"]), 0.0)
 	if event["wall"]:
-		_wall_impact(Vector2(_wall_face_x(event["dir"]), pos.y), power)
+		var wall_at := Vector2(_wall_face_x(event["dir"]), pos.y)
+		if event["final"]:
+			# The knockout blow reads first; the body hits the wall just after.
+			_fx_queue.append([FINAL_WALL_FX_DELAY, _wall_impact.bind(wall_at, power)])
+		else:
+			_wall_impact(wall_at, power)
 		_wall_dent = Vector2(_wall_face_x(event["dir"]) + event["dir"] * 10.0, pos.y)
 	if event.get("slam", false):
 		# Driven back into the wall (no blow): the wall and the body take it.
@@ -1147,6 +1163,17 @@ func _finisher_ambient() -> void:
 	_fin_attacker_air = atk.airborne
 
 
+## Runs held-back effects once their game ticks have passed (not in hitstop).
+func _tick_fx_queue() -> void:
+	if _hitstop > 0 or _fx_queue.is_empty():
+		return
+	for item in _fx_queue.duplicate():
+		item[0] -= 1
+		if item[0] <= 0:
+			_fx_queue.erase(item)
+			(item[1] as Callable).call()
+
+
 func _tick_slowmo() -> void:
 	if _slowmo_ticks <= 0:
 		return
@@ -1221,6 +1248,7 @@ func _tick_round_over() -> void:
 ## over), then "ROUND 2" / "FINAL ROUND" and FIGHT. The arena keeps its
 ## battle damage.
 func _next_round() -> void:
+	_fx_queue.clear()
 	round_number += 1
 	_finisher = null
 	_follow_victim = false
@@ -1519,7 +1547,10 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 	# colours, flung inward off the face.
 	fx.chunks(hit, 2 + power * 3, PILLAR_LIGHT, 3.0 + power * 1.4, -side * 0.9, 0.9, 4.0 + power, 8.0 + power * 2.0)
 	fx.chunks(hit, 1 + power * 2, PILLAR_DARK, 2.0 + power, -side * 0.6, 0.8, 4.0, 9.0)
-	fx.flare(hit, mini(power, 2) - 1, fx.GLOW_WARM)  # small: the cracks and chunks carry the hit
+	if power >= 3:
+		# Only the knockout impact flares; build-up hits against the wall
+		# keep the bodies in front of it readable (cracks and chunks carry them).
+		fx.flare(hit, 1, fx.GLOW_WARM)
 	fx.dust_cloud(hit + Vector2(-side * 14.0, 10.0), 0.6 + power * 0.3, 45, 4 + power * 2)
 	# Splinters of raw wood burst out of the dent, flung inward (more each hit).
 	fx.splinters(hit, 4 + power * 5, RAW_WOOD, 5.0 + power * 1.5, -side * 1.1, 0.9)

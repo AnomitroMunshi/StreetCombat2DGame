@@ -216,7 +216,9 @@ func strike(pos: Vector2, dir: Vector2, power: int, final: bool = false) -> void
 	_spawn({"kind": "shock", "glow": true, "pos": pos + dir * 4.0, "age": 0, "life": 7 + power * 2,
 		"color": STRIKE_HOT, "size": 16.0 + power * 12.0 + (34.0 if final else 0.0), "dir": base})
 	if final:
-		_spawn({"kind": "shock", "glow": true, "pos": pos + dir * 10.0, "age": 0, "life": 16,
+		# The big pressure ring opens past the contact, along the blow, so the
+		# striking hand/foot stays readable at the knockout frame.
+		_spawn({"kind": "shock", "glow": true, "pos": pos + dir * 40.0, "age": 0, "life": 16,
 			"color": STRIKE_WARM, "size": 120.0, "dir": base})
 		_spawn({"kind": "lens", "glow": true, "pos": pos, "age": 0, "life": 18, "color": STRIKE_HOT, "size": 360.0})
 
