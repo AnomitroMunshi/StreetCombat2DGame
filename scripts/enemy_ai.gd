@@ -58,8 +58,10 @@ var _defaults: Dictionary = {}
 ## Chance to time a perfect parry instead of blocking (only against attacks
 ## slow enough to read: startup at least reaction_frames + 2).
 @export_range(0.0, 1.0) var parry_chance: float = 0.15
-## Per-tick chance to fire the signature when Focus is full and in range.
-@export_range(0.0, 1.0) var signature_chance: float = 0.05
+## Per-tick chance to fire the signature when Focus is full and in range (an
+## opening, below, fires it outright). With a full meter the AI also walks into
+## signature range instead of waiting for the opponent to come to it.
+@export_range(0.0, 1.0) var signature_chance: float = 0.12
 ## Chance to punish a staggered (parried) or whiffing opponent.
 @export_range(0.0, 1.0) var punish_chance: float = 0.8
 ## Chance to uppercut a player who is jumping in close.
@@ -177,12 +179,13 @@ func compute_intent() -> CombatData.Intent:
 			intent.attack = aa
 			return intent
 
-	# Signature: at full Focus, in range, sometimes (never a guaranteed hit: it
-	# has a long startup the player can read, block, parry or dodge).
-	if _me.focus >= CombatData.FOCUS_MAX and _me.style != null and _me.style.signature != &"" and _me.can_act():
-		var sig := CombatData.get_attack(CombatData.type_for_id(_me.style.signature))
-		var reach := sig.hitbox.end.x + sig.lunge * sig.startup
-		if dist < reach and dist > 50.0 and _rng.randf() < signature_chance:
+	# Signature: at full Focus and in range, on an opening (guard broken,
+	# dizzy, staggered by a parry, stuck in a whiffed attack's recovery) or
+	# else soon (signature_chance per tick). Never a guaranteed hit: it has a
+	# long startup the player can read, block, parry or dodge.
+	if _has_signature_ready():
+		var opening := _target.state in [Fighter.State.BROKEN, Fighter.State.DIZZY, Fighter.State.STAGGER] 			or _target.get_phase() == Fighter.Phase.RECOVERY
+		if dist < _signature_reach() and dist > 50.0 and (opening or _rng.randf() < signature_chance):
 			intent.signature = true
 			_enter(AIState.SPACING, 30)
 			return intent
@@ -263,7 +266,11 @@ func compute_intent() -> CombatData.Intent:
 			intent.move = toward
 			if _plan_pending:
 				# Walking into range for a planned combo: throw it on arrival.
-				if _can_reach(_plan[0], dist) and _me.can_act():
+				if _has_signature_ready() and dist < _signature_reach():
+					_plan_pending = false  # the signature takes over (rolled every tick)
+					_plan.clear()
+					_enter(AIState.SPACING, _rng.randi_range(8, 14))
+				elif _can_reach(_plan[0], dist) and _me.can_act():
 					_plan_pending = false
 					_plan_index = 0
 					_last_pressed_swing = _me.swing_id
@@ -272,7 +279,8 @@ func compute_intent() -> CombatData.Intent:
 					_plan_pending = false
 					_plan.clear()
 					_think(dist)
-			elif dist <= preferred_range or _timer <= 0:
+			elif _timer <= 0 or (dist <= preferred_range and not (_has_signature_ready() and dist >= _signature_reach())):
+				# (A full meter keeps closing until the signature reaches.)
 				_think(dist)
 		AIState.SPACING:
 			# Pressure: close in steadily, only give ground when crowded.
@@ -342,6 +350,17 @@ func _next_attack() -> CombatData.AttackType:
 	return type
 
 
+## Full Focus, a signature to throw and free to act.
+func _has_signature_ready() -> bool:
+	return _me.focus >= CombatData.FOCUS_MAX and _me.style != null and _me.style.signature != &"" and _me.can_act()
+
+
+## How far the signature reaches from a standstill (hitbox plus its lunge).
+func _signature_reach() -> float:
+	var sig := CombatData.get_attack(CombatData.type_for_id(_me.style.signature))
+	return sig.hitbox.end.x + sig.lunge * sig.startup
+
+
 func _think(dist: float) -> void:
 	if not _me.can_act():
 		_enter(AIState.IDLE, 3)
@@ -351,6 +370,19 @@ func _think(dist: float) -> void:
 		_enter(AIState.SPACING, _rng.randi_range(10, 20))
 		return
 	var roll := _rng.randf()
+	if _has_signature_ready():
+		# Meter full: get into signature range (or out of point-blank) so it
+		# can come out, rather than waiting for the opponent to wander in.
+		if dist >= _signature_reach() and roll < 0.85:
+			_enter(AIState.APPROACH, _rng.randi_range(20, 40))
+			return
+		if dist <= 50.0:
+			_enter(AIState.RETREAT, _rng.randi_range(6, 10))
+			return
+		if dist < _signature_reach():
+			# In range: hold a moment for the signature (rolled every tick).
+			_enter(AIState.SPACING, _rng.randi_range(8, 14))
+			return
 	if dist > preferred_range + 40.0:
 		if dist < 230.0 and roll < jump_in_chance:
 			_jump_pressed = false
