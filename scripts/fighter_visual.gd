@@ -404,6 +404,30 @@ var _fax_apex := PackedFloat32Array([-0.5, 0.4, 1.5, 2.2, 0.0, 2.4, 2.65, 2.7, 0
 var _fax_chop := PackedFloat32Array([0.25, 0.15, 1.1, 2.6, 0.6, 2.8, 1.85, 1.7, 0.2, -1.3, 8.0, 0.0, 0.8])
 var _fax_follow := PackedFloat32Array([0.4, 0.2, 1.0, 2.7, 0.6, 2.8, 1.45, 1.1, 0.1, -1.3, 10.0, 0.0, 0.8])
 var _fax_land := PackedFloat32Array([0.35, 0.2, 1.0, 2.8, 0.6, 2.9, 1.1, -0.6, -0.45, -1.1, 2.0, 0.0, 0.3])
+# X moves have their own full-body timelines. The two Dempsey hooks and three
+# Taekwondo kicks retain the same authored chamber across sequence boundaries.
+var _x_dip_left := PackedFloat32Array([0.48, -0.2, 0.9, 2.9, 0.7, 2.7, 0.95, -0.9, -0.6, -1.05, -12.0, 0.0, 0.0, 15.0])
+var _x_dip_right := PackedFloat32Array([0.32, -0.2, 0.7, 2.75, 1.1, 2.95, 0.85, -0.75, -0.65, -1.0, 5.0, 0.0, 0.4, -10.0])
+var _x_hook_left := PackedFloat32Array([0.12, -0.1, 1.2, 2.55, 0.8, 2.9, 0.5, -0.3, -0.45, -0.65, 8.0, 0.0, 0.7, 18.0])
+var _x_hook_right := PackedFloat32Array([0.18, -0.15, 0.9, 2.8, 1.2, 2.55, 0.6, -0.25, -0.35, -0.7, 15.0, 0.0, 0.8, -16.0])
+var _x_retreat := PackedFloat32Array([-0.18, 0.1, 1.0, 2.9, 0.8, 2.8, 0.4, -0.4, -0.65, -0.8, -10.0, 0.0, 0.0, 8.0])
+var _x_elbow_load := PackedFloat32Array([0.12, -0.1, 0.9, 3.45, 1.0, 2.9, 1.5, -1.0, 0.8, -1.25, -2.0, 0.0, 0.0, 13.0])
+var _x_elbow_hit := PackedFloat32Array([0.22, -0.2, 0.95, 3.45, 1.0, 2.9, 1.0, -0.8, -0.5, -1.0, 8.0, 0.0, 0.0, 15.0])
+var _x_backfist_coil := PackedFloat32Array([0.12, -0.1, 0.9, 2.8, 0.5, 3.3, 0.55, -0.5, -0.65, -0.8, -8.0, 0.0, 0.5, -12.0])
+var _x_backfist_hit := PackedFloat32Array([0.2, -0.1, 0.8, 2.85, 1.85, 1.9, 0.65, -0.4, -0.5, -0.7, 24.0, 0.0, 1.0, -14.0])
+var _x_butterfly_dip := PackedFloat32Array([1.1, -0.4, 0.4, 1.1, -0.8, -0.2, 1.0, -0.8, -0.7, -1.15, 8.0, 0.0, 0.4, 14.0])
+var _x_butterfly_open := PackedFloat32Array([-1.25, 0.25, -0.9, -0.5, -2.3, -1.8, 1.15, 1.3, -0.9, -1.0, 0.0, 0.0, 0.0, 12.0])
+var _x_butterfly_hit := PackedFloat32Array([-1.35, 0.25, -1.2, -0.8, -2.4, -1.9, 1.5, 1.55, -0.8, -1.05, 0.0, 0.0, 0.0, -10.0])
+var _x_triple_chamber := PackedFloat32Array([-0.18, 0.1, 1.0, 2.8, 0.75, 2.9, 2.15, -0.4, -0.2, -0.35, -5.0, 0.0, 0.5, 10.0])
+var _x_triple_body_one := PackedFloat32Array([-0.25, 0.1, 1.0, 2.75, 0.7, 2.85, 1.9, 1.85, -0.15, -0.3, 2.0, 0.0, 0.75, 12.0])
+var _x_triple_body_two := PackedFloat32Array([-0.32, 0.1, 1.05, 2.8, 0.6, 2.8, 1.95, 1.9, -0.15, -0.3, 4.0, 0.0, 0.9, 8.0])
+var _x_triple_head := PackedFloat32Array([-0.5, 0.2, 1.0, 2.7, 0.5, 2.85, 2.5, 2.4, -0.1, -0.25, 30.0, 0.0, 1.0, 10.0])
+var _x_big_chamber := PackedFloat32Array([-0.25, 0.15, 1.0, 2.8, 0.7, 2.9, 2.0, -0.5, -0.3, -0.5, -8.0, 0.0, 0.3, 7.0])
+var _x_big_hit := PackedFloat32Array([-0.4, 0.1, 1.1, 2.8, 0.7, 2.9, 1.9, 1.85, -0.25, -0.45, 12.0, 0.0, 0.7, 8.0])
+var _x_drop_load := PackedFloat32Array([-0.3, 0.15, -0.2, 1.0, -0.5, 0.8, 1.9, -0.9, 1.75, -1.0, -2.0, 0.0, 0.0, 7.0])
+var _x_drop_hit := PackedFloat32Array([-1.35, 0.15, -1.8, -1.3, -1.6, -1.1, 1.5, 1.55, 1.45, 1.5, 0.0, 0.0, 0.0, 12.0])
+var _x_drop_fall := PackedFloat32Array([-1.45, 0.25, -1.8, -1.3, -1.6, -1.1, 1.1, 1.3, 1.0, 1.2, -4.0, 0.0, 0.0, 8.0])
+var _x_drop_sit := PackedFloat32Array([-0.75, 0.2, -0.4, 0.1, -0.7, -0.1, 1.0, 0.9, 0.9, 0.8, -6.0, 0.0, 0.0, 8.0])
 # Dizzy: guard dropped, knees soft, head lolling (wobbled in _dizzy_pose).
 var _dizzy := PackedFloat32Array([0.28, 0.5, 0.45, 1.1, 0.35, 0.9, 0.75, -0.35, -0.45, -0.75, -3.0, 0.0, 0.0, 2.0])
 # --- Victory routines (by style; see _victory_pose) ------------------------------
@@ -1167,6 +1191,7 @@ func _ready() -> void:
 			[S, 0.55, _lpalm_load, EASE_SMOOTH], [A, 0.0, _lpalm_hit, EASE_IN],
 			[A, 1.0, _over(_lpalm_hit, _lpalm_load), EASE_LINEAR], [R, 0.35, _lpalm_load, EASE_OUT]],
 	}
+	_build_x_moves()
 	_victory = {
 		&"boxing": [[0, null], [12, _win_box_raise], [40, _win_box_raise], [50, _win_box_tap], [58, _win_box_tap],
 			[68, _win_box_raise]],
@@ -1728,6 +1753,8 @@ func _target_pose(t: float) -> PackedFloat32Array:
 			squat[TORSO] += 0.08 * float(fighter.move_input * fighter.facing)
 			return squat
 		Fighter.State.LAND:
+			if fighter.landing_attack_id == &"dropkick":
+				return _dropkick_landing(t)
 			return _blend(_land, _guard, smoothstep(0.0, 1.0, t / maxf(float(fighter.stun_frames), 1.0)))
 		Fighter.State.KO:
 			if fighter.script_pose == &"slumped":
@@ -1957,6 +1984,10 @@ func _is_back_kick() -> bool:
 ## through the recovery.
 func _back_turn(t: float) -> float:
 	var attack := fighter.current_attack
+	if attack.id in [&"step_back_spinning_backfist", &"butterfly_kick"]:
+		# The retreat/dip reads first; a complete rotation presents the striking
+		# hand/foot toward the opponent on the first contact frame.
+		return 2.0 * smoothstep(attack.startup * 0.35, float(attack.startup), t)
 	if attack.spin_turns > 1.0:
 		# Multi-turn spins (540): odd half-turns by contact (back to the target
 		# as the heel lands), then the last half-turn round to face again.
@@ -2044,11 +2075,86 @@ func _air_pose() -> PackedFloat32Array:
 	return pose
 
 
+## Dropkick lands on the back/hip, absorbs the fall, sits up, then rises.
+## LAND owns the remaining committed recovery after the aerial attack clears.
+func _dropkick_landing(t: float) -> PackedFloat32Array:
+	var u := t / maxf(float(fighter.stun_frames), 1.0)
+	if u < 0.15:
+		return _blend(_x_drop_hit, _x_drop_fall, smoothstep(0.0, 0.15, u))
+	if u < 0.35:
+		return _blend(_x_drop_fall, _x_drop_sit, smoothstep(0.15, 0.35, u))
+	if u < 0.6:
+		return _x_drop_sit
+	if u < 0.85:
+		return _blend(_x_drop_sit, _land_crouch, smoothstep(0.6, 0.85, u))
+	return _blend(_land_crouch, _guard, smoothstep(0.85, 1.0, u))
+
+
+## Register by permanent id so these timelines stay coupled to the data table.
+func _build_x_moves() -> void:
+	var timelines := {
+		&"dempsey_hook_left": [
+			[S, 0.28, _x_dip_left, EASE_SMOOTH], [S, 0.6, _x_dip_right, EASE_SMOOTH],
+			[A, 0.0, _x_hook_left, EASE_IN], [A, 1.0, _x_hook_left, EASE_LINEAR], [R, 1.0, _x_dip_right, EASE_SMOOTH]],
+		&"dempsey_hook_right": [
+			[S, 0.45, _x_dip_right, EASE_SMOOTH], [A, 0.0, _x_hook_right, EASE_IN],
+			[A, 1.0, _x_hook_right, EASE_LINEAR], [R, 0.45, _x_dip_left, EASE_OUT]],
+		&"retreating_jump_elbow": [
+			[S, 0.35, _x_retreat, EASE_SMOOTH], [S, 0.6, _jump_squat, EASE_SMOOTH],
+			[S, 0.82, _x_elbow_load, EASE_OUT], [A, 0.0, _x_elbow_hit, EASE_IN],
+			[A, 1.0, _x_elbow_hit, EASE_LINEAR], [R, 0.35, _land_crouch, EASE_SMOOTH], [R, 0.65, _land_crouch, EASE_LINEAR]],
+		&"step_back_spinning_backfist": [
+			[S, 0.35, _x_retreat, EASE_SMOOTH], [S, 0.65, _x_backfist_coil, EASE_SMOOTH],
+			[A, 0.0, _x_backfist_hit, EASE_IN], [A, 1.0, _x_backfist_hit, EASE_LINEAR],
+			[R, 0.4, _x_backfist_coil, EASE_SMOOTH]],
+		&"butterfly_kick": [
+			[S, 0.4, _x_butterfly_dip, EASE_SMOOTH], [S, 0.8, _x_butterfly_open, EASE_SMOOTH],
+			[A, 0.0, _x_butterfly_hit, EASE_IN], [A, 1.0, _x_butterfly_hit, EASE_LINEAR],
+			[R, 0.25, _x_butterfly_open, EASE_OUT], [R, 0.55, _land_crouch, EASE_SMOOTH]],
+		&"triple_kick_body_one": [
+			[S, 0.65, _x_triple_chamber, EASE_SMOOTH], [A, 0.0, _x_triple_body_one, EASE_IN],
+			[A, 1.0, _x_triple_body_one, EASE_LINEAR], [R, 1.0, _x_triple_chamber, EASE_OUT]],
+		&"triple_kick_body_two": [
+			[S, 0.45, _x_triple_chamber, EASE_OUT], [A, 0.0, _x_triple_body_two, EASE_IN],
+			[A, 1.0, _x_triple_body_two, EASE_LINEAR], [R, 1.0, _x_triple_chamber, EASE_OUT]],
+		&"triple_kick_head": [
+			[S, 0.45, _x_triple_chamber, EASE_OUT], [S, 0.85, _x_triple_head, EASE_IN],
+			[A, 0.0, _x_triple_head, EASE_LINEAR],
+			[A, 1.0, _x_triple_head, EASE_LINEAR], [R, 0.45, _x_triple_chamber, EASE_OUT]],
+		&"big_foot": [
+			[S, 0.6, _x_big_chamber, EASE_SMOOTH], [S, 0.85, _x_big_chamber, EASE_LINEAR],
+			[A, 0.0, _x_big_hit, EASE_IN], [A, 1.0, _x_big_hit, EASE_LINEAR],
+			[R, 0.45, _x_big_chamber, EASE_SMOOTH]],
+		&"dropkick": [
+			[S, 0.4, _jump_squat, EASE_SMOOTH], [S, 0.75, _x_drop_load, EASE_SMOOTH],
+			[A, 0.0, _x_drop_hit, EASE_IN], [A, 1.0, _x_drop_hit, EASE_LINEAR],
+			[R, 0.22, _x_drop_fall, EASE_SMOOTH], [R, 0.45, _x_drop_sit, EASE_SMOOTH],
+			[R, 0.65, _x_drop_sit, EASE_LINEAR], [R, 0.85, _land_crouch, EASE_SMOOTH]],
+	}
+	for id: StringName in timelines:
+		var type := CombatData.type_for_id(id)
+		if type != CombatData.AttackType.NONE:
+			_moves[type] = timelines[id]
+
+
+static func _is_x_strike(attack: CombatData.Attack) -> bool:
+	return attack.id in [&"dempsey_hook_left", &"dempsey_hook_right", &"retreating_jump_elbow",
+		&"step_back_spinning_backfist", &"butterfly_kick", &"triple_kick_body_one",
+		&"triple_kick_body_two", &"triple_kick_head", &"big_foot", &"dropkick"]
+
+
 ## Attack pose: the move's keyframes plus whole-body mechanics.
 func _attack_pose(t: float) -> PackedFloat32Array:
 	if fighter.current_attack == null:
 		return _guard
-	return _mechanics(_attack_keys(t), t)
+	var keys := _attack_keys(t)
+	var attack := fighter.current_attack
+	if _is_x_strike(attack):
+		if attack.id in [&"dempsey_hook_left", &"dempsey_hook_right"]:
+			return _aim_bent_arm(keys, attack.id == &"dempsey_hook_left", true,
+				CombatData.ImpactKind.HOOK, maxf(_drive(t, attack), 0.0))
+		return keys
+	return _mechanics(keys, t)
 
 
 ## Drive of a strike over time: a small load against the strike (anticipation),
@@ -2217,7 +2323,7 @@ func _attack_keys(t: float) -> PackedFloat32Array:
 	var keys: Array = _kit_moves.get(_kit, {}).get(attack.type, _moves.get(attack.type, []))
 	if _rear_palm_swing():
 		keys = _kf_rear_palm_keys
-	if _kit in FLOW_KITS:
+	if _kit in FLOW_KITS and not _is_x_strike(attack):
 		return _flow_keys(keys, t, rest)
 	var prev_t := 0.0
 	var prev_pose := _swing_from
@@ -3295,6 +3401,8 @@ func _draw_boxing_kit(j: PackedVector2Array, accent: Color) -> void:
 
 ## States where the feet are planted on the floor (legs solved by IK).
 func _wants_plant() -> bool:
+	if fighter.state == Fighter.State.LAND and fighter.landing_attack_id == &"dropkick":
+		return false  # a back/hip landing cannot plant both feet upright
 	if fighter.airborne or _rag_on or _rag_blend > 0.0 or _tuck_amount > 0.0:
 		return false
 	if absf(wrapf(_spin_angle, -PI, PI)) > 0.01 or fighter.script_flip:
@@ -3500,6 +3608,13 @@ func get_strike_point() -> Vector2:
 
 ## Which joint leads an attack (the one that lands).
 static func _attack_joint(type: CombatData.AttackType) -> int:
+	match CombatData.id_for_type(type):
+		&"dempsey_hook_right", &"step_back_spinning_backfist":
+			return J_HAND_B
+		&"retreating_jump_elbow":
+			return J_ELBOW_F
+		&"butterfly_kick", &"triple_kick_body_one", &"triple_kick_body_two", &"triple_kick_head", &"big_foot", &"dropkick":
+			return J_FOOT_F
 	match type:
 		CombatData.AttackType.KICK, CombatData.AttackType.FRONT_KICK, CombatData.AttackType.JUMP_KICK, \
 				CombatData.AttackType.SWEEP, CombatData.AttackType.HIGH_KICK, CombatData.AttackType.AXE_KICK, \
@@ -3574,7 +3689,7 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 		return pose
 	# Bisect the blend toward the stance: the largest extension that still fits.
 	var base := _air_pose() if fighter.airborne else _guard
-	if idx in [J_HAND_F, J_HAND_B, J_ELBOW_B]:
+	if idx in [J_HAND_F, J_HAND_B, J_ELBOW_F, J_ELBOW_B]:
 		# Punches make room by sitting back from the shoulder; if that is not
 		# enough the glove stays on its line to the target and the elbow bends
 		# under it (a short punch). Blending the arm toward the guard instead
@@ -3584,12 +3699,12 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 		sit[TORSO] -= PUNCH_ROOM_LEAN
 		if _solve_joints(sit)[idx].x * dir <= limit:
 			base = sit
-		elif idx != J_ELBOW_B and dir > 0.0:
+		elif idx not in [J_ELBOW_F, J_ELBOW_B] and dir > 0.0:
 			return _short_punch(sit, idx, limit)
 		else:
 			pose = sit
 			base = pose.duplicate()
-			base[UA_B] = pose[UA_B] - 1.1
+			base[UA_F if idx == J_ELBOW_F else UA_B] -= 1.1
 	elif idx == J_FOOT_F or idx == J_FOOT_B:
 		# Kicks first make room the way a fighter does: hips back and torso
 		# leaning away, the leg staying extended. Only if that is not enough
@@ -3620,7 +3735,13 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 			lo = mid
 		else:
 			hi = mid
-	return _blend(pose, base, hi)
+	var limited := _blend(pose, base, hi)
+	if fighter.current_attack.id == &"dropkick":
+		# Both soles travel together even when close contact re-chambers the
+		# leading knee; the rear foot must not pass through the target.
+		limited[TH_B] = limited[TH_F] - 0.05
+		limited[SH_B] = limited[SH_F] - 0.05
+	return limited
 
 
 ## A strike aimed at head height, measured from the floor (a leaping strike's

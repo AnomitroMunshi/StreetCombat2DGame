@@ -1,7 +1,7 @@
 extends SceneTree
 ## Simplified controls: J light, K heavy, L technique, W / S + J / K variants,
-## F signature, Space jump, Shift block / parry, double-tap A / D dash.
-## Checks the published mapping for all six styles in both facing directions
+## F signature, X cooldown move, Space jump, Shift block / parry, double-tap A / D dash.
+## Checks the published mapping for all seven styles in both facing directions
 ## (independently of the style files), every combo branch, the non-striking
 ## techniques, and through the real scene: dash rules, movement + attack,
 ## block, low block, parry, jump + air attack, signature and restart.
@@ -12,25 +12,25 @@ var _fails: int = 0
 const SPEC: Dictionary = {
 	&"boxing": {&"light": &"jab", &"heavy": &"cross", &"technique": &"bob_weave", &"up_light": &"uppercut",
 		&"up_heavy": &"overhand", &"down_light": &"body_hook", &"down_heavy": &"slip_counter", &"F": &"gazelle_hook",
-		&"power_light": &"power_uppercut", &"power_heavy": &"superman_punch"},
+		&"power_light": &"power_uppercut", &"power_heavy": &"superman_punch", &"x_move": &"dempsey_roll"},
 	&"muay_thai": {&"light": &"jab", &"heavy": &"body_roundhouse", &"technique": &"elbow", &"up_light": &"rising_elbow",
 		&"up_heavy": &"high_kick", &"down_light": &"body_straight", &"down_heavy": &"low_roundhouse", &"F": &"flying_knee",
-		&"power_light": &"jumping_elbow", &"power_heavy": &"flying_knee_face"},
+		&"power_light": &"jumping_elbow", &"power_heavy": &"flying_knee_face", &"x_move": &"retreating_jump_elbow"},
 	&"karate": {&"light": &"jab", &"heavy": &"reverse_punch", &"technique": &"knife_hand", &"up_light": &"rising_punch",
 		&"up_heavy": &"high_kick", &"down_light": &"body_punch", &"down_heavy": &"low_side_kick", &"F": &"perfect_gyaku",
-		&"power_light": &"jumping_reverse_punch", &"power_heavy": &"flying_side_kick"},
+		&"power_light": &"jumping_reverse_punch", &"power_heavy": &"flying_side_kick", &"x_move": &"step_back_spinning_backfist"},
 	&"kung_fu": {&"light": &"straight_palm", &"heavy": &"double_palm", &"technique": &"front_kick",
 		&"up_light": &"rising_palm", &"up_heavy": &"backhand", &"down_light": &"low_palm", &"down_heavy": &"sweep",
-		&"F": &"palm_barrage", &"power_light": &"leaping_spin_backfist", &"power_heavy": &"flying_axe_kick"},
+		&"F": &"palm_barrage", &"power_light": &"leaping_spin_backfist", &"power_heavy": &"flying_axe_kick", &"x_move": &"butterfly_kick"},
 	&"taekwondo": {&"light": &"jab", &"heavy": &"side_kick", &"technique": &"double_kick", &"up_light": &"rising_punch",
 		&"up_heavy": &"high_kick", &"down_light": &"body_punch", &"down_heavy": &"axe_kick", &"F": &"tornado_540",
-		&"power_light": &"jumping_backfist", &"power_heavy": &"jumping_spin_hook"},
+		&"power_light": &"jumping_backfist", &"power_heavy": &"jumping_spin_hook", &"x_move": &"triple_kick"},
 	&"kickboxing": {&"light": &"jab", &"heavy": &"cross", &"technique": &"body_roundhouse", &"up_light": &"uppercut",
 		&"up_heavy": &"high_kick", &"down_light": &"body_hook", &"down_heavy": &"low_roundhouse", &"F": &"breaker_combo",
-		&"power_light": &"superman_punch", &"power_heavy": &"leaping_roundhouse"},
+		&"power_light": &"superman_punch", &"power_heavy": &"leaping_roundhouse", &"x_move": &"big_foot"},
 	&"bangla_maar": {&"light": &"street_punch", &"heavy": &"thrust_kick", &"technique": &"jor_dhakka",
 		&"up_light": &"head_elbow", &"up_heavy": &"hammer_fist", &"down_light": &"stomach_shot", &"down_heavy": &"leg_kick",
-		&"F": &"belly_bomb", &"power_light": &"flying_slap", &"power_heavy": &"flying_chest_kick"},
+		&"F": &"belly_bomb", &"power_light": &"flying_slap", &"power_heavy": &"flying_chest_kick", &"x_move": &"dropkick"},
 }
 ## Names the move list must show for each style (its own name for shared moves).
 const NAMES: Dictionary = {

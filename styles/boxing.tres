@@ -21,6 +21,7 @@ ai_tuning = {
 "parry_chance": 0.28
 }
 input_map = {
+&"x_move": &"dempsey_roll",
 &"power_heavy": &"superman_punch",
 &"power_light": &"power_uppercut",
 &"down_heavy": &"slip_counter",

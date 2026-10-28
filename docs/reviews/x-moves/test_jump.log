@@ -1,0 +1,51 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+
+[facing right]
+
+  ok   neutral apex ~100 px (100)
+
+  ok   about 30 ticks in the air (30)
+
+  ok   neutral jump stays put (0.0)
+
+  ok   forward jump ~135 px (130)
+
+  ok   back jump ~95 px, shorter (-93)
+
+  ok   reversing at the apex slows the jump, never snaps round (100)
+
+  ok   releasing keeps most of the momentum (122)
+
+[facing left]
+
+  ok   neutral apex ~100 px (100)
+
+  ok   about 30 ticks in the air (30)
+
+  ok   neutral jump stays put (-0.0)
+
+  ok   forward jump ~135 px (130)
+
+  ok   back jump ~95 px, shorter (-93)
+
+  ok   reversing at the apex slows the jump, never snaps round (100)
+
+  ok   releasing keeps most of the momentum (122)
+
+[jump-ins connect]
+
+  ok   jump-in light from 130 px connects (4 of 7 timings, facing 1)
+
+  ok   jump-in heavy from 130 px connects (7 of 7 timings, facing 1)
+
+  ok   jump-in light from 130 px connects (4 of 7 timings, facing -1)
+
+  ok   jump-in heavy from 130 px connects (7 of 7 timings, facing -1)
+
+[knockbacks keep the shared physics]
+
+  ok   a -10 launch peaks ~53 px under the shared gravity (48)
+
+RESULT: PASS (0 failures)

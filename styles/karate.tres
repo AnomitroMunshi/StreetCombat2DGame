@@ -25,6 +25,7 @@ move_names = {
 &"jab": "Straight Punch"
 }
 input_map = {
+&"x_move": &"step_back_spinning_backfist",
 &"power_heavy": &"flying_side_kick",
 &"power_light": &"jumping_reverse_punch",
 &"down_heavy": &"low_side_kick",

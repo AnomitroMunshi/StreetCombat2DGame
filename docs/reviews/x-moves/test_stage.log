@@ -1,0 +1,45 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+
+[who gets the street]
+
+  ok   style select: still the dojo
+
+  ok   player Bangla Maar: the Kolkata street (west_bengal_howrah)
+
+  ok   stone damage decals on the street
+
+  ok   back to style select: the dojo
+
+  ok   a Bangla Maar rival alone does not unlock it
+
+  ok   wood damage decals in the dojo
+
+  ok   training as Bangla Maar: the dojo
+
+[walls and props]
+
+  ok   the stall and the shopfront stand at the arena's walls
+
+  ok   props stand on the street (bench foot 572, crate foot 572)
+
+  ok   a light landing breaks nothing
+
+  ok   a far impact breaks nothing
+
+  ok   a strong landing by the bench breaks it, and the cups on it fall too (2 broken)
+
+  ok   a broken prop never breaks again
+
+  ok   a reset restores the props
+
+RESULT: PASS (0 failures)
+
+WARNING: 10 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+
+   at: cleanup (core/object/object.cpp:2536)
+
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+
+   at: clear (core/io/resource.cpp:822)

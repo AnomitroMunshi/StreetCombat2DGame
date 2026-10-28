@@ -1,0 +1,143 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+
+[every stun move, both directions]
+
+  ok   overhand stuns for 1-2 s (75 ticks)
+
+  ok   overhand facing 1: dizzy after the hit reaction, helpless, then recovers (35 ticks)
+
+  ok   overhand stuns for 1-2 s (75 ticks)
+
+  ok   overhand facing -1: dizzy after the hit reaction, helpless, then recovers (35 ticks)
+
+  ok   overhand: same either way ([35, 35])
+
+  ok   superman_punch stuns for 1-2 s (60 ticks)
+
+  ok   superman_punch facing 1: dizzy after the hit reaction, helpless, then recovers (31 ticks)
+
+  ok   superman_punch stuns for 1-2 s (60 ticks)
+
+  ok   superman_punch facing -1: dizzy after the hit reaction, helpless, then recovers (31 ticks)
+
+  ok   superman_punch: same either way ([31, 31])
+
+  ok   jumping_elbow stuns for 1-2 s (80 ticks)
+
+  ok   jumping_elbow facing 1: dizzy after the hit reaction, helpless, then recovers (36 ticks)
+
+  ok   jumping_elbow stuns for 1-2 s (80 ticks)
+
+  ok   jumping_elbow facing -1: dizzy after the hit reaction, helpless, then recovers (36 ticks)
+
+  ok   jumping_elbow: same either way ([36, 36])
+
+  ok   flying_knee_face stuns for 1-2 s (70 ticks)
+
+  ok   flying_knee_face facing 1: dizzy after the hit reaction, helpless, then recovers (34 ticks)
+
+  ok   flying_knee_face stuns for 1-2 s (70 ticks)
+
+  ok   flying_knee_face facing -1: dizzy after the hit reaction, helpless, then recovers (34 ticks)
+
+  ok   flying_knee_face: same either way ([34, 34])
+
+  ok   flying_side_kick stuns for 1-2 s (70 ticks)
+
+  ok   flying_side_kick facing 1: dizzy after the hit reaction, helpless, then recovers (34 ticks)
+
+  ok   flying_side_kick stuns for 1-2 s (70 ticks)
+
+  ok   flying_side_kick facing -1: dizzy after the hit reaction, helpless, then recovers (34 ticks)
+
+  ok   flying_side_kick: same either way ([34, 34])
+
+  ok   jumping_reverse_punch stuns for 1-2 s (60 ticks)
+
+  ok   jumping_reverse_punch facing 1: dizzy after the hit reaction, helpless, then recovers (31 ticks)
+
+  ok   jumping_reverse_punch stuns for 1-2 s (60 ticks)
+
+  ok   jumping_reverse_punch facing -1: dizzy after the hit reaction, helpless, then recovers (31 ticks)
+
+  ok   jumping_reverse_punch: same either way ([31, 31])
+
+  ok   flying_axe_kick stuns for 1-2 s (100 ticks)
+
+  ok   flying_axe_kick facing 1: dizzy after the hit reaction, helpless, then recovers (41 ticks)
+
+  ok   flying_axe_kick stuns for 1-2 s (100 ticks)
+
+  ok   flying_axe_kick facing -1: dizzy after the hit reaction, helpless, then recovers (41 ticks)
+
+  ok   flying_axe_kick: same either way ([41, 41])
+
+  ok   leaping_spin_backfist stuns for 1-2 s (60 ticks)
+
+  ok   leaping_spin_backfist facing 1: dizzy after the hit reaction, helpless, then recovers (31 ticks)
+
+  ok   leaping_spin_backfist stuns for 1-2 s (60 ticks)
+
+  ok   leaping_spin_backfist facing -1: dizzy after the hit reaction, helpless, then recovers (31 ticks)
+
+  ok   leaping_spin_backfist: same either way ([31, 31])
+
+  ok   axe_kick stuns for 1-2 s (75 ticks)
+
+  ok   axe_kick facing 1: dizzy after the hit reaction, helpless, then recovers (35 ticks)
+
+  ok   axe_kick stuns for 1-2 s (75 ticks)
+
+  ok   axe_kick facing -1: dizzy after the hit reaction, helpless, then recovers (35 ticks)
+
+  ok   axe_kick: same either way ([35, 35])
+
+  ok   jumping_spin_hook stuns for 1-2 s (80 ticks)
+
+  ok   jumping_spin_hook facing 1: dizzy after the hit reaction, helpless, then recovers (36 ticks)
+
+  ok   jumping_spin_hook stuns for 1-2 s (80 ticks)
+
+  ok   jumping_spin_hook facing -1: dizzy after the hit reaction, helpless, then recovers (36 ticks)
+
+  ok   jumping_spin_hook: same either way ([36, 36])
+
+  ok   leaping_roundhouse stuns for 1-2 s (75 ticks)
+
+  ok   leaping_roundhouse facing 1: dizzy after the hit reaction, helpless, then recovers (35 ticks)
+
+  ok   leaping_roundhouse stuns for 1-2 s (75 ticks)
+
+  ok   leaping_roundhouse facing -1: dizzy after the hit reaction, helpless, then recovers (35 ticks)
+
+  ok   leaping_roundhouse: same either way ([35, 35])
+
+[dizzy rules]
+
+  ok   overhand: dizzy once the reaction ends (DIZZY)
+
+  ok   a dizzy fighter can be hit (no guard)
+
+  ok   each hit drains the stun (59 -> 41)
+
+  ok   after that hit's reaction it is dizzy again (DIZZY)
+
+  ok   a stun move on a dizzy fighter never re-stuns
+
+  ok   a knockdown clears the stun
+
+  ok   recovering grants stun immunity (179)
+
+  ok   a stun move during the immunity does not stun
+
+  ok   a blocked stun move never stuns
+
+  ok   a move without stun never stuns
+
+[mashing]
+
+  ok   mashing shortens the stun but keeps the shake-off (75 -> 35 ticks)
+
+RESULT: PASS (0 failures)

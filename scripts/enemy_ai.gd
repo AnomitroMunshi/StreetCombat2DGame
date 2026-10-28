@@ -190,6 +190,25 @@ func compute_intent() -> CombatData.Intent:
 			_enter(AIState.SPACING, 30)
 			return intent
 
+	# X uses the same public readiness and range constraints as a player.
+	# Full-Focus signatures above keep their opportunity; X then takes an
+	# available opening without reading inputs or gaining defensive armour.
+	if not _has_signature_ready() and _me.x_cooldown <= 0 and _me.style != null and _me.can_act() and not _me.airborne and _target.can_be_hit() and not _target.airborne:
+		var x_type := _me.style.resolve(&"x_move", false)
+		if x_type != CombatData.AttackType.NONE:
+			var move := CombatData.get_attack(x_type)
+			if not move.sequence.is_empty():
+				move = CombatData.get_attack(CombatData.type_for_id(move.sequence[0]))
+			var reach := move.hitbox.end.x + move.step + move.lunge * move.startup - move.backstep
+			if move.leap_vy != 0.0:
+				reach += move.leap_vx * maxi(0, move.startup - move.leap_at)
+			if dist > 50.0 and dist < reach:
+				_plan.clear()
+				_plan_pending = false
+				intent.slot = &"x_move"
+				_enter(AIState.SPACING, 30)
+				return intent
+
 	# Punish: the opponent was parried (staggering) or guard-broken. A broken
 	# guard is always punished; a stagger is one roll per parried swing.
 	var helpless := _target.state == Fighter.State.BROKEN or _target.state == Fighter.State.DIZZY

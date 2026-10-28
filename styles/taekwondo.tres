@@ -24,6 +24,7 @@ move_names = {
 &"high_kick": "High Roundhouse"
 }
 input_map = {
+&"x_move": &"triple_kick",
 &"power_heavy": &"jumping_spin_hook",
 &"power_light": &"jumping_backfist",
 &"down_heavy": &"axe_kick",

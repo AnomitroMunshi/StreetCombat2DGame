@@ -25,6 +25,7 @@ move_names = {
 &"front_kick": "Push Kick"
 }
 input_map = {
+&"x_move": &"butterfly_kick",
 &"power_heavy": &"flying_axe_kick",
 &"power_light": &"leaping_spin_backfist",
 &"down_heavy": &"sweep",

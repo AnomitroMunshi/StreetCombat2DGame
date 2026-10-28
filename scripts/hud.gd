@@ -51,9 +51,10 @@ const HEADLINE_Y: float = 200.0
 ## Message lanes under each health bar (baselines): style + HP, signature
 ## readiness, the combo counter, then up to POPUP_SLOTS stacked callouts. Each
 ## kind of message has its own row, so nothing is ever drawn over another.
-const LANE_READY_Y: float = BAR_Y + 80.0
-const LANE_COMBO_Y: float = BAR_Y + 108.0
-const LANE_POPUP_Y: float = BAR_Y + 136.0
+const LANE_X_Y: float = BAR_Y + 80.0
+const LANE_READY_Y: float = BAR_Y + 104.0
+const LANE_COMBO_Y: float = BAR_Y + 132.0
+const LANE_POPUP_Y: float = BAR_Y + 160.0
 const LANE_POPUP_STEP: float = 26.0
 const POPUP_SLOTS: int = 3
 const READY_SIZE: int = 18
@@ -487,6 +488,8 @@ static func _style_details(st: MartialArtStyle) -> String:
 	for row in st.move_list():
 		t += "[cell][color=#f2c14e]%s  [/color][/cell][cell]%s      [/cell]" % [row[0], row[1]]
 	t += "[/table]\n"
+	if st.input_map.has(&"x_move"):
+		t += "[color=#b9a98f]X: 10 s cooldown, no Focus. Block, parry or evade.[/color]\n"
 	if st.signature != &"":
 		t += "[b]SIGNATURE[/b] (F at full Focus)  [color=#f2c14e]%s[/color]\n" % CombatData.get_attack(CombatData.type_for_id(st.signature)).display_name
 	if not st.finishers.is_empty():
@@ -734,12 +737,14 @@ func _draw_gameplay_hud() -> void:
 	_draw_posture(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, _posture_shown[1])
 	_draw_focus(_player, BAR_MARGIN, false)
 	_draw_focus(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, true)
+	_draw_x_move(_player, BAR_MARGIN, false)
+	_draw_x_move(_enemy, SCREEN_W - BAR_MARGIN - BAR_WIDTH, true)
 	_draw_popups()
 	_draw_combo(_enemy, BAR_MARGIN, HORIZONTAL_ALIGNMENT_LEFT)
 	_draw_combo(_player, SCREEN_W - BAR_MARGIN - BAR_WIDTH, HORIZONTAL_ALIGNMENT_RIGHT)
 	if _show_hints and _headline == "":
 		_canvas.draw_string(_font, Vector2(0.0, 706.0),
-			"A/D move · 2×A/D dash · SPACE jump · J light · K heavy · L technique · W/S + J/K high/low · SPACE + J/K power · F signature · SHIFT block/parry · S+SHIFT low block · R rematch",
+			"A/D move · 2×A/D dash · SPACE jump · J light · K heavy · L technique · W/S + J/K high/low · SPACE + J/K power · F signature · X special · SHIFT block/parry · S+SHIFT low block · R rematch",
 			HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
 
 
@@ -860,6 +865,18 @@ func _draw_focus(f: Fighter, x: float, mirrored: bool) -> void:
 		var align := HORIZONTAL_ALIGNMENT_RIGHT if mirrored else HORIZONTAL_ALIGNMENT_LEFT
 		_shadow_text(Vector2(x, LANE_READY_Y), text, _fit_size(text, READY_SIZE, BAR_WIDTH), align, BAR_WIDTH,
 			Color(1.0, 0.9, 0.5, 0.75 + 0.25 * pulse))
+
+
+## Both fighters expose the same cooldown, measured in simulation ticks.
+func _draw_x_move(f: Fighter, x: float, mirrored: bool) -> void:
+	if f.style == null or not f.style.input_map.has(&"x_move"):
+		return
+	var name := f.style.move_name(f.style.input_map[&"x_move"])
+	var ready := f.x_cooldown <= 0
+	var text := "X READY  -  " + name if ready else "X  %.1f s  -  %s" % [float(f.x_cooldown) / CombatData.TICK_RATE, name]
+	var color := COLOR_FOCUS_FULL if ready else COLOR_DIM
+	var align := HORIZONTAL_ALIGNMENT_RIGHT if mirrored else HORIZONTAL_ALIGNMENT_LEFT
+	_shadow_text(Vector2(x, LANE_X_Y), text, _fit_size(text, READY_SIZE, BAR_WIDTH), align, BAR_WIDTH, color)
 
 
 ## Largest font size up to `size` at which `text` fits in `width`.
