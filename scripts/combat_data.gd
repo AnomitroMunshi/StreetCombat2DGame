@@ -30,7 +30,7 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	TRIPLE_KICK_BODY_TWO, TRIPLE_KICK_HEAD, BIG_FOOT, DROPKICK, SCORPION_KICK, THAI_ROUNDHOUSE,
 	CAP_QUICK_PALM, CAP_SPIN_HEEL, CAP_CARTWHEEL, CAP_CRESCENT, CAP_LOW_SWEEP, CAP_LEAP_PALM, CAP_FLYING_SCISSOR, CAP_AIR_CRESCENT, CAP_AIR_SPIN,
 	RODA_STORM, CAP_RODA_SWEEP, CAP_RODA_CARTWHEEL, CAP_RODA_HEEL, MEIA_LUA_TORNADO,
-	JKD_LEAD_STRAIGHT, JKD_HIGH_HOOK, JKD_JUMP_STRAIGHT, JKD_AIR_FRONT, INTERCEPTING_FURY, JKD_STOP_KICK, JKD_INTERCEPT_LEAD, JKD_INTERCEPT_REAR, JKD_INTERCEPT_SIDE, DRAGONS_BURST }
+	JKD_LEAD_STRAIGHT, JKD_HIGH_HOOK, JKD_JUMP_STRAIGHT, JKD_AIR_FRONT, INTERCEPTING_FURY, JKD_STOP_KICK, JKD_INTERCEPT_LEAD, JKD_INTERCEPT_REAR, JKD_INTERCEPT_SIDE, DRAGONS_BURST, JKD_X_STOP, JKD_X_SIDE }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
 ## part): strikes travel into range like real footwork instead of being thrown
@@ -1143,7 +1143,7 @@ const ATTACK_TABLE: Dictionary = {
 		"startup": 18, "active": 5, "recovery": 28, "cancel_window": 0,
 		"damage": 13, "hitstun": 23, "blockstun": 14, "posture": 14.0,
 		"knockback": 6.0, "lunge": 0.5, "hitstop": 6,
-		"hitbox": Rect2(30.0, -176.0, 56.0, 66.0), "pose_hurtbox": Rect2(-48.0, -152.0, 96.0, 152.0), "hurtbox_start": 8, "hurtbox_end": 29,
+		"hitbox": Rect2(30.0, -176.0, 56.0, 66.0), "pose_hurtbox": Rect2(-48.0, -152.0, 96.0, 152.0), "hurtbox_start": 8, "hurtbox_end": 32, "recovery_hurtbox": Rect2(-48.0, -125.0, 96.0, 125.0), "recovery_hurtbox_start": 33, "recovery_hurtbox_end": 47,
 	},
 	AttackType.CAP_CRESCENT: {
 		"id": &"cap_crescent", "name": "Crescent Kick",
@@ -1206,7 +1206,7 @@ const ATTACK_TABLE: Dictionary = {
 		"startup": 6, "active": 4, "recovery": 10, "cancel_window": 0,
 		"damage": 8, "hitstun": 23, "blockstun": 14, "posture": 10.0,
 		"knockback": 0.5, "lunge": 1.0, "hitstop": 6,
-		"hitbox": Rect2(30.0, -176.0, 56.0, 66.0), "x_strike": true, "pose_hurtbox": Rect2(-48.0, -152.0, 96.0, 152.0), "hurtbox_start": 0, "hurtbox_end": 13,
+		"hitbox": Rect2(30.0, -176.0, 56.0, 66.0), "x_strike": true, "pose_hurtbox": Rect2(-48.0, -152.0, 96.0, 152.0), "hurtbox_start": 0, "hurtbox_end": 13, "recovery_hurtbox": Rect2(-48.0, -125.0, 96.0, 125.0), "recovery_hurtbox_start": 14, "recovery_hurtbox_end": 19,
 	},
 	AttackType.CAP_RODA_HEEL: {
 		"id": &"cap_roda_heel", "name": "Roda Storm (heel)",
@@ -1220,7 +1220,7 @@ const ATTACK_TABLE: Dictionary = {
 		"startup": 24, "active": 5, "recovery": 32, "cancel_window": 0,
 		"damage": 18, "hitstun": 23, "blockstun": 14, "posture": 18.0,
 		"knockback": 10.0, "lunge": 0.8, "hitstop": 10,
-		"hitbox": Rect2(30.0, -178.0, 58.0, 66.0), "x_move": true, "x_cooldown_frames": 900, "impact_power": 3, "pose_hurtbox": Rect2(-50.0, -160.0, 104.0, 160.0), "hurtbox_start": 10, "hurtbox_end": 37,
+		"hitbox": Rect2(30.0, -178.0, 58.0, 66.0), "x_move": true, "x_cooldown_frames": 900, "impact_power": 3, "pose_hurtbox": Rect2(-50.0, -160.0, 104.0, 160.0), "hurtbox_start": 10, "hurtbox_end": 39, "recovery_hurtbox": Rect2(-52.0, -125.0, 104.0, 125.0), "recovery_hurtbox_start": 40, "recovery_hurtbox_end": 57,
 	},
 	AttackType.JKD_LEAD_STRAIGHT: {
 		"id": &"jkd_lead_straight", "name": "Lead Straight",
@@ -1287,10 +1287,25 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	AttackType.DRAGONS_BURST: {
 		"id": &"dragons_burst", "name": "Dragon's Burst",
-		"startup": 18, "active": 4, "recovery": 30, "cancel_window": 0,
-		"damage": 18, "hitstun": 23, "blockstun": 14, "posture": 18.0,
-		"knockback": 16.0, "lunge": 1.2, "hitstop": 11,
-		"hitbox": Rect2(28.0, -166.0, 58.0, 38.0), "x_move": true, "x_cooldown_frames": 900, "impact_power": 3, "step": 42.0,
+		"startup": 18, "active": 3, "recovery": 30, "cancel_window": 0,
+		"damage": 0, "hitstun": 0, "blockstun": 0, "posture": 0.0,
+		"knockback": 0.0, "lunge": 0.0, "hitstop": 0,
+		"hitbox": Rect2(28.0, -108.0, 60.0, 50.0), "x_move": true, "x_cooldown_frames": 900,
+		"sequence": [&"jkd_x_stop", &"jkd_x_side"],
+	},
+	AttackType.JKD_X_STOP: {
+		"id": &"jkd_x_stop", "name": "Dragon's Burst (stop kick)", "x_strike": true,
+		"startup": 18, "active": 3, "recovery": 10, "cancel_window": 0,
+		"damage": 6, "hitstun": 23, "blockstun": 14, "posture": 8.0,
+		"knockback": 0.5, "lunge": 1.2, "hitstop": 6, "impact_power": 2,
+		"hitbox": Rect2(28.0, -108.0, 60.0, 50.0),
+	},
+	AttackType.JKD_X_SIDE: {
+		"id": &"jkd_x_side", "name": "Dragon's Burst (side kick)", "x_strike": true,
+		"startup": 6, "active": 4, "recovery": 30, "cancel_window": 0,
+		"damage": 12, "hitstun": 23, "blockstun": 14, "posture": 16.0,
+		"knockback": 16.0, "lunge": 1.2, "hitstop": 11, "impact_power": 3,
+		"hitbox": Rect2(30.0, -136.0, 58.0, 52.0),
 	},
 
 }
@@ -1365,6 +1380,10 @@ class Attack extends RefCounted:
 	## Signature technique (F at full Focus).
 	var signature: bool = false
 	var pose_hurtbox: Rect2 = Rect2()
+	## Absolute attack-tick range for a vulnerable low recovery after hand support.
+	var recovery_hurtbox: Rect2 = Rect2()
+	var recovery_hurtbox_start: int = 0
+	var recovery_hurtbox_end: int = 0
 	var hurtbox_start: int = 0
 	var hurtbox_end: int = 0
 	var x_move: bool = false
@@ -1464,6 +1483,9 @@ static func get_attack(type: AttackType) -> Attack:
 	attack.spin_turns = row.get("spin_turns", 1.0)
 	attack.signature = row.get("signature", false)
 	attack.pose_hurtbox = row.get("pose_hurtbox", Rect2())
+	attack.recovery_hurtbox = row.get("recovery_hurtbox", Rect2())
+	attack.recovery_hurtbox_start = row.get("recovery_hurtbox_start", 0)
+	attack.recovery_hurtbox_end = row.get("recovery_hurtbox_end", 0)
 	attack.hurtbox_start = row.get("hurtbox_start", 0)
 	attack.hurtbox_end = row.get("hurtbox_end", 0)
 	attack.x_move = row.get("x_move", false)
@@ -1502,7 +1524,7 @@ static func focus_for_hit(attack: Attack, counter: bool) -> float:
 	if counter:
 		return FOCUS_COUNTER
 	var n := String(attack.id)
-	if n.contains("kick") or n == "sweep" or n.contains("knee") or attack.type in [AttackType.CAP_SPIN_HEEL, AttackType.CAP_CARTWHEEL, AttackType.CAP_CRESCENT, AttackType.CAP_LOW_SWEEP, AttackType.CAP_FLYING_SCISSOR, AttackType.CAP_AIR_CRESCENT, AttackType.CAP_AIR_SPIN, AttackType.JKD_HIGH_HOOK, AttackType.JKD_AIR_FRONT]:
+	if n.contains("kick") or n == "sweep" or n.contains("knee") or attack.type in [AttackType.CAP_SPIN_HEEL, AttackType.CAP_CARTWHEEL, AttackType.CAP_CRESCENT, AttackType.CAP_LOW_SWEEP, AttackType.CAP_FLYING_SCISSOR, AttackType.CAP_AIR_CRESCENT, AttackType.CAP_AIR_SPIN, AttackType.JKD_HIGH_HOOK, AttackType.JKD_AIR_FRONT, AttackType.JKD_X_STOP, AttackType.JKD_X_SIDE]:
 		return FOCUS_KICK
 	return FOCUS_HEAVY if attack.damage >= 10 else FOCUS_LIGHT
 

@@ -43,6 +43,67 @@ func free_pair(p: Array[Fighter]) -> void:
 	for f in p:
 		f.free()
 
+func total_damage(attack: CombatData.Attack) -> int:
+	var out:=attack.damage
+	for child in attack.sequence:
+		out+=CombatData.get_attack(CombatData.type_for_id(child)).damage
+	return out
+
+func jkd_x_regression(side: int) -> void:
+	var p:=pair(&"jeet_kune_do",side)
+	var intent:=CombatData.Intent.new()
+	intent.slot=&"x_move"
+	p[0].push_intent(intent)
+	var hits:=play(p[0],p[1],100)
+	check(hits.size()==2 and hits[0][0]==&"jkd_x_stop" and hits[1][0]==&"jkd_x_side" and p[1].health==p[1].max_health-18,"JKD X stop kick then side kick: 6+12, both directions")
+	check(p[0].x_cooldown==801 and p[0].focus==0,"JKD two-hit X charges one 900-tick cooldown without Focus")
+	free_pair(p)
+	p=pair(&"jeet_kune_do",side)
+	p[0].push_intent(intent)
+	play(p[0],p[1],19)
+	check(p[1].health==p[1].max_health-6 and p[0].is_mid_sequence(),"stop kick lands before committed second kick")
+	var cd:=p[0].x_cooldown
+	p[0].receive_hit(CombatData.get_attack(CombatData.AttackType.LIGHT),p[1],1)
+	play(p[0],p[1],100)
+	check(not p[0].is_mid_sequence() and p[1].health==p[1].max_health-6 and p[0].x_cooldown==cd-100,"interruption removes second kick without refund")
+	free_pair(p)
+	p=pair(&"jeet_kune_do",side)
+	p[1].position.x+=side*400.0
+	var started: Array=[]
+	p[0].attack_started.connect(func(_f: Fighter, attack: CombatData.Attack): started.append(attack.id))
+	p[0].push_intent(intent)
+	play(p[0],p[1],80)
+	check(started==[&"jkd_x_stop",&"jkd_x_side"] and p[1].health==p[1].max_health and p[0].x_cooldown==821,"whiff still completes both kicks and preserves cooldown")
+	free_pair(p)
+	p=pair(&"jeet_kune_do",side)
+	for child in [CombatData.AttackType.JKD_X_STOP,CombatData.AttackType.JKD_X_SIDE]:
+		var raw:=CombatData.Intent.new()
+		raw.attack=child
+		p[0].push_intent(raw)
+		p[0].tick()
+		check(p[0].state==Fighter.State.IDLE and p[0].x_cooldown==0,"raw X child cannot bypass parent cooldown")
+	free_pair(p)
+
+func recovery_hurtbox_regression(side: int) -> void:
+	for test in [[CombatData.AttackType.CAP_CARTWHEEL,32,33,47,48],[CombatData.AttackType.MEIA_LUA_TORNADO,39,40,57,58]]:
+		var p:=pair(&"capoeira",side)
+		var a:=p[0]
+		a.call("_start_attack",test[0],1,true)
+		a.state_frame=test[1]
+		var inverted:=a.get_hurtbox_world()
+		a.state_frame=test[2]
+		var crouched:=a.get_hurtbox_world()
+		check(inverted.size.y>crouched.size.y and crouched.size.y==125.0 and crouched.size.x>=96.0,"inverted body transitions to broad low recovery hurtbox")
+		for frame in range(test[2],test[3]+1):
+			a.state_frame=frame
+			check(a.get_hurtbox_world().size==crouched.size and a.can_be_hit(),"low recovery stays vulnerable throughout authored phase")
+		var ghost_head:=Rect2(a.position+Vector2(-10,-164),Vector2(20,18))
+		var body_strike:=Rect2(a.position+Vector2(-10,-100),Vector2(20,25))
+		check(not crouched.intersects(ghost_head) and crouched.intersects(body_strike),"high strike above crouched body whiffs while body strike still contacts")
+		a.state_frame=test[4]
+		check(a.get_hurtbox_world().size==Fighter.HURTBOX.size,"upright hurtbox returns at authored guard recovery")
+		free_pair(p)
+
 func _initialize() -> void:
 	check(StyleRegistry.count()==9 and StyleRegistry.rejected().is_empty(),"nine registered styles without rejected data")
 	for sid in [&"capoeira",&"jeet_kune_do"]:
@@ -78,7 +139,7 @@ func _initialize() -> void:
 			check(legal_hits.size()==signature.sequence.size() and p[1].health==p[1].max_health-24 and p[0].focus==0.0,"normal F still pays Focus and completes all authorized child continuations")
 			free_pair(p)
 		var x:=CombatData.get_attack(style.resolve(&"x_move",false))
-		check(x.damage==18 and x.x_cooldown_frames==900 and not x.signature,"%s X18 damage,15 seconds,no Focus" %sid)
+		check(total_damage(x)==18 and x.x_cooldown_frames==900 and not x.signature,"%s X18 damage,15 seconds,no Focus" %sid)
 		for side in [1,-1]:
 			var p:=pair(sid,side)
 			p[0].focus=CombatData.FOCUS_MAX
@@ -94,12 +155,12 @@ func _initialize() -> void:
 			intent.slot=&"x_move"
 			p[0].push_intent(intent)
 			hits=play(p[0],p[1],100)
-			check(p[1].health==p[1].max_health-18 and hits.size()==1 and p[0].x_cooldown==801,"%s X single contact and committed cooldown facing%d" %[sid,side])
+			check(p[1].health==p[1].max_health-18 and hits.size()==maxi(1,x.sequence.size()) and p[0].x_cooldown==801,"%s X authored contacts and committed cooldown facing%d" %[sid,side])
 			free_pair(p)
 			p=pair(sid,side)
 			p[0].push_intent(intent)
 			hits=play(p[0],p[1],100,true)
-			check(p[1].health==p[1].max_health and hits.size()==1 and hits[0][1]==CombatData.HitResult.BLOCKED,"%s X normal block facing%d" %[sid,side])
+			check(p[1].health==p[1].max_health and hits.size()==maxi(1,x.sequence.size()) and hits.all(func(hit): return hit[1]==CombatData.HitResult.BLOCKED),"%s X normal block facing%d" %[sid,side])
 			free_pair(p)
 			p=pair(sid,side)
 			p[0].push_intent(intent)
@@ -129,7 +190,7 @@ func _initialize() -> void:
 				p[0].push_intent(intent)
 				var mapped:=CombatData.get_attack(style.resolve(slot,false))
 				var contacts:=play(p[0],p[1],100)
-				check(p[1].health==p[1].max_health-mapped.damage and contacts.size()==1,"%s %s actual single contact matches damage facing%d" %[sid,slot,side])
+				check(p[1].health==p[1].max_health-total_damage(mapped) and contacts.size()==maxi(1,mapped.sequence.size()),"%s %s actual authored contacts match damage facing%d" %[sid,slot,side])
 				free_pair(p)
 		# Another martial art cannot inject any of this style's exclusive X/F moves.
 		var wrong:=pair(&"boxing",1)
@@ -139,6 +200,8 @@ func _initialize() -> void:
 		check(wrong[0].buffered_attack==CombatData.AttackType.NONE and wrong[0].rejected_attacks==1,"foreign style rejects %s X" %sid)
 		free_pair(wrong)
 	for side in [1,-1]:
+		jkd_x_regression(side)
+		recovery_hurtbox_regression(side)
 		var p:=pair(&"capoeira",side)
 		var intent:=CombatData.Intent.new()
 		intent.slot=&"technique"
