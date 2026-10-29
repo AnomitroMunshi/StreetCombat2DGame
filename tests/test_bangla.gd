@@ -27,7 +27,11 @@ func _charge(attack: CombatData.Attack, gap: float, side: int, block: bool) -> D
 	var result := "-"
 	var hit_x := INF
 	var down := false
-	a.call("_start_attack", attack.type, 0, true)
+	if attack.signature:
+		a.focus = CombatData.FOCUS_MAX
+		a.push_intent(_attack(attack.type))
+	else:
+		a.call("_start_attack", attack.type, 0, true)
 	for t in 70:
 		var i := CombatData.Intent.new()
 		i.block = block
@@ -80,7 +84,10 @@ func _free(p: Array[Fighter]) -> void:
 
 func _attack(t: CombatData.AttackType) -> CombatData.Intent:
 	var i := CombatData.Intent.new()
-	i.attack = t
+	if CombatData.get_attack(t).signature:
+		i.signature = true
+	else:
+		i.attack = t
 	return i
 
 
@@ -101,6 +108,8 @@ func _initialize() -> void:
 			var p := _pair(gap, side)
 			var a := p[0]
 			var b := p[1]
+			if CombatData.get_attack(CombatData.type_for_id(mid)).signature:
+				a.focus = CombatData.FOCUS_MAX
 			a.push_intent(_attack(CombatData.type_for_id(mid)))
 			var hits := 0
 			for t in 80:
@@ -203,6 +212,7 @@ func _initialize() -> void:
 		var a := p[0]
 		var b := p[1]
 		var start_x := a.position.x
+		a.focus = CombatData.FOCUS_MAX
 		a.push_intent(_attack(CombatData.AttackType.BELLY_BOMB))
 		var min_x := start_x
 		var hit := false
