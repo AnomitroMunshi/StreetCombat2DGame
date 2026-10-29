@@ -241,6 +241,11 @@ func polish_semantics() -> void:
 		check(FighterVisual._attack_joint(fighter.current_attack.type) == FighterVisual.J_HAND_B, "JKD jab-cross finishes with the rear fist")
 		check(jab[FighterVisual.SPREAD] > 20 and cross[FighterVisual.SPREAD] < -20, "JKD jab-cross reverses shoulder drive between punches")
 		check(cross[FighterVisual.HIP_X] - jab[FighterVisual.HIP_X] > 7 and cross[FighterVisual.PIVOT] > 0.9, "JKD cross drives the hip and rear heel")
+		for id: StringName in [&"jkd_chain_jab", &"jkd_chain_cross"]:
+			var hit := contact_pose(fighter, v, id)
+			var early := contact_pose(fighter, v, id, fighter.current_attack.startup - 1.0)
+			var joint := FighterVisual._attack_joint(fighter.current_attack.type)
+			check(v._solve_joints(hit)[joint].distance_to(v._solve_joints(early)[joint]) < 0.5, "fast JKD punch visibly extends by the interpolated first active tick: %s" % id)
 		var hammer := contact_pose(fighter, v, &"jkd_hammerfist")
 		var hammer_load := contact_pose(fighter, v, &"jkd_hammerfist", fighter.current_attack.startup * 0.45)
 		var hammer_before := v._solve_joints(hammer_load)

@@ -2363,6 +2363,16 @@ func _build_expansion_moves() -> void:
 		var hit: PackedFloat32Array = p[specs[id][1]]
 		_moves[type] = [[S, 0.4, load, EASE_SMOOTH], [S, 0.9, hit, EASE_IN],
 			[A, 0.0, hit, EASE_LINEAR], [A, 1.0, hit, EASE_LINEAR], [R, 0.5, load, EASE_SMOOTH]]
+	# Three-tick punches must extend on the rendered tick before collision:
+	# interpolation samples startup-1 at the first active physics tick.
+	# The generic 90% key leaves these exceptionally fast fists in windup.
+	for id: StringName in [&"jkd_chain_jab", &"jkd_chain_cross"]:
+		var type := CombatData.type_for_id(id)
+		if type == CombatData.AttackType.NONE: continue
+		var load: PackedFloat32Array = p[specs[id][0]]
+		var hit: PackedFloat32Array = p[specs[id][1]]
+		_moves[type] = [[S, 0.25, load, EASE_SMOOTH], [S, 0.6, hit, EASE_IN],
+			[A, 0.0, hit, EASE_LINEAR], [A, 1.0, hit, EASE_LINEAR], [R, 0.5, load, EASE_SMOOTH]]
 	var hammer_type := CombatData.type_for_id(&"jkd_hammerfist")
 	if hammer_type != CombatData.AttackType.NONE:
 		_moves[hammer_type] = [[S, 0.45, p[&"jkd_hammer_load"], EASE_SMOOTH],
