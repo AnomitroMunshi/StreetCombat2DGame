@@ -20,6 +20,8 @@ var _next_voice: int = 0
 ## Music id -> [file, gain dB]. Gains match each track's measured loudness to
 ## the procedural loop's (about -22 dBFS mean as heard). Add a style's track
 ## here when it exists; until then that style plays the procedural loop.
+## Capoeira and Jeet Kune Do intentionally use the existing procedural loop
+## until dedicated tracks are supplied. Do not alias another style's music.
 const MUSIC_FILES: Dictionary = {
 	&"menu": ["res://assets/audio/music/originals/menu_theme.mp3", -4.5],
 	&"boxing": ["res://assets/audio/music/originals/boxing_theme.mp3", -5.8],

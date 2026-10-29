@@ -20,7 +20,9 @@ enum Kind { PALM_FLURRY, SPINNING_HEEL, AIR_SMASH, WALL_CRUSH, TORNADO_KICK,
 	HUNDRED_PALMS, DRAGONS_DESCENT, LAST_COMBINATION, KNOCKOUT_RHYTHM,
 	PAAYE_LATHI, SUPER_CHOR, SKYLINE_VERDICT, IRON_CORNER,
 	FALLING_CROSS, CORNER_COUNT, AIR_BREAKER, CORNER_BREAKER, SKYFALL_AXE, CORNER_CYCLONE,
-	DESCENDING_DRAGON_PALM, WALL_OF_PALMS, BANGLA_AIR_SMASH, DEOWAL_DHAKKA }
+	DESCENDING_DRAGON_PALM, WALL_OF_PALMS, BANGLA_AIR_SMASH, DEOWAL_DHAKKA,
+	RODAS_END, HANDSTAND_HAVOC, SKY_WHEEL, CORNER_CARNIVAL,
+	ONE_INCH_ENDING, NO_SECOND_CHANCE, DRAGON_INTERCEPT, END_OF_LINE }
 
 const DISPLAY_NAMES: Dictionary = {
 	Kind.PALM_FLURRY: "PALM FLURRY",
@@ -54,6 +56,14 @@ const DISPLAY_NAMES: Dictionary = {
 	Kind.WALL_OF_PALMS: "WALL OF PALMS",
 	Kind.BANGLA_AIR_SMASH: "AIR SMASH",
 	Kind.DEOWAL_DHAKKA: "DEOWAL DHAKKA",
+	Kind.RODAS_END: "RODA'S END",
+	Kind.HANDSTAND_HAVOC: "HANDSTAND HAVOC",
+	Kind.SKY_WHEEL: "SKY WHEEL",
+	Kind.CORNER_CARNIVAL: "CORNER CARNIVAL",
+	Kind.ONE_INCH_ENDING: "ONE-INCH ENDING",
+	Kind.NO_SECOND_CHANCE: "NO SECOND CHANCE",
+	Kind.DRAGON_INTERCEPT: "DRAGON INTERCEPT",
+	Kind.END_OF_LINE: "END OF THE LINE",
 }
 ## Permanent finisher ids (used by MartialArtStyle.finishers).
 const IDS: Dictionary = {
@@ -70,17 +80,23 @@ const IDS: Dictionary = {
 	Kind.SKYFALL_AXE: &"skyfall_axe", Kind.CORNER_CYCLONE: &"corner_cyclone",
 	Kind.DESCENDING_DRAGON_PALM: &"descending_dragon_palm", Kind.WALL_OF_PALMS: &"wall_of_palms",
 	Kind.BANGLA_AIR_SMASH: &"bangla_air_smash", Kind.DEOWAL_DHAKKA: &"deowal_dhakka",
+	Kind.RODAS_END: &"rodas_end", Kind.HANDSTAND_HAVOC: &"handstand_havoc",
+	Kind.SKY_WHEEL: &"sky_wheel", Kind.CORNER_CARNIVAL: &"corner_carnival",
+	Kind.ONE_INCH_ENDING: &"one_inch_ending", Kind.NO_SECOND_CHANCE: &"no_second_chance",
+	Kind.DRAGON_INTERCEPT: &"dragon_intercept", Kind.END_OF_LINE: &"end_of_line",
 }
 ## Situational finishers: one airborne and one wall finisher per style
 ## (MartialArtStyle.air_finisher / wall_finisher); Air Smash and Wall Crush are
 ## the shared ones for a style that sets none.
 const AIR_KINDS: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT, Kind.FALLING_CROSS, Kind.AIR_BREAKER,
-	Kind.SKYFALL_AXE, Kind.DESCENDING_DRAGON_PALM, Kind.BANGLA_AIR_SMASH]
+	Kind.SKYFALL_AXE, Kind.DESCENDING_DRAGON_PALM, Kind.BANGLA_AIR_SMASH, Kind.SKY_WHEEL, Kind.DRAGON_INTERCEPT]
+
 const WALL_KINDS: Array[Kind] = [Kind.WALL_CRUSH, Kind.IRON_CORNER, Kind.CORNER_COUNT, Kind.CORNER_BREAKER,
-	Kind.CORNER_CYCLONE, Kind.WALL_OF_PALMS, Kind.DEOWAL_DHAKKA]
+	Kind.CORNER_CYCLONE, Kind.WALL_OF_PALMS, Kind.DEOWAL_DHAKKA, Kind.CORNER_CARNIVAL, Kind.END_OF_LINE]
 const ENVIRONMENTAL: Array[Kind] = [Kind.AIR_SMASH, Kind.SKYLINE_VERDICT, Kind.FALLING_CROSS, Kind.AIR_BREAKER,
 	Kind.SKYFALL_AXE, Kind.DESCENDING_DRAGON_PALM, Kind.BANGLA_AIR_SMASH, Kind.WALL_CRUSH, Kind.IRON_CORNER,
-	Kind.CORNER_COUNT, Kind.CORNER_BREAKER, Kind.CORNER_CYCLONE, Kind.WALL_OF_PALMS, Kind.DEOWAL_DHAKKA]
+	Kind.CORNER_COUNT, Kind.CORNER_BREAKER, Kind.CORNER_CYCLONE, Kind.WALL_OF_PALMS, Kind.DEOWAL_DHAKKA,
+	Kind.SKY_WHEEL, Kind.DRAGON_INTERCEPT, Kind.CORNER_CARNIVAL, Kind.END_OF_LINE]
 ## Open-floor finishers for a fighter with no style (tests).
 const OPEN_FLOOR_KINDS: Array[Kind] = [Kind.PALM_FLURRY, Kind.SPINNING_HEEL, Kind.TORNADO_KICK]
 ## Victim this close to the wall behind them -> Wall Crush.
@@ -114,6 +130,8 @@ const POSE_KIND: Dictionary = {
 	&"elbow_hit": CombatData.ImpactKind.HOOK, &"knife_hit": CombatData.ImpactKind.HOOK,
 	&"jrh_hit": CombatData.ImpactKind.HOOK, &"spin_kick": CombatData.ImpactKind.HOOK,
 	&"tornado_kick": CombatData.ImpactKind.HOOK, &"backhand_strike": CombatData.ImpactKind.HOOK,
+	&"cap_armada_hit": CombatData.ImpactKind.HOOK, &"cap_meialua_hit": CombatData.ImpactKind.HOOK,
+	&"jkd_hook_hit": CombatData.ImpactKind.HOOK,
 	&"uppercut_strike": CombatData.ImpactKind.RISING, &"knee": CombatData.ImpactKind.RISING,
 	&"fknee_hit": CombatData.ImpactKind.RISING, &"rpalm_hit": CombatData.ImpactKind.RISING,
 	&"axe_chop": CombatData.ImpactKind.DOWNWARD, &"overhand_hit": CombatData.ImpactKind.DOWNWARD,
@@ -122,12 +140,16 @@ const POSE_KIND: Dictionary = {
 	&"punt_hit": CombatData.ImpactKind.STRAIGHT, &"hammer_hit": CombatData.ImpactKind.DOWNWARD,
 }
 ## Low strikes: the victim's lead knee buckles.
-const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_extend", &"lkick_hit"]
+const LEG_POSES: Array[StringName] = [&"lowrh_hit", &"lowside_hit", &"sweep_extend", &"lkick_hit",
+	&"cap_rasteira_hit", &"jkd_stop_hit"]
 ## Strike poses thrown with a leg (contact is measured from the feet and knees;
 ## every other strike pose from the hands and elbows).
 const KICK_POSES: Array[StringName] = [&"axe_chop", &"back_extend", &"back_extend_high", &"bodyrh_hit", &"fknee_hit", &"front_extend", &"flying_side_kick",
 	&"high_extend", &"jrh_hit", &"knee", &"lkick_hit", &"lowrh_hit", &"punt_hit", &"shook_hit", &"spin_kick",
-	&"sweep_extend", &"thrust_extend", &"tornado_kick", &"lowside_hit"]
+	&"sweep_extend", &"thrust_extend", &"tornado_kick", &"lowside_hit", &"cap_armada_hit", &"cap_au_hit",
+	&"cap_crescent_hit", &"cap_rasteira_hit", &"cap_meialua_hit", &"cap_scissor_hit", &"jkd_side_hit",
+	&"jkd_stop_hit", &"jkd_hook_hit"]
+
 ## Documented contact tolerance: a blow counts as landed when its intended
 ## limb is within CONTACT_SLOP px of the victim's drawn body outline.
 ## A blow lands when the striking limb is this close to the victim's drawn body
@@ -1195,6 +1217,92 @@ func _build(k: Kind) -> Array[Dictionary]:
 					"contact": &"head", "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
 				{"ticks": 16, "atk": &"mega_slap_follow", "def": &"slumped"},
 				{"ticks": 34, "atk": &"glare", "def": &"slumped", "atk_move": -2.0},
+			]
+		Kind.RODAS_END:
+			return [
+				{"ticks": 8, "atk": &"cap_rasteira_load", "def": &"stagger"},
+				{"ticks": 8, "atk": &"cap_rasteira_hit", "def": &"hitstun_leg", "hit": true, "high": false, "power": 2},
+				{"ticks": 8, "atk": &"cap_armada_load", "def": &"stagger", "atk_spin": 0.5},
+				{"ticks": 4, "atk": &"cap_armada_hit", "def": &"stagger", "atk_spin": 0.5},
+				{"ticks": 18, "atk": &"cap_armada_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"contact": &"head", "ko_vy": -10.0, "ko_drift": 15.0, "ko_rolls": 1, "ko_tumble": true},
+				{"ticks": 46, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.HANDSTAND_HAVOC:
+			return [
+				{"ticks": 10, "atk": &"cap_au_entry", "def": &"stagger"},
+				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger"},
+				{"ticks": 8, "atk": &"cap_au_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2},
+				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger"},
+				{"ticks": 8, "atk": &"cap_au_hit", "def": &"hitstun", "hit": true, "power": 2},
+				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger"},
+				{"ticks": 5, "atk": &"cap_au_hit", "def": &"stagger"},
+				{"ticks": 18, "atk": &"cap_au_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"contact": &"body", "high": false, "ko_vy": -11.0, "ko_drift": 14.0, "ko_rolls": 1, "ko_tumble": true},
+				{"ticks": 12, "atk": &"cap_au_exit", "def": &"knock_fly"},
+				{"ticks": 38, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.SKY_WHEEL:
+			return [
+				{"ticks": 8, "atk": &"cap_au_entry", "def": &"air_tumble", "atk_move": 1.5},
+				{"ticks": 9, "atk": &"cap_au_support", "def": &"air_tumble", "glide": true},
+				{"ticks": 18, "atk": &"cap_au_hit", "def": &"knock_fly", "hit": true, "meet": true, "power": 3, "final": true,
+					"meet_at": 0.25, "ko_vy": 7.0, "ko_drift": 13.0, "ko_rolls": 1},
+				{"ticks": 12, "atk": &"cap_au_exit", "def": &"knock_fly"},
+				{"ticks": 36, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.CORNER_CARNIVAL:
+			return [
+				{"ticks": 8, "atk": &"cap_crescent_hit", "def": &"hitstun_body", "hit": true, "high": false,
+					"contact": &"body", "power": 2, "atk_move": 3.0, "def_move": 9.0, "slam": true},
+				{"ticks": 9, "atk": &"cap_au_entry", "def": &"stagger"},
+				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger"},
+				{"ticks": 9, "atk": &"cap_au_hit", "def": &"hitstun", "hit": true, "power": 2, "wall": true},
+				{"ticks": 9, "atk": &"cap_armada_load", "def": &"stagger", "atk_spin": 0.5},
+				{"ticks": 7, "atk": &"cap_armada_hit", "def": &"stagger", "atk_spin": 0.5},
+				{"ticks": 18, "atk": &"cap_armada_hit", "def": &"slumped", "hit": true, "power": 3, "final": true,
+					"contact": &"head", "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
+				{"ticks": 22, "atk": &"guard", "def": &"slumped", "atk_move": -3.0},
+				{"ticks": 30, "atk": &"guard", "def": &"slumped"},
+			]
+		Kind.ONE_INCH_ENDING:
+			return [
+				{"ticks": 8, "atk": &"jkd_lead_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2},
+				{"ticks": 14, "atk": &"jkd_burst_load", "def": &"stagger", "atk_move": 1.0},
+				{"ticks": 18, "atk": &"jkd_burst_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"contact": &"body", "high": false, "ko_vy": -7.0, "ko_drift": 17.0, "ko_rolls": 1, "ko_tumble": true},
+				{"ticks": 48, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.NO_SECOND_CHANCE:
+			return [
+				{"ticks": 8, "atk": &"jkd_stop_hit", "def": &"hitstun_leg", "hit": true, "high": false},
+				{"ticks": 7, "atk": &"deflect", "def": &"stagger"},
+				{"ticks": 7, "atk": &"jkd_lead_hit", "def": &"hitstun", "hit": true, "power": 2},
+				{"ticks": 9, "atk": &"jkd_side_load", "def": &"stagger"},
+				{"ticks": 18, "atk": &"jkd_side_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"contact": &"body", "high": false, "ko_vy": -9.0, "ko_drift": 16.0, "ko_rolls": 1, "ko_tumble": true},
+				{"ticks": 46, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.DRAGON_INTERCEPT:
+			return [
+				{"ticks": 7, "atk": &"jump_squat", "def": &"air_tumble"},
+				{"ticks": 10, "atk": &"jkd_side_load", "def": &"air_tumble", "atk_vy": -12.0, "glide": true},
+				{"ticks": 18, "atk": &"jkd_side_hit", "def": &"knock_fly", "hit": true, "meet": true, "power": 3, "final": true,
+					"contact": &"body", "high": false, "meet_at": 0.3, "ko_vy": 7.0, "ko_drift": 13.0, "ko_rolls": 1},
+				{"ticks": 12, "atk": &"land_crouch", "def": &"knock_fly"},
+				{"ticks": 36, "atk": &"guard", "def": &"knock_fly"},
+			]
+		Kind.END_OF_LINE:
+			return [
+				{"ticks": 7, "atk": &"jkd_lead_hit", "def": &"hitstun_body", "hit": true, "high": false,
+					"contact": &"body", "atk_move": 3.0, "def_move": 9.0, "slam": true},
+				{"ticks": 7, "atk": &"jkd_cross_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2, "wall": true},
+				{"ticks": 7, "atk": &"deflect", "def": &"stagger"},
+				{"ticks": 9, "atk": &"jkd_side_load", "def": &"stagger"},
+				{"ticks": 18, "atk": &"jkd_side_hit", "def": &"slumped", "hit": true, "power": 3, "final": true,
+					"contact": &"body", "high": false, "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
+				{"ticks": 22, "atk": &"guard", "def": &"slumped", "atk_move": -3.0},
+				{"ticks": 30, "atk": &"guard", "def": &"slumped"},
 			]
 		Kind.AIR_SMASH:
 			# Leap together, reach and grab, overhead hammer-fist, spike into the

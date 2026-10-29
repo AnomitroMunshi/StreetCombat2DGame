@@ -6,6 +6,8 @@ var out := "res://docs/reviews/x-impact"
 func _initialize() -> void:
 	call_deferred("run")
 func run() -> void:
+	if OS.get_environment("REVIEW_OUT") != "":
+		out = OS.get_environment("REVIEW_OUT")
 	root.size = Vector2i(1280, 720)
 	root.get_viewport().physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	RenderingServer.set_default_clear_color(Color(0.12, 0.14, 0.18))

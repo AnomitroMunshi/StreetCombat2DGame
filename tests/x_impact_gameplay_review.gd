@@ -13,12 +13,13 @@ class Driver extends Node:
 	var target_start := 0.0
 	var seen_hits := 0
 	var baseline_head := 0.0
+	var output_dir := "res://docs/reviews/x-impact"
 	func _physics_process(_delta: float) -> void:
 		Input.action_release("x_move")
 		var index := frame / 200
 		var local := frame % 200
 		if index >= styles.size():
-			var out := FileAccess.open("res://docs/reviews/x-impact/gameplay_%s.json" % ("right" if side == 1 else "left"), FileAccess.WRITE)
+			var out := FileAccess.open(output_dir + "/gameplay_%s.json" % ("right" if side == 1 else "left"), FileAccess.WRITE)
 			out.store_string(JSON.stringify(rows, "\t"))
 			print("RESULT: ", "PASS" if failures == 0 else "FAIL", " real-scene X impact review, ", failures, " failures")
 			tree.quit(0 if failures == 0 else 1)
@@ -83,6 +84,10 @@ func run() -> void:
 	d.main = main
 	d.tree = self
 	d.styles = StyleRegistry.all()
+	if OS.get_environment("REVIEW_STYLES") != "":
+		d.styles = d.styles.filter(func(st): return String(st.id) in OS.get_environment("REVIEW_STYLES").split(","))
+	if OS.get_environment("REVIEW_OUT") != "":
+		d.output_dir = OS.get_environment("REVIEW_OUT")
 	d.side = -1 if OS.get_environment("REVIEW_SIDE") == "-1" else 1
 	d.process_physics_priority = -100
 	root.add_child(d)

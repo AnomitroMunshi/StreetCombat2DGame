@@ -1,7 +1,7 @@
 extends SceneTree
 ## Simplified controls: J light, K heavy, L technique, W / S + J / K variants,
 ## F signature, X cooldown move, Space jump, Shift block / parry, double-tap A / D dash.
-## Checks the published mapping for all seven styles in both facing directions
+## Checks the published mapping for all nine styles in both facing directions
 ## (independently of the style files), every combo branch, the non-striking
 ## techniques, and through the real scene: dash rules, movement + attack,
 ## block, low block, parry, jump + air attack, signature and restart.
@@ -31,6 +31,12 @@ const SPEC: Dictionary = {
 	&"bangla_maar": {&"light": &"street_punch", &"heavy": &"thrust_kick", &"technique": &"jor_dhakka",
 		&"up_light": &"head_elbow", &"up_heavy": &"hammer_fist", &"down_light": &"stomach_shot", &"down_heavy": &"leg_kick",
 		&"F": &"belly_bomb", &"power_light": &"flying_slap", &"power_heavy": &"flying_chest_kick", &"x_move": &"dropkick"},
+	&"capoeira": {&"light": &"cap_quick_palm", &"heavy": &"cap_spin_heel", &"technique": &"cap_cartwheel",
+		&"up_light": &"rising_elbow", &"up_heavy": &"cap_crescent", &"down_light": &"body_punch", &"down_heavy": &"cap_low_sweep",
+		&"power_light": &"cap_leap_palm", &"power_heavy": &"cap_flying_scissor", &"x_move": &"meia_lua_tornado", &"F": &"roda_storm"},
+	&"jeet_kune_do": {&"light": &"jkd_lead_straight", &"heavy": &"cross", &"technique": &"side_kick",
+		&"up_light": &"rising_elbow", &"up_heavy": &"jkd_high_hook", &"down_light": &"body_straight", &"down_heavy": &"low_roundhouse",
+		&"power_light": &"jkd_jump_straight", &"power_heavy": &"flying_side_kick", &"x_move": &"dragons_burst", &"F": &"intercepting_fury"},
 }
 ## Names the move list must show for each style (its own name for shared moves).
 const NAMES: Dictionary = {
@@ -271,6 +277,8 @@ func _power_chords() -> void:
 		&"karate": [&"jumping_reverse_punch", &"flying_side_kick"], &"kung_fu": [&"leaping_spin_backfist", &"flying_axe_kick"],
 		&"taekwondo": [&"jumping_backfist", &"jumping_spin_hook"], &"kickboxing": [&"superman_punch", &"leaping_roundhouse"],
 		&"bangla_maar": [&"flying_slap", &"flying_chest_kick"],
+		&"capoeira": [&"cap_leap_palm", &"cap_flying_scissor"],
+		&"jeet_kune_do": [&"jkd_jump_straight", &"flying_side_kick"],
 	}
 	var w := CombatData.POWER_CHORD_WINDOW
 	for sid in POWER:

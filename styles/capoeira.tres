@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="MartialArtStyle" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/martial_art_style.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+id = &"capoeira"
+order = 8
+display_name = "Capoeira"
+description = "Ginga rhythm, circular kicks and hand-supported attacks. Change levels, sweep low, then turn the heel through the guard. Every inverted attack has a readable entry and committed recovery."
+category = &"kicking"
+difficulty = 4
+strengths = PackedStringArray("Circular kicks and low-to-high sequences", "Wide hand-supported silhouettes", "Fluid palm-to-kick chains")
+weaknesses = PackedStringArray("Committed cartwheel recovery", "Inverted attacks remain vulnerable", "Longer setup for heavy heels")
+stance = 11
+kit = &"capoeira"
+step_scale = 1.0
+ai_preferred_range = 90.0
+ai_tuning = {"aggression": 0.55, "dodge_chance": 0.24, "parry_chance": 0.16}
+move_names = {&"rising_elbow": "Rising Elbow", &"body_punch": "Crouching Body Punch", &"jump_punch": "Jump Palm"}
+input_map = {
+&"light": &"cap_quick_palm",
+&"heavy": &"cap_spin_heel",
+&"technique": &"cap_cartwheel",
+&"up_light": &"rising_elbow",
+&"up_heavy": &"cap_crescent",
+&"down_light": &"body_punch",
+&"down_heavy": &"cap_low_sweep",
+&"power_light": &"cap_leap_palm",
+&"power_heavy": &"cap_flying_scissor",
+&"x_move": &"meia_lua_tornado"
+}
+air_map = {&"light": &"jump_punch", &"heavy": &"cap_air_crescent", &"technique": &"cap_air_spin"}
+chains = {
+&"cap_quick_palm": [&"cap_spin_heel", &"cap_crescent", &"body_punch", &"cap_low_sweep"],
+&"cap_spin_heel": [&"cap_quick_palm"],
+&"cap_crescent": [&"cap_quick_palm", &"cap_low_sweep"],
+&"body_punch": [&"cap_quick_palm", &"cap_spin_heel"],
+&"cap_low_sweep": [&"cap_quick_palm"]
+}
+ai_close_plans = [[&"cap_quick_palm", &"body_punch", &"cap_spin_heel"], [&"cap_quick_palm", &"cap_low_sweep"], [&"cap_crescent", &"cap_quick_palm"], [&"cap_cartwheel"]]
+ai_far_plans = [[&"cap_spin_heel"], [&"cap_cartwheel"], [&"cap_leap_palm"], [&"cap_flying_scissor"]]
+signature = &"roda_storm"
+finishers = PackedStringArray("rodas_end", "handstand_havoc")
+air_finisher = &"sky_wheel"
+wall_finisher = &"corner_carnival"

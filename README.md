@@ -1,15 +1,16 @@
 # Street Combat
 
 A 2D side-view hand-to-hand fighting game for Godot 4: one player against
-one AI in a training hall, with seven martial arts. Each style has its own
+one AI in a training hall, with nine martial arts. Each style has its own
 character costume, stance, moveset, power moves, signature and two finishers:
-Boxing, Muay Thai, Karate, Kung Fu, Taekwondo, Kickboxing and the parody style
-Bangla Maar.
+Boxing, Muay Thai, Karate, Kung Fu, Taekwondo, Kickboxing, Capoeira,
+Jeet Kune Do and the parody style Bangla Maar.
 
 The fighters are procedurally animated skeletons with keyframed martial-arts
 moves, ragdoll knockdowns and blowback physics. The game also has stuns,
 cinematic finishers, victory celebrations, speech bubbles, procedurally
-generated sound effects, and a music track for each style.
+generated sound effects, seven style music tracks and procedural music for
+the two new styles.
 
 Built and tested with **Godot 4.7.2 stable** (GL Compatibility renderer).
 No plugins. All graphics and sound effects are generated from code; the only
@@ -1116,3 +1117,11 @@ review: `docs/M6.5_ARCHITECTURE.md`, `docs/M6.5_REVIEW.md`,
 - AI difficulty is set by exported values on the `EnemyAI` node
   (`aggression`, `block_chance`, `reaction_frames`, `jump_in_chance`,
   `anti_air_chance`).
+
+## Roster expansion: Capoeira and Jeet Kune Do
+
+The roster includes Capoeira (circular kicks and changing levels) and Jeet Kune Do (direct interception and compact combinations). Both use the same controls, including style-specific X moves, signatures and finishers. Select any of the nine styles from the three-column roster or cycle with Q. Training's dummy-style selector also includes both.
+
+Capoeira uses ginga, circular heel kicks, sweeps and hand-supported cartwheel attacks. Its signature is **Roda Storm** and X is **Meia-Lua Tornado**. JKD draws on Bruce Lee-inspired bladed readiness, lead-hand economy, stop kicks and direct side kicks. Its signature is **Intercepting Fury**; X **Dragon's Burst** delivers a stop kick followed by a powerful side kick (6 + 12 damage). Both new X moves cost no Focus and use a 15-second cooldown.
+
+These two styles currently use the existing procedural music loop. Dedicated music tracks have not been supplied. See [Adding a style](docs/ADDING_A_STYLE.md) for integration and validation requirements.

@@ -14,6 +14,8 @@ const STYLES := {
 	&"muay_thai": [&"eight_limbs", &"iron_knee", &"iron_corner"],
 	&"karate": [&"one_inch_verdict", &"crimson_crescent", &"skyline_verdict"],
 	&"kung_fu": [&"hundred_palms", &"dragons_descent", &"descending_dragon_palm", &"wall_of_palms"], &"kickboxing": [&"last_combination", &"knockout_rhythm", &"air_breaker", &"corner_breaker"],
+	&"capoeira": [&"rodas_end", &"handstand_havoc", &"sky_wheel", &"corner_carnival"],
+	&"jeet_kune_do": [&"one_inch_ending", &"no_second_chance", &"dragon_intercept", &"end_of_line"],
 	&"bangla_maar": [&"paaye_lathi", &"super_chor", &"bangla_air_smash", &"deowal_dhakka"],
 }
 const START_GAP: float = 120.0
@@ -120,6 +122,8 @@ func _physics_process(_delta: float) -> bool:
 		var ev: Dictionary = _main.get("_last_finisher_event")
 		var fresh := not is_same(ev, _seen_event)
 		_seen_event = ev
+		if fresh and ev.get("final", false) and c[0] == &"jeet_kune_do":
+			_check(not ev.get("high", true), "JKD body finisher emits body-hit feedback")
 		if fresh and not ev.is_empty() and ev.get("wall", false):
 			_walls += 1
 			var bound := Fighter.ARENA_MIN_X if c[2] else Fighter.ARENA_MAX_X

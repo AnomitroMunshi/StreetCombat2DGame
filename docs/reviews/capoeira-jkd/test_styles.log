@@ -1,0 +1,192 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[registry]
+  ok   boxing and taekwondo are registered
+  ok   no style file rejected ([])
+  ok   boxing validates
+  ok   muay_thai validates
+  ok   karate validates
+  ok   kung_fu validates
+  ok   taekwondo validates
+  ok   kickboxing validates
+  ok   bangla_maar validates
+  ok   capoeira validates
+  ok   jeet_kune_do validates
+  ok   style ids are unique
+  ok   malformed style data is reported (4 problems: unknown move no_such_move, unknown slot kick, ground slot heavy maps to air-only move jump_kick, chain jab -> cross leaves the moveset)
+[boxing cannot kick]
+  ok   no kick or sweep anywhere in the boxing moveset ([&"dempsey_roll", &"superman_punch", &"power_uppercut", &"slip_counter", &"body_hook", &"cross", &"jab", &"bob_weave", &"overhand", &"uppercut", &"jump_punch"])
+  ok   every button, on the ground and in the air, gives a boxer a punch (or nothing)
+  ok   boxing S+J = body hook
+  ok   boxing L = bob and weave
+  ok   an AI/legacy kick intent is refused for a boxer
+  ok   S+K for a boxer is a slip counter, never a low kick
+[taekwondo has no boxing combos]
+  ok   no hooks, overhand, slip counter or uppercut in taekwondo
+  ok   jab-jab is a boxing chain, not a taekwondo one
+  ok   movesets genuinely differ (boxing-only 9, taekwondo-only 11)
+[air attacks follow the style]
+  ok   boxing in the air, heavy -> JUMP_PUNCH (JUMP_PUNCH)
+  ok   taekwondo in the air, heavy -> JUMP_ROUNDHOUSE (JUMP_ROUNDHOUSE)
+  ok   taekwondo in the air, technique -> JUMP_SPIN_KICK (JUMP_SPIN_KICK)
+  ok   taekwondo in the air, light -> JUMP_PUNCH (JUMP_PUNCH)
+[combos follow the style graph]
+  ok   boxing: LIGHT then down_light chains
+  ok   taekwondo: KICK then up_heavy chains
+  ok   taekwondo: LIGHT then light does not chain
+[new moves: one hit, both directions]
+  ok   LEAD_HOOK hits exactly once, same result facing either way ([[1, 91], [1, 91]])
+  ok   REAR_HOOK hits exactly once, same result facing either way ([[1, 88], [1, 88]])
+  ok   BODY_HOOK hits exactly once, same result facing either way ([[1, 90], [1, 90]])
+  ok   OVERHAND hits exactly once, same result facing either way ([[1, 85], [1, 85]])
+  ok   SLIP_COUNTER hits exactly once, same result facing either way ([[1, 89], [1, 89]])
+  ok   AXE_KICK hits exactly once, same result facing either way ([[1, 86], [1, 86]])
+  ok   SPIN_HOOK_KICK hits exactly once, same result facing either way ([[1, 86], [1, 86]])
+[slip counter]
+  ok   a head-height jab whiffs during the slip
+  ok   a low attack still lands during the slip
+[style finishers]
+  ok   boxing on open floor: only its own two finishers, alternating (["EIGHT-COUNT", "THE FINAL BELL"])
+  ok   taekwondo on open floor: only its own two finishers, alternating (["CYCLONE 360", "HEAVEN\'S HEEL"])
+  ok   airborne kill: the style's air finisher has priority (41/100)
+  ok   near the wall: the style's wall finisher has priority (38/100)
+  ok   Boxing's air and wall finishers throw punches only ([])
+[style air and wall finishers]
+  ok   karate: its own SKYLINE VERDICT, else its own finishers, never twice running (40/100, 0 foreign)
+  ok   muay_thai: its own IRON CORNER, else its own finishers, never twice running (38/100, 0 foreign)
+  ok   boxing: its own FALLING CROSS, else its own finishers, never twice running (39/100, 0 foreign)
+  ok   boxing: its own THE CORNER COUNT, else its own finishers, never twice running (42/100, 0 foreign)
+  ok   kickboxing: its own AIR BREAKER, else its own finishers, never twice running (41/100, 0 foreign)
+  ok   kickboxing: its own CORNER BREAKER, else its own finishers, never twice running (38/100, 0 foreign)
+  ok   taekwondo: its own SKYFALL AXE, else its own finishers, never twice running (44/100, 0 foreign)
+  ok   taekwondo: its own CORNER CYCLONE, else its own finishers, never twice running (39/100, 0 foreign)
+  ok   kung_fu: its own DESCENDING DRAGON PALM, else its own finishers, never twice running (42/100, 0 foreign)
+  ok   kung_fu: its own WALL OF PALMS, else its own finishers, never twice running (35/100, 0 foreign)
+  ok   bangla_maar: its own AIR SMASH, else its own finishers, never twice running (40/100, 0 foreign)
+  ok   bangla_maar: its own DEOWAL DHAKKA, else its own finishers, never twice running (36/100, 0 foreign)
+  ok   an air or wall finisher of the wrong kind is reported (["air_finisher iron_corner is not an airborne finisher", "wall_finisher skyline_verdict is not a wall finisher"])
+[boxing power]
+  ok   REAR_HOOK drives the opponent back 47 px (>= 40)
+  ok   OVERHAND drives the opponent back 56 px (>= 50)
+  ok   BODY_HOOK drives the opponent back 34 px (>= 30)
+[focus]
+  ok   focus per hit: light < kick < heavy < counter (3, 5, 6, 9)
+[focus from taking hits is capped]
+  ok   a long combo pays at most 12 focus in the window (12.0)
+  ok   the window reopens afterwards (15.9)
+  ok   taking a 12-damage hit pays the victim 3.6 focus
+  ok   signature hits earn no focus
+  ok   focus starts at 0
+  ok   focus never exceeds 100 (100)
+  ok   two blocks in quick succession pay once (no block farming)
+  ok   blocks pay again after the cooldown
+[signatures]
+  ok   boxing: F without full focus does nothing and costs nothing
+  ok   boxing: F at full focus starts GAZELLE_HOOK and spends 100
+  ok   boxing: a whiffed signature is not refunded
+  ok   taekwondo: F without full focus does nothing and costs nothing
+  ok   taekwondo: F at full focus starts TORNADO_540 and spends 100
+  ok   taekwondo: a whiffed signature is not refunded
+  ok   540 tornado kick leaves the ground and lands
+  ok   a boxer cannot do another style's signature
+  ok   GAZELLE_HOOK lands once, knocks down, same both ways ([[1, 78, true], [1, 78, true]])
+  ok   TORNADO_540 lands once, knocks down, same both ways ([[1, 76, true], [1, 76, true]])
+  ok   a signature can be blocked (BLOCKED, no damage)
+[all nine styles]
+  ok   nine styles registered (9)
+  ok   kickboxing is the default all-rounder
+  ok   boxing has two finishers of its own (["final_bell", "eight_count"])
+  ok   boxing has its own signature (gazelle_hook)
+  ok   boxing: signature starts on F at full focus
+  ok   muay_thai has two finishers of its own (["eight_limbs", "iron_knee"])
+  ok   muay_thai has its own signature (flying_knee)
+  ok   muay_thai: signature starts on F at full focus
+  ok   karate has two finishers of its own (["one_inch_verdict", "crimson_crescent"])
+  ok   karate has its own signature (perfect_gyaku)
+  ok   karate: signature starts on F at full focus
+  ok   kung_fu has two finishers of its own (["hundred_palms", "dragons_descent"])
+  ok   kung_fu has its own signature (palm_barrage)
+  ok   kung_fu: signature starts on F at full focus
+  ok   taekwondo has two finishers of its own (["cyclone_360", "heavens_heel"])
+  ok   taekwondo has its own signature (tornado_540)
+  ok   taekwondo: signature starts on F at full focus
+  ok   kickboxing has two finishers of its own (["last_combination", "knockout_rhythm"])
+  ok   kickboxing has its own signature (breaker_combo)
+  ok   kickboxing: signature starts on F at full focus
+  ok   bangla_maar has two finishers of its own (["paaye_lathi", "super_chor"])
+  ok   bangla_maar has its own signature (belly_bomb)
+  ok   bangla_maar: signature starts on F at full focus
+  ok   capoeira has two finishers of its own (["rodas_end", "handstand_havoc"])
+  ok   capoeira has its own signature (roda_storm)
+  ok   capoeira: signature starts on F at full focus
+  ok   jeet_kune_do has two finishers of its own (["one_inch_ending", "no_second_chance"])
+  ok   jeet_kune_do has its own signature (intercepting_fury)
+  ok   jeet_kune_do: signature starts on F at full focus
+  ok   movesets stay distinct (no high kick in kung fu, no sweep in karate, elbows only in muay thai)
+[sequences, multi-hit, deflection]
+  ok   Breaker Combination: jab, cross, low kick, high kick all land (["Jab", "Cross", "Low Kick", "High Kick"])
+  ok   no knockdown before the final strike of the sequence
+  ok   a signature sequence is interrupted by a hit
+  ok   chain palms hit three times in one move (3)
+  ok   deflection counter turns aside a body hook
+  ok   ...but not a low kick
+  ok   a standing guard does not stop a low kick
+[new moves: one hit, both directions]
+  ok   ELBOW hits exactly once, same both ways ([[1, 89], [1, 89]])
+  ok   KNEE hits exactly once, same both ways ([[1, 88], [1, 88]])
+  ok   LOW_ROUNDHOUSE hits exactly once, same both ways ([[1, 91], [1, 91]])
+  ok   BODY_ROUNDHOUSE hits exactly once, same both ways ([[1, 88], [1, 88]])
+  ok   REVERSE_PUNCH hits exactly once, same both ways ([[1, 88], [1, 88]])
+  ok   KNIFE_HAND hits exactly once, same both ways ([[1, 91], [1, 91]])
+  ok   RISING_PUNCH hits exactly once, same both ways ([[1, 89], [1, 89]])
+  ok   SPIN_COUNTER_KICK hits exactly once, same both ways ([[1, 87], [1, 87]])
+  ok   STRAIGHT_PALM hits exactly once, same both ways ([[1, 94], [1, 94]])
+  ok   DOUBLE_PALM hits exactly once, same both ways ([[1, 88], [1, 88]])
+  ok   LOW_SIDE_KICK hits exactly once, same both ways ([[1, 91], [1, 91]])
+  ok   RISING_PALM hits exactly once, same both ways ([[1, 89], [1, 89]])
+  ok   DEFLECT_COUNTER hits exactly once, same both ways ([[1, 89], [1, 89]])
+  ok   PERFECT_GYAKU hits exactly once, same both ways ([[1, 78], [1, 78]])
+  ok   FLYING_KNEE hits exactly once, same both ways ([[1, 76], [1, 76]])
+[finisher poses and wall entries]
+  ok   every finisher pose (all styles, incl. wall entries) exists in the pose library ([])
+  ok   Wall Crush as a boxer: hooks and an overhand, no knee or kick, ends in the slump
+[palm barrage and parried signatures]
+  ok   Flowing Palm Barrage: three palms then the double palm (["Straight Palm", "Straight Palm", "Straight Palm", "Double Palm"])
+  ok   taekwondo signature can be parried (PARRIED)
+  ok   karate signature can be parried (PARRIED)
+[AI rivals stay in style]
+  ok   boxing rival: 11 different moves used, none illegal, none refused (["Jab", "Cross", "Body Hook", "Overhand", "Superman Punch", "Uppercut", "Dempsey Roll (lead hook)", "Dempsey Roll (rear hook)", "Crouching Power Uppercut", "Bob and Weave", "Gazelle Hook"])
+  ok   boxing rival uses a varied moveset
+  ok   taking hits fills the Focus bar (21 hits taken, focus 71)
+  ok   muay_thai rival: 10 different moves used, none illegal, none refused (["Body Straight", "Low Kick", "Thai Roundhouse Kick (Tae Chiang)", "Jab", "Elbow", "High Kick", "Rising Elbow", "Jumping Downward Elbow", "Flying Knee", "Body Kick"])
+  ok   muay_thai rival uses a varied moveset
+  ok   taking hits fills the Focus bar (22 hits taken, focus 71)
+  ok   karate rival: 11 different moves used, none illegal, none refused (["Body Punch", "Reverse Punch", "Step-Back Spinning Backfist", "Flying Side Kick", "Jab", "High Kick", "Jumping Reverse Punch", "Rising Punch", "Perfect Gyaku-Zuki", "Knife Hand", "Jump Punch"])
+  ok   karate rival uses a varied moveset
+  ok   taking hits fills the Focus bar (27 hits taken, focus 79)
+  ok   kung_fu rival: 9 different moves used, none illegal, none refused (["Low Palm", "Rising Palm", "Straight Palm", "Double Palm", "Front Kick", "Backhand", "Scorpion Kick", "Leaping Spinning Backfist", "Sweep"])
+  ok   kung_fu rival uses a varied moveset
+  ok   taking hits fills the Focus bar (24 hits taken, focus 63)
+  ok   taekwondo rival: 8 different moves used, none illegal, none refused (["Jab", "Body Punch", "High Kick", "Jumping Spinning Hook Kick", "Side Kick", "Axe Kick", "Double Kick (low)", "Double Kick (mid)"])
+  ok   taekwondo rival uses a varied moveset
+  ok   taking hits fills the Focus bar (22 hits taken, focus 63)
+  ok   kickboxing rival: 9 different moves used, none illegal, none refused (["Jab", "Cross", "Low Kick", "Superman Punch", "Body Kick", "High Kick", "Big Foot", "Uppercut", "Body Hook"])
+  ok   kickboxing rival uses a varied moveset
+  ok   taking hits fills the Focus bar (19 hits taken, focus 62)
+  ok   bangla_maar rival: 10 different moves used, none illegal, none refused (["Dropkick", "Jump Kick", "Street Punch", "Stomach Shot", "Leg Kick", "Head Elbow", "Front Thrust Kick", "Double-Hand Hammer", "Jor Dhakka", "Belly Bomb"])
+  ok   bangla_maar rival uses a varied moveset
+  ok   taking hits fills the Focus bar (25 hits taken, focus 67)
+  ok   bangla_maar rival does not spam Jor Dhakka or the Belly Bomb (2 bashes, 1 belly bombs of 29 swings)
+  ok   capoeira rival: 9 different moves used, none illegal, none refused (["Meia-Lua Tornado", "Jump Crescent Kick", "Crescent Kick", "Quick Palm", "Body Punch", "Spinning Heel Kick", "Cartwheel Kick", "Low Spinning Sweep", "Leaping Palm"])
+  ok   capoeira rival uses a varied moveset
+  ok   taking hits fills the Focus bar (22 hits taken, focus 62)
+  ok   jeet_kune_do rival: 9 different moves used, none illegal, none refused (["Dragon\'s Burst (stop kick)", "Dragon\'s Burst (side kick)", "Jump Kick", "Lead Straight", "Cross", "Side Kick", "Body Straight", "Low Kick", "High Hook Kick"])
+  ok   jeet_kune_do rival uses a varied moveset
+  ok   taking hits fills the Focus bar (22 hits taken, focus 64)
+[every style selectable]
+  ok   each of the 9 styles can be selected; it loads into the fighter and the rival differs
+RESULT: PASS (0 failures)
+WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
