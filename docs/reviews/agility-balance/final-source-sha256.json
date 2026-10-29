@@ -3,5 +3,8 @@
   "scripts\\fighter.gd": "caa043e71f88c3ae88f045c3b2a20cbcff2242d024f15da294e9483fd7446396",
   "scripts\\enemy_ai.gd": "d7192b79ee7dfbbbcb6ecedfed4896fb54e783ec989d84bf8108e032343d5a73",
   "styles\\capoeira.tres": "a590ca300927b7a1f77f9f2be7344390c2deb44164aa9c20ccc78ca3dffe7d13",
-  "styles\\jeet_kune_do.tres": "9ac7e3eeae6209622edd72e3b5432dbefff6076590f70a00cc2dcefe499aba6f"
+  "styles\\jeet_kune_do.tres": "9ac7e3eeae6209622edd72e3b5432dbefff6076590f70a00cc2dcefe499aba6f",
+  "scripts/martial_art_style.gd": "73798ab834bc071d17bfbfcbcafe7c94704cba49359ce42d2cd34b994c00fd62",
+  "scripts/stances.gd": "cb1c22074dc1c68f7e3a6e8e6b070f98dc61d8ccabbd45c128a80825f007763b",
+  "scripts/style_registry.gd": "3731af66b1cf9b8eb36ef59e46b43b54fffddbfd4afe9be5a74b55136cac6986"
 }
