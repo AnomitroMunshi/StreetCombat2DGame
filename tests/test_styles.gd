@@ -47,6 +47,23 @@ func _attack(t: CombatData.AttackType) -> CombatData.Intent:
 	return i
 
 
+## Contact fixtures use the real Focus-paid F path for signature techniques.
+## Deliberate raw-input legality probes continue to use _attack() directly.
+func _request_contact_attack(fighter: Fighter, type: CombatData.AttackType) -> void:
+	var attack := CombatData.get_attack(type)
+	if not attack.signature:
+		fighter.push_intent(_attack(type))
+		return
+	for owner in StyleRegistry.all():
+		if owner.signature == attack.id:
+			fighter.set_style(owner)
+			break
+	fighter.focus = CombatData.FOCUS_MAX
+	var intent := CombatData.Intent.new()
+	intent.signature = true
+	fighter.push_intent(intent)
+
+
 func _initialize() -> void:
 	var boxing := StyleRegistry.by_id(&"boxing")
 	var tkd := StyleRegistry.by_id(&"taekwondo")
@@ -148,7 +165,7 @@ func _initialize() -> void:
 			p = _pair(null, 80.0, side)
 			a = p[0]
 			var b: Fighter = p[1]
-			a.push_intent(_attack(t_new))
+			_request_contact_attack(a, t_new)
 			var hits := 0
 			for t in 50:
 				a.tick()
@@ -350,7 +367,7 @@ func _initialize() -> void:
 			p = _pair(null, 90.0, side)
 			a = p[0]
 			var b2: Fighter = p[1]
-			a.push_intent(_attack(sig_t))
+			_request_contact_attack(a, sig_t)
 			var hits := 0
 			var blocked := false
 			for t in 60:
@@ -491,7 +508,7 @@ func _initialize() -> void:
 			p = _pair(null, 80.0, side)
 			a = p[0]
 			var b3: Fighter = p[1]
-			a.push_intent(_attack(t_new))
+			_request_contact_attack(a, t_new)
 			var hits2 := 0
 			for t in 60:
 				a.tick()
