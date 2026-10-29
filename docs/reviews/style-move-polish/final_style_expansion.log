@@ -1,0 +1,32 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  ok   nine cards in a 3 by 3 selector
+  ok   capoeira: every card and confirm stay onscreen
+  ok   full style names fit each card
+  ok   capoeira selectable and rival differs
+  ok   confirm includes complete style name
+  ok   capoeira enters training with X information
+  ok   training dummy cycles through all nine styles
+  ok   capoeira: AI selects legal rising anti-air
+  ok   new-style anti-air starts without illegal fallback
+  ok   nine cards in a 3 by 3 selector
+  ok   jeet_kune_do: every card and confirm stay onscreen
+  ok   full style names fit each card
+  ok   jeet_kune_do selectable and rival differs
+  ok   confirm includes complete style name
+  ok   jeet_kune_do enters training with X information
+  ok   training dummy cycles through all nine styles
+  ok   jeet_kune_do: AI selects legal rising anti-air
+  ok   new-style anti-air starts without illegal fallback
+RESULT: PASS (0 failures)
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At line:2 char:106
++ ... ontact')) { & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 4 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

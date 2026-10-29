@@ -1,0 +1,38 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[style select]
+  ok   style select plays the menu theme
+  ok   previewing a style keeps the menu theme
+[match]
+  ok   confirming Bangla Maar plays its own track
+  ok   the rival's style never changes the music
+  ok   after the crossfade only one track plays (1)
+  ok   music has its own bus
+[existing tracks and new-style procedural fallback]
+  ok   boxing retains its own track
+  ok   muay_thai retains its own track
+  ok   karate retains its own track
+  ok   kung_fu retains its own track
+  ok   taekwondo retains its own track
+  ok   kickboxing retains its own track
+  ok   bangla_maar retains its own track
+  ok   capoeira uses the documented procedural loop until its own music is supplied
+  ok   jeet_kune_do uses the documented procedural loop until its own music is supplied
+[styles without a track fall back]
+  ok   CHANGE STYLE goes back to the menu theme
+  ok   Karate plays its own looping track
+  ok   a style with no track yet plays the procedural loop
+[same track: no restart]
+  ok   asking for the playing track again changes nothing
+RESULT: PASS (0 failures)
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 11 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At line:2 char:362
++ ...  $suites) { & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 11 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

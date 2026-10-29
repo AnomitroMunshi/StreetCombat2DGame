@@ -1,0 +1,69 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  ok   kickboxing corner_breaker right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker right (60 px from the wall): completes
+  ok   kickboxing corner_breaker right (60 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker right (60 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker right (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker right (110 px from the wall): completes
+  ok   kickboxing corner_breaker right (110 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker right (110 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker right (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker right (160 px from the wall): completes
+  ok   kickboxing corner_breaker right (160 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker right (160 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker right (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker left (60 px from the wall): completes
+  ok   kickboxing corner_breaker left (60 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker left (60 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker left (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker left (110 px from the wall): completes
+  ok   kickboxing corner_breaker left (110 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker left (110 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker left (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker left (160 px from the wall): completes
+  ok   kickboxing corner_breaker left (160 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker left (160 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker left (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival right (60 px from the wall): completes
+  ok   capoeira corner_carnival right (60 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival right (60 px from the wall): every blow within 6 px of the body (worst 2.1)
+  contact gaps by beat: [-7.61432266235352, 2.0620059967041, -3.99182415008545]
+  ok   capoeira corner_carnival right (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival right (110 px from the wall): completes
+  ok   capoeira corner_carnival right (110 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival right (110 px from the wall): every blow within 6 px of the body (worst 3.1)
+  contact gaps by beat: [-7.3621187210083, 3.09431457519531, -3.97210502624512]
+  ok   capoeira corner_carnival right (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival right (160 px from the wall): completes
+  ok   capoeira corner_carnival right (160 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival right (160 px from the wall): every blow within 6 px of the body (worst 4.4)
+  contact gaps by beat: [-7.3621187210083, 4.39694023132324, -3.9890718460083]
+  ok   capoeira corner_carnival right (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival left (60 px from the wall): completes
+  ok   capoeira corner_carnival left (60 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival left (60 px from the wall): every blow within 6 px of the body (worst 4.4)
+  contact gaps by beat: [-7.3621301651001, 4.39692687988281, -3.98921203613281]
+  ok   capoeira corner_carnival left (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival left (110 px from the wall): completes
+  ok   capoeira corner_carnival left (110 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival left (110 px from the wall): every blow within 6 px of the body (worst 2.1)
+  contact gaps by beat: [-7.3621301651001, 2.05679702758789, -3.99187755584717]
+  ok   capoeira corner_carnival left (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival left (160 px from the wall): completes
+  ok   capoeira corner_carnival left (160 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival left (160 px from the wall): every blow within 6 px of the body (worst 2.1)
+  contact gaps by beat: [-7.3621301651001, 2.05679702758789, -3.99187755584717]
+  ok   capoeira corner_carnival left (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+RESULT: PASS (0 failures)

@@ -1,0 +1,21 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  ok   nine cards in a 3 by 3 selector
+  ok   capoeira: every card and confirm stay onscreen
+  ok   full style names fit each card
+  ok   capoeira selectable and rival differs
+  ok   confirm includes complete style name
+  ok   capoeira enters training with X information
+  ok   training dummy cycles through all nine styles
+  ok   capoeira: AI selects legal rising anti-air
+  ok   new-style anti-air starts without illegal fallback
+  ok   nine cards in a 3 by 3 selector
+  ok   jeet_kune_do: every card and confirm stay onscreen
+  ok   full style names fit each card
+  ok   jeet_kune_do selectable and rival differs
+  ok   confirm includes complete style name
+  ok   jeet_kune_do enters training with X information
+  ok   training dummy cycles through all nine styles
+  ok   jeet_kune_do: AI selects legal rising anti-air
+  ok   new-style anti-air starts without illegal fallback
+RESULT: PASS (0 failures)
