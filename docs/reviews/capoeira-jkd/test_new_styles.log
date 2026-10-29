@@ -1,0 +1,228 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ok nine registered styles without rejected data
+ok capoeira validates
+ok new append-only stance has all pose channels
+ok capoeira maps light
+ok capoeira maps heavy
+ok capoeira maps technique
+ok capoeira maps up_light
+ok capoeira maps up_heavy
+ok capoeira maps down_light
+ok capoeira maps down_heavy
+ok capoeira maps power_light
+ok capoeira maps power_heavy
+ok capoeira maps x_move
+ok signature child is internal and style-legal
+ok signature child is internal and style-legal
+ok signature child is internal and style-legal
+ok capoeira signature sums exactly24
+ok raw signature wrapper cannot bypass F/Focus at meter0
+ok central signature start requires authorized Focus path
+ok normal F still pays Focus and completes all authorized child continuations
+ok raw signature wrapper cannot bypass F/Focus at meter50
+ok central signature start requires authorized Focus path
+ok normal F still pays Focus and completes all authorized child continuations
+ok raw signature wrapper cannot bypass F/Focus at meter100
+ok central signature start requires authorized Focus path
+ok normal F still pays Focus and completes all authorized child continuations
+ok capoeira X18 damage,15 seconds,no Focus
+ok capoeira F all strikes24 damage facing1 ([[&"cap_roda_sweep", 1], [&"cap_roda_cartwheel", 1], [&"cap_roda_heel", 1]])
+ok F spends Focus exactly once and leaves X ready
+ok capoeira X authored contacts and committed cooldown facing1
+ok capoeira X normal block facing1
+ok capoeira X parry without cooldown refund
+ok capoeira signature interrupt drops remaining strikes
+ok signature children cannot be directly injected
+ok capoeira F all strikes24 damage facing-1 ([[&"cap_roda_sweep", 1], [&"cap_roda_cartwheel", 1], [&"cap_roda_heel", 1]])
+ok F spends Focus exactly once and leaves X ready
+ok capoeira X authored contacts and committed cooldown facing-1
+ok capoeira X normal block facing-1
+ok capoeira X parry without cooldown refund
+ok capoeira signature interrupt drops remaining strikes
+ok signature children cannot be directly injected
+ok capoeira light actual authored contacts match damage facing1
+ok capoeira heavy actual authored contacts match damage facing1
+ok capoeira technique actual authored contacts match damage facing1
+ok capoeira up_light actual authored contacts match damage facing1
+ok capoeira up_heavy actual authored contacts match damage facing1
+ok capoeira down_light actual authored contacts match damage facing1
+ok capoeira down_heavy actual authored contacts match damage facing1
+ok capoeira power_light actual authored contacts match damage facing1
+ok capoeira power_heavy actual authored contacts match damage facing1
+ok capoeira x_move actual authored contacts match damage facing1
+ok capoeira light actual authored contacts match damage facing-1
+ok capoeira heavy actual authored contacts match damage facing-1
+ok capoeira technique actual authored contacts match damage facing-1
+ok capoeira up_light actual authored contacts match damage facing-1
+ok capoeira up_heavy actual authored contacts match damage facing-1
+ok capoeira down_light actual authored contacts match damage facing-1
+ok capoeira down_heavy actual authored contacts match damage facing-1
+ok capoeira power_light actual authored contacts match damage facing-1
+ok capoeira power_heavy actual authored contacts match damage facing-1
+ok capoeira x_move actual authored contacts match damage facing-1
+ok foreign style rejects capoeira X
+ok jeet_kune_do validates
+ok new append-only stance has all pose channels
+ok jeet_kune_do maps light
+ok jeet_kune_do maps heavy
+ok jeet_kune_do maps technique
+ok jeet_kune_do maps up_light
+ok jeet_kune_do maps up_heavy
+ok jeet_kune_do maps down_light
+ok jeet_kune_do maps down_heavy
+ok jeet_kune_do maps power_light
+ok jeet_kune_do maps power_heavy
+ok jeet_kune_do maps x_move
+ok signature child is internal and style-legal
+ok signature child is internal and style-legal
+ok signature child is internal and style-legal
+ok signature child is internal and style-legal
+ok jeet_kune_do signature sums exactly24
+ok raw signature wrapper cannot bypass F/Focus at meter0
+ok central signature start requires authorized Focus path
+ok normal F still pays Focus and completes all authorized child continuations
+ok raw signature wrapper cannot bypass F/Focus at meter50
+ok central signature start requires authorized Focus path
+ok normal F still pays Focus and completes all authorized child continuations
+ok raw signature wrapper cannot bypass F/Focus at meter100
+ok central signature start requires authorized Focus path
+ok normal F still pays Focus and completes all authorized child continuations
+ok jeet_kune_do X18 damage,15 seconds,no Focus
+ok jeet_kune_do F all strikes24 damage facing1 ([[&"jkd_stop_kick", 1], [&"jkd_intercept_lead", 1], [&"jkd_intercept_rear", 1], [&"jkd_intercept_side", 1]])
+ok F spends Focus exactly once and leaves X ready
+ok jeet_kune_do X authored contacts and committed cooldown facing1
+ok jeet_kune_do X normal block facing1
+ok jeet_kune_do X parry without cooldown refund
+ok jeet_kune_do signature interrupt drops remaining strikes
+ok signature children cannot be directly injected
+ok jeet_kune_do F all strikes24 damage facing-1 ([[&"jkd_stop_kick", 1], [&"jkd_intercept_lead", 1], [&"jkd_intercept_rear", 1], [&"jkd_intercept_side", 1]])
+ok F spends Focus exactly once and leaves X ready
+ok jeet_kune_do X authored contacts and committed cooldown facing-1
+ok jeet_kune_do X normal block facing-1
+ok jeet_kune_do X parry without cooldown refund
+ok jeet_kune_do signature interrupt drops remaining strikes
+ok signature children cannot be directly injected
+ok jeet_kune_do light actual authored contacts match damage facing1
+ok jeet_kune_do heavy actual authored contacts match damage facing1
+ok jeet_kune_do technique actual authored contacts match damage facing1
+ok jeet_kune_do up_light actual authored contacts match damage facing1
+ok jeet_kune_do up_heavy actual authored contacts match damage facing1
+ok jeet_kune_do down_light actual authored contacts match damage facing1
+ok jeet_kune_do down_heavy actual authored contacts match damage facing1
+ok jeet_kune_do power_light actual authored contacts match damage facing1
+ok jeet_kune_do power_heavy actual authored contacts match damage facing1
+ok jeet_kune_do x_move actual authored contacts match damage facing1
+ok jeet_kune_do light actual authored contacts match damage facing-1
+ok jeet_kune_do heavy actual authored contacts match damage facing-1
+ok jeet_kune_do technique actual authored contacts match damage facing-1
+ok jeet_kune_do up_light actual authored contacts match damage facing-1
+ok jeet_kune_do up_heavy actual authored contacts match damage facing-1
+ok jeet_kune_do down_light actual authored contacts match damage facing-1
+ok jeet_kune_do down_heavy actual authored contacts match damage facing-1
+ok jeet_kune_do power_light actual authored contacts match damage facing-1
+ok jeet_kune_do power_heavy actual authored contacts match damage facing-1
+ok jeet_kune_do x_move actual authored contacts match damage facing-1
+ok foreign style rejects jeet_kune_do X
+ok JKD X stop kick then side kick: 6+12, both directions
+ok JKD two-hit X charges one 900-tick cooldown without Focus
+ok stop kick lands before committed second kick
+ok interruption removes second kick without refund
+ok whiff still completes both kicks and preserves cooldown
+ok raw X child cannot bypass parent cooldown
+ok raw X child cannot bypass parent cooldown
+ok inverted body transitions to broad low recovery hurtbox
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok high strike above crouched body whiffs while body strike still contacts
+ok upright hurtbox returns at authored guard recovery
+ok inverted body transitions to broad low recovery hurtbox
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok high strike above crouched body whiffs while body strike still contacts
+ok upright hurtbox returns at authored guard recovery
+ok hand-supported Capoeira uses wider authored hurtbox without invulnerability
+ok support hurtbox clears outside authored attack
+ok JKD X stop kick then side kick: 6+12, both directions
+ok JKD two-hit X charges one 900-tick cooldown without Focus
+ok stop kick lands before committed second kick
+ok interruption removes second kick without refund
+ok whiff still completes both kicks and preserves cooldown
+ok raw X child cannot bypass parent cooldown
+ok raw X child cannot bypass parent cooldown
+ok inverted body transitions to broad low recovery hurtbox
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok high strike above crouched body whiffs while body strike still contacts
+ok upright hurtbox returns at authored guard recovery
+ok inverted body transitions to broad low recovery hurtbox
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok low recovery stays vulnerable throughout authored phase
+ok high strike above crouched body whiffs while body strike still contacts
+ok upright hurtbox returns at authored guard recovery
+ok hand-supported Capoeira uses wider authored hurtbox without invulnerability
+ok support hurtbox clears outside authored attack
+ok new kicks use the existing kick Focus gain
+ok new kicks use the existing kick Focus gain
+ok new kicks use the existing kick Focus gain
+ok new kicks use the existing kick Focus gain
+ok new kicks use the existing kick Focus gain
+RESULT: PASS

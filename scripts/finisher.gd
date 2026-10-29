@@ -1259,7 +1259,7 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger"},
 				{"ticks": 9, "atk": &"cap_au_hit", "def": &"hitstun", "hit": true, "power": 2, "wall": true},
 				{"ticks": 9, "atk": &"cap_armada_load", "def": &"stagger", "atk_spin": 0.5},
-				{"ticks": 4, "atk": &"cap_armada_hit", "def": &"stagger", "atk_spin": 0.5},
+				{"ticks": 7, "atk": &"cap_armada_hit", "def": &"stagger", "atk_spin": 0.5},
 				{"ticks": 18, "atk": &"cap_armada_hit", "def": &"slumped", "hit": true, "power": 3, "final": true,
 					"contact": &"head", "ko_vy": -2.0, "ko_drift": 0.0, "wall": true},
 				{"ticks": 22, "atk": &"guard", "def": &"slumped", "atk_move": -3.0},

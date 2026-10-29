@@ -1,0 +1,39 @@
+Final regression results: 29 suites pass, including scoped reruns described below.
+Godot 4.7.2, headless, Dummy audio, fixed 60 FPS.
+
+ai_defense PASS
+ai_finisher PASS
+ai_signature PASS
+announcer PASS
+bangla PASS
+controls PASS
+core PASS
+double_kick PASS
+expansion_visuals PASS (68 move/facing probes)
+finisher_contact PASS after Corner Carnival scoped rerun
+flow PASS
+guard PASS
+input PASS
+jump PASS
+knockdown PASS
+match PASS
+movement PASS
+music PASS
+new_styles PASS
+rounds PASS
+stage PASS
+stun PASS
+styles PASS after Focus-paid signature fixture correction and rerun
+style_expansion PASS
+training PASS
+x_flinch PASS
+x_impact PASS
+x_moves PASS
+x_ui_ai PASS
+
+Full finisher sweep: three Corner Carnival right-facing contact failures at 7.6px.
+Extended the final turn by 3 ticks; all six wall cases pass at 2.1px.
+See finisher-contact.log and corner-contact-rerun.log; tolerance remains 6px.
+Styles initially failed four raw signature fixtures after the Focus gate fix.
+Fixtures now exercise normal Focus-paid F input; test_styles.log is the passing rerun.
+Known scene teardown ObjectDB/resource warnings remain; no script or polygon errors.

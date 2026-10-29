@@ -13,11 +13,13 @@ Finishers: Capoeira has Roda's End, Handstand Havoc, Sky Wheel and Corner Carniv
 
 ## Review artifacts
 
+- [29-suite regression results](suite-summary.txt), including the documented focused reruns after fixes.
 - Actual-scene X clips with HUD, effects and sound: [right](clips/gameplay_right.mp4), [left](clips/gameplay_left.mp4).
 - Move pose sheets: [Capoeira](capoeira_moves.png), [JKD](jeet_kune_do_moves.png).
 - [Rendered X contact census](census.json): 24 cases, both directions, centre/wall and close/max range; all deal 18 total damage. Worst sampled strike-joint gap is under 1px against the hurtbox. This is not an every-frame body-contour measurement.
 - Actual-scene hit records: [right](gameplay_right.json), [left](gameplay_left.json). JKD contacts deal 6 then 12 damage; both cooldowns are 15s.
 - [Finisher contact log](finisher-contact.log) uses the existing 6px drawn-body tolerance across all nine styles.
+- The full sweep found three right-facing Corner Carnival contacts at 7.6px. Its final turn was extended by three ticks; the [six-case wall rerun](corner-contact-rerun.log) passes at 2.1px in both directions. The original full-sweep log is retained for traceability.
 - `test_expansion_visuals` covers 68 move/facing geometry, registration and hand-support probes. Other focused tests cover controls, legal AI plans, real damage, interruption, cooldown bypass, recovery vulnerability and all nine visible roster cards.
 
 The two new styles currently use the existing procedural music fallback. Dedicated tracks, human feel/balance approval, a large matchup win-rate census and exported-platform checks remain follow-up work. Scene tests retain the existing cleanup warnings at exit.

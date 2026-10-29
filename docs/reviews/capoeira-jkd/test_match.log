@@ -1,0 +1,9 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  KO at frame 1895  hp P=0 E=63  finisher: EIGHT-COUNT
+  winner celebrates: boxing
+  restart ok: fresh match back in PRE_MATCH
+  max combo received by enemy: 2
+  enemy block events: 1   hits taken by player: 17
+  AI states seen: ["IDLE", "APPROACH", "SPACING", "JUMP_IN", "ATTACK", "RETREAT", "BLOCK"]
+RESULT: PASS (0 failures)
