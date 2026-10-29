@@ -132,6 +132,11 @@ var velocity_y: float = 0.0
 var jump_vx: float = 0.0
 ## In the air from a voluntary jump (its own arc, see CombatData.JUMP_*).
 var jump_arc: bool = false
+## Capoeira's directional jump: a vulnerable somersault, not an evade roll.
+var cap_roll_jump: bool = false
+var cap_roll_jump_frame: int = 0
+var cap_roll_jump_dir: int = 1
+const cap_roll_jump_duration: int = 36
 var air_attack_used: bool = false
 # Knockdown / blowback bookkeeping.
 var bounced: bool = false
@@ -363,6 +368,7 @@ func _power_chord_after_attack() -> bool:
 
 ## Drops any queued input. Used when the round ends.
 func stop_combat() -> void:
+	cap_roll_jump = false
 	buffered_attack = CombatData.AttackType.NONE
 	buffer_frames = 0
 	jump_buffer_frames = 0
@@ -463,7 +469,7 @@ func _tick_neutral() -> void:
 		_enter_state(State.CROUCH)
 		return
 	if move_input != 0:
-		var speed := walk_speed
+		var speed := walk_speed * (style.movement_scale if style != null else 1.0)
 		if move_input != facing:
 			speed *= back_walk_mult
 		position.x += move_input * speed
@@ -532,7 +538,10 @@ func _tick_jump() -> void:
 		if state_frame >= CombatData.JUMP_SQUAT_FRAMES and space_age >= chord_wait:
 			airborne = true
 			jump_arc = true
-			velocity_y = CombatData.JUMP_LAUNCH
+			cap_roll_jump = style != null and style.rolling_jump and move_input != 0
+			cap_roll_jump_frame = 0
+			cap_roll_jump_dir = move_input if move_input != 0 else facing
+			velocity_y = -15.5 if cap_roll_jump else CombatData.JUMP_LAUNCH
 			jump_vx = move_input * _jump_speed(move_input)
 			jumped.emit(self)
 		return
@@ -629,6 +638,11 @@ func _in_strike_range(attack: CombatData.Attack, contact_only: bool = false) -> 
 
 
 func _apply_motion() -> void:
+	if cap_roll_jump:
+		if state != State.JUMP or not airborne:
+			cap_roll_jump = false
+		else:
+			cap_roll_jump_frame += 1
 	position.x += velocity_x
 	velocity_x *= KNOCKBACK_FRICTION
 	if absf(velocity_x) < 0.05:
@@ -670,12 +684,14 @@ func _apply_motion() -> void:
 
 ## Jump travel speed for a direction (screen -1 / 1): back jumps are shorter.
 func _jump_speed(dir: int) -> float:
-	return CombatData.JUMP_SPEED_FORWARD if dir * facing >= 0 else CombatData.JUMP_SPEED_BACK
+	var speed := CombatData.JUMP_SPEED_FORWARD if dir * facing >= 0 else CombatData.JUMP_SPEED_BACK
+	return speed * (style.jump_travel_scale if style != null else 1.0)
 
 
 func _land() -> void:
 	position.y = ground_y
 	jump_arc = false
+	cap_roll_jump = false
 	last_impact_speed = velocity_y
 	landed.emit(self)
 	if is_down():
@@ -865,6 +881,7 @@ func _can_chain(from: CombatData.AttackType, to: CombatData.AttackType) -> bool:
 
 ## Locks a martial art onto this fighter (its stance comes with it).
 func set_style(new_style: MartialArtStyle) -> void:
+	cap_roll_jump = false
 	style = new_style
 	if style != null:
 		stance = style.stance
@@ -1125,6 +1142,8 @@ func is_mid_sequence() -> bool:
 
 
 func _enter_state(new_state: State) -> void:
+	if new_state != State.JUMP:
+		cap_roll_jump = false
 	if new_state != State.LAND:
 		landing_attack_id = &""
 	state = new_state
@@ -1408,6 +1427,8 @@ func get_hitbox_world() -> Rect2:
 
 
 func get_hurtbox_world() -> Rect2:
+	if cap_roll_jump and cap_roll_jump_frame >= 4 and cap_roll_jump_frame < cap_roll_jump_duration - 4:
+		return Rect2(position + Vector2(-65.0, -125.0), Vector2(130.0, 80.0))
 	if state == State.ATTACK and current_attack != null:
 		var pose_box := Rect2()
 		if current_attack.recovery_hurtbox.has_area() and state_frame >= current_attack.recovery_hurtbox_start and state_frame <= current_attack.recovery_hurtbox_end:
@@ -1444,6 +1465,8 @@ func can_act() -> bool:
 
 
 func face_opponent() -> void:
+	if cap_roll_jump:
+		return  # retain the takeoff facing through the crossover somersault
 	if opponent == null:
 		return
 	var dx := opponent.position.x - position.x

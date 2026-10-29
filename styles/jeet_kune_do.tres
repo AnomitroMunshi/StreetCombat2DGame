@@ -16,12 +16,13 @@ stance = 12
 kit = &"jeet_kune_do"
 intro_pose = &"jkd_bai_jong_ready"
 step_scale = 1.15
+movement_scale = 1.2
 ai_preferred_range = 100.0
 ai_tuning = {"aggression": 0.6, "dodge_chance": 0.2, "parry_chance": 0.24}
 move_names = {&"cross": "Rear Cross", &"side_kick": "Side Kick", &"low_roundhouse": "Low Shin Kick", &"jump_punch": "Jump Straight", &"jump_kick": "Jump Side Kick"}
 input_map = {
-&"light": &"jkd_lead_straight",
-&"heavy": &"cross",
+&"light": &"jkd_jab_cross",
+&"heavy": &"jkd_hammerfist",
 &"technique": &"side_kick",
 &"up_light": &"rising_elbow",
 &"up_heavy": &"jkd_high_hook",
@@ -33,14 +34,14 @@ input_map = {
 }
 air_map = {&"light": &"jump_punch", &"heavy": &"jump_kick", &"technique": &"jkd_air_front"}
 chains = {
-&"jkd_lead_straight": [&"cross", &"body_straight", &"low_roundhouse", &"side_kick"],
-&"cross": [&"jkd_lead_straight", &"low_roundhouse", &"side_kick"],
-&"body_straight": [&"cross", &"side_kick"],
-&"low_roundhouse": [&"jkd_lead_straight", &"jkd_high_hook"],
-&"side_kick": [&"jkd_lead_straight"]
+&"jkd_jab_cross": [&"jkd_hammerfist", &"body_straight", &"low_roundhouse", &"side_kick"],
+&"jkd_hammerfist": [&"jkd_jab_cross", &"low_roundhouse", &"side_kick"],
+&"body_straight": [&"jkd_hammerfist", &"side_kick"],
+&"low_roundhouse": [&"jkd_jab_cross", &"jkd_high_hook"],
+&"side_kick": [&"jkd_jab_cross"]
 }
-ai_close_plans = [[&"jkd_lead_straight", &"cross", &"side_kick"], [&"jkd_lead_straight", &"body_straight", &"cross"], [&"low_roundhouse", &"jkd_high_hook"]]
-ai_far_plans = [[&"side_kick"], [&"jkd_jump_straight"], [&"flying_side_kick"], [&"jkd_lead_straight", &"side_kick"]]
+ai_close_plans = [[&"jkd_jab_cross", &"jkd_hammerfist", &"side_kick"], [&"jkd_jab_cross", &"body_straight", &"jkd_hammerfist"], [&"low_roundhouse", &"jkd_high_hook"]]
+ai_far_plans = [[&"side_kick"], [&"jkd_jump_straight"], [&"flying_side_kick"], [&"jkd_jab_cross", &"side_kick"]]
 signature = &"intercepting_fury"
 finishers = PackedStringArray("one_inch_ending", "no_second_chance")
 air_finisher = &"dragon_intercept"

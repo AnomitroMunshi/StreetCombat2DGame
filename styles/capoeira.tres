@@ -15,7 +15,10 @@ weaknesses = PackedStringArray("Committed cartwheel recovery", "Inverted attacks
 stance = 11
 kit = &"capoeira"
 intro_pose = &"cap_one_hand_ready"
-step_scale = 1.0
+step_scale = 1.1
+movement_scale = 1.3
+jump_travel_scale = 1.5
+rolling_jump = true
 ai_preferred_range = 90.0
 ai_tuning = {"aggression": 0.55, "dodge_chance": 0.24, "parry_chance": 0.16}
 move_names = {&"rising_elbow": "Rising Elbow", &"body_punch": "Crouching Body Punch", &"jump_punch": "Jump Palm"}
@@ -33,14 +36,13 @@ input_map = {
 }
 air_map = {&"light": &"jump_punch", &"heavy": &"cap_air_crescent", &"technique": &"cap_air_spin"}
 chains = {
-&"cap_quick_palm": [&"cap_spin_heel", &"cap_crescent", &"body_punch", &"cap_low_sweep"],
+&"cap_quick_palm": [&"cap_spin_heel", &"cap_crescent", &"body_punch", &"cap_low_sweep", &"cap_cartwheel"],
 &"cap_spin_heel": [&"cap_quick_palm"],
 &"cap_crescent": [&"cap_quick_palm", &"cap_low_sweep"],
-&"body_punch": [&"cap_quick_palm", &"cap_spin_heel"],
-&"cap_low_sweep": [&"cap_quick_palm"]
+&"body_punch": [&"cap_quick_palm", &"cap_spin_heel"]
 }
-ai_close_plans = [[&"cap_quick_palm", &"body_punch", &"cap_spin_heel"], [&"cap_quick_palm", &"cap_low_sweep"], [&"cap_crescent", &"cap_quick_palm"], [&"cap_cartwheel"]]
-ai_far_plans = [[&"cap_spin_heel"], [&"cap_cartwheel"], [&"cap_leap_palm"], [&"cap_flying_scissor"]]
+ai_close_plans = [[&"cap_quick_palm", &"body_punch", &"cap_spin_heel"], [&"cap_quick_palm", &"cap_low_sweep"], [&"cap_quick_palm", &"cap_low_sweep"], [&"cap_quick_palm", &"cap_cartwheel"]]
+ai_far_plans = [[&"cap_spin_heel"], [&"cap_crescent"], [&"cap_leap_palm"], [&"cap_spin_heel"]]
 signature = &"roda_storm"
 finishers = PackedStringArray("rodas_end", "handstand_havoc")
 air_finisher = &"sky_wheel"
