@@ -2244,11 +2244,11 @@ func _build_expansion_moves() -> void:
 		&"jkd_elbow_hit": [0.15, -0.12, 1.2, 2.75, 2.0, 3.6, 0.6, -0.25, -0.5, -0.7, 10.0, 0.0, 0.65, -10.0],
 		&"cap_crescent_load": [0.08, 0.0, 1.0, 2.7, 0.6, 2.6, 1.7, -0.6, -0.25, -0.45, -3.0, 0.0, 0.5, 10.0],
 		&"cap_crescent_hit": [-0.35, 0.2, 1.0, 2.7, -0.7, 0.2, 2.3, 2.25, -0.2, -0.4, 17.0, 0.0, 1.0, -8.0],
-		&"cap_rasteira_load": [0.8, -0.2, 1.0, 2.2, 0.2, 0.25, 1.4, -0.7, 1.0, -1.2, -3.0, 0.0, 0.0, 5.0],
-		&"cap_rasteira_hit": [0.95, -0.3, 1.0, 2.4, 0.15, 0.15, 1.5, 1.5, 1.1, -1.3, 9.0, 0.0, 0.8, -8.0],
-		&"cap_meialua_load": [1.2, -0.2, 0.15, 0.3, -0.1, 0.2, 1.2, -0.7, -0.7, -1.0, 0.0, 60.0, 0.0, 8.0],
-		&"cap_meialua_support": [2.6, 0.2, 0.05, 0.05, -0.05, -0.05, -0.9, -1.2, -2.6, -2.6, 0.0, 100.0, 0.0, 12.0],
-		&"cap_meialua_hit": [2.6, 0.2, 0.05, 0.05, -0.05, -0.05, -2.5, -2.5, -4.13, -4.13, 10.0, 100.0, 0.0, -10.0],
+		&"cap_rasteira_load": [-0.35, 0.25, -0.3, 2.7, 0.15, 0.2, 1.3, -0.7, 0.9, -1.25, -3.0, 0.0, 0.0, 8.0],
+		&"cap_rasteira_hit": [-0.85, 0.5, -0.5, 2.9, 0.15, 0.15, 1.35, 1.35, 1.0, -1.43, 0.0, 0.0, 0.0, 2.0],
+		&"cap_meialua_load": [1.15, -0.25, 0.15, 0.2, -0.1, 0.1, 0.8, -0.6, -0.85, -1.0, -5.0, 60.0, 0.0, 20.0],
+		&"cap_meialua_support": [2.0, 0.2, 0.05, 0.05, -0.05, -0.05, 0.35, -0.5, -2.6, -2.6, 0.0, 83.0, 0.0, 18.0],
+		&"cap_meialua_hit": [2.0, 0.2, 0.05, 0.05, -0.05, -0.05, 0.35, -0.5, -4.18, -4.18, 10.0, 83.0, 0.0, -20.0],
 		&"cap_scissor_load": [0.1, 0.05, 1.1, 2.6, 0.6, 2.8, 1.7, -0.8, 1.4, -1.1, -3.0, 0.0, 0.0, 8.0],
 		&"cap_scissor_hit": [-0.45, 0.15, 1.1, 2.6, -0.7, 0.2, 2.05, 2.0, -0.7, -1.0, 10.0, 0.0, 0.0, 12.0],
 		&"jkd_lead_load": [0.1, -0.05, 1.2, 2.8, 0.95, 2.9, 0.55, -0.25, -0.6, -0.65, -3.0, 0.0, 0.0, 17.0],
@@ -2258,6 +2258,17 @@ func _build_expansion_moves() -> void:
 		&"jkd_side_hit": [-0.45, 0.2, 1.15, 2.65, 0.95, 2.9, 1.9, 1.85, -0.15, -0.35, 17.0, 0.0, 1.0, 18.0],
 		&"jkd_stop_hit": [-0.15, 0.05, 1.25, 2.65, 0.9, 2.9, 1.25, 1.15, -0.2, -0.4, 10.0, 0.0, 0.5, 18.0],
 		&"jkd_hook_hit": [-0.35, 0.2, 1.1, 2.65, 0.8, 2.8, 2.35, 2.3, -0.15, -0.35, 20.0, 0.0, 1.0, 14.0],
+		&"jkd_air_front_load": [0.08, 0.0, 1.05, 2.7, 1.15, 2.85, 2.15, -0.65, 0.9, -1.3, -3.0, 0.0, 0.0, 2.0],
+		&"jkd_air_front_hit": [0.04, 0.02, 1.1, 2.75, 1.1, 2.85, 1.55, 1.5, 0.85, -1.3, 8.0, 0.0, 0.15, 2.0],
+		&"jkd_air_side_hit": [-0.55, 0.25, 1.1, 2.65, 0.85, 2.9, 1.95, 1.9, 0.8, -1.3, 14.0, 0.0, 1.0, 20.0],
+		&"jkd_step_collect": [0.02, -0.08, 1.2, 2.7, 1.0, 2.9, 0.3, -0.2, 0.1, -0.25, -9.0, 0.0, 0.1, 20.0],
+		&"jkd_step_chamber": [-0.18, 0.08, 1.25, 2.7, 1.0, 2.95, 2.15, -0.65, -0.15, -0.35, -8.0, 0.0, 0.65, 22.0],
+		&"jkd_step_hit": [-0.55, 0.22, 1.2, 2.7, 0.95, 2.95, 1.95, 1.9, -0.3, -0.55, 28.0, 0.0, 1.0, 24.0],
+		&"jkd_step_follow": [-0.42, 0.18, 1.2, 2.75, 0.9, 2.95, 1.95, 1.9, -0.2, -0.45, 30.0, 0.0, 1.0, 22.0],
+		&"jkd_inch_set": [0.03, -0.05, 0.6, 2.0, 1.0, 2.85, 0.7, -0.4, -0.6, -0.85, 0.0, 0.0, 0.2, 17.0],
+		&"jkd_inch_load": [-0.04, -0.05, 0.6, 2.0, 1.05, 2.9, 0.78, -0.45, -0.6, -0.9, -2.0, 0.0, 0.35, 18.0],
+		&"jkd_inch_hit": [0.12, -0.08, 0.75, 1.75, 1.05, 2.9, 0.55, -0.25, -0.45, -0.7, 7.0, 0.0, 0.95, 14.0],
+		&"jkd_inch_follow": [0.16, -0.1, 0.78, 1.72, 1.05, 2.9, 0.6, -0.3, -0.5, -0.75, 8.0, 0.0, 0.8, 14.0],
 		&"jkd_burst_load": [0.28, -0.15, 0.85, 2.7, 0.95, 2.95, 0.85, -0.55, -0.7, -0.9, -10.0, 0.0, 0.0, 17.0],
 		&"jkd_burst_hit": [0.32, -0.18, 1.8, 1.8, 1.05, 2.9, 0.75, -0.35, -0.5, -0.8, 20.0, 0.0, 0.8, 24.0],
 	}
@@ -2278,11 +2289,12 @@ func _build_expansion_moves() -> void:
 		&"jkd_lead_straight": [&"jkd_lead_load", &"jkd_lead_hit"],
 		&"jkd_high_hook": [&"jkd_side_load", &"jkd_hook_hit"],
 		&"jkd_jump_straight": [&"jkd_lead_load", &"jkd_lead_hit"],
-		&"jkd_air_front": [&"jkd_side_load", &"jkd_side_hit"],
+		&"jkd_air_front": [&"jkd_air_front_load", &"jkd_air_front_hit"],
 		&"jkd_stop_kick": [&"jkd_side_load", &"jkd_stop_hit"],
 		&"jkd_intercept_lead": [&"jkd_lead_load", &"jkd_lead_hit"],
 		&"jkd_intercept_rear": [&"jkd_lead_load", &"jkd_cross_hit"],
 		&"jkd_intercept_side": [&"jkd_side_load", &"jkd_side_hit"],
+		&"dragons_burst": [&"jkd_step_collect", &"jkd_step_hit"],
 		&"jkd_x_stop": [&"jkd_side_load", &"jkd_stop_hit"],
 		&"jkd_x_side": [&"jkd_side_load", &"jkd_side_hit"],
 	}
@@ -2294,6 +2306,12 @@ func _build_expansion_moves() -> void:
 		var hit: PackedFloat32Array = p[specs[id][1]]
 		_moves[type] = [[S, 0.4, load, EASE_SMOOTH], [S, 0.9, hit, EASE_IN],
 			[A, 0.0, hit, EASE_LINEAR], [A, 1.0, hit, EASE_LINEAR], [R, 0.5, load, EASE_SMOOTH]]
+	var step_type := CombatData.type_for_id(&"dragons_burst")
+	if step_type != CombatData.AttackType.NONE:
+		_moves[step_type] = [[S, 0.28, p[&"jkd_step_collect"], EASE_SMOOTH],
+			[S, 0.64, p[&"jkd_step_chamber"], EASE_SMOOTH], [S, 0.94, p[&"jkd_step_hit"], EASE_IN],
+			[A, 0.0, p[&"jkd_step_hit"], EASE_LINEAR], [A, 1.0, p[&"jkd_step_follow"], EASE_LINEAR],
+			[R, 0.4, p[&"jkd_step_chamber"], EASE_SMOOTH], [R, 0.72, p[&"jkd_step_collect"], EASE_SMOOTH]]
 	# X is a committed lead-leg interception, re-chamber, then a finishing
 	# thrust; the burst straight remains a finisher pose, never the X move.
 	var x_chamber := p[&"jkd_side_load"].duplicate() as PackedFloat32Array
@@ -2340,7 +2358,7 @@ func _build_expansion_moves() -> void:
 			&"side_kick": [&"jkd_side_load", &"jkd_side_hit"], &"rising_elbow": [&"jkd_lead_load", &"jkd_elbow_hit"],
 			&"body_straight": [&"jkd_lead_load", &"jkd_cross_hit"], &"low_roundhouse": [&"jkd_side_load", &"jkd_stop_hit"],
 			&"flying_side_kick": [&"jkd_side_load", &"jkd_side_hit"], &"jump_punch": [&"jkd_lead_load", &"jkd_lead_hit"],
-			&"jump_kick": [&"jkd_side_load", &"jkd_side_hit"]},
+			&"jump_kick": [&"jkd_side_load", &"jkd_air_side_hit"]},
 	}
 	for kit: StringName in overrides:
 		for id: StringName in overrides[kit]:
@@ -2777,7 +2795,7 @@ func _solve_joints(p: PackedFloat32Array) -> PackedVector2Array:
 		var leg_f := THIGH * cos(p[TH_F]) + SHIN * cos(p[SH_F])
 		var leg_b := THIGH * cos(p[TH_B]) + SHIN * cos(p[SH_B])
 		hip.y = -maxf(maxf(leg_f, leg_b), TORSO_WIDTH * 0.5 + 1.0)
-	if _cap_inverted_move() and p[DROP] > 50.0:
+	if (_cap_inverted_move() or _cap_meialua_move()) and p[DROP] > 50.0:
 		hip.y = lerpf(hip.y, -p[DROP], smoothstep(50.0, 80.0, p[DROP]))
 	hip = hip.lerp(TUCK_HIP, smoothstep(0.0, 1.0, _tuck_amount))
 	var torso_dir := Vector2(sin(p[TORSO]), -cos(p[TORSO]))
@@ -3721,14 +3739,19 @@ func _draw_boxing_kit(j: PackedVector2Array, accent: Color) -> void:
 
 func _cap_inverted_move() -> bool:
 	if fighter.state == Fighter.State.ATTACK and fighter.current_attack != null:
-		return fighter.current_attack.id in [&"cap_cartwheel", &"cap_roda_cartwheel", &"meia_lua_tornado"]
-	return fighter.state == Fighter.State.FINISHER and (String(fighter.script_pose).begins_with("cap_au_") \
-		or String(fighter.script_pose).begins_with("cap_meialua_"))
+		return fighter.current_attack.id in [&"cap_cartwheel", &"cap_roda_cartwheel"]
+	return fighter.state == Fighter.State.FINISHER and String(fighter.script_pose).begins_with("cap_au_")
+
+
+func _cap_meialua_move() -> bool:
+	return (fighter.state == Fighter.State.ATTACK and fighter.current_attack != null and fighter.current_attack.id == &"meia_lua_tornado") \
+		or (fighter.state == Fighter.State.FINISHER and String(fighter.script_pose).begins_with("cap_meialua_"))
 
 
 func _cap_supported_move() -> bool:
-	return _cap_inverted_move() or (fighter.state == Fighter.State.ATTACK and fighter.current_attack != null \
-		and fighter.current_attack.id in [&"cap_low_sweep", &"cap_roda_sweep"])
+	return _cap_inverted_move() or _cap_meialua_move() or (fighter.state == Fighter.State.ATTACK and fighter.current_attack != null \
+		and fighter.current_attack.id in [&"cap_low_sweep", &"cap_roda_sweep"]) \
+		or (fighter.state == Fighter.State.FINISHER and String(fighter.script_pose).begins_with("cap_rasteira_"))
 
 
 ## Supporting palms stay at their first floor contact while the hips pass
@@ -3736,7 +3759,8 @@ func _cap_supported_move() -> bool:
 ## rather than stretching a shoulder or dragging a hand along the floor.
 func _plant_cap_hands(j: PackedVector2Array) -> PackedVector2Array:
 	var inverted := _cap_inverted_move()
-	var weight := smoothstep(90.0, 100.0, _pose[DROP]) if inverted else smoothstep(0.7, 0.9, _pose[TORSO])
+	var two_hands := inverted or _cap_meialua_move()
+	var weight := smoothstep(90.0, 100.0, _pose[DROP]) if inverted else (smoothstep(70.0, 82.0, _pose[DROP]) if two_hands else smoothstep(0.6, 0.85, absf(_pose[TORSO])))
 	if not _cap_supported_move() or weight <= 0.01:
 		_cap_hand_anchors.clear()
 		_cap_hand_swing = -1
@@ -3746,7 +3770,7 @@ func _plant_cap_hands(j: PackedVector2Array) -> PackedVector2Array:
 		_cap_hand_anchors = [Vector2(j[J_HAND_F].x, fighter.ground_y - 4.0), Vector2(j[J_HAND_B].x, fighter.ground_y - 4.0)]
 	var arms := [[J_SHOULDER_F, J_ELBOW_F, J_HAND_F], [J_SHOULDER_B, J_ELBOW_B, J_HAND_B]]
 	for arm in 2:
-		if not inverted and arm == 0: continue  # rasteira uses one rear palm
+		if not two_hands and arm == 0: continue  # rasteira uses one rear palm
 		var ids: Array = arms[arm]
 		var shoulder := j[ids[0]]
 		var target := _cap_hand_anchors[arm]
@@ -3974,7 +3998,7 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 	match CombatData.id_for_type(type):
 		&"cap_spin_heel", &"cap_cartwheel", &"cap_air_spin", &"cap_roda_cartwheel", &"cap_roda_heel", &"meia_lua_tornado":
 			return J_FOOT_B
-		&"cap_crescent", &"cap_low_sweep", &"cap_flying_scissor", &"cap_air_crescent", &"cap_roda_sweep", &"jkd_high_hook", &"jkd_air_front", &"jkd_stop_kick", &"jkd_intercept_side", &"jkd_x_stop", &"jkd_x_side":
+		&"cap_crescent", &"cap_low_sweep", &"cap_flying_scissor", &"cap_air_crescent", &"cap_roda_sweep", &"jkd_high_hook", &"jkd_air_front", &"jkd_stop_kick", &"jkd_intercept_side", &"jkd_x_stop", &"jkd_x_side", &"dragons_burst":
 			return J_FOOT_F
 		&"jkd_intercept_rear":
 			return J_HAND_B

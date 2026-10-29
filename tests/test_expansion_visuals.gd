@@ -5,7 +5,7 @@ var failures: int = 0
 var count: int = 0
 var canvas: Node
 var capture := OS.get_environment("CAPTURE_STYLE_VISUALS") == "1"
-var out := "res://docs/reviews/capoeira-jkd"
+var out := "res://docs/reviews/style-move-polish"
 
 func _initialize() -> void:
 	call_deferred("run")
@@ -111,5 +111,70 @@ func run() -> void:
 			await RenderingServer.frame_post_draw
 			(canvas as SubViewport).get_texture().get_image().save_png(out + "/%s_moves.png" % style_id)
 			for node in retained: node.free()
+	polish_semantics()
 	print("RESULT: ", "PASS" if failures == 0 else "FAIL", " expansion visuals: ", count, " move/facing probes, ", failures, " failures")
 	quit(0 if failures == 0 else 1)
+
+
+func contact_pose(fighter: Fighter, visual: FighterVisual, id: StringName, time: float = -1.0) -> PackedFloat32Array:
+	fighter.state = Fighter.State.ATTACK
+	fighter.current_attack = CombatData.get_attack(CombatData.type_for_id(id))
+	fighter.airborne = fighter.current_attack.air_only
+	visual._swing_from = visual._guard.duplicate()
+	return visual._attack_pose(float(fighter.current_attack.startup) if time < 0.0 else time)
+
+
+func polish_semantics() -> void:
+	for side in [1, -1]:
+		var fighter := load("res://scenes/fighter.tscn").instantiate() as Fighter
+		root.add_child(fighter)
+		fighter.position = Vector2(640.0, 560.0)
+		fighter.ground_y = 560.0
+		fighter.facing = side
+		fighter.set_style(StyleRegistry.by_id(&"capoeira"))
+		var v := fighter.get_node("Visual") as FighterVisual
+		v.set_process(false)
+		v._sync_stance()
+		var wheel := contact_pose(fighter, v, &"cap_cartwheel")
+		var meia := contact_pose(fighter, v, &"meia_lua_tornado")
+		check(wheel[FighterVisual.TORSO] - meia[FighterVisual.TORSO] > 0.9, "Capoeira L inversion differs from horizontal X")
+		check(absf(meia[FighterVisual.TORSO] - PI * 0.5) < 0.6, "Capoeira X torso near horizontal")
+		check(wheel[FighterVisual.DROP] - meia[FighterVisual.DROP] > 15.0, "Capoeira L hips clearly higher than X")
+		var sweep := contact_pose(fighter, v, &"cap_low_sweep")
+		var j := v._solve_joints(sweep)
+		check(j[FighterVisual.J_FOOT_F].y > -25.0 and j[FighterVisual.J_FOOT_F].y < -3.0, "sweep heel stays low above floor")
+		check(j[FighterVisual.J_HIP_F].distance_to(j[FighterVisual.J_FOOT_F]) > 85.0, "sweep attacking leg extends without a frog fold")
+		check(j[FighterVisual.J_FOOT_F].x - j[FighterVisual.J_KNEE_B].x > 35.0, "sweep heel separates from bent support knee")
+		check(j[FighterVisual.J_KNEE_B].y < -3.0, "sweep support knee clears floor")
+		var load := contact_pose(fighter, v, &"cap_low_sweep", fighter.current_attack.startup * 0.4)
+		var recoil := contact_pose(fighter, v, &"cap_low_sweep", fighter.current_attack.startup + fighter.current_attack.active + fighter.current_attack.recovery * 0.5)
+		check(v._solve_joints(load)[FighterVisual.J_FOOT_F].x < j[FighterVisual.J_FOOT_F].x - 35.0, "sweep visibly loads before extending")
+		check(v._solve_joints(recoil)[FighterVisual.J_FOOT_F].x < j[FighterVisual.J_FOOT_F].x - 35.0, "sweep retracts heel before standing")
+		fighter.state = Fighter.State.FINISHER
+		fighter.script_pose = &"cap_rasteira_hit"
+		check(v._cap_supported_move(), "finisher sweep uses the same planted-hand support")
+		fighter.script_pose = &""
+		fighter.set_style(StyleRegistry.by_id(&"jeet_kune_do"))
+		v._sync_stance()
+		var air_side := contact_pose(fighter, v, &"jump_kick")
+		var air_front := contact_pose(fighter, v, &"jkd_air_front")
+		check(absf(air_side[FighterVisual.TORSO] - air_front[FighterVisual.TORSO]) > 0.5, "JKD air side kick counterlean differs from upright front snap")
+		check(absf(air_side[FighterVisual.SPREAD] - air_front[FighterVisual.SPREAD]) > 12.0, "JKD air front kick squares the hips")
+		var step := contact_pose(fighter, v, &"dragons_burst")
+		var collect := contact_pose(fighter, v, &"dragons_burst", fighter.current_attack.startup * 0.28)
+		var chamber := contact_pose(fighter, v, &"dragons_burst", fighter.current_attack.startup * 0.64)
+		var gathered := v._solve_joints(collect)
+		check(absf(gathered[FighterVisual.J_FOOT_F].x - gathered[FighterVisual.J_FOOT_B].x) < 25.0, "JKD X gathers rear foot before driving")
+		check(chamber[FighterVisual.TH_F] > 2.0 and chamber[FighterVisual.SH_F] < 0.0, "JKD X has a raised folded side chamber")
+		check(step[FighterVisual.HIP_X] - collect[FighterVisual.HIP_X] > 25.0, "JKD X transfers weight through the finishing hip")
+		check(FighterVisual._attack_joint(fighter.current_attack.type) == FighterVisual.J_FOOT_F, "JKD X is one heel kick, never a punch")
+		fighter.state = Fighter.State.FINISHER
+		fighter.airborne = false
+		var set_pose: PackedFloat32Array = v._pose_library[&"jkd_inch_set"]
+		var hit_pose: PackedFloat32Array = v._pose_library[&"jkd_inch_hit"]
+		var before := v._solve_joints(set_pose)
+		var after := v._solve_joints(hit_pose)
+		var stroke := (after[FighterVisual.J_HAND_F] - after[FighterVisual.J_HIP]).distance_to(before[FighterVisual.J_HAND_F] - before[FighterVisual.J_HIP])
+		check(stroke <= 12.0, "one-inch punch has compact torso-relative stroke: %.2fpx" % stroke)
+		check(hit_pose[FighterVisual.HIP_X] - set_pose[FighterVisual.HIP_X] >= 6.0 and hit_pose[FighterVisual.PIVOT] > 0.8, "one-inch punch drives through hip and rear heel")
+		fighter.free()
