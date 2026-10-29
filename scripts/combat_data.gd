@@ -1220,7 +1220,7 @@ const ATTACK_TABLE: Dictionary = {
 		"startup": 24, "active": 5, "recovery": 32, "cancel_window": 0,
 		"damage": 18, "hitstun": 23, "blockstun": 14, "posture": 18.0,
 		"knockback": 10.0, "lunge": 0.8, "hitstop": 10,
-		"hitbox": Rect2(30.0, -178.0, 58.0, 66.0), "x_move": true, "x_cooldown_frames": 900, "impact_power": 3, "pose_hurtbox": Rect2(-50.0, -160.0, 104.0, 160.0), "hurtbox_start": 10, "hurtbox_end": 39, "recovery_hurtbox": Rect2(-52.0, -125.0, 104.0, 125.0), "recovery_hurtbox_start": 40, "recovery_hurtbox_end": 57,
+		"hitbox": Rect2(26.0, -175.0, 50.0, 65.0), "x_move": true, "x_cooldown_frames": 900, "impact_power": 3, "pose_hurtbox": Rect2(-40.0, -150.0, 120.0, 150.0), "hurtbox_start": 10, "hurtbox_end": 39, "recovery_hurtbox": Rect2(-45.0, -125.0, 115.0, 125.0), "recovery_hurtbox_start": 40, "recovery_hurtbox_end": 57,
 	},
 	AttackType.JKD_LEAD_STRAIGHT: {
 		"id": &"jkd_lead_straight", "name": "Lead Straight",
@@ -1287,11 +1287,11 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	AttackType.DRAGONS_BURST: {
 		"id": &"dragons_burst", "name": "Dragon's Burst",
-		"startup": 18, "active": 3, "recovery": 30, "cancel_window": 0,
-		"damage": 0, "hitstun": 0, "blockstun": 0, "posture": 0.0,
-		"knockback": 0.0, "lunge": 0.0, "hitstop": 0,
-		"hitbox": Rect2(28.0, -108.0, 60.0, 50.0), "x_move": true, "x_cooldown_frames": 900,
-		"sequence": [&"jkd_x_stop", &"jkd_x_side"],
+		"startup": 22, "active": 5, "recovery": 34, "cancel_window": 0,
+		"damage": 18, "hitstun": 25, "blockstun": 16, "posture": 18.0,
+		"knockback": 9.0, "lunge": 3.5, "travel_start": 8, "hitstop": 12, "impact_power": 3,
+		"hitbox": Rect2(30.0, -140.0, 58.0, 56.0), "x_move": true, "x_cooldown_frames": 900,
+		"blowback_chance": 1.0, "blowback_vx": 9.0, "blowback_vy": -5.5, "blowback_rolls": 0,
 	},
 	AttackType.JKD_X_STOP: {
 		"id": &"jkd_x_stop", "name": "Dragon's Burst (stop kick)", "x_strike": true,
@@ -1524,7 +1524,7 @@ static func focus_for_hit(attack: Attack, counter: bool) -> float:
 	if counter:
 		return FOCUS_COUNTER
 	var n := String(attack.id)
-	if n.contains("kick") or n == "sweep" or n.contains("knee") or attack.type in [AttackType.CAP_SPIN_HEEL, AttackType.CAP_CARTWHEEL, AttackType.CAP_CRESCENT, AttackType.CAP_LOW_SWEEP, AttackType.CAP_FLYING_SCISSOR, AttackType.CAP_AIR_CRESCENT, AttackType.CAP_AIR_SPIN, AttackType.JKD_HIGH_HOOK, AttackType.JKD_AIR_FRONT, AttackType.JKD_X_STOP, AttackType.JKD_X_SIDE]:
+	if n.contains("kick") or n == "sweep" or n.contains("knee") or attack.type in [AttackType.CAP_SPIN_HEEL, AttackType.CAP_CARTWHEEL, AttackType.CAP_CRESCENT, AttackType.CAP_LOW_SWEEP, AttackType.CAP_FLYING_SCISSOR, AttackType.CAP_AIR_CRESCENT, AttackType.CAP_AIR_SPIN, AttackType.JKD_HIGH_HOOK, AttackType.JKD_AIR_FRONT, AttackType.JKD_X_STOP, AttackType.JKD_X_SIDE, AttackType.DRAGONS_BURST]:
 		return FOCUS_KICK
 	return FOCUS_HEAVY if attack.damage >= 10 else FOCUS_LIGHT
 
