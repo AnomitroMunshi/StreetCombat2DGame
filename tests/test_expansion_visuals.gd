@@ -137,9 +137,10 @@ func polish_semantics() -> void:
 		v._sync_stance()
 		var wheel := contact_pose(fighter, v, &"cap_cartwheel")
 		var meia := contact_pose(fighter, v, &"meia_lua_tornado")
-		check(wheel[FighterVisual.TORSO] - meia[FighterVisual.TORSO] > 0.9, "Capoeira L inversion differs from horizontal X")
-		check(absf(meia[FighterVisual.TORSO] - PI * 0.5) < 0.6, "Capoeira X torso near horizontal")
-		check(wheel[FighterVisual.DROP] - meia[FighterVisual.DROP] > 15.0, "Capoeira L hips clearly higher than X")
+		check(wheel[FighterVisual.TORSO] - meia[FighterVisual.TORSO] > 0.4, "Capoeira X slants away from vertical cartwheel")
+		var split := v._solve_joints(meia)
+		check(split[FighterVisual.J_FOOT_B].x - split[FighterVisual.J_FOOT_F].x > 160.0, "Capoeira X has a wide split handstand")
+		check(split[FighterVisual.J_HAND_F].y < -35.0, "Capoeira X free hand stays off the floor")
 		var sweep := contact_pose(fighter, v, &"cap_low_sweep")
 		var j := v._solve_joints(sweep)
 		check(j[FighterVisual.J_FOOT_F].y > -25.0 and j[FighterVisual.J_FOOT_F].y < -3.0, "sweep heel stays low above floor")
@@ -167,6 +168,9 @@ func polish_semantics() -> void:
 		check(absf(gathered[FighterVisual.J_FOOT_F].x - gathered[FighterVisual.J_FOOT_B].x) < 25.0, "JKD X gathers rear foot before driving")
 		check(chamber[FighterVisual.TH_F] > 2.0 and chamber[FighterVisual.SH_F] < 0.0, "JKD X has a raised folded side chamber")
 		check(step[FighterVisual.HIP_X] - collect[FighterVisual.HIP_X] > 25.0, "JKD X transfers weight through the finishing hip")
+		check(collect[FighterVisual.SPREAD] > 15 and step[FighterVisual.SPREAD] < -15, "JKD X turns shoulders and hips through edge-on into side stance")
+		check(chamber[FighterVisual.PIVOT] > 0.9 and collect[FighterVisual.PIVOT] < 0.2, "JKD support foot pivots before heel extension")
+		check(collect[FighterVisual.UA_F] - step[FighterVisual.UA_F] > 1.2, "JKD lead arm counterbalances the hip turn instead of staying rigid")
 		check(FighterVisual._attack_joint(fighter.current_attack.type) == FighterVisual.J_FOOT_F, "JKD X is one heel kick, never a punch")
 		fighter.state = Fighter.State.FINISHER
 		fighter.airborne = false

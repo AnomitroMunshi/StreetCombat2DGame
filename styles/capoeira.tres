@@ -14,6 +14,7 @@ strengths = PackedStringArray("Circular kicks and low-to-high sequences", "Wide 
 weaknesses = PackedStringArray("Committed cartwheel recovery", "Inverted attacks remain vulnerable", "Longer setup for heavy heels")
 stance = 11
 kit = &"capoeira"
+intro_pose = &"cap_one_hand_ready"
 step_scale = 1.0
 ai_preferred_range = 90.0
 ai_tuning = {"aggression": 0.55, "dodge_chance": 0.24, "parry_chance": 0.16}

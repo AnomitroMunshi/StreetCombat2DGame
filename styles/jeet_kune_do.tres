@@ -14,6 +14,7 @@ strengths = PackedStringArray("Fast direct lead straight", "Hand-to-foot interce
 weaknesses = PackedStringArray("Heavy bursts are punishable", "High hook needs a clear opening", "No automatic traps or invulnerability")
 stance = 12
 kit = &"jeet_kune_do"
+intro_pose = &"jkd_bai_jong_ready"
 step_scale = 1.15
 ai_preferred_range = 100.0
 ai_tuning = {"aggression": 0.6, "dodge_chance": 0.2, "parry_chance": 0.24}

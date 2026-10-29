@@ -20,8 +20,7 @@ var _next_voice: int = 0
 ## Music id -> [file, gain dB]. Gains match each track's measured loudness to
 ## the procedural loop's (about -22 dBFS mean as heard). Add a style's track
 ## here when it exists; until then that style plays the procedural loop.
-## Capoeira and Jeet Kune Do intentionally use the existing procedural loop
-## until dedicated tracks are supplied. Do not alias another style's music.
+## Each registered style has its own track; unknown future styles fall back.
 const MUSIC_FILES: Dictionary = {
 	&"menu": ["res://assets/audio/music/originals/menu_theme.mp3", -4.5],
 	&"boxing": ["res://assets/audio/music/originals/boxing_theme.mp3", -5.8],
@@ -32,6 +31,8 @@ const MUSIC_FILES: Dictionary = {
 	&"karate": ["res://assets/audio/music/generated/karate_theme.ogg", -5.0],
 	&"taekwondo": ["res://assets/audio/music/generated/taekwondo_theme.ogg", -5.0],
 	&"kickboxing": ["res://assets/audio/music/generated/kickboxing_theme.ogg", -5.0],
+	&"capoeira": ["res://assets/audio/music/generated/capoeira_theme.ogg", -5.0],
+	&"jeet_kune_do": ["res://assets/audio/music/generated/jeet_kune_do_theme.ogg", -5.0],
 }
 const MUSIC_BUS: StringName = &"Music"
 ## Announcer clips (placeholders: Windows text-to-speech, processed; replace

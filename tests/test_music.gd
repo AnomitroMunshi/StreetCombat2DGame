@@ -55,18 +55,21 @@ func _run() -> void:
 	_check(playing == 1, "after the crossfade only one track plays (%d)" % playing)
 	_check(AudioServer.get_bus_index(GameAudio.MUSIC_BUS) >= 0, "music has its own bus")
 
-	print("[existing tracks and new-style procedural fallback]")
+	print("[distinct tracks for all nine styles]")
+	var track_paths: Array = []
 	for st in StyleRegistry.all():
+		_check(GameAudio.MUSIC_FILES.has(st.id) and ResourceLoader.exists(GameAudio.MUSIC_FILES[st.id][0]), "%s has its own track" % st.id)
+		var path: String = GameAudio.MUSIC_FILES[st.id][0]
+		_check(not track_paths.has(path), "%s music does not alias another style" % st.id)
+		track_paths.append(path)
 		if st.id in [&"capoeira", &"jeet_kune_do"]:
-			audio.set_music(st.id)
-			var ready_at := Time.get_ticks_msec()
-			while not audio.get_music_stream() is AudioStreamWAV and Time.get_ticks_msec() - ready_at < 20000:
-				await process_frame
-			_check(not GameAudio.MUSIC_FILES.has(st.id) and audio.get_music_id() == st.id and audio.get_music_stream() is AudioStreamWAV,
-				"%s uses the documented procedural loop until its own music is supplied" % st.id)
-		else:
-			_check(GameAudio.MUSIC_FILES.has(st.id) and ResourceLoader.exists(GameAudio.MUSIC_FILES[st.id][0]),
-				"%s retains its own track" % st.id)
+			main.change_style()
+			main.select_style(st.id)
+			main.confirm_style()
+			await _wait(3)
+			var stream := audio.get_music_stream()
+			_check(audio.get_music_id() == st.id and stream == load(path) and stream is AudioStreamOggVorbis and stream.loop, "%s selects its dedicated looping OGG" % st.id)
+			_check(stream.get_length() > 60, "%s has a full musical arrangement" % st.id)
 
 	print("[styles without a track fall back]")
 	main.call("change_style")

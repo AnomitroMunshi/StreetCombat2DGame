@@ -110,6 +110,25 @@ func jkd_x_regression(side: int) -> void:
 		check(p[0].state==Fighter.State.IDLE and p[0].x_cooldown==0,"old permanent X children stay unmapped and cannot bypass the parent")
 	free_pair(p)
 
+func cap_x_launch_regression(side: int) -> void:
+	for block in [false, true]:
+		var p := pair(&"capoeira", side)
+		var intent := CombatData.Intent.new()
+		intent.slot = &"x_move"
+		p[0].push_intent(intent)
+		var start := p[1].position.x
+		var air_travel := 0.0
+		for tick in 150:
+			play(p[0], p[1], 1, block)
+			if p[1].airborne:
+				air_travel = maxf(air_travel, (p[1].position.x - start) * side)
+		if block:
+			check(air_travel == 0 and p[1].health == p[1].max_health, "blocked Capoeira X does not launch or damage")
+		else:
+			check(air_travel > 110 and air_travel < 180 and p[1].health == p[1].max_health - 18, "Capoeira X launches strongly without increasing damage: %.1fpx airborne" % air_travel)
+		check(p[0].x_cooldown == 751, "Capoeira impact retains full 15s cooldown")
+		free_pair(p)
+
 func recovery_hurtbox_regression(side: int) -> void:
 	for test in [[CombatData.AttackType.CAP_CARTWHEEL,32,33,47,48],[CombatData.AttackType.MEIA_LUA_TORNADO,39,40,57,58]]:
 		var p:=pair(&"capoeira",side)
@@ -128,6 +147,25 @@ func recovery_hurtbox_regression(side: int) -> void:
 		check(not crouched.intersects(ghost_head) and crouched.intersects(body_strike),"high strike above crouched body whiffs while body strike still contacts")
 		a.state_frame=test[4]
 		check(a.get_hurtbox_world().size==Fighter.HURTBOX.size,"upright hurtbox returns at authored guard recovery")
+		free_pair(p)
+
+func sweep_geometry_regression(side: int) -> void:
+	for signature in [false,true]:
+		var p:=pair(&"capoeira",side)
+		var intent:=CombatData.Intent.new()
+		if signature:
+			p[0].focus=CombatData.FOCUS_MAX
+			intent.signature=true
+		else:
+			intent.slot=&"down_heavy"
+		p[0].push_intent(intent)
+		p[0].tick()
+		var attack:=p[0].current_attack
+		p[0].state_frame=attack.startup
+		var head_world:=p[0].position+Vector2(-50*side,-86)
+		var heel_world:=p[0].position+Vector2(85*side,-11)
+		check(p[0].get_hurtbox_world().has_point(head_world) and p[0].can_be_hit(),"low sweep counterleaning head remains in vulnerable mirrored hurtbox")
+		check(attack.low and p[0].get_hitbox_world().has_point(heel_world),"low sweep hitbox follows the floor-level heel while requiring low guard")
 		free_pair(p)
 
 func _initialize() -> void:
@@ -227,7 +265,9 @@ func _initialize() -> void:
 		free_pair(wrong)
 	for side in [1,-1]:
 		jkd_x_regression(side)
+		cap_x_launch_regression(side)
 		recovery_hurtbox_regression(side)
+		sweep_geometry_regression(side)
 		var p:=pair(&"capoeira",side)
 		var intent:=CombatData.Intent.new()
 		intent.slot=&"technique"

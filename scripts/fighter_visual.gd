@@ -740,7 +740,7 @@ var _jd_follow := PackedFloat32Array([0.35, 0.1, 1.2, 2.2, 0.3, 1.2, 0.55, -0.2,
 ## Intro poses that stand on one leg (the feet are not planted on the floor).
 const ONE_LEG_POSES: Array[StringName] = [&"mt_ready", &"kf_crane"]
 ## Intro poses with an open lead hand.
-const OPEN_HAND_POSES: Array[StringName] = [&"kt_ready"]
+const OPEN_HAND_POSES: Array[StringName] = [&"kt_ready", &"jkd_bai_jong_ready", &"cap_one_hand_ready"]
 ## Intro poses with an open rear hand.
 const OPEN_REAR_POSES: Array[StringName] = [&"kf_crane"]
 ## Kung fu flows: softer, well-damped joint springs outside strikes, and every
@@ -778,6 +778,8 @@ var _kit_moves: Dictionary = {}
 var _expansion_ids: Dictionary = {}
 var _cap_hand_anchors: Array[Vector2] = []
 var _cap_hand_swing: int = -1
+var _cap_intro_exit := 0.0
+var _cap_intro_seen := false
 var _kf_rear_palm_keys: Array = []
 
 var _pose := PackedFloat32Array()
@@ -887,6 +889,7 @@ var _grow: float = 0.0
 var _skin := SKIN_LIGHT
 ## The arm being drawn ends in an open hand.
 var _open_arm: bool = false
+var _draw_southpaw: bool = false
 ## Standing one-legged guard (Stances "crane"), empty if the stance has none.
 var _crane := PackedFloat32Array()
 ## 0..1: how far the lead leg is lifted off the floor (one-legged poses).
@@ -1328,6 +1331,14 @@ func _process(delta: float) -> void:
 	# the hit's reaction impulse is applied when the freeze ends.
 	if not frozen:
 		_apply_impulses()
+	if fighter.prefight_pose == &"cap_one_hand_ready":
+		_cap_intro_seen = true
+	elif _cap_intro_seen:
+		_cap_intro_seen = false
+		_cap_intro_exit = 0.55
+	_cap_intro_exit = maxf(0.0, _cap_intro_exit - delta)
+	if fighter.state not in [Fighter.State.IDLE, Fighter.State.WALK]:
+		_cap_intro_exit = 0.0
 	var target := _close_yield(_target_pose(t))
 	var dt := minf(delta, 1.0 / 30.0)
 	if not _pose_ready:
@@ -1714,6 +1725,11 @@ func _close_yield(pose: PackedFloat32Array) -> PackedFloat32Array:
 
 
 func _target_pose(t: float) -> PackedFloat32Array:
+	if _cap_intro_exit > 0.0:
+		var progress := 1.0 - _cap_intro_exit / 0.55
+		if progress < 0.55:
+			return _blend(_pose_library[&"cap_one_hand_ready"], _pose_library[&"cap_au_exit"], smoothstep(0.0, 0.55, progress))
+		return _blend(_pose_library[&"cap_au_exit"], _guard, smoothstep(0.55, 1.0, progress))
 	if fighter.celebration != &"" and fighter.state == Fighter.State.IDLE:
 		return _victory_pose()
 	if fighter.state == Fighter.State.DIZZY:
@@ -2247,8 +2263,13 @@ func _build_expansion_moves() -> void:
 		&"cap_rasteira_load": [-0.35, 0.25, -0.3, 2.7, 0.15, 0.2, 1.3, -0.7, 0.9, -1.25, -3.0, 0.0, 0.0, 8.0],
 		&"cap_rasteira_hit": [-0.85, 0.5, -0.5, 2.9, 0.15, 0.15, 1.35, 1.35, 1.0, -1.43, 0.0, 0.0, 0.0, 2.0],
 		&"cap_meialua_load": [1.15, -0.25, 0.15, 0.2, -0.1, 0.1, 0.8, -0.6, -0.85, -1.0, -5.0, 60.0, 0.0, 20.0],
-		&"cap_meialua_support": [2.0, 0.2, 0.05, 0.05, -0.05, -0.05, 0.35, -0.5, -2.6, -2.6, 0.0, 83.0, 0.0, 18.0],
-		&"cap_meialua_hit": [2.0, 0.2, 0.05, 0.05, -0.05, -0.05, 0.35, -0.5, -4.18, -4.18, 10.0, 83.0, 0.0, -20.0],
+		&"cap_meialua_support": [2.65, 0.1, -1.0, 2.5, -0.05, -0.05, -1.65, -1.65, 2.9, 2.9, 0.0, 103.0, 0.0, 12.0],
+		&"cap_meialua_hit": [2.65, 0.1, -1.0, 2.5, -0.05, -0.05, -1.65, -1.65, -4.55, -4.55, 10.0, 103.0, 0.0, 12.0],
+		&"cap_one_hand_ready": [3.45, -0.15, 1.5, 1.5, 0.0, 0.0, -2.85, -2.85, -2.8, -2.8, 0.0, 110.0, 0.0, 8.0],
+		&"jkd_bai_jong_ready": [-0.05, 0.1, 0.95, 1.5, 0.9, 2.9, 0.95, -0.05, -0.9, -0.95, 0.0, 0.0, 0.3, 18.0],
+		&"kt_verdict_load": [-0.12, 0.05, 1.1, 2.6, -0.5, 2.3, 1.0, -0.05, -0.85, -0.9, -8.0, 0.0, 0.1, 12.0],
+		&"kt_verdict_hit": [0.16, -0.05, -0.6, 0.95, 1.55, 1.55, 1.1, 0.0, -0.95, -0.95, 16.0, 0.0, 0.95, -12.0],
+		&"kt_verdict_follow": [0.18, -0.05, -0.6, 0.95, 1.55, 1.55, 1.1, 0.0, -0.95, -0.95, 18.0, 0.0, 0.95, -12.0],
 		&"cap_scissor_load": [0.1, 0.05, 1.1, 2.6, 0.6, 2.8, 1.7, -0.8, 1.4, -1.1, -3.0, 0.0, 0.0, 8.0],
 		&"cap_scissor_hit": [-0.45, 0.15, 1.1, 2.6, -0.7, 0.2, 2.05, 2.0, -0.7, -1.0, 10.0, 0.0, 0.0, 12.0],
 		&"jkd_lead_load": [0.1, -0.05, 1.2, 2.8, 0.95, 2.9, 0.55, -0.25, -0.6, -0.65, -3.0, 0.0, 0.0, 17.0],
@@ -2261,10 +2282,12 @@ func _build_expansion_moves() -> void:
 		&"jkd_air_front_load": [0.08, 0.0, 1.05, 2.7, 1.15, 2.85, 2.15, -0.65, 0.9, -1.3, -3.0, 0.0, 0.0, 2.0],
 		&"jkd_air_front_hit": [0.04, 0.02, 1.1, 2.75, 1.1, 2.85, 1.55, 1.5, 0.85, -1.3, 8.0, 0.0, 0.15, 2.0],
 		&"jkd_air_side_hit": [-0.55, 0.25, 1.1, 2.65, 0.85, 2.9, 1.95, 1.9, 0.8, -1.3, 14.0, 0.0, 1.0, 20.0],
-		&"jkd_step_collect": [0.02, -0.08, 1.2, 2.7, 1.0, 2.9, 0.3, -0.2, 0.1, -0.25, -9.0, 0.0, 0.1, 20.0],
-		&"jkd_step_chamber": [-0.18, 0.08, 1.25, 2.7, 1.0, 2.95, 2.15, -0.65, -0.15, -0.35, -8.0, 0.0, 0.65, 22.0],
-		&"jkd_step_hit": [-0.55, 0.22, 1.2, 2.7, 0.95, 2.95, 1.95, 1.9, -0.3, -0.55, 28.0, 0.0, 1.0, 24.0],
-		&"jkd_step_follow": [-0.42, 0.18, 1.2, 2.75, 0.9, 2.95, 1.95, 1.9, -0.2, -0.45, 30.0, 0.0, 1.0, 22.0],
+		&"jkd_step_collect": [0.12, -0.08, 0.9, 2.3, 1.15, 2.9, 0.3, -0.2, 0.1, -0.25, -9.0, 0.0, 0.05, 22.0],
+		&"jkd_step_turn": [0.02, 0.04, 0.5, 2.0, 1.25, 2.8, 1.35, -1.1, -0.1, -0.3, -3.0, 0.0, 0.6, 2.0],
+		&"jkd_step_chamber": [-0.28, 0.18, -0.25, 1.9, 1.15, 2.85, 2.2, -0.75, -0.15, -0.3, 3.0, 0.0, 0.95, -14.0],
+		&"jkd_step_hit": [-0.65, 0.38, -0.65, 1.2, 1.2, 2.85, 1.95, 1.9, -0.2, -0.35, 32.0, 0.0, 1.0, -22.0],
+		&"jkd_step_follow": [-0.58, 0.3, -0.75, 1.05, 1.15, 2.8, 1.95, 1.9, -0.2, -0.35, 34.0, 0.0, 1.0, -24.0],
+		&"jkd_step_recoil": [-0.3, 0.18, -0.25, 1.9, 1.15, 2.85, 2.15, -0.7, -0.1, -0.25, 13.0, 0.0, 0.85, -10.0],
 		&"jkd_inch_set": [0.03, -0.05, 0.6, 2.0, 1.0, 2.85, 0.7, -0.4, -0.6, -0.85, 0.0, 0.0, 0.2, 17.0],
 		&"jkd_inch_load": [-0.04, -0.05, 0.6, 2.0, 1.05, 2.9, 0.78, -0.45, -0.6, -0.9, -2.0, 0.0, 0.35, 18.0],
 		&"jkd_inch_hit": [0.12, -0.08, 0.75, 1.75, 1.05, 2.9, 0.55, -0.25, -0.45, -0.7, 7.0, 0.0, 0.95, 14.0],
@@ -2309,11 +2332,13 @@ func _build_expansion_moves() -> void:
 	var step_type := CombatData.type_for_id(&"dragons_burst")
 	if step_type != CombatData.AttackType.NONE:
 		_moves[step_type] = [[S, 0.28, p[&"jkd_step_collect"], EASE_SMOOTH],
+			[S, 0.47, p[&"jkd_step_turn"], EASE_SMOOTH],
 			[S, 0.64, p[&"jkd_step_chamber"], EASE_SMOOTH], [S, 0.94, p[&"jkd_step_hit"], EASE_IN],
 			[A, 0.0, p[&"jkd_step_hit"], EASE_LINEAR], [A, 1.0, p[&"jkd_step_follow"], EASE_LINEAR],
-			[R, 0.4, p[&"jkd_step_chamber"], EASE_SMOOTH], [R, 0.72, p[&"jkd_step_collect"], EASE_SMOOTH]]
-	# X is a committed lead-leg interception, re-chamber, then a finishing
-	# thrust; the burst straight remains a finisher pose, never the X move.
+			[R, 0.25, p[&"jkd_step_recoil"], EASE_SMOOTH], [R, 0.55, p[&"jkd_step_turn"], EASE_SMOOTH],
+			[R, 0.8, p[&"jkd_step_collect"], EASE_SMOOTH]]
+	# Keep legacy unmapped sequence poses for permanent attack-ID compatibility.
+	# The playable X uses the single stepping-side-kick timeline above.
 	var x_chamber := p[&"jkd_side_load"].duplicate() as PackedFloat32Array
 	x_chamber[TH_F] = 2.1
 	x_chamber[SH_F] = -0.5
@@ -2795,7 +2820,7 @@ func _solve_joints(p: PackedFloat32Array) -> PackedVector2Array:
 		var leg_f := THIGH * cos(p[TH_F]) + SHIN * cos(p[SH_F])
 		var leg_b := THIGH * cos(p[TH_B]) + SHIN * cos(p[SH_B])
 		hip.y = -maxf(maxf(leg_f, leg_b), TORSO_WIDTH * 0.5 + 1.0)
-	if (_cap_inverted_move() or _cap_meialua_move()) and p[DROP] > 50.0:
+	if (_cap_inverted_move() or _cap_meialua_move() or _cap_intro_balance()) and p[DROP] > 50.0:
 		hip.y = lerpf(hip.y, -p[DROP], smoothstep(50.0, 80.0, p[DROP]))
 	hip = hip.lerp(TUCK_HIP, smoothstep(0.0, 1.0, _tuck_amount))
 	var torso_dir := Vector2(sin(p[TORSO]), -cos(p[TORSO]))
@@ -2933,6 +2958,7 @@ func _draw_dizzy_stars(head: Vector2) -> void:
 
 
 func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color, forward: Vector2, southpaw: bool = false) -> void:
+	_draw_southpaw = southpaw
 	_heel_draw = _heel
 	if southpaw:
 		# Right foot forward: lead limbs are on the far side, rear limbs near.
@@ -2986,15 +3012,17 @@ func _draw_body(j: PackedVector2Array, front: Color, back: Color, accent: Color,
 ## Far-side limbs use `far`, everything else `near`.
 func _silhouette(j: PackedVector2Array, forward: Vector2, back_toe: Vector2, pad: float, far: Color, near: Color) -> void:
 	_far = true
-	_leg(j[J_HIP_B], j[J_KNEE_B], j[J_FOOT_B], back_toe, pad, far, _heel_draw.y * _plant, _foot_point.y)
-	_open_arm = fighter.prefight_pose in OPEN_REAR_POSES or (_lift > 0.5 and not _crane.is_empty()) or _palm_hands(false)
+	# After swapping limbs for a right-lead stance, the support foot and
+	# open lead hand must follow their anatomical roles, not drawing order.
+	_leg(j[J_HIP_B], j[J_KNEE_B], j[J_FOOT_B], forward if _draw_southpaw else back_toe, pad, far, _heel_draw.y * _plant, _foot_point.y)
+	_open_arm = fighter.prefight_pose in (OPEN_HAND_POSES if _draw_southpaw else OPEN_REAR_POSES) or (_lift > 0.5 and not _crane.is_empty()) or _palm_hands(_draw_southpaw)
 	_arm(j[J_SHOULDER_B], j[J_ELBOW_B], j[J_HAND_B], pad, far, _glove_color(false, pad))
 	_open_arm = false
 	_far = false
 	_torso(j, forward, pad, near)
 	_head(j, forward, pad, near)
-	_leg(j[J_HIP_F], j[J_KNEE_F], j[J_FOOT_F], forward, pad, near, _heel_draw.x * _plant, _foot_point.x)
-	_open_arm = fighter.prefight_pose in OPEN_HAND_POSES or _palm_hands(true)
+	_leg(j[J_HIP_F], j[J_KNEE_F], j[J_FOOT_F], back_toe if _draw_southpaw else forward, pad, near, _heel_draw.x * _plant, _foot_point.x)
+	_open_arm = fighter.prefight_pose in (OPEN_REAR_POSES if _draw_southpaw else OPEN_HAND_POSES) or _palm_hands(not _draw_southpaw)
 	_arm(j[J_SHOULDER_F], j[J_ELBOW_F], j[J_HAND_F], pad, near, _glove_color(true, pad))
 	_open_arm = false
 
@@ -3334,8 +3362,9 @@ func _build_outfit() -> void:
 	_cols["hair"] = Color(0.2, 0.13, 0.09) if light else Color(0.07, 0.06, 0.06)
 	match _kit:
 		&"capoeira":
-			_cloth([P_THIGH, P_SHIN], GI_WHITE, 3.0)
-			_cols["pants"] = GI_WHITE
+			var yellow := Color(0.98, 0.76, 0.08)
+			_cloth([P_THIGH, P_SHIN], yellow, 3.0)
+			_cols["pants"] = yellow
 			_cols["cord"] = acc.lightened(0.15)
 		&"jeet_kune_do":
 			var dark := Color(0.14, 0.17, 0.21) if light else Color(0.21, 0.24, 0.29)
@@ -3749,9 +3778,13 @@ func _cap_meialua_move() -> bool:
 
 
 func _cap_supported_move() -> bool:
-	return _cap_inverted_move() or _cap_meialua_move() or (fighter.state == Fighter.State.ATTACK and fighter.current_attack != null \
+	return _cap_intro_balance() or _cap_inverted_move() or _cap_meialua_move() or (fighter.state == Fighter.State.ATTACK and fighter.current_attack != null \
 		and fighter.current_attack.id in [&"cap_low_sweep", &"cap_roda_sweep"]) \
 		or (fighter.state == Fighter.State.FINISHER and String(fighter.script_pose).begins_with("cap_rasteira_"))
+
+
+func _cap_intro_balance() -> bool:
+	return fighter.prefight_pose == &"cap_one_hand_ready" or _cap_intro_exit > 0.0
 
 
 ## Supporting palms stay at their first floor contact while the hips pass
@@ -3759,8 +3792,9 @@ func _cap_supported_move() -> bool:
 ## rather than stretching a shoulder or dragging a hand along the floor.
 func _plant_cap_hands(j: PackedVector2Array) -> PackedVector2Array:
 	var inverted := _cap_inverted_move()
-	var two_hands := inverted or _cap_meialua_move()
-	var weight := smoothstep(90.0, 100.0, _pose[DROP]) if inverted else (smoothstep(70.0, 82.0, _pose[DROP]) if two_hands else smoothstep(0.6, 0.85, absf(_pose[TORSO])))
+	var two_hands := inverted
+	var raised := inverted or _cap_meialua_move() or _cap_intro_balance()
+	var weight := smoothstep(90.0, 100.0, _pose[DROP]) if raised else smoothstep(0.6, 0.85, absf(_pose[TORSO]))
 	if not _cap_supported_move() or weight <= 0.01:
 		_cap_hand_anchors.clear()
 		_cap_hand_swing = -1
@@ -3788,6 +3822,8 @@ func _plant_cap_hands(j: PackedVector2Array) -> PackedVector2Array:
 
 ## States where the feet are planted on the floor (legs solved by IK).
 func _wants_plant() -> bool:
+	if _cap_intro_balance():
+		return false
 	if fighter.state == Fighter.State.LAND and fighter.landing_attack_id == &"dropkick":
 		return false  # a back/hip landing cannot plant both feet upright
 	if fighter.airborne or _rag_on or _rag_blend > 0.0 or _tuck_amount > 0.0:

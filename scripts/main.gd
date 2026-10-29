@@ -751,6 +751,9 @@ func _tick_match_flow() -> void:
 
 ## The style's own pre-fight gesture, or the shared one.
 static func _intro_pose(f: Fighter, fallback: StringName) -> StringName:
+	# The acrobatic intro lands before the countdown unlocks combat.
+	if f.style != null and f.style.id == &"capoeira" and fallback == &"":
+		return &""
 	return f.style.intro_pose if f.style != null and f.style.intro_pose != &"" else fallback
 
 

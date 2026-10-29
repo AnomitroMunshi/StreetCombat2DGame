@@ -1157,7 +1157,7 @@ const ATTACK_TABLE: Dictionary = {
 		"startup": 13, "active": 4, "recovery": 24, "cancel_window": 6,
 		"damage": 8, "hitstun": 23, "blockstun": 14, "posture": 12.0,
 		"knockback": 4.0, "lunge": 0.8, "hitstop": 6,
-		"hitbox": Rect2(26.0, -58.0, 64.0, 45.0), "low": true, "pose_hurtbox": Rect2(-44.0, -98.0, 90.0, 98.0), "hurtbox_start": 5, "hurtbox_end": 25,
+		"hitbox": Rect2(26.0, -45.0, 60.0, 40.0), "low": true, "pose_hurtbox": Rect2(-65.0, -100.0, 115.0, 100.0), "hurtbox_start": 5, "hurtbox_end": 25,
 	},
 	AttackType.CAP_LEAP_PALM: {
 		"id": &"cap_leap_palm", "name": "Leaping Palm",
@@ -1199,7 +1199,7 @@ const ATTACK_TABLE: Dictionary = {
 		"startup": 12, "active": 3, "recovery": 10, "cancel_window": 0,
 		"damage": 8, "hitstun": 23, "blockstun": 14, "posture": 10.0,
 		"knockback": 0.5, "lunge": 1.0, "hitstop": 6,
-		"hitbox": Rect2(26.0, -58.0, 60.0, 45.0), "x_strike": true, "low": true, "pose_hurtbox": Rect2(-44.0, -98.0, 90.0, 98.0), "hurtbox_start": 4, "hurtbox_end": 18,
+		"hitbox": Rect2(26.0, -45.0, 60.0, 40.0), "x_strike": true, "low": true, "pose_hurtbox": Rect2(-65.0, -100.0, 115.0, 100.0), "hurtbox_start": 4, "hurtbox_end": 18,
 	},
 	AttackType.CAP_RODA_CARTWHEEL: {
 		"id": &"cap_roda_cartwheel", "name": "Roda Storm (cartwheel)",
@@ -1216,11 +1216,12 @@ const ATTACK_TABLE: Dictionary = {
 		"hitbox": Rect2(32.0, -180.0, 56.0, 62.0), "x_strike": true, "spin": true,
 	},
 	AttackType.MEIA_LUA_TORNADO: {
-		"id": &"meia_lua_tornado", "name": "Meia-Lua Tornado",
+		"id": &"meia_lua_tornado", "name": "Handstand Hammer",
 		"startup": 24, "active": 5, "recovery": 32, "cancel_window": 0,
 		"damage": 18, "hitstun": 23, "blockstun": 14, "posture": 18.0,
-		"knockback": 10.0, "lunge": 0.8, "hitstop": 10,
-		"hitbox": Rect2(26.0, -175.0, 50.0, 65.0), "x_move": true, "x_cooldown_frames": 900, "impact_power": 3, "pose_hurtbox": Rect2(-40.0, -150.0, 120.0, 150.0), "hurtbox_start": 10, "hurtbox_end": 39, "recovery_hurtbox": Rect2(-45.0, -125.0, 115.0, 125.0), "recovery_hurtbox_start": 40, "recovery_hurtbox_end": 57,
+		"knockback": 12.0, "lunge": 0.8, "hitstop": 12,
+		"blowback_chance": 1.0, "blowback_vx": 11.5, "blowback_vy": -5.5, "blowback_rolls": 0,
+		"hitbox": Rect2(45.0, -143.0, 70.0, 55.0), "x_move": true, "x_cooldown_frames": 900, "impact_power": 3, "pose_hurtbox": Rect2(-40.0, -150.0, 120.0, 150.0), "hurtbox_start": 10, "hurtbox_end": 39, "recovery_hurtbox": Rect2(-45.0, -125.0, 115.0, 125.0), "recovery_hurtbox_start": 40, "recovery_hurtbox_end": 57,
 	},
 	AttackType.JKD_LEAD_STRAIGHT: {
 		"id": &"jkd_lead_straight", "name": "Lead Straight",
