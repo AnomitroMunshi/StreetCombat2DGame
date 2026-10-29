@@ -217,6 +217,10 @@ func info_text() -> String:
 	lines.append("Dummy [color=#f2c14e]%s[/color]   Speed [color=#f2c14e]%d%%[/color]%s   Focus %s" % [
 		DUMMY_NAMES[dummy_mode], roundi(speed() * 100.0), "   [color=#ff8a6a]PAUSED[/color]" if paused else "",
 		"[color=#f2c14e]unlimited[/color]" if infinite_focus else "normal"])
+	if player.style != null and player.style.id == &"capoeira":
+		lines.append("A/D + Space: rolling crossover jump  ·  L: stun  ·  S+K: knockdown sweep")
+	elif player.style != null and player.style.id == &"jeet_kune_do":
+		lines.append("J: fast jab-cross  ·  K: hammerfist  ·  W+K: hook kick (stun / guard break)")
 	if player.style != null and player.style.input_map.has(&"x_move"):
 		var x_name := player.style.move_name(player.style.input_map[&"x_move"])
 		var status := "READY" if player.x_cooldown <= 0 else "%.1f s" % (float(player.x_cooldown) / CombatData.TICK_RATE)
