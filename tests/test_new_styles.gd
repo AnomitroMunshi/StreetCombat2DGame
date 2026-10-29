@@ -60,6 +60,23 @@ func _initialize() -> void:
 			total+=attack.damage
 			check(attack.x_strike and style.allows(attack.type),"signature child is internal and style-legal")
 		check(signature.signature and total==24,"%s signature sums exactly24" %sid)
+		for meter in [0.0,50.0,100.0]:
+			var p:=pair(sid,1)
+			p[0].focus=meter
+			var raw_f:=CombatData.Intent.new()
+			raw_f.attack=signature.type
+			p[0].push_intent(raw_f)
+			p[0].tick()
+			check(p[0].state==Fighter.State.IDLE and p[0].focus==meter and p[0].rejected_attacks==1,"raw signature wrapper cannot bypass F/Focus at meter%.0f" %meter)
+			p[0].call("_start_attack",signature.type,1,true)
+			check(p[0].state==Fighter.State.IDLE and p[0].focus==meter,"central signature start requires authorized Focus path")
+			p[0].focus=CombatData.FOCUS_MAX
+			var proper_f:=CombatData.Intent.new()
+			proper_f.signature=true
+			p[0].push_intent(proper_f)
+			var legal_hits:=play(p[0],p[1],150)
+			check(legal_hits.size()==signature.sequence.size() and p[1].health==p[1].max_health-24 and p[0].focus==0.0,"normal F still pays Focus and completes all authorized child continuations")
+			free_pair(p)
 		var x:=CombatData.get_attack(style.resolve(&"x_move",false))
 		check(x.damage==18 and x.x_cooldown_frames==900 and not x.signature,"%s X18 damage,15 seconds,no Focus" %sid)
 		for side in [1,-1]:

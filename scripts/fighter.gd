@@ -318,7 +318,7 @@ func push_intent(intent: CombatData.Intent) -> void:
 			buffered_slot = slot
 			buffer_frames = CombatData.INPUT_BUFFER_FRAMES
 	elif intent.attack != CombatData.AttackType.NONE:
-		if CombatData.get_attack(intent.attack).x_strike or (style != null and not style.allows(intent.attack)):
+		if CombatData.get_attack(intent.attack).x_strike or CombatData.get_attack(intent.attack).signature or (style != null and not style.allows(intent.attack)):
 			rejected_attacks += 1
 		else:
 			buffered_attack = intent.attack
@@ -830,7 +830,7 @@ func _try_signature() -> bool:
 	focus = 0.0
 	buffered_attack = CombatData.AttackType.NONE
 	buffer_frames = 0
-	_start_attack(type, 1, true)
+	_start_attack(type, 1, true, false, true)
 	signature_started.emit(self, CombatData.get_attack(type))
 	return true
 
@@ -1024,11 +1024,14 @@ func _consume_jump() -> bool:
 	return true
 
 
-func _start_attack(type: CombatData.AttackType, step: int, turn_to_opponent: bool, sequence_continuation: bool = false) -> void:
+func _start_attack(type: CombatData.AttackType, step: int, turn_to_opponent: bool, sequence_continuation: bool = false, signature_authorized: bool = false) -> void:
 	attack_slot = &""
 	if turn_to_opponent:
 		face_opponent()
 	var chosen := CombatData.get_attack(type)
+	if chosen.signature and not signature_authorized:
+		rejected_attacks += 1
+		return
 	if chosen.x_strike and not sequence_continuation:
 		rejected_attacks += 1
 		return
