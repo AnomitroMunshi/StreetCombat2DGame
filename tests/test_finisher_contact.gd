@@ -122,6 +122,8 @@ func _physics_process(_delta: float) -> bool:
 		var ev: Dictionary = _main.get("_last_finisher_event")
 		var fresh := not is_same(ev, _seen_event)
 		_seen_event = ev
+		if fresh and ev.get("final", false) and c[0] == &"jeet_kune_do":
+			_check(not ev.get("high", true), "JKD body finisher emits body-hit feedback")
 		if fresh and not ev.is_empty() and ev.get("wall", false):
 			_walls += 1
 			var bound := Fighter.ARENA_MIN_X if c[2] else Fighter.ARENA_MAX_X
