@@ -16,6 +16,8 @@ func check(ok: bool, message: String) -> void:
 		print("FAIL ", message)
 
 func run() -> void:
+	if OS.get_environment("REVIEW_OUT") != "":
+		out = OS.get_environment("REVIEW_OUT")
 	root.size = Vector2i(1800, 1600)
 	root.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	canvas = root
@@ -112,8 +114,69 @@ func run() -> void:
 			(canvas as SubViewport).get_texture().get_image().save_png(out + "/%s_moves.png" % style_id)
 			for node in retained: node.free()
 	polish_semantics()
+	if capture:
+		await capture_agility_sequences()
 	print("RESULT: ", "PASS" if failures == 0 else "FAIL", " expansion visuals: ", count, " move/facing probes, ", failures, " failures")
 	quit(0 if failures == 0 else 1)
+
+
+## Authored startup/contact/recovery snapshots, not a gameplay contact test.
+func capture_agility_sequences() -> void:
+	var retained: Array[Node] = []
+	var cases: Array = []
+	for side in [1, -1]:
+		for frame in [0, 7, 12, 18, 25, 32]:
+			cases.append([&"capoeira", side, &"roll", frame])
+	for side in [1, -1]:
+		for phase in [0.45, 1.0, 1.35]:
+			cases.append([&"jeet_kune_do", side, &"jkd_hammerfist", phase])
+	for side in [1, -1]:
+		for id in [&"jkd_chain_jab", &"jkd_chain_cross"]:
+			cases.append([&"jeet_kune_do", side, id, 1.0])
+	var cell := 0
+	for c in cases:
+		var fighter := load("res://scenes/fighter.tscn").instantiate() as Fighter
+		canvas.add_child(fighter)
+		fighter.set_style(StyleRegistry.by_id(c[0]))
+		fighter.facing = c[1]
+		var x := float(cell % 6) * 300.0 + 150.0
+		var floor_y := float(cell / 6) * 260.0 + 235.0
+		fighter.position = Vector2(x, floor_y)
+		fighter.ground_y = floor_y
+		var v := fighter.get_node("Visual") as FighterVisual
+		v.set_process(false)
+		v._sync_stance()
+		var label := Label.new()
+		if c[2] == &"roll":
+			fighter.state = Fighter.State.JUMP
+			fighter.airborne = true
+			fighter.cap_roll_jump = true
+			fighter.cap_roll_jump_frame = c[3]
+			fighter.cap_roll_jump_dir = c[1]
+			fighter.position.y -= 40
+			v._height = 40
+			v._pose = v._air_pose()
+			v._tuck_amount = v._cap_roll_tuck()
+			v._update_spin(0, 1)
+			label.text = "Cap roll %s frame %s" % [c[1], c[3]]
+		else:
+			var attack := CombatData.get_attack(CombatData.type_for_id(c[2]))
+			var time := attack.startup * minf(c[3], 1.0)
+			if c[3] > 1.0:
+				time = attack.startup + attack.active * (c[3] - 1.0) / 0.35
+			v._pose = contact_pose(fighter, v, c[2], time)
+			label.text = "%s %s %.2f" % [c[2], c[1], c[3]]
+		v.queue_redraw()
+		label.position = Vector2(x - 142, floor_y - 228)
+		label.add_theme_font_size_override("font_size", 15)
+		canvas.add_child(label)
+		retained.append(fighter)
+		retained.append(label)
+		cell += 1
+	await process_frame
+	await RenderingServer.frame_post_draw
+	(canvas as SubViewport).get_texture().get_image().save_png(out + "/agility_sequences.png")
+	for node in retained: node.free()
 
 
 func contact_pose(fighter: Fighter, visual: FighterVisual, id: StringName, time: float = -1.0) -> PackedFloat32Array:
@@ -155,8 +218,37 @@ func polish_semantics() -> void:
 		fighter.script_pose = &"cap_rasteira_hit"
 		check(v._cap_supported_move(), "finisher sweep uses the same planted-hand support")
 		fighter.script_pose = &""
+		fighter.state = Fighter.State.JUMP
+		fighter.airborne = true
+		fighter.cap_roll_jump = true
+		fighter.cap_roll_jump_dir = side
+		fighter.cap_roll_jump_frame = 12
+		v._update_spin(1.0 / 60.0, 1.0)
+		var first_angle := v._body_rot
+		var roll_pose := v._air_pose()
+		check(roll_pose[FighterVisual.TH_F] > 2.4 and roll_pose[FighterVisual.SH_F] < 0.0, "Capoeira somersault draws knees tightly into the chest")
+		check(v._cap_roll_tuck() > 0.9 and first_angle > 0.5 and first_angle < PI, "Capoeira rolls as a tucked body after takeoff")
+		fighter.cap_roll_jump_frame = fighter.cap_roll_jump_duration - 5
+		v._update_spin(1.0 / 60.0, 1.0)
+		check(v._body_rot > first_angle and absf(v._body_rot - TAU) < 0.05, "Capoeira finishes one full somersault before landing")
+		check(v._cap_roll_tuck() < 0.1, "Capoeira opens the legs before landing")
+		fighter.cap_roll_jump = false
 		fighter.set_style(StyleRegistry.by_id(&"jeet_kune_do"))
 		v._sync_stance()
+		var jab := contact_pose(fighter, v, &"jkd_chain_jab")
+		check(FighterVisual._attack_joint(fighter.current_attack.type) == FighterVisual.J_HAND_F, "JKD jab-cross starts with the lead fist")
+		var cross := contact_pose(fighter, v, &"jkd_chain_cross")
+		check(FighterVisual._attack_joint(fighter.current_attack.type) == FighterVisual.J_HAND_B, "JKD jab-cross finishes with the rear fist")
+		check(jab[FighterVisual.SPREAD] > 20 and cross[FighterVisual.SPREAD] < -20, "JKD jab-cross reverses shoulder drive between punches")
+		check(cross[FighterVisual.HIP_X] - jab[FighterVisual.HIP_X] > 7 and cross[FighterVisual.PIVOT] > 0.9, "JKD cross drives the hip and rear heel")
+		var hammer := contact_pose(fighter, v, &"jkd_hammerfist")
+		var hammer_load := contact_pose(fighter, v, &"jkd_hammerfist", fighter.current_attack.startup * 0.45)
+		var hammer_before := v._solve_joints(hammer_load)
+		var hammer_after := v._solve_joints(hammer)
+		check(FighterVisual._attack_joint(fighter.current_attack.type) == FighterVisual.J_HAND_B, "JKD hammerfist uses its raised rear fist")
+		check(hammer_before[FighterVisual.J_HAND_B].y < hammer_before[FighterVisual.J_HEAD].y - 12, "JKD hammerfist winds up above the head")
+		check(hammer_after[FighterVisual.J_HAND_B].y - hammer_before[FighterVisual.J_HAND_B].y > 40, "JKD hammerfist has a descending contact arc")
+		check(absf(hammer[FighterVisual.UA_B] - hammer[FighterVisual.LA_B]) > 0.4, "JKD hammerfist retains its bent elbow at contact")
 		var air_side := contact_pose(fighter, v, &"jump_kick")
 		var air_front := contact_pose(fighter, v, &"jkd_air_front")
 		check(absf(air_side[FighterVisual.TORSO] - air_front[FighterVisual.TORSO]) > 0.5, "JKD air side kick counterlean differs from upright front snap")

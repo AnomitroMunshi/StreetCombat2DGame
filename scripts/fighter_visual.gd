@@ -1517,16 +1517,35 @@ func _satisfy(a: int, b: int, length: float, at_least: bool) -> void:
 ## A controlled breakfall (knockdown with rolls) curls into a ball. Limp KO'd
 ## bodies are ragdolls instead.
 func _is_balled() -> bool:
+	if _cap_roll_active():
+		return _cap_roll_tuck() > 0.5
 	if fighter.state == Fighter.State.EVADE_ROLL:
 		# Tucked from the end of the startup until the roll has travelled.
 		return fighter.state_frame >= CombatData.ROLL_STARTUP - 1 and fighter.is_rolling_through()
 	return fighter.state == Fighter.State.KNOCKDOWN and (fighter.rolling or (fighter.airborne and fighter.tumble))
 
 
+func _cap_roll_active() -> bool:
+	return _kit == &"capoeira" and fighter.cap_roll_jump and fighter.airborne and fighter.state == Fighter.State.JUMP
+
+
+func _cap_roll_tuck() -> float:
+	var frame := float(fighter.cap_roll_jump_frame)
+	var duration := float(fighter.cap_roll_jump_duration)
+	return smoothstep(2.0, 7.0, frame) * (1.0 - smoothstep(duration - 10.0, duration - 4.0, frame))
+
+
 func _update_spin(dt: float, fraction: float) -> void:
 	var balled := _is_balled()
-	_tuck_amount = move_toward(_tuck_amount, 1.0 if balled else 0.0, dt * 14.0)
-	if fighter.state == Fighter.State.EVADE_ROLL and balled:
+	var tuck_target := _cap_roll_tuck() if _cap_roll_active() else (1.0 if balled else 0.0)
+	_tuck_amount = move_toward(_tuck_amount, tuck_target, dt * 14.0)
+	if _cap_roll_active():
+		# One deliberate somersault. Open the knees and finish the rotation
+		# before landing instead of letting a generic tumble spin indefinitely.
+		var frame := maxf(float(fighter.cap_roll_jump_frame) - 1.0 + fraction, 0.0)
+		var progress := smoothstep(1.0, float(fighter.cap_roll_jump_duration) - 5.0, frame)
+		_body_rot = float(fighter.cap_roll_jump_dir * fighter.facing) * TAU * progress
+	elif fighter.state == Fighter.State.EVADE_ROLL and balled:
 		# Evasive roll: the ball turns by the distance actually travelled
 		# (rolls without slipping, forward or backward).
 		var roll_dir := float(fighter.dodge_world_dir * fighter.facing)
@@ -2216,6 +2235,11 @@ func _walk_pose() -> PackedFloat32Array:
 
 ## Stretch while rising, tuck at the apex, extend the legs while falling.
 func _air_pose() -> PackedFloat32Array:
+	if _cap_roll_active():
+		var frame := float(fighter.cap_roll_jump_frame)
+		var open_pose := _blend(_jump_rise, _jump_fall,
+			smoothstep(10.0, float(fighter.cap_roll_jump_duration) - 4.0, frame))
+		return _blend(open_pose, _tuck, _cap_roll_tuck())
 	var k := clampf(fighter.velocity_y / 9.0, -1.0, 1.0)
 	# The shape at the top depends on travel: tuck (neutral), leap (forward)
 	# or guarded retreat (back), blended by the actual air speed so steering
@@ -2275,6 +2299,13 @@ func _build_expansion_moves() -> void:
 		&"jkd_lead_load": [0.1, -0.05, 1.2, 2.8, 0.95, 2.9, 0.55, -0.25, -0.6, -0.65, -3.0, 0.0, 0.0, 17.0],
 		&"jkd_lead_hit": [0.2, -0.12, 1.8, 1.8, 1.0, 2.95, 0.6, -0.3, -0.55, -0.7, 12.0, 0.0, 0.4, 21.0],
 		&"jkd_cross_hit": [0.25, -0.1, 1.15, 2.75, 1.8, 1.8, 0.65, -0.25, -0.45, -0.7, 15.0, 0.0, 0.85, -14.0],
+		&"jkd_chain_jab_load": [-0.03, 0.02, 1.05, 2.85, 1.0, 2.95, 0.6, -0.3, -0.55, -0.75, -3.0, 0.0, 0.05, 24.0],
+		&"jkd_chain_jab_hit": [0.16, -0.1, 1.78, 1.78, 1.0, 2.95, 0.65, -0.3, -0.5, -0.7, 9.0, 0.0, 0.35, 26.0],
+		&"jkd_chain_cross_load": [0.04, -0.02, 1.1, 2.9, 0.85, 2.8, 0.7, -0.35, -0.6, -0.8, 3.0, 0.0, 0.25, 8.0],
+		&"jkd_chain_cross_hit": [0.3, -0.15, 1.0, 2.95, 1.8, 1.8, 0.8, -0.3, -0.4, -0.65, 18.0, 0.0, 0.95, -24.0],
+		&"jkd_hammer_load": [-0.15, 0.1, 1.1, 2.85, 3.3, 2.7, 0.8, -0.45, -0.6, -0.85, -7.0, 0.0, 0.2, 15.0],
+		&"jkd_hammer_hit": [0.42, -0.2, 1.15, 2.8, 2.4, 1.45, 0.95, -0.35, -0.45, -0.7, 18.0, 0.0, 0.95, -22.0],
+		&"jkd_hammer_follow": [0.46, -0.22, 1.15, 2.85, 2.0, 1.1, 0.95, -0.35, -0.45, -0.7, 20.0, 0.0, 0.95, -24.0],
 		&"jkd_side_load": [-0.08, 0.0, 1.2, 2.65, 0.95, 2.9, 1.85, -0.8, -0.2, -0.35, -4.0, 0.0, 0.4, 16.0],
 		&"jkd_side_hit": [-0.45, 0.2, 1.15, 2.65, 0.95, 2.9, 1.9, 1.85, -0.15, -0.35, 17.0, 0.0, 1.0, 18.0],
 		&"jkd_stop_hit": [-0.15, 0.05, 1.25, 2.65, 0.9, 2.9, 1.25, 1.15, -0.2, -0.4, 10.0, 0.0, 0.5, 18.0],
@@ -2310,6 +2341,9 @@ func _build_expansion_moves() -> void:
 		&"cap_roda_sweep": [&"cap_rasteira_load", &"cap_rasteira_hit"],
 		&"cap_roda_heel": [&"cap_armada_load", &"cap_armada_hit"],
 		&"jkd_lead_straight": [&"jkd_lead_load", &"jkd_lead_hit"],
+		&"jkd_chain_jab": [&"jkd_chain_jab_load", &"jkd_chain_jab_hit"],
+		&"jkd_chain_cross": [&"jkd_chain_cross_load", &"jkd_chain_cross_hit"],
+		&"jkd_hammerfist": [&"jkd_hammer_load", &"jkd_hammer_hit"],
 		&"jkd_high_hook": [&"jkd_side_load", &"jkd_hook_hit"],
 		&"jkd_jump_straight": [&"jkd_lead_load", &"jkd_lead_hit"],
 		&"jkd_air_front": [&"jkd_air_front_load", &"jkd_air_front_hit"],
@@ -2329,6 +2363,11 @@ func _build_expansion_moves() -> void:
 		var hit: PackedFloat32Array = p[specs[id][1]]
 		_moves[type] = [[S, 0.4, load, EASE_SMOOTH], [S, 0.9, hit, EASE_IN],
 			[A, 0.0, hit, EASE_LINEAR], [A, 1.0, hit, EASE_LINEAR], [R, 0.5, load, EASE_SMOOTH]]
+	var hammer_type := CombatData.type_for_id(&"jkd_hammerfist")
+	if hammer_type != CombatData.AttackType.NONE:
+		_moves[hammer_type] = [[S, 0.45, p[&"jkd_hammer_load"], EASE_SMOOTH],
+			[S, 0.98, p[&"jkd_hammer_hit"], EASE_IN], [A, 0.0, p[&"jkd_hammer_hit"], EASE_LINEAR],
+			[A, 1.0, p[&"jkd_hammer_follow"], EASE_LINEAR], [R, 0.4, p[&"jkd_chain_cross_load"], EASE_SMOOTH]]
 	var step_type := CombatData.type_for_id(&"dragons_burst")
 	if step_type != CombatData.AttackType.NONE:
 		_moves[step_type] = [[S, 0.28, p[&"jkd_step_collect"], EASE_SMOOTH],
@@ -2468,6 +2507,10 @@ func _attack_pose(t: float) -> PackedFloat32Array:
 		return _guard
 	var keys := _attack_keys(t)
 	var attack := fighter.current_attack
+	if attack.id == &"jkd_hammerfist":
+		# Preserve the cocked elbow and descending arc; straight-punch aiming
+		# would otherwise flatten the hammer into another cross at contact.
+		return _aim_bent_arm(keys, false, true, CombatData.ImpactKind.DOWNWARD, maxf(_drive(t, attack), 0.0))
 	if _expansion_ids.has(attack.id) or _kit_moves.get(_kit, {}).has(attack.type) and _kit in [&"capoeira", &"jeet_kune_do"]:
 		var joint := _attack_joint(attack.type)
 		if joint in [J_HAND_F, J_HAND_B]:
@@ -2822,7 +2865,10 @@ func _solve_joints(p: PackedFloat32Array) -> PackedVector2Array:
 		hip.y = -maxf(maxf(leg_f, leg_b), TORSO_WIDTH * 0.5 + 1.0)
 	if (_cap_inverted_move() or _cap_meialua_move() or _cap_intro_balance()) and p[DROP] > 50.0:
 		hip.y = lerpf(hip.y, -p[DROP], smoothstep(50.0, 80.0, p[DROP]))
-	hip = hip.lerp(TUCK_HIP, smoothstep(0.0, 1.0, _tuck_amount))
+	# The evasive ground roll curls near the floor. A jumping somersault
+	# keeps that same compact anatomy centred at the airborne body's height.
+	var tuck_hip := TUCK_HIP - Vector2(0.0, 50.0) if _cap_roll_active() else TUCK_HIP
+	hip = hip.lerp(tuck_hip, smoothstep(0.0, 1.0, _tuck_amount))
 	var torso_dir := Vector2(sin(p[TORSO]), -cos(p[TORSO]))
 	# Body rotation: lead shoulder / hip sit in front of the rear ones.
 	var across := Vector2(cos(p[TORSO]), sin(p[TORSO]))
@@ -4036,7 +4082,7 @@ static func _attack_joint(type: CombatData.AttackType) -> int:
 			return J_FOOT_B
 		&"cap_crescent", &"cap_low_sweep", &"cap_flying_scissor", &"cap_air_crescent", &"cap_roda_sweep", &"jkd_high_hook", &"jkd_air_front", &"jkd_stop_kick", &"jkd_intercept_side", &"jkd_x_stop", &"jkd_x_side", &"dragons_burst":
 			return J_FOOT_F
-		&"jkd_intercept_rear":
+		&"jkd_intercept_rear", &"jkd_chain_cross", &"jkd_hammerfist":
 			return J_HAND_B
 		&"dempsey_hook_right", &"step_back_spinning_backfist":
 			return J_HAND_B
