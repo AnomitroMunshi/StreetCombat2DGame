@@ -775,6 +775,9 @@ var _pose_library: Dictionary = {}
 var _moves: Dictionary = {}
 ## Outfit kit -> {AttackType -> keyframes}: a style's own version of a shared move.
 var _kit_moves: Dictionary = {}
+var _expansion_ids: Dictionary = {}
+var _cap_hand_anchors: Array[Vector2] = []
+var _cap_hand_swing: int = -1
 var _kf_rear_palm_keys: Array = []
 
 var _pose := PackedFloat32Array()
@@ -866,7 +869,7 @@ var _shoe := Color.TRANSPARENT
 # extra bulk]); everything else is skin. Details (belts, collars, armbands,
 # hair) are drawn in the same body pass, so depth order stays right.
 enum { P_UPPER_ARM, P_FOREARM, P_TORSO, P_THIGH, P_SHIN, P_FOOT }
-const OUTFIT_KITS: Array[StringName] = [&"muay_thai", &"karate", &"kung_fu", &"taekwondo", &"kickboxing", &"bangla_maar"]
+const OUTFIT_KITS: Array[StringName] = [&"muay_thai", &"karate", &"kung_fu", &"taekwondo", &"kickboxing", &"bangla_maar", &"capoeira", &"jeet_kune_do"]
 const GLOVED_KITS: Array[StringName] = [&"boxing", &"muay_thai", &"kickboxing"]
 const GI_WHITE := Color(0.95, 0.94, 0.9)
 ## The dark-fighter gi/dobok: slate rather than black, so the costume still
@@ -1217,6 +1220,7 @@ func _ready() -> void:
 			[A, 1.0, _over(_lpalm_hit, _lpalm_load), EASE_LINEAR], [R, 0.35, _lpalm_load, EASE_OUT]],
 	}
 	_build_x_moves()
+	_build_expansion_moves()
 	_victory = {
 		&"boxing": [[0, null], [12, _win_box_raise], [40, _win_box_raise], [50, _win_box_tap], [58, _win_box_tap],
 			[68, _win_box_raise]],
@@ -1684,6 +1688,8 @@ func _update_down_amount(t: float) -> void:
 ## strike drives in without the head going through the body (the contact-aware
 ## reach then still puts the fist on target). Spins and leaps keep their shape.
 func _close_yield(pose: PackedFloat32Array) -> PackedFloat32Array:
+	if _kit == &"capoeira" and fighter.state == Fighter.State.ATTACK:
+		return pose  # low/inverted authored support owns its torso path
 	if _has_x_flinch():
 		return pose  # its wall-fitted recoil already owns the body position
 	var opp := fighter.opponent
@@ -1889,6 +1895,27 @@ func _active_idle() -> PackedFloat32Array:
 	var k := _idle_amount
 	if k <= 0.0:
 		return idle
+	if _kit == &"capoeira":
+		var phase := sin(_time * TAU * 0.75 + fighter.idle_phase)
+		idle[HIP_X] += phase * 11.0 * k
+		idle[TORSO] += phase * 0.14 * k
+		idle[HEAD] -= phase * 0.12 * k
+		idle[SPREAD] += phase * 12.0 * k
+		idle[TH_F] += phase * 0.25 * k
+		idle[TH_B] += phase * 0.28 * k
+		idle[UA_F] += phase * 0.38 * k
+		idle[LA_F] += phase * 0.25 * k
+		idle[UA_B] -= phase * 0.32 * k
+		_bob_target = (1.0 - absf(phase)) * 5.0 * k
+		return idle
+	if _kit == &"jeet_kune_do":
+		var pulse := sin(_time * TAU * 1.65 + fighter.idle_phase)
+		idle[HIP_X] += pulse * 2.0 * k
+		idle[UA_F] += pulse * 0.06 * k
+		idle[HEAD] -= pulse * 0.015 * k
+		_heel_target = Vector2(0.0, 3.5 * k)
+		_bob_target = (0.5 + pulse * 0.5) * 2.0 * k
+		return idle
 	var crane := 0.0
 	if not _crane.is_empty():
 		# Settle from the moving stance onto one leg once standing still.
@@ -2020,6 +2047,8 @@ func _is_back_kick() -> bool:
 ## through the recovery.
 func _back_turn(t: float) -> float:
 	var attack := fighter.current_attack
+	if attack.id in [&"cap_spin_heel", &"cap_roda_heel", &"cap_air_spin"]:
+		return 2.0 * smoothstep(attack.startup * 0.2, attack.startup * 0.94, t)
 	if attack.id in [&"step_back_spinning_backfist", &"butterfly_kick"]:
 		# The retreat/dip reads first; a complete rotation presents the striking
 		# hand/foot toward the opponent on the first contact frame.
@@ -2200,6 +2229,129 @@ func _dropkick_landing(t: float) -> PackedFloat32Array:
 		return _blend(_x_drop_kneel, _getup_crouch, smoothstep(0.78, 0.9, u))
 	return _blend(_getup_crouch, _guard, smoothstep(0.9, 1.0, u))
 
+## Expansion poses are registered by permanent ids and shared by finishers.
+func _build_expansion_moves() -> void:
+	var poses := {
+		&"cap_palm_load": [0.25, 0.05, 0.65, 2.65, 0.85, 2.8, 0.8, -0.4, -0.65, -0.8, -7.0, 0.0, 0.0, 12.0],
+		&"cap_palm_hit": [0.3, -0.1, 1.75, 1.75, 0.9, 2.8, 0.75, -0.35, -0.6, -0.85, 10.0, 0.0, 0.5, 18.0],
+		&"cap_armada_load": [0.25, 0.0, 1.0, 2.6, 0.0, 1.6, 0.65, -0.4, 1.45, -0.8, -4.0, 0.0, 0.5, 15.0],
+		&"cap_armada_hit": [-0.4, 0.25, 1.1, 2.4, -0.7, 0.2, -0.2, -0.45, 2.4, 2.35, 24.0, 0.0, 1.0, -12.0],
+		&"cap_au_entry": [1.1, -0.35, 0.2, 0.4, -0.2, 0.2, 1.15, -0.7, -0.9, -1.1, 5.0, 58.0, 0.0, 8.0],
+		&"cap_au_support": [2.9, 0.0, 0.05, 0.05, -0.05, -0.05, -0.8, -1.1, -2.7, -2.7, 0.0, 106.0, 0.0, 10.0],
+		&"cap_au_hit": [PI, 0.0, 0.05, 0.05, -0.05, -0.05, -2.6, -2.6, -4.33, -4.33, 8.0, 106.0, 0.0, 10.0],
+		&"cap_au_exit": [1.3, -0.2, 0.2, 0.8, 0.0, 0.5, 1.2, -0.7, -0.5, -1.15, 3.0, 58.0, 0.0, 8.0],
+		&"cap_elbow_hit": [0.25, -0.1, 1.1, 2.8, 2.05, 3.65, 0.7, -0.3, -0.55, -0.8, 12.0, 0.0, 0.7, -12.0],
+		&"jkd_elbow_hit": [0.15, -0.12, 1.2, 2.75, 2.0, 3.6, 0.6, -0.25, -0.5, -0.7, 10.0, 0.0, 0.65, -10.0],
+		&"cap_crescent_load": [0.08, 0.0, 1.0, 2.7, 0.6, 2.6, 1.7, -0.6, -0.25, -0.45, -3.0, 0.0, 0.5, 10.0],
+		&"cap_crescent_hit": [-0.35, 0.2, 1.0, 2.7, -0.7, 0.2, 2.3, 2.25, -0.2, -0.4, 17.0, 0.0, 1.0, -8.0],
+		&"cap_rasteira_load": [0.8, -0.2, 1.0, 2.2, 0.2, 0.25, 1.4, -0.7, 1.0, -1.2, -3.0, 0.0, 0.0, 5.0],
+		&"cap_rasteira_hit": [0.95, -0.3, 1.0, 2.4, 0.15, 0.15, 1.5, 1.5, 1.1, -1.3, 9.0, 0.0, 0.8, -8.0],
+		&"cap_meialua_load": [1.2, -0.2, 0.15, 0.3, -0.1, 0.2, 1.2, -0.7, -0.7, -1.0, 0.0, 60.0, 0.0, 8.0],
+		&"cap_meialua_support": [2.6, 0.2, 0.05, 0.05, -0.05, -0.05, -0.9, -1.2, -2.6, -2.6, 0.0, 100.0, 0.0, 12.0],
+		&"cap_meialua_hit": [2.6, 0.2, 0.05, 0.05, -0.05, -0.05, -2.5, -2.5, -4.13, -4.13, 10.0, 100.0, 0.0, -10.0],
+		&"cap_scissor_load": [0.1, 0.05, 1.1, 2.6, 0.6, 2.8, 1.7, -0.8, 1.4, -1.1, -3.0, 0.0, 0.0, 8.0],
+		&"cap_scissor_hit": [-0.45, 0.15, 1.1, 2.6, -0.7, 0.2, 2.05, 2.0, -0.7, -1.0, 10.0, 0.0, 0.0, 12.0],
+		&"jkd_lead_load": [0.1, -0.05, 1.2, 2.8, 0.95, 2.9, 0.55, -0.25, -0.6, -0.65, -3.0, 0.0, 0.0, 17.0],
+		&"jkd_lead_hit": [0.2, -0.12, 1.8, 1.8, 1.0, 2.95, 0.6, -0.3, -0.55, -0.7, 12.0, 0.0, 0.4, 21.0],
+		&"jkd_cross_hit": [0.25, -0.1, 1.15, 2.75, 1.8, 1.8, 0.65, -0.25, -0.45, -0.7, 15.0, 0.0, 0.85, -14.0],
+		&"jkd_side_load": [-0.08, 0.0, 1.2, 2.65, 0.95, 2.9, 1.85, -0.8, -0.2, -0.35, -4.0, 0.0, 0.4, 16.0],
+		&"jkd_side_hit": [-0.45, 0.2, 1.15, 2.65, 0.95, 2.9, 1.9, 1.85, -0.15, -0.35, 17.0, 0.0, 1.0, 18.0],
+		&"jkd_stop_hit": [-0.15, 0.05, 1.25, 2.65, 0.9, 2.9, 1.25, 1.15, -0.2, -0.4, 10.0, 0.0, 0.5, 18.0],
+		&"jkd_hook_hit": [-0.35, 0.2, 1.1, 2.65, 0.8, 2.8, 2.35, 2.3, -0.15, -0.35, 20.0, 0.0, 1.0, 14.0],
+		&"jkd_burst_load": [0.28, -0.15, 0.85, 2.7, 0.95, 2.95, 0.85, -0.55, -0.7, -0.9, -10.0, 0.0, 0.0, 17.0],
+		&"jkd_burst_hit": [0.32, -0.18, 1.8, 1.8, 1.05, 2.9, 0.75, -0.35, -0.5, -0.8, 20.0, 0.0, 0.8, 24.0],
+	}
+	for id: StringName in poses:
+		_pose_library[id] = PackedFloat32Array(poses[id])
+	var p := _pose_library
+	var specs := {
+		&"cap_quick_palm": [&"cap_palm_load", &"cap_palm_hit"],
+		&"cap_spin_heel": [&"cap_armada_load", &"cap_armada_hit"],
+		&"cap_crescent": [&"cap_crescent_load", &"cap_crescent_hit"],
+		&"cap_low_sweep": [&"cap_rasteira_load", &"cap_rasteira_hit"],
+		&"cap_leap_palm": [&"cap_palm_load", &"cap_palm_hit"],
+		&"cap_flying_scissor": [&"cap_scissor_load", &"cap_scissor_hit"],
+		&"cap_air_crescent": [&"cap_crescent_load", &"cap_crescent_hit"],
+		&"cap_air_spin": [&"cap_armada_load", &"cap_armada_hit"],
+		&"cap_roda_sweep": [&"cap_rasteira_load", &"cap_rasteira_hit"],
+		&"cap_roda_heel": [&"cap_armada_load", &"cap_armada_hit"],
+		&"jkd_lead_straight": [&"jkd_lead_load", &"jkd_lead_hit"],
+		&"jkd_high_hook": [&"jkd_side_load", &"jkd_hook_hit"],
+		&"jkd_jump_straight": [&"jkd_lead_load", &"jkd_lead_hit"],
+		&"jkd_air_front": [&"jkd_side_load", &"jkd_side_hit"],
+		&"jkd_stop_kick": [&"jkd_side_load", &"jkd_stop_hit"],
+		&"jkd_intercept_lead": [&"jkd_lead_load", &"jkd_lead_hit"],
+		&"jkd_intercept_rear": [&"jkd_lead_load", &"jkd_cross_hit"],
+		&"jkd_intercept_side": [&"jkd_side_load", &"jkd_side_hit"],
+		&"jkd_x_stop": [&"jkd_side_load", &"jkd_stop_hit"],
+		&"jkd_x_side": [&"jkd_side_load", &"jkd_side_hit"],
+	}
+	for id: StringName in specs:
+		var type := CombatData.type_for_id(id)
+		if type == CombatData.AttackType.NONE: continue
+		_expansion_ids[id] = true
+		var load: PackedFloat32Array = p[specs[id][0]]
+		var hit: PackedFloat32Array = p[specs[id][1]]
+		_moves[type] = [[S, 0.4, load, EASE_SMOOTH], [S, 0.9, hit, EASE_IN],
+			[A, 0.0, hit, EASE_LINEAR], [A, 1.0, hit, EASE_LINEAR], [R, 0.5, load, EASE_SMOOTH]]
+	# X is a committed lead-leg interception, re-chamber, then a finishing
+	# thrust; the burst straight remains a finisher pose, never the X move.
+	var x_chamber := p[&"jkd_side_load"].duplicate() as PackedFloat32Array
+	x_chamber[TH_F] = 2.1
+	x_chamber[SH_F] = -0.5
+	x_chamber[HIP_X] = -8.0
+	var x_stop := p[&"jkd_stop_hit"].duplicate() as PackedFloat32Array
+	x_stop[TH_F] = 1.45
+	x_stop[SH_F] = 1.35
+	x_stop[HIP_X] = 12.0
+	var x_side := p[&"jkd_side_hit"].duplicate() as PackedFloat32Array
+	x_side[HIP_X] = 24.0
+	x_side[SPREAD] = 22.0
+	_pose_library[&"jkd_x_chamber"] = x_chamber
+	_pose_library[&"jkd_x_stop_hit"] = x_stop
+	_pose_library[&"jkd_x_side_hit"] = x_side
+	var stop_type := CombatData.type_for_id(&"jkd_x_stop")
+	var side_type := CombatData.type_for_id(&"jkd_x_side")
+	if stop_type != CombatData.AttackType.NONE:
+		_moves[stop_type] = [[S, 0.45, x_chamber, EASE_SMOOTH], [S, 0.9, x_stop, EASE_IN],
+			[A, 0.0, x_stop, EASE_LINEAR], [A, 1.0, x_stop, EASE_LINEAR], [R, 0.25, x_chamber, EASE_OUT]]
+	if side_type != CombatData.AttackType.NONE:
+		_moves[side_type] = [[S, 0.3, x_chamber, EASE_OUT], [S, 0.85, x_side, EASE_IN],
+			[A, 0.0, x_side, EASE_LINEAR], [A, 1.0, _over(x_side, x_chamber), EASE_LINEAR],
+			[R, 0.45, x_chamber, EASE_SMOOTH]]
+	for id: StringName in [&"cap_cartwheel", &"cap_roda_cartwheel", &"meia_lua_tornado"]:
+		var type := CombatData.type_for_id(id)
+		if type == CombatData.AttackType.NONE: continue
+		_expansion_ids[id] = true
+		var meia := id == &"meia_lua_tornado"
+		_moves[type] = [[S, 0.3, p[&"cap_meialua_load"] if meia else p[&"cap_au_entry"], EASE_SMOOTH],
+			[S, 0.65, p[&"cap_meialua_support"] if meia else p[&"cap_au_support"], EASE_SMOOTH],
+			[S, 0.94, p[&"cap_meialua_hit"] if meia else p[&"cap_au_hit"], EASE_IN],
+			[A, 0.0, p[&"cap_meialua_hit"] if meia else p[&"cap_au_hit"], EASE_LINEAR],
+			[A, 1.0, p[&"cap_meialua_hit"] if meia else p[&"cap_au_hit"], EASE_LINEAR],
+			[R, 0.3, p[&"cap_au_exit"], EASE_SMOOTH], [R, 0.65, _land_crouch, EASE_SMOOTH]]
+	# Shared legal attacks retain their identity but use their style's own body mechanics.
+	_kit_moves[&"capoeira"] = {}
+	_kit_moves[&"jeet_kune_do"] = {}
+	var overrides := {
+		&"capoeira": {&"rising_elbow": [&"cap_palm_load", &"cap_elbow_hit"],
+			&"body_punch": [&"cap_palm_load", &"jkd_cross_hit"], &"jump_punch": [&"cap_palm_load", &"cap_palm_hit"]},
+		&"jeet_kune_do": {&"cross": [&"jkd_lead_load", &"jkd_cross_hit"],
+			&"side_kick": [&"jkd_side_load", &"jkd_side_hit"], &"rising_elbow": [&"jkd_lead_load", &"jkd_elbow_hit"],
+			&"body_straight": [&"jkd_lead_load", &"jkd_cross_hit"], &"low_roundhouse": [&"jkd_side_load", &"jkd_stop_hit"],
+			&"flying_side_kick": [&"jkd_side_load", &"jkd_side_hit"], &"jump_punch": [&"jkd_lead_load", &"jkd_lead_hit"],
+			&"jump_kick": [&"jkd_side_load", &"jkd_side_hit"]},
+	}
+	for kit: StringName in overrides:
+		for id: StringName in overrides[kit]:
+			var type := CombatData.type_for_id(id)
+			if type == CombatData.AttackType.NONE: continue
+			var load: PackedFloat32Array = p[overrides[kit][id][0]]
+			var hit: PackedFloat32Array = p[overrides[kit][id][1]]
+			_kit_moves[kit][type] = [[S, 0.4, load, EASE_SMOOTH], [S, 0.9, hit, EASE_IN],
+				[A, 0.0, hit, EASE_LINEAR], [A, 1.0, hit, EASE_LINEAR], [R, 0.5, load, EASE_SMOOTH]]
+
+
 ## Register by permanent id so these timelines stay coupled to the data table.
 func _build_x_moves() -> void:
 	var timelines := {
@@ -2273,6 +2425,13 @@ func _attack_pose(t: float) -> PackedFloat32Array:
 		return _guard
 	var keys := _attack_keys(t)
 	var attack := fighter.current_attack
+	if _expansion_ids.has(attack.id) or _kit_moves.get(_kit, {}).has(attack.type) and _kit in [&"capoeira", &"jeet_kune_do"]:
+		var joint := _attack_joint(attack.type)
+		if joint in [J_HAND_F, J_HAND_B]:
+			return _aim_arm(keys, J_SHOULDER_F if joint == J_HAND_F else J_SHOULDER_B,
+				UA_F if joint == J_HAND_F else UA_B, LA_F if joint == J_HAND_F else LA_B,
+				_hits_high(attack), maxf(_drive(t, attack), 0.0))
+		return keys
 	if _is_x_strike(attack):
 		if attack.id in [&"dempsey_hook_left", &"dempsey_hook_right"]:
 			return _aim_bent_arm(keys, attack.id == &"dempsey_hook_left", true,
@@ -2540,6 +2699,10 @@ static func _flow_tangent(times: PackedFloat32Array, poses: Array[PackedFloat32A
 ## Kung fu fights open-handed (palms), except for its fist techniques and the
 ## crane's extended lead fist.
 func _palm_hands(lead: bool) -> bool:
+	if _kit == &"capoeira":
+		return true
+	if _kit == &"jeet_kune_do":
+		return lead and fighter.state in [Fighter.State.IDLE, Fighter.State.WALK, Fighter.State.PARRY]
 	if _kit != &"kung_fu":
 		return false
 	if fighter.state == Fighter.State.ATTACK and fighter.current_attack != null:
@@ -2614,6 +2777,8 @@ func _solve_joints(p: PackedFloat32Array) -> PackedVector2Array:
 		var leg_f := THIGH * cos(p[TH_F]) + SHIN * cos(p[SH_F])
 		var leg_b := THIGH * cos(p[TH_B]) + SHIN * cos(p[SH_B])
 		hip.y = -maxf(maxf(leg_f, leg_b), TORSO_WIDTH * 0.5 + 1.0)
+	if _cap_inverted_move() and p[DROP] > 50.0:
+		hip.y = lerpf(hip.y, -p[DROP], smoothstep(50.0, 80.0, p[DROP]))
 	hip = hip.lerp(TUCK_HIP, smoothstep(0.0, 1.0, _tuck_amount))
 	var torso_dir := Vector2(sin(p[TORSO]), -cos(p[TORSO]))
 	# Body rotation: lead shoulder / hip sit in front of the rear ones.
@@ -2705,6 +2870,7 @@ func _draw() -> void:
 			world_joints.append(_rag_pos[i].lerp(_fk_world[i], 1.0 - _rag_blend))
 	else:
 		world_joints = _plant_feet(_fk_world.duplicate(), to_world, Vector2(signf(face), 0.0))
+		world_joints = _plant_cap_hands(world_joints)
 
 	# Afterimages (world space) behind the body.
 	var trail_accent := fighter.state in [Fighter.State.ATTACK, Fighter.State.FINISHER, Fighter.State.DODGE]
@@ -3149,6 +3315,18 @@ func _build_outfit() -> void:
 	var gi := GI_WHITE if light else GI_BLACK
 	_cols["hair"] = Color(0.2, 0.13, 0.09) if light else Color(0.07, 0.06, 0.06)
 	match _kit:
+		&"capoeira":
+			_cloth([P_THIGH, P_SHIN], GI_WHITE, 3.0)
+			_cols["pants"] = GI_WHITE
+			_cols["cord"] = acc.lightened(0.15)
+		&"jeet_kune_do":
+			var dark := Color(0.14, 0.17, 0.21) if light else Color(0.21, 0.24, 0.29)
+			_cloth([P_TORSO, P_UPPER_ARM], dark, 0.6)
+			_cloth([P_THIGH, P_SHIN], dark.darkened(0.15), 1.3)
+			_cloth([P_FOOT], Color(0.11, 0.12, 0.14), 0.0)
+			_cols["shirt"] = dark
+			_cols["pants"] = dark.darkened(0.15)
+			_cols["trim"] = acc.lightened(0.2)
 		&"karate", &"taekwondo":
 			_cloth([P_TORSO], gi, 1.5)
 			_cloth([P_UPPER_ARM, P_FOREARM, P_THIGH, P_SHIN], gi, 2.5)
@@ -3225,6 +3403,11 @@ static func _across(a: Vector2, b: Vector2) -> Vector2:
 ## pass (so the far leg's stay behind the body).
 func _leg_extras(hip: Vector2, knee: Vector2, ankle: Vector2) -> void:
 	match _kit:
+		&"capoeira":
+			_limb_band(knee, ankle, 0.91, 7.4, _ccol("pants").darkened(0.13), 1.7)
+		&"jeet_kune_do":
+			_ribbon(hip.lerp(knee, 0.12), knee, 1.8, 1.4, _ccol("trim"))
+			_limb_band(knee, ankle, 0.93, 6.5, _ccol("pants").lightened(0.2), 1.4)
 		&"muay_thai":
 			# Wide, short satin Thai shorts with a contrasting hem; ankle supports.
 			var hem := hip.lerp(knee, 0.45)
@@ -3346,6 +3529,8 @@ func _ribbon(p0: Vector2, p1: Vector2, w0: float, w1: float, color: Color) -> vo
 ## Armbands, sleeve hems, silk cuffs: per arm, before the hand is drawn.
 func _arm_extras(shoulder: Vector2, elbow: Vector2, hand: Vector2) -> void:
 	match _kit:
+		&"jeet_kune_do":
+			_limb_band(shoulder, elbow, 0.78, 7.5, _ccol("shirt").lightened(0.2), 1.5)
 		&"muay_thai":
 			# Prajioud: a cloth band tied round the upper arm, a short tail.
 			var half := _profile_width(UPPER_ARM_FRONT, 0.45) + 0.8
@@ -3366,6 +3551,17 @@ func _torso_extras(j: PackedVector2Array, hip: Vector2, axis: Vector2, length: f
 	var sway := sin(_time * 6.0) * 1.5
 	var grow := _pb(P_TORSO)
 	match _kit:
+		&"capoeira":
+			_capsule(j[J_HIP_F], j[J_HIP_B], 12.0, 12.0, _cols["pants"])
+			_waist_band(hip, axis, length, n, 5.0, 9.0, _cols["cord"])
+			var knot := hip + axis * 7.0 + n * 9.0
+			draw_circle(knot, 3.5, _cols["cord"], true, -1.0, true)
+			_ribbon(knot, knot + Vector2(n.x * 5.0, 24.0 + sway), 2.5, 1.8, _cols["cord"])
+			_ribbon(knot, knot + Vector2(n.x * 10.0, 18.0 - sway), 2.2, 1.5, _cols["cord"].darkened(0.15))
+		&"jeet_kune_do":
+			_ribbon(neck_base - n * 5.0, neck_base + n * 5.0, 3.5, 3.5, _cols["shirt"].lightened(0.25))
+			_waist_band(hip, axis, length, n, 4.0, 8.0, _cols["pants"].lightened(0.15))
+			_ribbon(hip + axis * length * 0.68 + n * 8.0, hip + axis * length * 0.8 + n * 8.0, 2.0, 2.0, _cols["trim"])
 		&"karate", &"taekwondo":
 			# Crossed jacket front: two tapering lapels meeting at the belt (the
 			# dobok's is a black V collar). The belt is drawn over the near leg
@@ -3521,6 +3717,49 @@ func _draw_boxing_kit(j: PackedVector2Array, accent: Color) -> void:
 	draw_line(head - face * 5.0 - up * 5.0, head + face * 4.0 - up * 11.0, gear.darkened(0.3), 1.8, true)  # chin strap
 	# Gloves are coloured in the body pass (_arm), so the far glove stays
 	# behind the head and torso.
+
+
+func _cap_inverted_move() -> bool:
+	if fighter.state == Fighter.State.ATTACK and fighter.current_attack != null:
+		return fighter.current_attack.id in [&"cap_cartwheel", &"cap_roda_cartwheel", &"meia_lua_tornado"]
+	return fighter.state == Fighter.State.FINISHER and (String(fighter.script_pose).begins_with("cap_au_") \
+		or String(fighter.script_pose).begins_with("cap_meialua_"))
+
+
+func _cap_supported_move() -> bool:
+	return _cap_inverted_move() or (fighter.state == Fighter.State.ATTACK and fighter.current_attack != null \
+		and fighter.current_attack.id in [&"cap_low_sweep", &"cap_roda_sweep"])
+
+
+## Supporting palms stay at their first floor contact while the hips pass
+## overhead. Two-bone arms preserve length; an unreachable anchor releases
+## rather than stretching a shoulder or dragging a hand along the floor.
+func _plant_cap_hands(j: PackedVector2Array) -> PackedVector2Array:
+	var inverted := _cap_inverted_move()
+	var weight := smoothstep(90.0, 100.0, _pose[DROP]) if inverted else smoothstep(0.7, 0.9, _pose[TORSO])
+	if not _cap_supported_move() or weight <= 0.01:
+		_cap_hand_anchors.clear()
+		_cap_hand_swing = -1
+		return j
+	if _cap_hand_swing != fighter.swing_id or _cap_hand_anchors.size() != 2:
+		_cap_hand_swing = fighter.swing_id
+		_cap_hand_anchors = [Vector2(j[J_HAND_F].x, fighter.ground_y - 4.0), Vector2(j[J_HAND_B].x, fighter.ground_y - 4.0)]
+	var arms := [[J_SHOULDER_F, J_ELBOW_F, J_HAND_F], [J_SHOULDER_B, J_ELBOW_B, J_HAND_B]]
+	for arm in 2:
+		if not inverted and arm == 0: continue  # rasteira uses one rear palm
+		var ids: Array = arms[arm]
+		var shoulder := j[ids[0]]
+		var target := _cap_hand_anchors[arm]
+		var delta := target - shoulder
+		var distance := delta.length()
+		if distance > UPPER_ARM + FOREARM + 1.0: continue
+		var d := clampf(distance, 1.0, UPPER_ARM + FOREARM - 0.1)
+		var axis := delta.normalized()
+		var across := Vector2(-axis.y, axis.x) * fighter.facing * (1.0 if arm == 0 else -1.0)
+		var bend := sqrt(maxf(UPPER_ARM * UPPER_ARM - d * d * 0.25, 0.0))
+		j[ids[1]] = j[ids[1]].lerp(shoulder + axis * d * 0.5 + across * bend, weight)
+		j[ids[2]] = j[ids[2]].lerp(shoulder + axis * d, weight)
+	return j
 
 
 ## States where the feet are planted on the floor (legs solved by IK).
@@ -3733,6 +3972,12 @@ func get_strike_point() -> Vector2:
 ## Which joint leads an attack (the one that lands).
 static func _attack_joint(type: CombatData.AttackType) -> int:
 	match CombatData.id_for_type(type):
+		&"cap_spin_heel", &"cap_cartwheel", &"cap_air_spin", &"cap_roda_cartwheel", &"cap_roda_heel", &"meia_lua_tornado":
+			return J_FOOT_B
+		&"cap_crescent", &"cap_low_sweep", &"cap_flying_scissor", &"cap_air_crescent", &"cap_roda_sweep", &"jkd_high_hook", &"jkd_air_front", &"jkd_stop_kick", &"jkd_intercept_side", &"jkd_x_stop", &"jkd_x_side":
+			return J_FOOT_F
+		&"jkd_intercept_rear":
+			return J_HAND_B
 		&"dempsey_hook_right", &"step_back_spinning_backfist":
 			return J_HAND_B
 		&"retreating_jump_elbow":
@@ -3815,7 +4060,7 @@ func _limit_reach(pose: PackedFloat32Array) -> PackedFloat32Array:
 	var j := _solve_joints(pose)[idx]
 	if j.x * dir <= limit or j.y < top or j.y > bottom:
 		return pose
-	if fighter.current_attack.id == &"scorpion_kick":
+	if fighter.current_attack.id == &"scorpion_kick" or _cap_supported_move():
 		# Keep the hand-supported torso level and bring the whole base back;
 		# ordinary kick re-chambering would drop the heel and lift the hands.
 		var supported := pose.duplicate()
