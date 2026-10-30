@@ -63,10 +63,11 @@ const SLOWMO_TICKS: int = 28
 ## Fight camera: frames both fighters, zoom = K / (gap + C) clamped to
 ## [1, FIGHT_ZOOM_MAX], so it closes in during exchanges and widens as they
 ## separate. The floor sits FIGHT_FLOOR_FRAME of the half-height below centre;
-## a jump lifts the frame and widens it a little.
-const FIGHT_ZOOM_K: float = 1540.0
+## a jump lifts the frame and widens it a little. Zoom 1.46 at a 300 px gap
+## (fighters ~40% of the screen height), 1.0 only from a 900 px gap.
+const FIGHT_ZOOM_K: float = 1900.0
 const FIGHT_ZOOM_C: float = 1000.0
-const FIGHT_ZOOM_MAX: float = 1.4
+const FIGHT_ZOOM_MAX: float = 1.6
 const FIGHT_ZOOM_RATE: float = 2.5
 const FIGHT_FLOOR_FRAME: float = 0.56
 const FIGHT_AIR_ZOOM_OUT: float = 0.0015
