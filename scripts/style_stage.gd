@@ -6,8 +6,10 @@ extends Node2D
 const ART_DIR := "res://assets/art/backgrounds/style_arenas_v1/"
 const LAYOUT_FILE := ART_DIR + "layout.json"
 const DOJO_PROPS := "res://assets/art/backgrounds/dojo_props_v1/breakable_props.png"
-## Props stand on the floor just in front of the wall (px below the floor line).
-const PROP_BASE: float = 8.0
+## Props stand at the foot of the back wall, a little behind the fighters' feet
+## (px relative to the floor line; negative = further back), so they read as
+## scenery behind the fight rather than obstacles in the lane.
+const PROP_BASE: float = -3.0
 const VIEW := Rect2(-200, -200, 1680, 1120)
 const PROFILES := {
 	&"boxing": {"name": "boxing_gym", "floor": &"rubber", "wall": &"plaster"},
@@ -89,6 +91,11 @@ func get_stage_name() -> String:
 
 func floor_material() -> StringName:
 	return StringName(_layout.get("floor_material", PROFILES[style_id]["floor"]))
+
+## The scene's light on the fighters (layout "fighter_light"; see
+## FighterVisual.set_scene_light): matched by eye to the painted backdrop.
+func fighter_light() -> Dictionary:
+	return _layout.get("fighter_light", {})
 
 func wall_material() -> StringName:
 	return StringName(_layout.get("wall_material", PROFILES[style_id]["wall"]))
@@ -263,10 +270,11 @@ func _build_props() -> void:
 			regions.append([_alpha_bounds(image, Rect2i(0, y0, split, height)), _alpha_bounds(image, Rect2i(split, y0, image.get_width() - split, height))])
 		_prop_region_cache[cache_key] = regions
 	var sources: Array = _prop_region_cache[cache_key]
-	# [id, centre x, visible height, impact that breaks it, debris colour]: spread
-	# along the back wall, clear of each other and of both starting spots: the
-	# pot and boards on the left, the bench on the right.
-	var specs: Array = _layout.get("props_specs", [[&"pot", 170.0, 58.0, 8.0, Color(0.55, 0.32, 0.16)], [&"boards", 290.0, 54.0, 10.0, Color(0.60, 0.40, 0.20)], [&"bench", 1100.0, 64.0, 12.0, Color(0.48, 0.31, 0.17)]])
+	# [id, centre x, visible height, impact that breaks it, debris colour]:
+	# real-world sizes (fighter 172 px ~ 175 cm, so about 1 px per cm), packed
+	# into the corners against the side walls, behind the fighters.
+	var specs: Array = _layout.get("props_specs", [])
+	if specs.size() != 3: return
 	for row in 3:
 		var prop_color: Color
 		var tint: Variant = specs[row][4]

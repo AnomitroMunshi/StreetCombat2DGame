@@ -886,6 +886,13 @@ var _aim_chest := Vector2.INF
 var _aim_chin_offset := Vector2.ZERO
 ## Shoe colour on the fill pass (transparent = body colour).
 var _shoe := Color.TRANSPARENT
+## The arena's light (set_scene_light): ground shadow colour/strength, how far
+## it falls away from the key light (world px) and how much a low sun
+## stretches it; the shader lights the body itself.
+var _ground_shadow := Color(0.0, 0.0, 0.0, 0.35)
+var _shadow_shift: float = 0.0
+var _shadow_stretch: float = 1.0
+const LIGHT_SHADER := preload("res://shaders/fighter_light.gdshader")
 # Style outfits: body parts that are cloth (part -> [near colour, far colour,
 # extra bulk]); everything else is skin. Details (belts, collars, armbands,
 # hair) are drawn in the same body pass, so depth order stays right.
@@ -1326,12 +1333,52 @@ func _physics_process(_delta: float) -> void:
 	_update_ragdoll()
 
 
+## The arena's light on this fighter (StyleStage / WestBengalStage
+## fighter_light(): ambient, key, optional fill, shadow); empty = unlit.
+func set_scene_light(light: Dictionary) -> void:
+	if light.is_empty():
+		material = null
+		_ground_shadow = Color(0.0, 0.0, 0.0, 0.35)
+		_shadow_shift = 0.0
+		_shadow_stretch = 1.0
+		return
+	var m := material as ShaderMaterial
+	if m == null:
+		m = ShaderMaterial.new()
+		m.shader = LIGHT_SHADER
+		material = m
+	m.set_shader_parameter("ambient", _rgb(light.get("ambient", [1, 1, 1])))
+	m.set_shader_parameter("key_color", _rgb(light.get("key", [1, 1, 1])))
+	var key_dir: Array = light.get("key_dir", [-0.7, -0.7])
+	m.set_shader_parameter("key_dir", Vector2(key_dir[0], key_dir[1]))
+	m.set_shader_parameter("key_strength", float(light.get("key_strength", 0.0)))
+	m.set_shader_parameter("fill_color", _rgb(light.get("fill", [1, 1, 1])))
+	var fill_dir: Array = light.get("fill_dir", [0.7, -0.7])
+	m.set_shader_parameter("fill_dir", Vector2(fill_dir[0], fill_dir[1]))
+	m.set_shader_parameter("fill_strength", float(light.get("fill_strength", 0.0)))
+	m.set_shader_parameter("floor_y", fighter.ground_y if fighter != null else 560.0)
+	var shadow: Array = light.get("shadow", [0, 0, 0, 0.35])
+	_ground_shadow = Color(shadow[0], shadow[1], shadow[2], shadow[3])
+	# The shadow falls away from the key light; a low light stretches it.
+	_shadow_shift = -signf(float(key_dir[0])) * float(light.get("shadow_shift", 0.0))
+	_shadow_stretch = float(light.get("shadow_stretch", 1.0))
+
+
+static func _rgb(c: Array) -> Vector3:
+	return Vector3(float(c[0]), float(c[1]), float(c[2]))
+
+
 func _process(delta: float) -> void:
 	if fighter == null:
 		return
 	_time += delta
 	_last_delta = delta
 	_sync_stance()
+	if material is ShaderMaterial:
+		# Light the body around where it is now (standing, crouched or down).
+		var body := fighter.get_hurtbox_world()
+		(material as ShaderMaterial).set_shader_parameter("centre", body.get_center())
+		(material as ShaderMaterial).set_shader_parameter("radius", Vector2(maxf(body.size.x, 70.0), maxf(body.size.y, 50.0)) * 0.55)
 	var calm := fighter.state in [Fighter.State.IDLE, Fighter.State.WALK, Fighter.State.BLOCK, Fighter.State.CROUCH]
 	_breath = move_toward(_breath, sin(_time * TAU * 0.32) if calm else 0.0, delta * 3.0)
 	_update_idle_amount(delta)
@@ -2951,13 +2998,14 @@ func _draw() -> void:
 
 	# Ground shadow: stays on the floor, shrinks with height, stretches when lying.
 	var shadow_scale := clampf(1.0 - _height / 260.0, 0.45, 1.0)
-	var shadow_len := shadow_scale * lerpf(1.0, 2.2, _down_amount)
+	var shadow_len := shadow_scale * lerpf(1.0, 2.2, _down_amount) * _shadow_stretch
 	var shadow_x := -40.0 * _down_amount
 	if _rag_on:
 		shadow_x = (to_local(_rag_pos[J_HIP]).x) * signf(face) - 10.0
+	shadow_x += _shadow_shift * signf(face)
 	draw_set_transform_matrix(mirror * Transform2D(0.0, Vector2(shadow_len, 0.22 * shadow_scale), 0.0,
 		Vector2(shadow_x, 2.0 + _height)))
-	draw_circle(Vector2.ZERO, 38.0, Color(0.0, 0.0, 0.0, 0.35 * shadow_scale))
+	draw_circle(Vector2.ZERO, 38.0, Color(_ground_shadow, _ground_shadow.a * shadow_scale))
 
 	# Rolls: the curled body turns about its own centre, which is held one
 	# ball radius above the floor (so it rolls without slipping or bobbing).

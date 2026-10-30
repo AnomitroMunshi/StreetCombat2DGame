@@ -61,6 +61,13 @@ const PROPS: Array = [
 const PROP_REACH: float = 60.0
 const CLAY := Color(0.72, 0.4, 0.25)
 const WOOD := Color(0.48, 0.34, 0.22)
+## The sunset light on the fighters per backdrop (FighterVisual.set_scene_light).
+const LIGHTS := {
+	&"howrah": {"ambient": [1.0, 0.9, 0.86], "key": [1.0, 0.74, 0.58], "key_dir": [-0.3, -0.95], "key_strength": 0.32,
+		"shadow": [0.16, 0.1, 0.1, 0.36], "shadow_shift": 6.0, "shadow_stretch": 1.1},
+	&"victoria": {"ambient": [1.0, 0.88, 0.8], "key": [1.0, 0.72, 0.5], "key_dir": [-0.8, -0.6], "key_strength": 0.38,
+		"shadow": [0.18, 0.1, 0.06, 0.4], "shadow_shift": 14.0, "shadow_stretch": 1.25},
+}
 
 var variant: StringName = &"howrah"
 var _backdrop: Texture2D = null
@@ -229,6 +236,10 @@ static func _shadow(c: CanvasItem, at: Vector2, half_width: float) -> void:
 			var a := TAU * j / 24.0
 			pts.append(at + Vector2(cos(a) * half_width * k, sin(a) * 6.0 * k))
 		c.draw_colored_polygon(pts, Color(SHADOW, SHADOW.a * 0.3))
+
+
+func fighter_light() -> Dictionary:
+	return LIGHTS.get(variant, {})
 
 
 ## World rects of the two walls: [tea stall (left), shopfront (right)].

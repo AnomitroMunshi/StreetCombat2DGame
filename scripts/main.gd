@@ -193,6 +193,8 @@ var _pause_message: Array = ["", ""]
 var _wall_dent := Vector2.INF
 ## Arena is selected once for a new match and retained between rounds.
 var stage = null  # WestBengalStage or StyleStage; presentation interface below.
+## The stage's light over the whole scene (created with the first stage).
+var _arena_light: ArenaLight = null
 ## Optional deterministic arena selection for capture/tests; empty means random.
 var match_arena_override: StringName = &""
 var _match_arena: StringName = &""
@@ -784,6 +786,16 @@ func _apply_stage() -> void:
 	stage.on_prop_broken = _on_prop_broken
 	add_child(stage)
 	move_child(stage, 0)  # under the fighters (later children draw on top)
+	# The arena's light falls on both fighters, and over the whole scene (above
+	# the fighters, under the hit effects at z 50).
+	for f: Fighter in [player, enemy]:
+		(f.get_node("Visual") as FighterVisual).set_scene_light(stage.fighter_light())
+	if _arena_light == null:
+		_arena_light = ArenaLight.new()
+		_arena_light.name = "ArenaLight"
+		_arena_light.z_index = 10
+		add_child(_arena_light)
+	_arena_light.setup(stage.fighter_light())
 	queue_redraw()
 
 
