@@ -62,6 +62,11 @@ func _initialize() -> void:
 		root.add_child(st)
 		st.setup(street)
 		_check(not st.fighter_light().is_empty(), "%s: lights the fighters to match the backdrop" % street)
+		# Cheering spectators fill ~86% of their cluster (the rest is raised
+		# fists); a pace behind the fighters they stand ~90% of a fighter's height.
+		for crowd: Dictionary in st.crowd_layers():
+			var person := (crowd["rect"] as Rect2).size.y * 0.86
+			_check(person > 172.0 * 0.82 and person < 172.0 * 1.0, "%s: spectators are adult-sized (%.0f px vs fighter 172)" % [street, person])
 		st.free()
 	for variant: StringName in [&"howrah", &"victoria"]:
 		var wb := WestBengalStage.new()
