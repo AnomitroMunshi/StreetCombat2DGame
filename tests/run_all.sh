@@ -33,7 +33,9 @@ for t in "${SUITES[@]}"; do
 	t0=$(date +%s)
 	limit=300
 	[ "$t" = "finisher_contact" ] && limit=1500  # every style finisher x every case
-	out=$(timeout $limit "$GODOT" --headless --path . -s "tests/test_$t.gd" 2>&1)
+	# Fixed 60 FPS: unthrottled headless frames draw at random rates, and drawn-pose
+	# contact checks then depend on wherever the last frame happened to land.
+	out=$(timeout $limit "$GODOT" --headless --path . --fixed-fps 60 -s "tests/test_$t.gd" 2>&1)
 	code=$?
 	result=$(echo "$out" | grep -E "^RESULT" | tail -1)
 	if [ $code -ne 0 ] || [ -z "$result" ] || echo "$result" | grep -q FAIL; then
