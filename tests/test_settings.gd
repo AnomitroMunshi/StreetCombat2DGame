@@ -58,15 +58,15 @@ class Driver extends Node:
 				hud.rebind_with(KEY_P)
 				check(GameSettings.key_for(&"attack_light") == KEY_J and hud.bind_button_text(&"attack_light") == "PRESS A KEY",
 					"a menu key (P) is refused and the action keeps waiting")
-				hud.rebind_with(KEY_U)
+				hud.rebind_with(KEY_Y)
 				var light_events := InputMap.action_get_events(&"attack_light")
-				check(light_events.size() == 1 and (light_events[0] as InputEventKey).physical_keycode == KEY_U,
-					"U now drives LIGHT in the input map")
-				check(MartialArtStyle.slot_key(&"up_light") == "W+U" and MartialArtStyle.slot_key(&"light") == "U",
+				check(light_events.size() == 1 and (light_events[0] as InputEventKey).physical_keycode == KEY_Y,
+					"Y now drives LIGHT in the input map")
+				check(MartialArtStyle.slot_key(&"up_light") == "W+Y" and MartialArtStyle.slot_key(&"light") == "Y",
 					"move-list prompts follow the binding (%s)" % MartialArtStyle.slot_key(&"up_light"))
 				hud.start_rebind(&"attack_heavy")
-				hud.rebind_with(KEY_U)
-				check(GameSettings.key_for(&"attack_heavy") == KEY_U and GameSettings.key_for(&"attack_light") == KEY_K,
+				hud.rebind_with(KEY_Y)
+				check(GameSettings.key_for(&"attack_heavy") == KEY_Y and GameSettings.key_for(&"attack_light") == KEY_K,
 					"taking a key in use swaps the two actions (no key drives two)")
 				hud.toggle_settings()
 				check(not hud.is_settings_open() and FileAccess.file_exists(TEST_FILE), "closing the panel saves")
@@ -77,7 +77,7 @@ class Driver extends Node:
 				GameSettings.read_again()
 				check(is_equal_approx(GameSettings.music_volume, 0.4) and is_equal_approx(GameSettings.sfx_volume, 0.0),
 					"saved values load back (music %.2f, effects %.2f)" % [GameSettings.music_volume, GameSettings.sfx_volume])
-				check(GameSettings.controls.get(&"attack_heavy") == KEY_U and GameSettings.controls.get(&"attack_light") == KEY_K,
+				check(GameSettings.controls.get(&"attack_heavy") == KEY_Y and GameSettings.controls.get(&"attack_light") == KEY_K,
 					"key bindings load back")
 				main.call("start_match", true)
 			10:

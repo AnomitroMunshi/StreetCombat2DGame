@@ -31,6 +31,8 @@ var speed_index: int = 0
 var paused: bool = false
 var infinite_focus: bool = true
 var finisher_index: int = 0
+## The beginner tutorial running in this training ground (null when none).
+var tutorial: Tutorial = null
 
 var player: Fighter = null
 var dummy: Fighter = null
@@ -130,6 +132,10 @@ func cycle_finisher() -> void:
 
 ## The dummy's controls for this tick (not used in FIGHT BACK).
 func dummy_intent() -> CombatData.Intent:
+	if tutorial != null:
+		var lesson := tutorial.dummy_intent()
+		if lesson != null:
+			return lesson
 	var it := CombatData.Intent.new()
 	match dummy_mode:
 		Dummy.CROUCH:
@@ -153,6 +159,8 @@ func on_attack_started(attack: CombatData.Attack) -> void:
 
 
 func on_hit(result: CombatData.HitResult, attacker: Fighter, defender: Fighter, attack: CombatData.Attack) -> void:
+	if tutorial != null:
+		tutorial.on_hit(result, attacker, defender, attack)
 	if attacker != player:
 		return
 	last_result = {
@@ -173,6 +181,8 @@ func on_hit(result: CombatData.HitResult, attacker: Fighter, defender: Fighter, 
 
 func after_tick() -> void:
 	_tick += 1
+	if tutorial != null:
+		tutorial.after_tick()
 	if _measuring:
 		if _player_free < 0 and player.can_act():
 			_player_free = _tick
@@ -187,7 +197,7 @@ func after_tick() -> void:
 		_idle_ticks = 0
 	if _idle_ticks == REFILL_DELAY:
 		for f: Fighter in [player, dummy]:
-			f.health = 100
+			f.health = f.max_health
 			f.posture = 0.0
 	if infinite_focus and not player.in_signature:
 		player.focus = CombatData.FOCUS_MAX

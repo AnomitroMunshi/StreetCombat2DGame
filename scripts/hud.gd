@@ -14,6 +14,8 @@ signal style_confirmed
 signal training_pressed
 ## The AI difficulty button (pre-match): cycle to the next level.
 signal difficulty_pressed
+## TUTORIAL (pre-match): start the beginner tutorial.
+signal tutorial_pressed
 ## A training panel button (same names as main.gd's training actions).
 signal training_action(action: StringName)
 ## The on-screen pause button.
@@ -107,6 +109,10 @@ var _debug_lines: PackedStringArray = PackedStringArray()
 var _canvas: Control = null
 var _font: Font = null
 var _pause_button: Button = null
+## TUTORIAL, under TRAINING; the tutorial's step panel near the bottom.
+var _button5: Button = null
+var _lesson_panel: PanelContainer = null
+var _lesson_label: RichTextLabel = null
 var _settings_button: Button = null
 var _settings_panel: PanelContainer = null
 var _settings_sliders: Dictionary = {}
@@ -191,6 +197,30 @@ func _ready() -> void:
 	_button4.pressed.connect(func() -> void: difficulty_pressed.emit())
 	add_child(_button4)
 	set_difficulty(EnemyAI.selected_difficulty)
+	_button5 = _make_button()
+	_button5.size = Vector2(200.0, 44.0)
+	_button5.position = Vector2(SCREEN_W * 0.5 + 180.0, 642.0)
+	_button5.add_theme_font_size_override("font_size", 18)
+	_button5.text = "TUTORIAL  [U]"
+	_button5.pressed.disconnect(_on_button_pressed)
+	_button5.pressed.connect(func() -> void:
+		show_button(&"")
+		tutorial_pressed.emit())
+	add_child(_button5)
+	_lesson_panel = PanelContainer.new()
+	var lesson_box := _panel_box()
+	lesson_box.bg_color = Color(0.05, 0.04, 0.04, 0.88)
+	lesson_box.content_margin_left = 16.0
+	lesson_box.content_margin_right = 16.0
+	lesson_box.content_margin_top = 10.0
+	lesson_box.content_margin_bottom = 10.0
+	_lesson_panel.add_theme_stylebox_override("panel", lesson_box)
+	_lesson_label = _text_label(Vector2(700.0, 0.0))
+	_lesson_label.add_theme_font_size_override("normal_font_size", 18)
+	_lesson_label.add_theme_font_size_override("bold_font_size", 20)
+	_lesson_panel.add_child(_lesson_label)
+	_lesson_panel.visible = false
+	add_child(_lesson_panel)
 	_build_style_panel()
 	_build_training_panels()
 
@@ -238,6 +268,7 @@ func show_button(mode: StringName) -> void:
 	_button2.visible = mode == &"start" or mode == &"rematch"
 	_button3.visible = mode == &"start"
 	_button4.visible = mode == &"start"
+	_button5.visible = mode == &"start"
 	show_settings_button(mode == &"start" or mode == &"rematch")
 	if mode == &"start":
 		_button.text = "START MATCH"
@@ -258,6 +289,26 @@ func get_difficulty_text() -> String:
 
 func is_difficulty_button_visible() -> bool:
 	return _button4.visible
+
+
+func is_tutorial_button_visible() -> bool:
+	return _button5.visible
+
+
+## The tutorial's current step (title, instruction), or hides it (title "").
+func set_lesson(title: String, text: String) -> void:
+	_lesson_panel.visible = title != ""
+	if title == "":
+		return
+	var bb := "[center][b]%s[/b]\n%s\n[color=#b9a98f][font_size=13]N skip step  ·  U replay  ·  Esc leave[/font_size][/color][/center]" % [title, text]
+	if _lesson_label.text != bb:
+		_lesson_label.text = bb
+		_lesson_panel.reset_size()
+		_lesson_panel.position = Vector2((SCREEN_W - _lesson_panel.size.x) * 0.5, 720.0 - _lesson_panel.size.y - 18.0)
+
+
+func get_lesson_text() -> String:
+	return _lesson_label.text if _lesson_panel.visible else ""
 
 
 func is_training_button_visible() -> bool:
@@ -1001,10 +1052,18 @@ func _draw_gameplay_hud() -> void:
 	_draw_popups()
 	_draw_combo(_enemy, BAR_MARGIN, HORIZONTAL_ALIGNMENT_LEFT)
 	_draw_combo(_player, SCREEN_W - BAR_MARGIN - BAR_WIDTH, HORIZONTAL_ALIGNMENT_RIGHT)
-	if _show_hints and _headline == "":
-		_canvas.draw_string(_font, Vector2(0.0, 706.0),
-			"A/D move · 2×A/D dash · SPACE jump · J light · K heavy · L technique · W/S + J/K high/low · SPACE + J/K power · F signature · X special · SHIFT block/parry · S+SHIFT low block · R rematch",
-			HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
+	if _show_hints and _headline == "" and not _lesson_panel.visible:
+		_canvas.draw_string(_font, Vector2(0.0, 706.0), hint_line(), HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
+
+
+## The controls reminder along the bottom, with the player's key bindings.
+static func hint_line() -> String:
+	var k := func(action: StringName) -> String: return GameSettings.key_label(action).to_upper()
+	return "%s/%s move · 2×%s/%s dash · %s jump · %s light · %s heavy · %s technique · %s/%s + %s/%s high/low · %s + %s/%s power · %s signature · %s special · %s block/parry · %s+%s low block · R rematch" % [
+		k.call(&"move_left"), k.call(&"move_right"), k.call(&"move_left"), k.call(&"move_right"), k.call(&"jump"),
+		k.call(&"attack_light"), k.call(&"attack_heavy"), k.call(&"attack_technique"), k.call(&"mod_up"), k.call(&"mod_down"),
+		k.call(&"attack_light"), k.call(&"attack_heavy"), k.call(&"jump"), k.call(&"attack_light"), k.call(&"attack_heavy"),
+		k.call(&"signature"), k.call(&"x_move"), k.call(&"block"), k.call(&"mod_down"), k.call(&"block")]
 
 
 ## Messages, banner, countdown, flash and the developer panel (always shown).

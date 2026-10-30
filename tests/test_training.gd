@@ -78,7 +78,7 @@ class Driver extends Node:
 					check(e.health == 1 and e.state != Fighter.State.FINISHED and state == "FIGHTING",
 						"a lethal hit leaves the dummy at 1 HP, no finisher (hp %d)" % e.health)
 				if phase_frame == 200:
-					check(e.health == 100 and p.health == 100, "health refills once the action settles")
+					check(e.health == e.max_health and p.health == p.max_health, "health refills to full once the action settles (%d / %d)" % [e.health, e.max_health])
 					go("block")
 			"block":
 				if phase_frame == 1:

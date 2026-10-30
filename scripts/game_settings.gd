@@ -104,7 +104,7 @@ const REMAPPABLE: Array = [
 	[&"x_move", "X MOVE"], [&"signature", "SIGNATURE"],
 ]
 ## Keys kept for the menus and screens (never bound to a combat action).
-const RESERVED_KEYS: Array[int] = [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE, KEY_P, KEY_O, KEY_G, KEY_T, KEY_R,
+const RESERVED_KEYS: Array[int] = [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE, KEY_P, KEY_O, KEY_G, KEY_T, KEY_R, KEY_U, KEY_N,
 	KEY_Q, KEY_F1, KEY_F2, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_H, KEY_PERIOD]
 ## Action -> physical keycode the player chose (only actions they changed).
 static var controls: Dictionary = {}

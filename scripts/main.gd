@@ -288,6 +288,7 @@ func _ready() -> void:
 	hud.style_chosen.connect(select_style)
 	hud.style_confirmed.connect(confirm_style)
 	hud.training_pressed.connect(start_training)
+	hud.tutorial_pressed.connect(start_tutorial)
 	hud.training_action.connect(training_action)
 	overlay.draw.connect(_draw_overlay)
 	_enter_pre_match()
@@ -395,6 +396,18 @@ func start_training() -> void:
 	hud.set_countdown("TRAINING")
 
 
+## TUTORIAL (or U) from the pre-match screen: the training ground with the
+## beginner tutorial on top (Tutorial); the developer panels stay hidden.
+func start_tutorial() -> void:
+	start_training()
+	if training == null:
+		return
+	training.infinite_focus = false
+	training.tutorial = Tutorial.new(player, enemy)
+	hud.show_training(false)
+	hud.set_countdown("TUTORIAL")
+
+
 func _move_list_text() -> String:
 	var lines := PackedStringArray(["[b]%s MOVES[/b]" % player.style.display_name.to_upper()])
 	for row in player.style.move_list():
@@ -453,6 +466,13 @@ func training_action(action: StringName) -> void:
 			hud.toggle_training_panels()
 		&"exit":
 			_exit_training()
+		&"lesson_skip":
+			if training.tutorial != null:
+				training.tutorial.skip()
+		&"lesson_replay":
+			if training.tutorial != null and not get_tree().paused:
+				_reset_training()
+				training.tutorial.restart()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -464,6 +484,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			start_training()
 		elif key.physical_keycode == KEY_G and _round_state == RoundState.PRE_MATCH:
 			cycle_difficulty()
+		elif key.physical_keycode == KEY_U and _round_state == RoundState.PRE_MATCH:
+			start_tutorial()
 		elif key.physical_keycode == KEY_O and hud.is_settings_button_visible():
 			hud.toggle_settings()
 			get_viewport().set_input_as_handled()
@@ -474,6 +496,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	var action: StringName = {
 		KEY_1: &"dummy", KEY_2: &"dummy_style", KEY_3: &"speed", KEY_4: &"focus", KEY_5: &"next_finisher",
 		KEY_6: &"play_finisher", KEY_P: &"pause", KEY_PERIOD: &"step", KEY_H: &"panels", KEY_ESCAPE: &"exit",
+		KEY_N: &"lesson_skip", KEY_U: &"lesson_replay",
 	}.get(key.physical_keycode, &"")
 	if action != &"":
 		training_action(action)
@@ -1884,6 +1907,9 @@ func _refresh_presentation() -> void:
 	hud.set_debug(_debug_visible and training == null, lines)
 	if training != null:
 		hud.set_training_info(training.info_text())
+		if training.tutorial != null:
+			var lesson := training.tutorial.text()
+			hud.set_lesson(lesson[0], lesson[1])
 
 
 # --- Drawing ------------------------------------------------------------------
