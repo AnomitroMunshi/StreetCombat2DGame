@@ -73,6 +73,18 @@ static func _set_bus(bus: StringName, volume: float) -> void:
 	AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(volume, 0.001)))
 
 
+## Mobile UI: touch controls always on, tap wording instead of key hints, and
+## only the settings that apply on a phone. True in a mobile export, or with
+## TOUCH CONTROLS on (a development-build toggle for testing mobile on PC).
+static func mobile_ui() -> bool:
+	return OS.has_feature("mobile") or touch_controls
+
+
+## A key hint for a button label ("  [G]"), or nothing in the mobile UI.
+static func key_hint(key: String) -> String:
+	return "" if mobile_ui() else "  [%s]" % key
+
+
 ## A volume by name ("master_volume", "music_volume", "sfx_volume").
 static func get_volume(key: String) -> float:
 	match key:

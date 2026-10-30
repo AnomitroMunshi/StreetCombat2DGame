@@ -60,12 +60,21 @@ func _set_step(next: Step) -> void:
 		player.focus = CombatData.FOCUS_MAX
 
 
+## Touch names in the mobile UI (joystick clock directions and buttons).
+const TOUCH_NAMES: Dictionary = {
+	&"move_right": "the joystick right (3)", &"move_left": "the joystick left (9)", &"block": "BLOCK",
+	&"mod_down": "the joystick down (6)", &"signature": "the glowing F", &"light": "J", &"heavy": "K",
+}
+
+
 func _key(action: StringName) -> String:
-	return "[color=#f2c14e]%s[/color]" % GameSettings.key_label(action)
+	var name: String = TOUCH_NAMES.get(action, "") if GameSettings.mobile_ui() else ""
+	return "[color=#f2c14e]%s[/color]" % (name if name != "" else GameSettings.key_label(action))
 
 
 func _slot(slot: StringName) -> String:
-	return "[color=#f2c14e]%s[/color]" % MartialArtStyle.slot_key(slot)
+	var name: String = TOUCH_NAMES.get(slot, "") if GameSettings.mobile_ui() else ""
+	return "[color=#f2c14e]%s[/color]" % (name if name != "" else MartialArtStyle.slot_key(slot))
 
 
 ## Step title ("STEP 2 / 7  -  LAND A HIT") and the instruction under it.
@@ -92,6 +101,8 @@ func text() -> Array[String]:
 				_slot(&"light"), _slot(&"light"), _slot(&"heavy")]]
 		Step.SIGNATURE:
 			return [title + "FOCUS", "Landing hits fills Focus (the bar under your health). It is full now: press %s for your signature move." % _key(&"signature")]
+	if GameSettings.mobile_ui():
+		return ["TUTORIAL COMPLETE", "Keep practising here, REPLAY the tutorial, or LEAVE and tap START MATCH."]
 	return ["TUTORIAL COMPLETE", "Keep practising here, %s to replay the tutorial, or Esc to go back and START MATCH." % "[color=#f2c14e]U[/color]"]
 
 

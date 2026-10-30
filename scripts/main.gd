@@ -579,7 +579,7 @@ func toggle_pause() -> void:
 	get_tree().paused = match_paused
 	if match_paused:
 		_pause_message = hud.get_message()
-		hud.set_message("PAUSED", "P / ESC resume  ·  R restart")
+		hud.set_message("PAUSED", "Tap RESUME" if GameSettings.mobile_ui() else "P / ESC resume  ·  R restart")
 		audio.duck_bgm(-12.0)
 	else:
 		hud.set_message(_pause_message[0], _pause_message[1])
@@ -816,7 +816,7 @@ func _show_ready() -> void:
 	hud.hide_style_select()
 	player.prefight_pose = &"relaxed"
 	hud.set_message("%s  vs  %s" % [player.style.display_name.to_upper(), enemy.style.display_name.to_upper()],
-		"ENTER or click to start")
+		"Tap START MATCH" if GameSettings.mobile_ui() else "ENTER or click to start")
 	hud.show_button(&"start")
 
 
@@ -1467,7 +1467,7 @@ func _tick_round_over() -> void:
 	_set_round_state(RoundState.RESULT)
 	hud.set_banner("", Color.WHITE)
 	hud.set_letterbox(false)
-	hud.set_message(_result_text, "ENTER, click or R to restart")
+	hud.set_message(_result_text, "Tap REMATCH" if GameSettings.mobile_ui() else "ENTER, click or R to restart")
 	hud.show_button(&"rematch")
 	audio.play(&"victory", -2.0, 0.0)
 	audio.duck_bgm(-6.0)

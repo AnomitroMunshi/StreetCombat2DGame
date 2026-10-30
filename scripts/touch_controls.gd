@@ -13,8 +13,9 @@ extends CanvasLayer
 ##   6 hold: crouch (6 + J/K: S+J / S+K)  ·  6 -> 4 / 6 -> 8 flick: roll right / left
 ## "Beyond 12" is extra upward travel past the joystick ring.
 ##
-## Shown during fights and training when the device has a touch screen, or
-## always when the TOUCH CONTROLS setting is on (for testing with a mouse).
+## Shown during fights and training in the mobile UI only (a mobile export,
+## or TOUCH CONTROLS on for testing): a PC with a touch screen keeps the
+## keyboard / controller setup.
 
 enum Zone { NONE, N, NE, E, SE, S, SW, W, NW, BEYOND_N }
 
@@ -94,9 +95,9 @@ func setup(p: Fighter) -> void:
 	player = p
 
 
-## Shown in a fight (or training) on touch devices, or when forced.
+## Shown in a fight (or training) in the mobile UI.
 func update_visibility(in_fight: bool) -> void:
-	var on := in_fight and (forced or DisplayServer.is_touchscreen_available())
+	var on := in_fight and (forced or OS.has_feature("mobile"))
 	shown = on
 	if _canvas.visible != on:
 		_canvas.visible = on

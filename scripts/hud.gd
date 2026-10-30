@@ -120,6 +120,9 @@ var _settings_panel: PanelContainer = null
 var _settings_sliders: Dictionary = {}
 var _settings_fullscreen: CheckButton = null
 var _settings_touch: CheckButton = null
+var _settings_controls: VBoxContainer = null
+var _settings_close: Button = null
+var _lesson_buttons: HBoxContainer = null
 ## Key binding buttons by action, the action waiting for its new key (&""
 ## when none) and the note under the list ("Esc cancels", "reserved").
 var _bind_buttons: Dictionary = {}
@@ -204,7 +207,6 @@ func _ready() -> void:
 	_button5.size = Vector2(200.0, 44.0)
 	_button5.position = Vector2(SCREEN_W * 0.5 + 180.0, 642.0)
 	_button5.add_theme_font_size_override("font_size", 18)
-	_button5.text = "TUTORIAL  [U]"
 	_button5.pressed.disconnect(_on_button_pressed)
 	_button5.pressed.connect(func() -> void:
 		show_button(&"")
@@ -218,14 +220,30 @@ func _ready() -> void:
 	lesson_box.content_margin_top = 10.0
 	lesson_box.content_margin_bottom = 10.0
 	_lesson_panel.add_theme_stylebox_override("panel", lesson_box)
+	var lesson_rows := VBoxContainer.new()
+	_lesson_panel.add_child(lesson_rows)
 	_lesson_label = _text_label(Vector2(700.0, 0.0))
 	_lesson_label.add_theme_font_size_override("normal_font_size", 18)
 	_lesson_label.add_theme_font_size_override("bold_font_size", 20)
-	_lesson_panel.add_child(_lesson_label)
+	lesson_rows.add_child(_lesson_label)
+	# Mobile: tap buttons for what N / U / Esc do on a keyboard.
+	_lesson_buttons = HBoxContainer.new()
+	_lesson_buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	_lesson_buttons.add_theme_constant_override("separation", 14)
+	for entry in [[&"lesson_skip", "SKIP STEP"], [&"lesson_replay", "REPLAY"], [&"exit", "LEAVE"]]:
+		var b := Button.new()
+		b.text = entry[1]
+		b.custom_minimum_size = Vector2(130.0, 34.0)
+		b.focus_mode = Control.FOCUS_NONE
+		var action: StringName = entry[0]
+		b.pressed.connect(func() -> void: training_action.emit(action))
+		_lesson_buttons.add_child(b)
+	lesson_rows.add_child(_lesson_buttons)
 	_lesson_panel.visible = false
 	add_child(_lesson_panel)
 	_build_style_panel()
 	_build_training_panels()
+	refresh_input_labels()
 
 
 ## A large flat button, centred; works with mouse, touch and keyboard focus.
@@ -283,7 +301,15 @@ func show_button(mode: StringName) -> void:
 
 ## Shows the rival AI's difficulty on its button.
 func set_difficulty(level: StringName) -> void:
-	_button4.text = "AI: %s  [G]" % String(level).to_upper()
+	_button4.text = "AI: %s%s" % [String(level).to_upper(), GameSettings.key_hint("G")]
+
+
+## Button labels with keyboard hints on PC and without them in the mobile UI.
+func refresh_input_labels() -> void:
+	_button5.text = "TUTORIAL" + GameSettings.key_hint("U")
+	set_difficulty(EnemyAI.selected_difficulty)
+	_settings_button.text = "SETTINGS" + GameSettings.key_hint("O")
+	_settings_close.text = "CLOSE" + GameSettings.key_hint("O")
 
 
 func get_difficulty_text() -> String:
@@ -303,7 +329,10 @@ func set_lesson(title: String, text: String) -> void:
 	_lesson_panel.visible = title != ""
 	if title == "":
 		return
-	var bb := "[center][b]%s[/b]\n%s\n[color=#b9a98f][font_size=13]N skip step  ·  U replay  ·  Esc leave[/font_size][/color][/center]" % [title, text]
+	var mobile := GameSettings.mobile_ui()
+	_lesson_buttons.visible = mobile
+	var footer := "" if mobile else "\n[color=#b9a98f][font_size=13]N skip step  ·  U replay  ·  Esc leave[/font_size][/color]"
+	var bb := "[center][b]%s[/b]\n%s%s[/center]" % [title, text, footer]
 	if _lesson_label.text != bb:
 		_lesson_label.text = bb
 		_lesson_panel.reset_size()
@@ -427,7 +456,6 @@ func _build_training_panels() -> void:
 ## screen, the result screen or the pause screen (button or O).
 func _build_settings() -> void:
 	_settings_button = Button.new()
-	_settings_button.text = "SETTINGS  [O]"
 	_settings_button.custom_minimum_size = Vector2(130.0, 26.0)
 	_settings_button.position = Vector2(SCREEN_W - 142.0, 720.0 - 36.0)  # clear of the health bars
 	_settings_button.focus_mode = Control.FOCUS_NONE  # Space must stay jump
@@ -508,10 +536,13 @@ func _build_settings() -> void:
 	_settings_touch.add_theme_color_override("font_color", COLOR_TEXT)
 	_settings_touch.toggled.connect(func(on: bool) -> void:
 		GameSettings.touch_controls = on
-		touch_setting_changed.emit())
+		touch_setting_changed.emit()
+		refresh_input_labels()
+		_layout_settings())
 	left.add_child(_settings_touch)
 	# Controls: click an action, then press its new key (Esc cancels).
 	var right := VBoxContainer.new()
+	_settings_controls = right
 	right.add_theme_constant_override("separation", 4)
 	columns.add_child(right)
 	var heading := Label.new()
@@ -551,12 +582,23 @@ func _build_settings() -> void:
 		_refresh_bindings())
 	right.add_child(reset)
 	var close := Button.new()
-	close.text = "CLOSE  [O]"
+	_settings_close = close
 	close.focus_mode = Control.FOCUS_NONE
 	close.pressed.connect(toggle_settings)
 	rows.add_child(close)
 	_settings_panel.visible = false
 	add_child(_settings_panel)
+
+
+## PC: fullscreen and key bindings. Mobile UI: volumes only. The TOUCH
+## CONTROLS toggle (mobile testing on PC) exists in development builds only.
+func _layout_settings() -> void:
+	var mobile := GameSettings.mobile_ui()
+	_settings_fullscreen.visible = not mobile
+	_settings_controls.visible = not mobile
+	_settings_touch.visible = OS.is_debug_build() and not OS.has_feature("mobile")
+	_settings_panel.reset_size()
+	_settings_panel.position = (Vector2(SCREEN_W, 720.0) - _settings_panel.size) * 0.5
 
 
 func show_settings_button(on: bool) -> void:
@@ -584,6 +626,7 @@ func toggle_settings() -> void:
 	for key: String in _settings_sliders:
 		_settings_sliders[key].value = GameSettings.get_volume(key) * 100.0
 	_settings_fullscreen.set_pressed_no_signal(GameSettings.fullscreen)
+	_layout_settings()
 	_settings_touch.set_pressed_no_signal(GameSettings.touch_controls)
 	_settings_panel.visible = true
 	_settings_panel.reset_size()
@@ -815,7 +858,7 @@ static func _style_details(st: MartialArtStyle) -> String:
 		for fid in st.finishers:
 			names.append(FinisherDirector.DISPLAY_NAMES[FinisherDirector.kind_for_id(fid)])
 		t += "[b]FINISHERS[/b]  %s\n" % "  ·  ".join(names)
-	t += "\n[color=#b9a98f]Q next style · ENTER confirm[/color]"
+	t += "\n[color=#b9a98f]%s[/color]" % ("Tap a style, then CONFIRM" if GameSettings.mobile_ui() else "Q next style · ENTER confirm")
 	return t
 
 
