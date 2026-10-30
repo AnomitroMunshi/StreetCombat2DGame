@@ -23,12 +23,21 @@ const SLOT_FALLBACK: Dictionary = {
 	&"up_light": &"light", &"down_light": &"light",
 	&"up_heavy": &"heavy", &"down_heavy": &"heavy",
 }
-## Key labels for each slot (move lists in the UI).
-const SLOT_KEYS: Dictionary = {
-	&"light": "J", &"heavy": "K", &"technique": "L",
-	&"up_light": "W+J", &"up_heavy": "W+K", &"down_light": "S+J", &"down_heavy": "S+K",
-	&"power_light": "Space+J", &"power_heavy": "Space+K", &"x_move": "X",
+## The actions that make up each slot's input (move lists in the UI).
+const SLOT_ACTIONS: Dictionary = {
+	&"light": [&"attack_light"], &"heavy": [&"attack_heavy"], &"technique": [&"attack_technique"],
+	&"up_light": [&"mod_up", &"attack_light"], &"up_heavy": [&"mod_up", &"attack_heavy"],
+	&"down_light": [&"mod_down", &"attack_light"], &"down_heavy": [&"mod_down", &"attack_heavy"],
+	&"power_light": [&"jump", &"attack_light"], &"power_heavy": [&"jump", &"attack_heavy"], &"x_move": [&"x_move"],
 }
+
+
+## The key label for a slot with the player's bindings ("J", "W+K", "Space+J").
+static func slot_key(slot: StringName) -> String:
+	var parts := PackedStringArray()
+	for action: StringName in SLOT_ACTIONS.get(slot, []):
+		parts.append(GameSettings.key_label(action))
+	return "+".join(parts)
 ## Known combat categories (metadata for the roster and future subsystems).
 const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"clinching",
 	&"grappling", &"throwing", &"ground", &"hybrid"]
@@ -261,7 +270,7 @@ func move_list() -> Array:
 	var out: Array = []
 	for slot in SLOTS:
 		if input_map.has(slot):
-			out.append([SLOT_KEYS[slot], move_name(input_map[slot])])
+			out.append([slot_key(slot), move_name(input_map[slot])])
 	# Air moves grouped by move: "air J/K/L" -> Jump Punch.
 	var air_keys: Dictionary = {}
 	for slot in SLOTS:
@@ -269,7 +278,7 @@ func move_list() -> Array:
 			var label := move_name(air_map[slot])
 			if not air_keys.has(label):
 				air_keys[label] = []
-			air_keys[label].append(SLOT_KEYS[slot])
+			air_keys[label].append(slot_key(slot))
 	for label in air_keys:
 		out.append(["air " + "/".join(air_keys[label]), label])
 	return out

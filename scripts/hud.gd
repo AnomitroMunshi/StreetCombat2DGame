@@ -111,6 +111,11 @@ var _settings_button: Button = null
 var _settings_panel: PanelContainer = null
 var _settings_sliders: Dictionary = {}
 var _settings_fullscreen: CheckButton = null
+## Key binding buttons by action, the action waiting for its new key (&""
+## when none) and the note under the list ("Esc cancels", "reserved").
+var _bind_buttons: Dictionary = {}
+var _rebinding: StringName = &""
+var _bind_note: Label = null
 ## Speech bubbles: side (0 player, 1 rival) -> {"fighter", "text", "age"}.
 var _speech: Dictionary = {}
 var _speech_font: Font = null
@@ -402,6 +407,13 @@ func _build_settings() -> void:
 	title.add_theme_color_override("font_color", COLOR_TEXT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rows.add_child(title)
+	# Audio and display on the left, key bindings on the right.
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 28)
+	rows.add_child(columns)
+	var left := VBoxContainer.new()
+	left.add_theme_constant_override("separation", 10)
+	columns.add_child(left)
 	for entry in [["MASTER", "master_volume"], ["MUSIC", "music_volume"], ["EFFECTS", "sfx_volume"]]:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 12)
@@ -425,7 +437,7 @@ func _build_settings() -> void:
 			value_label.text = "%d%%" % int(v))
 		row.add_child(slider)
 		row.add_child(value_label)
-		rows.add_child(row)
+		left.add_child(row)
 		_settings_sliders[key] = slider
 	_settings_fullscreen = CheckButton.new()
 	_settings_fullscreen.text = "FULLSCREEN"
@@ -434,7 +446,47 @@ func _build_settings() -> void:
 	_settings_fullscreen.toggled.connect(func(on: bool) -> void:
 		GameSettings.fullscreen = on
 		GameSettings.apply_display())
-	rows.add_child(_settings_fullscreen)
+	left.add_child(_settings_fullscreen)
+	# Controls: click an action, then press its new key (Esc cancels).
+	var right := VBoxContainer.new()
+	right.add_theme_constant_override("separation", 4)
+	columns.add_child(right)
+	var heading := Label.new()
+	heading.text = "CONTROLS  (click, then press a key)"
+	heading.add_theme_color_override("font_color", COLOR_DIM)
+	right.add_child(heading)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 3)
+	right.add_child(grid)
+	for entry in GameSettings.REMAPPABLE:
+		var action: StringName = entry[0]
+		var label := Label.new()
+		label.text = entry[1]
+		label.custom_minimum_size = Vector2(150.0, 0.0)
+		label.add_theme_color_override("font_color", COLOR_TEXT)
+		label.add_theme_font_size_override("font_size", 13)
+		grid.add_child(label)
+		var b := Button.new()
+		b.custom_minimum_size = Vector2(110.0, 24.0)
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_size_override("font_size", 13)
+		b.pressed.connect(func() -> void: _start_rebind(action))
+		grid.add_child(b)
+		_bind_buttons[action] = b
+	_bind_note = Label.new()
+	_bind_note.add_theme_color_override("font_color", COLOR_DIM)
+	_bind_note.add_theme_font_size_override("font_size", 12)
+	right.add_child(_bind_note)
+	var reset := Button.new()
+	reset.text = "RESET CONTROLS"
+	reset.focus_mode = Control.FOCUS_NONE
+	reset.pressed.connect(func() -> void:
+		GameSettings.reset_controls()
+		_rebinding = &""
+		_refresh_bindings())
+	right.add_child(reset)
 	var close := Button.new()
 	close.text = "CLOSE  [O]"
 	close.focus_mode = Control.FOCUS_NONE
@@ -462,14 +514,67 @@ func is_settings_open() -> bool:
 func toggle_settings() -> void:
 	if _settings_panel.visible:
 		_settings_panel.visible = false
+		_rebinding = &""
 		GameSettings.save()
 		return
+	_refresh_bindings()
 	for key: String in _settings_sliders:
 		_settings_sliders[key].value = GameSettings.get_volume(key) * 100.0
 	_settings_fullscreen.set_pressed_no_signal(GameSettings.fullscreen)
 	_settings_panel.visible = true
 	_settings_panel.reset_size()
 	_settings_panel.position = (Vector2(SCREEN_W, 720.0) - _settings_panel.size) * 0.5
+
+
+func _start_rebind(action: StringName) -> void:
+	_rebinding = action
+	_refresh_bindings()
+
+
+func _refresh_bindings() -> void:
+	for action: StringName in _bind_buttons:
+		_bind_buttons[action].text = "PRESS A KEY" if action == _rebinding else GameSettings.key_label(action)
+	if _rebinding != &"":
+		_bind_note.text = "Esc cancels. A key already in use swaps over."
+	elif _bind_note.text.begins_with("Esc"):
+		_bind_note.text = ""
+
+
+## While an action waits for its new key, the next key press binds it (and
+## goes no further: it must not also jump, attack or close the panel).
+func _input(event: InputEvent) -> void:
+	if _rebinding == &"":
+		return
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return
+	get_viewport().set_input_as_handled()
+	rebind_with(key.physical_keycode if key.physical_keycode != KEY_NONE else key.keycode)
+
+
+## Binds the waiting action to `code` (Esc cancels). Reserved menu keys are
+## refused and the action keeps waiting.
+func rebind_with(code: int) -> void:
+	if _rebinding == &"":
+		return
+	if code == KEY_ESCAPE:
+		_rebinding = &""
+	elif GameSettings.bind(_rebinding, code):
+		_rebinding = &""
+		_bind_note.text = ""
+	else:
+		_bind_note.text = "%s is kept for the menus; choose another key." % OS.get_keycode_string(code)
+		_bind_buttons[_rebinding].text = "PRESS A KEY"
+		return
+	_refresh_bindings()
+
+
+func bind_button_text(action: StringName) -> String:
+	return _bind_buttons[action].text
+
+
+func start_rebind(action: StringName) -> void:
+	_start_rebind(action)
 
 
 ## The slider for a setting ("master_volume", "music_volume", "sfx_volume").

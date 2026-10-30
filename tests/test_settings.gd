@@ -50,6 +50,24 @@ class Driver extends Node:
 				check(not bus_muted(&"Master") and not bus_muted(GameAudio.MUSIC_BUS), "other buses stay on")
 				var sfx_player: AudioStreamPlayer = main.get_node("Audio").get("_voices")[0]
 				check(sfx_player.bus == GameAudio.SFX_BUS, "sound effects play on the SFX bus")
+				print("[controls]")
+				check(hud.bind_button_text(&"attack_light") == "J" and hud.bind_button_text(&"jump") == "Space",
+					"the panel lists the current keys (light %s, jump %s)" % [hud.bind_button_text(&"attack_light"), hud.bind_button_text(&"jump")])
+				hud.start_rebind(&"attack_light")
+				check(hud.bind_button_text(&"attack_light") == "PRESS A KEY", "clicking an action waits for a key")
+				hud.rebind_with(KEY_P)
+				check(GameSettings.key_for(&"attack_light") == KEY_J and hud.bind_button_text(&"attack_light") == "PRESS A KEY",
+					"a menu key (P) is refused and the action keeps waiting")
+				hud.rebind_with(KEY_U)
+				var light_events := InputMap.action_get_events(&"attack_light")
+				check(light_events.size() == 1 and (light_events[0] as InputEventKey).physical_keycode == KEY_U,
+					"U now drives LIGHT in the input map")
+				check(MartialArtStyle.slot_key(&"up_light") == "W+U" and MartialArtStyle.slot_key(&"light") == "U",
+					"move-list prompts follow the binding (%s)" % MartialArtStyle.slot_key(&"up_light"))
+				hud.start_rebind(&"attack_heavy")
+				hud.rebind_with(KEY_U)
+				check(GameSettings.key_for(&"attack_heavy") == KEY_U and GameSettings.key_for(&"attack_light") == KEY_K,
+					"taking a key in use swaps the two actions (no key drives two)")
 				hud.toggle_settings()
 				check(not hud.is_settings_open() and FileAccess.file_exists(TEST_FILE), "closing the panel saves")
 			8:
@@ -59,6 +77,8 @@ class Driver extends Node:
 				GameSettings.read_again()
 				check(is_equal_approx(GameSettings.music_volume, 0.4) and is_equal_approx(GameSettings.sfx_volume, 0.0),
 					"saved values load back (music %.2f, effects %.2f)" % [GameSettings.music_volume, GameSettings.sfx_volume])
+				check(GameSettings.controls.get(&"attack_heavy") == KEY_U and GameSettings.controls.get(&"attack_light") == KEY_K,
+					"key bindings load back")
 				main.call("start_match", true)
 			10:
 				print("[match]")
@@ -71,6 +91,9 @@ class Driver extends Node:
 				check(not hud.is_settings_button_visible(), "resuming hides it again")
 				GameSettings.set_volume("music_volume", 1.0)
 				GameSettings.set_volume("sfx_volume", 1.0)
+				GameSettings.reset_controls()
+				check(GameSettings.key_for(&"attack_light") == KEY_J and GameSettings.key_for(&"attack_heavy") == KEY_K,
+					"RESET CONTROLS restores the defaults")
 				DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_FILE))
 				print("RESULT: %s (%d failures)" % ["PASS" if fails == 0 else "FAIL", fails])
 				tree.quit(1 if fails > 0 else 0)

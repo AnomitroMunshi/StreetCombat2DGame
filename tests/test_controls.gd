@@ -123,7 +123,7 @@ func _initialize() -> void:
 				_free(p)
 			want = _first_strike(want)
 			_check(faced[0] == [want, 1] and faced[1] == [want, -1],
-				"%s %s -> %s, facing right and left (%s)" % [sid, MartialArtStyle.SLOT_KEYS[slot], want, faced])
+				"%s %s -> %s, facing right and left (%s)" % [sid, MartialArtStyle.slot_key(slot), want, faced])
 		for m in NAMES.get(sid, {}):
 			_check(st.move_name(m) == NAMES[sid][m], "%s calls %s \"%s\" (%s)" % [sid, m, NAMES[sid][m], st.move_name(m)])
 		var keys_ok := true

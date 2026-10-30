@@ -225,6 +225,7 @@ func _ready() -> void:
 	GameSettings.load_once()
 	GameSettings.apply_audio()
 	GameSettings.apply_display()
+	GameSettings.apply_controls()
 	_fx_rng.seed = 7
 	# Which finisher plays is presentation, not combat: vary it every match.
 	_finisher_rng.randomize()
@@ -399,9 +400,12 @@ func _move_list_text() -> String:
 	for row in player.style.move_list():
 		lines.append("[color=#f2c14e]%s[/color]  %s" % [row[0], row[1]])
 	if player.style.id == &"capoeira":
-		lines.append("A/D + Space: rolling crossover jump. L/K/W+K stun; S+K knocks down.")
+		lines.append("%s/%s + %s: rolling crossover jump. %s/%s/%s stun; %s knocks down." % [GameSettings.key_label(&"move_left"),
+			GameSettings.key_label(&"move_right"), GameSettings.key_label(&"jump"), MartialArtStyle.slot_key(&"technique"), MartialArtStyle.slot_key(&"heavy"),
+			MartialArtStyle.slot_key(&"up_heavy"), MartialArtStyle.slot_key(&"down_heavy")])
 	elif player.style.id == &"jeet_kune_do":
-		lines.append("J: jab-cross. K: hammerfist. W+K stuns on hit and breaks guard on block.")
+		lines.append("%s: jab-cross. %s: hammerfist. %s stuns on hit and breaks guard on block." % [
+			MartialArtStyle.slot_key(&"light"), MartialArtStyle.slot_key(&"heavy"), MartialArtStyle.slot_key(&"up_heavy")])
 	if player.style.input_map.has(&"x_move"):
 		var x_attack := CombatData.get_attack(player.style.resolve(&"x_move", false))
 		lines.append("X: %d s cooldown, no Focus. Block, parry or evade." % (x_attack.x_cooldown_frames / CombatData.TICK_RATE))

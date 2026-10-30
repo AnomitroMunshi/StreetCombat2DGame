@@ -218,14 +218,17 @@ func info_text() -> String:
 		DUMMY_NAMES[dummy_mode], roundi(speed() * 100.0), "   [color=#ff8a6a]PAUSED[/color]" if paused else "",
 		"[color=#f2c14e]unlimited[/color]" if infinite_focus else "normal"])
 	if player.style != null and player.style.id == &"capoeira":
-		lines.append("A/D+Space: crossover  ·  L: long stun  ·  K/W+K: brief stun  ·  S+K: knockdown")
+		lines.append("%s/%s+%s: crossover  ·  %s: long stun  ·  %s/%s: brief stun  ·  %s: knockdown" % [
+			GameSettings.key_label(&"move_left"), GameSettings.key_label(&"move_right"), GameSettings.key_label(&"jump"),
+			MartialArtStyle.slot_key(&"technique"), MartialArtStyle.slot_key(&"heavy"), MartialArtStyle.slot_key(&"up_heavy"), MartialArtStyle.slot_key(&"down_heavy")])
 	elif player.style != null and player.style.id == &"jeet_kune_do":
-		lines.append("J: fast jab-cross  ·  K: hammerfist  ·  W+K: hook kick (stun / guard break)")
+		lines.append("%s: fast jab-cross  ·  %s: hammerfist  ·  %s: hook kick (stun / guard break)" % [
+			MartialArtStyle.slot_key(&"light"), MartialArtStyle.slot_key(&"heavy"), MartialArtStyle.slot_key(&"up_heavy")])
 	if player.style != null and player.style.input_map.has(&"x_move"):
 		var x_name := player.style.move_name(player.style.input_map[&"x_move"])
 		var status := "READY" if player.x_cooldown <= 0 else "%.1f s" % (float(player.x_cooldown) / CombatData.TICK_RATE)
 		var x_attack := CombatData.get_attack(player.style.resolve(&"x_move", false))
-		lines.append("X  [b]%s[/b]  [color=#f2c14e]%s[/color]  (%d s, no Focus)" % [x_name, status, x_attack.x_cooldown_frames / CombatData.TICK_RATE])
+		lines.append("%s  [b]%s[/b]  [color=#f2c14e]%s[/color]  (%d s, no Focus)" % [MartialArtStyle.slot_key(&"x_move"), x_name, status, x_attack.x_cooldown_frames / CombatData.TICK_RATE])
 	var parent := _sequence_of(last_move) if last_move != null else null
 	if parent != null:
 		# A multi-strike technique reads as one move: every active window, the
