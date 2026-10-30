@@ -120,6 +120,9 @@ const MAX_SETTLE_STRIKE: float = 18.0
 ## before the rear foot drags in behind them (the boxer's step-drag) instead
 ## of collapsing into a deep lunge.
 const MAX_SETTLE_STRIKE_BOXING: float = 6.0
+## Karate keeps its long low stance but drives the hips square instead of
+## sinking onto the front knee.
+const MAX_SETTLE_STRIKE_KARATE: float = 10.0
 ## Fastest the hips settle or rise for the knee bend (px/s).
 const SETTLE_RATE: float = 70.0
 ## Strikes sink into their lunge with the drive (still over a few frames).
@@ -576,6 +579,10 @@ var _fknee_hit := PackedFloat32Array([0.35, -0.05, 1.7, 2.6, 1.6, 2.5, 2.1, -0.5
 # snap square as the rear fist drives straight out, rear heel turning.
 var _gyaku_load := PackedFloat32Array([0.1, 0.15, 1.2, 2.0, 0.3, 2.4, 0.9, -0.25, -0.85, -0.35, -8.0, 0.0, 0.0, 16.0])
 var _gyaku_hit := PackedFloat32Array([0.25, 0.05, 0.6, 2.4, 1.57, 1.57, 1.0, -0.25, -0.95, -0.4, 18.0, 0.0, 0.9, -10.0])
+# In-match reverse punch (and Perfect Gyaku): the torso stays upright and the
+# hips drive square over the long stance (no collapse onto the front knee);
+# the lead fist pulls back to the hip (hikite) as the rear fist extends.
+var _kt_gyaku_hit := PackedFloat32Array([0.06, 0.05, -0.35, 1.75, 1.57, 1.57, 0.95, -0.15, -0.9, -0.4, 4.0, -3.0, 0.9, -10.0])
 # Knife hand: the blade of the lead hand raised beside the head, chopping down.
 var _knife_load := PackedFloat32Array([0.05, 0.15, 2.7, 3.7, 0.9, 3.0, 0.6, -0.15, -0.6, -0.3, -2.0, 0.0, 0.0, 14.0])
 var _knife_hit := PackedFloat32Array([0.3, 0.1, 1.6, 1.25, 0.9, 3.0, 0.7, -0.1, -0.65, -0.35, 8.0, 0.0, 0.3, 6.0])
@@ -1095,11 +1102,11 @@ func _ready() -> void:
 			[S, 0.35, _jump_squat, EASE_SMOOTH], [S, 0.85, _fknee_load, EASE_SMOOTH],
 			[A, 0.0, _fknee_hit, EASE_IN], [A, 1.0, _fknee_hit, EASE_LINEAR], [R, 0.5, _fknee_load, EASE_OUT]],
 		CombatData.AttackType.REVERSE_PUNCH: [
-			[S, 0.55, _gyaku_load, EASE_SMOOTH], [A, 0.0, _gyaku_hit, EASE_IN],
-			[A, 1.0, _over(_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.35, _gyaku_hit, EASE_LINEAR]],
+			[S, 0.55, _gyaku_load, EASE_SMOOTH], [A, 0.0, _kt_gyaku_hit, EASE_IN],
+			[A, 1.0, _over(_kt_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.35, _kt_gyaku_hit, EASE_LINEAR]],
 		CombatData.AttackType.PERFECT_GYAKU: [
-			[S, 0.55, _gyaku_load, EASE_SMOOTH], [S, 0.9, _gyaku_load, EASE_LINEAR], [A, 0.0, _gyaku_hit, EASE_IN],
-			[A, 1.0, _over(_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.45, _gyaku_hit, EASE_LINEAR]],
+			[S, 0.55, _gyaku_load, EASE_SMOOTH], [S, 0.9, _gyaku_load, EASE_LINEAR], [A, 0.0, _kt_gyaku_hit, EASE_IN],
+			[A, 1.0, _over(_kt_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.45, _kt_gyaku_hit, EASE_LINEAR]],
 		CombatData.AttackType.KNIFE_HAND: [
 			[S, 0.55, _knife_load, EASE_SMOOTH], [A, 0.0, _knife_hit, EASE_IN],
 			[A, 1.0, _over(_knife_hit, _knife_load), EASE_LINEAR], [R, 0.35, _knife_hit, EASE_LINEAR]],
@@ -3915,7 +3922,12 @@ func _wants_plant() -> bool:
 
 ## How far the hips may sink over planted feet during a strike.
 func _strike_settle_max() -> float:
-	return MAX_SETTLE_STRIKE_BOXING if _kit == &"boxing" else MAX_SETTLE_STRIKE
+	match _kit:
+		&"boxing":
+			return MAX_SETTLE_STRIKE_BOXING
+		&"karate":
+			return MAX_SETTLE_STRIKE_KARATE
+	return MAX_SETTLE_STRIKE
 
 
 ## Replaces the legs of a world-space skeleton with IK legs reaching planted

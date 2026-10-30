@@ -59,8 +59,9 @@ const DATA: Dictionary = {
 	},
 	Kind.KARATE: {
 		"name": "KARATE STANCE", "southpaw": false, "idle": {"hz": 1.7, "bob": 3.0, "shape": "hop", "shift": 7.0, "shift_hz": 0.85, "heel": 3.0, "lead_heel": 0.0, "shoulder": 1.2, "guard": 0.03, "sway": 0.015, "head": 0.01},
-		# Side-on long stance, low centre, extended lead guard, rear hand close to the body.
-		"pose": [0.05, 0.1, 1.45, 1.9, 0.9, 2.75, 0.95, -0.2, -0.85, -0.35, 0.0, 0.0, 0.0, 15.0],
+		# Side-on long stance, low centre, lead guard forward with the elbow
+		# bent (room left to extend), rear hand close to the body.
+		"pose": [0.05, 0.1, 1.2, 2.4, 0.9, 2.75, 0.95, -0.2, -0.85, -0.35, 0.0, 0.0, 0.0, 15.0],
 	},
 	Kind.KUNG_FU: {
 		"name": "KUNG FU STANCE", "southpaw": false, "idle": {"hz": 0.8, "bob": 3.0, "shape": "sine", "shift": 5.0, "shift_hz": 0.4, "heel": 1.0, "lead_heel": 0.0, "shoulder": 2.5, "guard": 0.12, "sway": 0.05, "head": 0.02, "circles": true},
