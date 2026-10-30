@@ -6,6 +6,8 @@ extends Node2D
 const ART_DIR := "res://assets/art/backgrounds/style_arenas_v1/"
 const LAYOUT_FILE := ART_DIR + "layout.json"
 const DOJO_PROPS := "res://assets/art/backgrounds/dojo_props_v1/breakable_props.png"
+## Props stand on the floor just in front of the wall (px below the floor line).
+const PROP_BASE: float = 8.0
 const VIEW := Rect2(-200, -200, 1680, 1120)
 const PROFILES := {
 	&"boxing": {"name": "boxing_gym", "floor": &"rubber", "wall": &"plaster"},
@@ -179,12 +181,15 @@ func _build_props() -> void:
 			regions.append([_alpha_bounds(image, Rect2i(0, y0, width, height)), _alpha_bounds(image, Rect2i(width, y0, width, height))])
 		_prop_region_cache[cache_key] = regions
 	var sources: Array = _prop_region_cache[cache_key]
-	var specs := [[&"pot", 210.0, 68.0, 8.0, Color(0.55, 0.32, 0.16)], [&"boards", 1060.0, 68.0, 10.0, Color(0.60, 0.40, 0.20)], [&"bench", 1170.0, 75.0, 12.0, Color(0.48, 0.31, 0.17)]]
+	# [id, centre x, visible height, impact that breaks it, debris colour]: spread
+	# along the back wall, clear of each other, the pot in the left corner and
+	# the boards and bench apart on the right.
+	var specs := [[&"pot", 170.0, 58.0, 8.0, Color(0.55, 0.32, 0.16)], [&"boards", 900.0, 54.0, 10.0, Color(0.60, 0.40, 0.20)], [&"bench", 1100.0, 64.0, 12.0, Color(0.48, 0.31, 0.17)]]
 	for row in 3:
 		var intact: Rect2 = sources[row][0]
 		var broken: Rect2 = sources[row][1]
 		var k: float = float(specs[row][2]) / intact.size.y
-		var base := _floor_y + 12
+		var base := _floor_y + PROP_BASE
 		var x: float = specs[row][1]
 		props.append({"id": specs[row][0], "intact": intact, "broken_src": broken,
 			"rect": Rect2(Vector2(x - intact.size.x * k * 0.5, base - intact.size.y * k), intact.size * k),
@@ -202,6 +207,16 @@ static func _alpha_bounds(image: Image, region: Rect2i) -> Rect2:
 	return Rect2(Vector2(lo), Vector2(hi - lo)) if hi.x > lo.x and hi.y > lo.y else Rect2(region)
 
 func _draw_props() -> void:
+	for p in props:
+		# A soft contact shadow on the floor grounds each prop.
+		var pr: Rect2 = p["broken_rect"] if p["broken"] else p["rect"]
+		for i in 4:
+			var k := 1.0 - i * 0.2
+			var pts := PackedVector2Array()
+			for j in 24:
+				var a := TAU * j / 24.0
+				pts.append(Vector2(pr.get_center().x + cos(a) * pr.size.x * 0.52 * k, pr.end.y - 1.0 + sin(a) * 6.0 * k))
+			_front.draw_colored_polygon(pts, Color(0.05, 0.04, 0.04, 0.1))
 	for p in props:
 		_front.draw_texture_rect_region(_props_texture, p["broken_rect"] if p["broken"] else p["rect"], p["broken_src"] if p["broken"] else p["intact"])
 

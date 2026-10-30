@@ -284,9 +284,13 @@ var _jump_punch_strike := PackedFloat32Array([0.4, 0.05, 1.6, 1.55, 0.4, 2.9, 1.
 #   active:  lead leg straight along the floor at ankle height, sweeping through;
 #   follow-through: the leg carries on in a low rising arc, then recover.
 var _sweep_load := PackedFloat32Array([0.5, 0.35, 0.7, 0.9, 0.85, 2.9, 1.25, -1.1, 1.0, -1.25, -4.0, 0.0, 0.0, 8.0])
-var _sweep_chamber := PackedFloat32Array([0.8, 0.5, 0.35, 0.15, 0.85, 2.9, 1.35, 1.0, 1.15, -1.3, -10.0, 0.0, 0.0, 6.0])
-var _sweep_extend := PackedFloat32Array([0.85, 0.55, 0.35, 0.15, 0.85, 2.9, 1.28, 1.4, 1.15, -1.3, -8.0, 0.0, 0.3, 4.0])
-var _sweep_follow := PackedFloat32Array([0.7, 0.5, 0.45, 0.3, 0.9, 2.9, 1.55, 1.68, 1.15, -1.3, -4.0, 0.0, 0.6, 2.0])
+# The hips stay up, crouched over the rear foot (a deep squat: thigh near
+# horizontal, shin back under the hips), so the sweeping leg runs straight
+# from the raised hip down to the floor and reads long; a kneel on the rear
+# shin sat the hips on the floor and read as sitting with a stubby leg.
+var _sweep_chamber := PackedFloat32Array([0.85, 0.5, 0.4, 0.2, 0.85, 2.9, 1.2, 0.6, 1.3, -0.55, -10.0, 0.0, 0.0, 6.0])
+var _sweep_extend := PackedFloat32Array([0.95, 0.6, 0.4, 0.2, 0.85, 2.9, 1.12, 1.15, 1.3, -0.6, -8.0, 0.0, 0.3, 4.0])
+var _sweep_follow := PackedFloat32Array([0.8, 0.55, 0.45, 0.3, 0.9, 2.9, 1.4, 1.42, 1.3, -0.6, -4.0, 0.0, 0.6, 2.0])
 # Back kick (away + L from standing). Drawn while the body is turned away from
 # the opponent (see _back_turn), so the kicking leg is the one pointing back:
 # knee pulled to the chest, then a heel thrust straight back at the opponent.
