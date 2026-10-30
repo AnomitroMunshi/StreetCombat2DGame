@@ -656,13 +656,10 @@ func _apply_stage() -> void:
 	queue_redraw()
 
 
-## Missing art during development falls back to procedural damage rather
-## than loading invalid textures. The legacy dojo stays available until v2
-## art has been imported; final asset validation checks every new file.
+## Missing art during development uses procedural damage. Superseded asset
+## versions are not retained as silent fallbacks; final checks require art.
 func _load_stage_decals(folder: String) -> Dictionary:
 	if not ResourceLoader.exists(folder + "/floor_impact_01.png"):
-		if folder == DECALS_WOOD:
-			return FxLayer.load_decal_set("res://assets/art/decals/dojo_wood_v1")
 		return {}
 	return FxLayer.load_decal_set(folder)
 
