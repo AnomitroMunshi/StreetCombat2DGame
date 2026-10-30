@@ -396,7 +396,8 @@ func wall_crack(pos: Vector2, power: int, clip: Rect2) -> void:
 		var w := h * float(decal_set.get("wall_aspect", 0.5))
 		pos.x = clampf(pos.x, clip.position.x + 6.0, clip.end.x - 6.0)
 		_add_decal({"kind": "tex", "tex": _pick(decal_set["wall"]), "age": 0, "grow": 3, "clip": clip,
-			"rect": Rect2(pos - Vector2(w * 0.5, h * 0.5), Vector2(w, h)), "opacity": decal_set.get("wall_opacity", 1.0)})
+			"rect": Rect2(pos - Vector2(w * 0.5, h * 0.5), Vector2(w, h)), "opacity": decal_set.get("wall_opacity", 1.0),
+			"tint": decal_set.get("wall_tint", Color.WHITE)})
 		decals_changed.emit()
 		return
 	pos.x = clampf(pos.x, clip.position.x + 6.0, clip.end.x - 6.0)
@@ -684,7 +685,7 @@ func floor_scuff(pos: Vector2, strength: float) -> void:
 
 
 ## The painted decals in a folder (floor_impact_01..03, floor_scuff_light,
-## wall_impact_01..03).
+## wall_impact_01..03), sized and tinted by the folder's art.json.
 static func load_decal_set(folder: String) -> Dictionary:
 	var d := {"floor": [], "wall": []}
 	for i in range(1, 4):
@@ -697,6 +698,10 @@ static func load_decal_set(folder: String) -> Dictionary:
 		if metadata is Dictionary:
 			for key in ["wall_height_base", "wall_height_power", "wall_aspect", "wall_opacity", "floor_width_base", "floor_width_power", "floor_aspect", "floor_opacity", "scuff_aspect", "scuff_opacity", "clip_floor"]:
 				if metadata.has(key): d[key] = metadata[key]
+			# Optional multiply for wall impacts that read too pale on their surface.
+			if metadata.get("wall_tint") is Array and metadata["wall_tint"].size() == 3:
+				var t: Array = metadata["wall_tint"]
+				d["wall_tint"] = Color(float(t[0]), float(t[1]), float(t[2]))
 	return d
 
 
@@ -718,7 +723,8 @@ func _draw_tex_decal(canvas: CanvasItem, d: Dictionary, g: float) -> void:
 			return
 		src = Rect2(src.position + (inter.position - r.position) / r.size * src.size, inter.size / r.size * src.size)
 		r = inter
-	canvas.draw_texture_rect_region(tex, r, src, Color(1.0, 1.0, 1.0, g * float(d.get("opacity", 1.0))))
+	var tint: Color = d.get("tint", Color.WHITE)
+	canvas.draw_texture_rect_region(tex, r, src, Color(tint.r, tint.g, tint.b, g * float(d.get("opacity", 1.0))))
 
 
 ## Called by the arena's _draw so cracks and craters sit under the fighters.

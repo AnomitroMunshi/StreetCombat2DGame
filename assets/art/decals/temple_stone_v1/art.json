@@ -1,9 +1,10 @@
 {
     "floor_width_power":  28,
     "wall_height_power":  22,
-    "wall_opacity":  0.8,
+    "wall_opacity":  1.0,
+    "wall_tint":  [0.36, 0.34, 0.32],
     "scuff_opacity":  0.6,
-    "wall_height_base":  60,
+    "wall_height_base":  80,
     "scuff_aspect":  0.12,
     "floor_opacity":  0.8,
     "floor_width_base":  110,

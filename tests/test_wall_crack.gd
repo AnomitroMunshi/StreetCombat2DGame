@@ -1,7 +1,8 @@
 extends SceneTree
 ## Wall cracks land on the struck wall: arenas whose side cutouts are the wall
 ## (the temple's stone pillars, layout "crack_on_cutout") crack the solid part
-## of the cutout, never the foliage beside it; other arenas keep the struck x.
+## of the cutout, never the foliage beside it, darkened so they read on the grey
+## stone; other arenas keep the struck x.
 
 var _fails := 0
 
@@ -32,6 +33,11 @@ func _initialize() -> void:
 	root.add_child(gym)
 	gym.setup(&"boxing")
 	_check(gym.wall_crack_x(-1, 430.0, 80.0) == 80.0, "the boxing gym keeps the struck x (its wall is the painted wall)")
+	var decals := FxLayer.load_decal_set(temple.decal_directory())
+	var tint: Color = decals.get("wall_tint", Color.WHITE)
+	_check(tint.v < 0.5 and float(decals.get("wall_opacity", 0.0)) >= 1.0,
+		"temple wall cracks are darkened to read on the grey pillar (tint value %.2f)" % tint.v)
+	_check(not FxLayer.load_decal_set(gym.decal_directory()).has("wall_tint"), "other decal sets keep their painted colour")
 	temple.free()
 	gym.free()
 	print("RESULT: %s (%d failures)" % ["PASS" if _fails == 0 else "FAIL", _fails])
