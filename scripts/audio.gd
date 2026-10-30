@@ -47,6 +47,8 @@ const VOICE_CLIPS: Dictionary = {
 	&"round_2": "res://assets/audio/voice/round_2.wav", &"final_round": "res://assets/audio/voice/final_round.wav",
 }
 const VOICE_BUS: StringName = &"Voice"
+## Sound effects have their own bus too, for the effects volume setting.
+const SFX_BUS: StringName = &"SFX"
 const VOICE_VOLUME_DB: float = -2.0
 const VOICE_MUSIC_DUCK_DB: float = -7.0
 const MUSIC_FADE_TIME: float = 0.8
@@ -73,12 +75,15 @@ var _rng := RandomNumberGenerator.new()
 func _ready() -> void:
 	_rng.seed = 5
 	_install_limiter()
+	_install_bus(SFX_BUS)
 	for i in VOICES:
 		var voice := AudioStreamPlayer.new()
+		voice.bus = SFX_BUS
 		add_child(voice)
 		_voices.append(voice)
 	_install_music_bus()
 	_install_bus(VOICE_BUS)
+	GameSettings.apply_audio()
 	_announcer = AudioStreamPlayer.new()
 	_announcer.bus = VOICE_BUS
 	_announcer.volume_db = VOICE_VOLUME_DB

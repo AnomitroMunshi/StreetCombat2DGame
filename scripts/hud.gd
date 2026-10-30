@@ -107,6 +107,10 @@ var _debug_lines: PackedStringArray = PackedStringArray()
 var _canvas: Control = null
 var _font: Font = null
 var _pause_button: Button = null
+var _settings_button: Button = null
+var _settings_panel: PanelContainer = null
+var _settings_sliders: Dictionary = {}
+var _settings_fullscreen: CheckButton = null
 ## Speech bubbles: side (0 player, 1 rival) -> {"fighter", "text", "age"}.
 var _speech: Dictionary = {}
 var _speech_font: Font = null
@@ -229,6 +233,7 @@ func show_button(mode: StringName) -> void:
 	_button2.visible = mode == &"start" or mode == &"rematch"
 	_button3.visible = mode == &"start"
 	_button4.visible = mode == &"start"
+	show_settings_button(mode == &"start" or mode == &"rematch")
 	if mode == &"start":
 		_button.text = "START MATCH"
 	elif mode == &"rematch":
@@ -354,6 +359,122 @@ func _build_training_panels() -> void:
 	_pause_button.pressed.connect(func() -> void: pause_pressed.emit())
 	_pause_button.visible = false
 	add_child(_pause_button)
+	_build_settings()
+
+
+# --- Settings -------------------------------------------------------------------
+
+## Volume sliders (master, music, effects) and fullscreen, from the pre-match
+## screen, the result screen or the pause screen (button or O).
+func _build_settings() -> void:
+	_settings_button = Button.new()
+	_settings_button.text = "SETTINGS  [O]"
+	_settings_button.custom_minimum_size = Vector2(130.0, 26.0)
+	_settings_button.position = Vector2(SCREEN_W - 142.0, 720.0 - 36.0)  # clear of the health bars
+	_settings_button.focus_mode = Control.FOCUS_NONE  # Space must stay jump
+	_settings_button.add_theme_font_size_override("font_size", 13)
+	for state in ["normal", "hover", "pressed"]:
+		var box := _panel_box()
+		box.content_margin_top = 2.0
+		box.content_margin_bottom = 2.0
+		if state != "normal":
+			box.bg_color = Color(0.42, 0.13, 0.11, 0.95)
+		_settings_button.add_theme_stylebox_override(state, box)
+	_settings_button.add_theme_color_override("font_color", COLOR_TEXT)
+	_settings_button.pressed.connect(toggle_settings)
+	_settings_button.visible = false
+	add_child(_settings_button)
+
+	_settings_panel = PanelContainer.new()
+	var box := _panel_box()
+	box.bg_color = Color(0.05, 0.04, 0.04, 0.94)
+	box.content_margin_left = 18.0
+	box.content_margin_right = 18.0
+	box.content_margin_top = 14.0
+	box.content_margin_bottom = 14.0
+	_settings_panel.add_theme_stylebox_override("panel", box)
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 10)
+	_settings_panel.add_child(rows)
+	var title := Label.new()
+	title.text = "SETTINGS"
+	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_color_override("font_color", COLOR_TEXT)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rows.add_child(title)
+	for entry in [["MASTER", "master_volume"], ["MUSIC", "music_volume"], ["EFFECTS", "sfx_volume"]]:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		var name_label := Label.new()
+		name_label.text = entry[0]
+		name_label.custom_minimum_size = Vector2(90.0, 0.0)
+		name_label.add_theme_color_override("font_color", COLOR_TEXT)
+		row.add_child(name_label)
+		var slider := HSlider.new()
+		slider.min_value = 0.0
+		slider.max_value = 100.0
+		slider.step = 5.0
+		slider.custom_minimum_size = Vector2(240.0, 24.0)
+		slider.focus_mode = Control.FOCUS_NONE
+		var value_label := Label.new()
+		value_label.custom_minimum_size = Vector2(44.0, 0.0)
+		value_label.add_theme_color_override("font_color", COLOR_DIM)
+		var key: String = entry[1]
+		slider.value_changed.connect(func(v: float) -> void:
+			GameSettings.set_volume(key, v / 100.0)
+			value_label.text = "%d%%" % int(v))
+		row.add_child(slider)
+		row.add_child(value_label)
+		rows.add_child(row)
+		_settings_sliders[key] = slider
+	_settings_fullscreen = CheckButton.new()
+	_settings_fullscreen.text = "FULLSCREEN"
+	_settings_fullscreen.focus_mode = Control.FOCUS_NONE
+	_settings_fullscreen.add_theme_color_override("font_color", COLOR_TEXT)
+	_settings_fullscreen.toggled.connect(func(on: bool) -> void:
+		GameSettings.fullscreen = on
+		GameSettings.apply_display())
+	rows.add_child(_settings_fullscreen)
+	var close := Button.new()
+	close.text = "CLOSE  [O]"
+	close.focus_mode = Control.FOCUS_NONE
+	close.pressed.connect(toggle_settings)
+	rows.add_child(close)
+	_settings_panel.visible = false
+	add_child(_settings_panel)
+
+
+func show_settings_button(on: bool) -> void:
+	_settings_button.visible = on
+	if not on and _settings_panel.visible:
+		toggle_settings()
+
+
+func is_settings_button_visible() -> bool:
+	return _settings_button.visible
+
+
+func is_settings_open() -> bool:
+	return _settings_panel.visible
+
+
+## Opens the panel with the current values, or closes it and saves them.
+func toggle_settings() -> void:
+	if _settings_panel.visible:
+		_settings_panel.visible = false
+		GameSettings.save()
+		return
+	for key: String in _settings_sliders:
+		_settings_sliders[key].value = GameSettings.get_volume(key) * 100.0
+	_settings_fullscreen.set_pressed_no_signal(GameSettings.fullscreen)
+	_settings_panel.visible = true
+	_settings_panel.reset_size()
+	_settings_panel.position = (Vector2(SCREEN_W, 720.0) - _settings_panel.size) * 0.5
+
+
+## The slider for a setting ("master_volume", "music_volume", "sfx_volume").
+func settings_slider(key: String) -> HSlider:
+	return _settings_sliders.get(key)
 
 
 func show_pause_button(on: bool) -> void:
@@ -362,6 +483,7 @@ func show_pause_button(on: bool) -> void:
 
 func set_paused(on: bool) -> void:
 	_pause_button.text = "▶  RESUME" if on else "II  PAUSE"
+	show_settings_button(on)
 
 
 func get_message() -> Array:

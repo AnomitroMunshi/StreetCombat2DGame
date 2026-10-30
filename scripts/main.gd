@@ -216,6 +216,10 @@ var training: TrainingMode = null
 
 
 func _ready() -> void:
+	# Saved settings (the audio node, a child, set up its buses before this).
+	GameSettings.load_once()
+	GameSettings.apply_audio()
+	GameSettings.apply_display()
 	_fx_rng.seed = 7
 	# Which finisher plays is presentation, not combat: vary it every match.
 	_finisher_rng.randomize()
@@ -450,6 +454,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			start_training()
 		elif key.physical_keycode == KEY_G and _round_state == RoundState.PRE_MATCH:
 			cycle_difficulty()
+		elif key.physical_keycode == KEY_O and hud.is_settings_button_visible():
+			hud.toggle_settings()
+			get_viewport().set_input_as_handled()
 		elif key.physical_keycode in [KEY_P, KEY_ESCAPE] and (match_paused or can_pause()):
 			toggle_pause()
 			get_viewport().set_input_as_handled()
