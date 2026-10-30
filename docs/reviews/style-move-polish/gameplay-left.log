@@ -12,14 +12,14 @@ CPU render time: 0.48 seconds (average: 1.19 ms/frame)
 GPU render time: 0.60 seconds (average: 1.50 ms/frame)
 Encoding time: 3.26 seconds (average: 8.10 ms/frame)
 --------------------------------------------------------------------------------
-Godot_v4.7.2-stable_win64_console.exe : WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for 
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for
 details).
 At line:2 char:205
 + ... e {'left'}; & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (WARNING: 4 Obje...` for details).:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
- 
+
    at: cleanup (core/object/object.cpp:2536)
 ERROR: 2 resources still in use at exit (run with --verbose for details).
    at: clear (core/io/resource.cpp:822)

@@ -1,0 +1,19 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ok Capoeira does not spend long X into neutral
+ok visible enemy startup does not count as safe X opening
+ok visible long recovery permits Capoeira X
+ok almost-ended recovery does not bait X
+ok stun permits X as a visible punish
+ok opening does not bypass X cooldown
+ok X still interrupts normally and keeps cooldown
+ok other styles retain their existing ready/in-range X policy
+ok Capoeira does not spend long X into neutral
+ok visible enemy startup does not count as safe X opening
+ok visible long recovery permits Capoeira X
+ok almost-ended recovery does not bait X
+ok stun permits X as a visible punish
+ok opening does not bypass X cooldown
+ok X still interrupts normally and keeps cooldown
+ok other styles retain their existing ready/in-range X policy
+RESULT: PASS Capoeira AI: 0 failures

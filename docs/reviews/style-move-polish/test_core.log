@@ -716,12 +716,12 @@ KEY_SHIFT = 4194325  block bound to shift: true
   ok   background music rendered and playing (1285 ms)
   ok   fight music loop: 16 bars at 140 BPM = 27.43 s (27.43 s)
 RESULT: PASS (0 failures)
-Godot_v4.7.2-stable_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for 
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for
 details).
 At line:2 char:362
 + ...  $suites) { & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
- 
+
    at: cleanup (core/object/object.cpp:2536)

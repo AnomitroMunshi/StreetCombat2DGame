@@ -17,14 +17,14 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [training]
   ok   training starts without a countdown voice ([])
 RESULT: PASS (0 failures)
-Godot_v4.7.2-stable_win64_console.exe : WARNING: 8 ObjectDB instances were leaked at exit (run with `--verbose` for 
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 8 ObjectDB instances were leaked at exit (run with `--verbose` for
 details).
 At line:2 char:362
 + ...  $suites) { & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (WARNING: 8 Obje...` for details).:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
- 
+
    at: cleanup (core/object/object.cpp:2536)
 ERROR: 3 resources still in use at exit (run with --verbose for details).
    at: clear (core/io/resource.cpp:822)

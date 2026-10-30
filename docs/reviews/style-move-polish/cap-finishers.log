@@ -107,14 +107,14 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
   ok   capoeira corner_carnival left (160 px from the wall): every blow within 6 px of the body (worst 4.4)
   ok   capoeira corner_carnival left (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
 RESULT: PASS (0 failures)
-Godot_v4.7.2-stable_win64_console.exe : WARNING: 16 ObjectDB instances were leaked at exit (run with `--verbose` for 
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 16 ObjectDB instances were leaked at exit (run with `--verbose` for
 details).
 At line:2 char:29
 + ... 'capoeira'; & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (WARNING: 16 Obj...` for details).:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
- 
+
    at: cleanup (core/object/object.cpp:2536)
 ERROR: 3 resources still in use at exit (run with --verbose for details).
    at: clear (core/io/resource.cpp:822)

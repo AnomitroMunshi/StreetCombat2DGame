@@ -2,6 +2,8 @@
 
 Updated 2026-10-30. Read this before changing the current gameplay.
 
+The older professional-polish review is preserved in [the 27 October handoff](archive/CLAUDE_HANDOFF_2026-10-27.md). Its findings describe an earlier build; reproduce them before treating them as current defects.
+
 ## User direction
 
 - Capoeira and Jeet Kune Do are the two new styles. There are nine styles total.

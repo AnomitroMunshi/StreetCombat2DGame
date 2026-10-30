@@ -1,0 +1,152 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  ok   boxing facing -1: ready AI chooses X in range
+  ok   boxing: AI waits for cooldown
+  ok   boxing: AI refuses out-of-range X
+  ok   boxing: training names ready X
+  ok   boxing: training displays correct per-move total cooldown
+  ok   boxing: roster displays correct per-move cooldown
+  ok   boxing: training shows simulation cooldown
+  ok   boxing facing 1: ready AI chooses X in range
+  ok   boxing: AI waits for cooldown
+  ok   boxing: AI refuses out-of-range X
+  ok   boxing: training names ready X
+  ok   boxing: training displays correct per-move total cooldown
+  ok   boxing: roster displays correct per-move cooldown
+  ok   boxing: training shows simulation cooldown
+  ok   muay_thai facing -1: ready AI chooses X in range
+  ok   muay_thai: AI waits for cooldown
+  ok   muay_thai: AI refuses out-of-range X
+  ok   muay_thai: training names ready X
+  ok   muay_thai: training displays correct per-move total cooldown
+  ok   muay_thai: roster displays correct per-move cooldown
+  ok   muay_thai: training shows simulation cooldown
+  ok   muay_thai facing 1: ready AI chooses X in range
+  ok   muay_thai: AI waits for cooldown
+  ok   muay_thai: AI refuses out-of-range X
+  ok   muay_thai: training names ready X
+  ok   muay_thai: training displays correct per-move total cooldown
+  ok   muay_thai: roster displays correct per-move cooldown
+  ok   muay_thai: training shows simulation cooldown
+  ok   karate facing -1: ready AI chooses X in range
+  ok   karate: AI waits for cooldown
+  ok   karate: AI refuses out-of-range X
+  ok   karate: training names ready X
+  ok   karate: training displays correct per-move total cooldown
+  ok   karate: roster displays correct per-move cooldown
+  ok   karate: training shows simulation cooldown
+  ok   karate facing 1: ready AI chooses X in range
+  ok   karate: AI waits for cooldown
+  ok   karate: AI refuses out-of-range X
+  ok   karate: training names ready X
+  ok   karate: training displays correct per-move total cooldown
+  ok   karate: roster displays correct per-move cooldown
+  ok   karate: training shows simulation cooldown
+  ok   kung_fu facing -1: ready AI chooses X in range
+  ok   kung_fu: AI waits for cooldown
+  ok   kung_fu: AI refuses out-of-range X
+  ok   kung_fu: training names ready X
+  ok   kung_fu: training displays correct per-move total cooldown
+  ok   kung_fu: roster displays correct per-move cooldown
+  ok   kung_fu: training shows simulation cooldown
+  ok   kung_fu facing 1: ready AI chooses X in range
+  ok   kung_fu: AI waits for cooldown
+  ok   kung_fu: AI refuses out-of-range X
+  ok   kung_fu: training names ready X
+  ok   kung_fu: training displays correct per-move total cooldown
+  ok   kung_fu: roster displays correct per-move cooldown
+  ok   kung_fu: training shows simulation cooldown
+  ok   taekwondo facing -1: ready AI chooses X in range
+  ok   taekwondo: AI waits for cooldown
+  ok   taekwondo: AI refuses out-of-range X
+  ok   taekwondo: training names ready X
+  ok   taekwondo: training displays correct per-move total cooldown
+  ok   taekwondo: roster displays correct per-move cooldown
+  ok   taekwondo: training shows simulation cooldown
+  ok   taekwondo facing 1: ready AI chooses X in range
+  ok   taekwondo: AI waits for cooldown
+  ok   taekwondo: AI refuses out-of-range X
+  ok   taekwondo: training names ready X
+  ok   taekwondo: training displays correct per-move total cooldown
+  ok   taekwondo: roster displays correct per-move cooldown
+  ok   taekwondo: training shows simulation cooldown
+  ok   kickboxing facing -1: ready AI chooses X in range
+  ok   kickboxing: AI waits for cooldown
+  ok   kickboxing: AI refuses out-of-range X
+  ok   kickboxing: training names ready X
+  ok   kickboxing: training displays correct per-move total cooldown
+  ok   kickboxing: roster displays correct per-move cooldown
+  ok   kickboxing: training shows simulation cooldown
+  ok   kickboxing facing 1: ready AI chooses X in range
+  ok   kickboxing: AI waits for cooldown
+  ok   kickboxing: AI refuses out-of-range X
+  ok   kickboxing: training names ready X
+  ok   kickboxing: training displays correct per-move total cooldown
+  ok   kickboxing: roster displays correct per-move cooldown
+  ok   kickboxing: training shows simulation cooldown
+  ok   bangla_maar facing -1: ready AI chooses X in range
+  ok   bangla_maar: AI waits for cooldown
+  ok   bangla_maar: AI refuses out-of-range X
+  ok   bangla_maar: training names ready X
+  ok   bangla_maar: training displays correct per-move total cooldown
+  ok   bangla_maar: roster displays correct per-move cooldown
+  ok   bangla_maar: training shows simulation cooldown
+  ok   bangla_maar facing 1: ready AI chooses X in range
+  ok   bangla_maar: AI waits for cooldown
+  ok   bangla_maar: AI refuses out-of-range X
+  ok   bangla_maar: training names ready X
+  ok   bangla_maar: training displays correct per-move total cooldown
+  ok   bangla_maar: roster displays correct per-move cooldown
+  ok   bangla_maar: training shows simulation cooldown
+  FAIL capoeira facing -1: ready AI chooses X in range
+  ok   capoeira: AI waits for cooldown
+  ok   capoeira: AI refuses out-of-range X
+  ok   capoeira: training names ready X
+  ok   capoeira: training displays correct per-move total cooldown
+  ok   capoeira: roster displays correct per-move cooldown
+  ok   capoeira: training shows simulation cooldown
+  FAIL capoeira facing 1: ready AI chooses X in range
+  ok   capoeira: AI waits for cooldown
+  ok   capoeira: AI refuses out-of-range X
+  ok   capoeira: training names ready X
+  ok   capoeira: training displays correct per-move total cooldown
+  ok   capoeira: roster displays correct per-move cooldown
+  ok   capoeira: training shows simulation cooldown
+  ok   jeet_kune_do facing -1: ready AI chooses X in range
+  ok   jeet_kune_do: AI waits for cooldown
+  ok   jeet_kune_do: AI refuses out-of-range X
+  ok   jeet_kune_do: training names ready X
+  ok   jeet_kune_do: training displays correct per-move total cooldown
+  ok   jeet_kune_do: roster displays correct per-move cooldown
+  ok   jeet_kune_do: training shows simulation cooldown
+  ok   jeet_kune_do facing 1: ready AI chooses X in range
+  ok   jeet_kune_do: AI waits for cooldown
+  ok   jeet_kune_do: AI refuses out-of-range X
+  ok   jeet_kune_do: training names ready X
+  ok   jeet_kune_do: training displays correct per-move total cooldown
+  ok   jeet_kune_do: roster displays correct per-move cooldown
+  ok   jeet_kune_do: training shows simulation cooldown
+  ok   fresh X input resolves new style slot
+  ok   holding X never repeats its input edge
+  ok   physical X is mapped
+  ok   boxing training move list explains actual X cooldown
+  ok   muay_thai training move list explains actual X cooldown
+  ok   karate training move list explains actual X cooldown
+  ok   kung_fu training move list explains actual X cooldown
+  ok   taekwondo training move list explains actual X cooldown
+  ok   kickboxing training move list explains actual X cooldown
+  ok   bangla_maar training move list explains actual X cooldown
+  ok   capoeira training move list explains actual X cooldown
+  ok   jeet_kune_do training move list explains actual X cooldown
+RESULT: FAIL (2 failures)
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for
+details).
+At line:2 char:377
++ ...  $suites) { & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
