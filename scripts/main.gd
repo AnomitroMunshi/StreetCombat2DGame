@@ -387,7 +387,7 @@ func _move_list_text() -> String:
 	for row in player.style.move_list():
 		lines.append("[color=#f2c14e]%s[/color]  %s" % [row[0], row[1]])
 	if player.style.id == &"capoeira":
-		lines.append("A/D + Space: rolling crossover jump. L stuns; S+K knocks down.")
+		lines.append("A/D + Space: rolling crossover jump. L/K/W+K stun; S+K knocks down.")
 	elif player.style.id == &"jeet_kune_do":
 		lines.append("J: jab-cross. K: hammerfist. W+K stuns on hit and breaks guard on block.")
 	if player.style.input_map.has(&"x_move"):

@@ -130,7 +130,7 @@ func cap_x_launch_regression(side: int) -> void:
 		free_pair(p)
 
 func recovery_hurtbox_regression(side: int) -> void:
-	for test in [[CombatData.AttackType.CAP_CARTWHEEL,32,33,47,48],[CombatData.AttackType.MEIA_LUA_TORNADO,39,40,57,58]]:
+	for test in [[CombatData.AttackType.CAP_CARTWHEEL,28,29,35,36],[CombatData.AttackType.MEIA_LUA_TORNADO,39,40,57,58]]:
 		var p:=pair(&"capoeira",side)
 		var a:=p[0]
 		a.call("_start_attack",test[0],1,true)
