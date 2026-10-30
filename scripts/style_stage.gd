@@ -40,7 +40,10 @@ var _backdrop_rect := VIEW
 var _props_texture: Texture2D
 var _front: Node2D
 var _layout: Dictionary = {}
+var _cutout_texture: Texture2D
+var _cutouts: Array[Dictionary] = []
 static var _prop_region_cache: Dictionary = {}
+static var _cutout_region_cache: Dictionary = {}
 
 func setup(which: StringName, floor_y: float = 560.0) -> void:
 	style_id = which if PROFILES.has(which) else &"karate"
@@ -57,6 +60,7 @@ func setup(which: StringName, floor_y: float = 560.0) -> void:
 		# can expose an unpainted strip during the finisher camera zoom-out.
 		var scale := maxf(VIEW.size.x / size.x, maxf((_floor_y - VIEW.position.y) / edge, (VIEW.end.y - _floor_y) / (size.y - edge)))
 		_backdrop_rect = Rect2(Vector2(640 - size.x * scale * 0.5, _floor_y - edge * scale), size * scale)
+	_build_cutouts()
 	_build_props()
 	if _front == null:
 		_front = Node2D.new()
@@ -98,18 +102,61 @@ func backdrop_rect() -> Rect2:
 func has_backdrop() -> bool:
 	return _backdrop != null
 
+## Independent left/right object layers, rather than scenery baked into the
+## backdrop. The returned rectangles use the same inner faces as the arena.
+func cutout_layers() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for layer in _cutouts:
+		out.append({"side": layer["side"], "source": layer["source"], "rect": _cutout_rect(layer, _floor_y)})
+	return out
+
+func _build_cutouts() -> void:
+	_cutouts.clear()
+	_cutout_texture = null
+	if is_dojo(): return
+	var path := String(_layout.get("cutouts", String(style_id) + "_cutouts.png"))
+	if not path.begins_with("res://"): path = ART_DIR + path
+	if not ResourceLoader.exists(path): return
+	_cutout_texture = load(path)
+	var size := _cutout_texture.get_size()
+	var split := clampi(int(_layout.get("cutout_split_x", size.x * 0.5)), 1, int(size.x) - 1)
+	var cache_key := "%s:%d" % [path, split]
+	if not _cutout_region_cache.has(cache_key):
+		var image := _cutout_texture.get_image()
+		if image.is_compressed(): image.decompress()
+		_cutout_region_cache[cache_key] = [
+			_alpha_bounds(image, Rect2i(0, 0, split, int(size.y))),
+			_alpha_bounds(image, Rect2i(split, 0, int(size.x) - split, int(size.y))),
+		]
+	var regions: Array = _cutout_region_cache[cache_key]
+	var heights: Array = _layout.get("cutout_heights", [300.0, 320.0])
+	for index in 2:
+		_cutouts.append({"side": -1 if index == 0 else 1, "source": regions[index], "height": maxf(float(heights[index]), 1.0)})
+
+func _cutout_rect(layer: Dictionary, floor_y: float) -> Rect2:
+	var source: Rect2 = layer["source"]
+	var scale: float = float(layer["height"]) / maxf(source.size.y, 1.0)
+	var size := source.size * scale
+	var x := Fighter.ARENA_MIN_X - 20.0 - size.x if int(layer["side"]) < 0 else Fighter.ARENA_MAX_X + 20.0
+	return Rect2(Vector2(x, floor_y + 6.0 - size.y), size)
+
 func draw_back(c: CanvasItem, floor_y: float) -> void:
 	if _backdrop != null:
 		c.draw_texture_rect(_backdrop, _backdrop_rect, false)
 	else:
 		DojoStage.draw(c, floor_y)
-	# Independent edge structures preserve exact wall-contact alignment even
-	# when generative backdrop geometry differs between arenas.
-	for rect in wall_rects(floor_y):
-		c.draw_rect(rect, wall_dark())
-		c.draw_rect(Rect2(rect.position, Vector2(4, rect.size.y)), wall_light().darkened(0.2))
+	if _cutouts.size() == 2:
+		for layer in _cutouts:
+			c.draw_texture_rect_region(_cutout_texture, _cutout_rect(layer, floor_y), layer["source"])
+	else:
+		# Safe development fallback while cutout artwork is being imported.
+		for rect in wall_rects(floor_y):
+			c.draw_rect(rect, wall_dark())
+			c.draw_rect(Rect2(rect.position, Vector2(4, rect.size.y)), wall_light().darkened(0.2))
 
 func wall_rects(floor_y: float) -> Array[Rect2]:
+	if _cutouts.size() == 2:
+		return [_cutout_rect(_cutouts[0], floor_y), _cutout_rect(_cutouts[1], floor_y)]
 	return [Rect2(Fighter.ARENA_MIN_X - 66, 96, 46, floor_y - 90), Rect2(Fighter.ARENA_MAX_X + 20, 96, 46, floor_y - 90)]
 
 func _build_props() -> void:

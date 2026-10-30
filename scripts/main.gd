@@ -511,6 +511,8 @@ func _training_finisher(kind: FinisherDirector.Kind) -> void:
 ## Both fighters back on their marks, fresh, ready to go again.
 func _reset_training() -> void:
 	_fx_queue.clear()
+	if stage != null:
+		stage.reset_props()
 	_finisher = null
 	_follow_victim = false
 	_ko_focus = Vector2.INF

@@ -116,6 +116,13 @@ func _run() -> void:
 		_check(art_stage.floor_material() == expected_floor, "%s supplies explicit floor debris material" % id)
 		if id != &"karate":
 			_check(art_stage.has_backdrop(), "%s has its own imported painted backdrop" % id)
+			var layers := art_stage.cutout_layers()
+			_check(layers.size() == 2, "%s supplies separate left and right painted cutout layers" % id)
+			if layers.size() == 2:
+				var left: Rect2 = layers[0]["rect"]
+				var right: Rect2 = layers[1]["rect"]
+				_check(is_equal_approx(left.end.x, 70) and is_equal_approx(right.position.x, 1210), "%s cutouts leave the entire fighting lane clear" % id)
+				_check(is_equal_approx(left.end.y, 566) and is_equal_approx(right.end.y, 566), "%s cutout foot baselines match the arena surface" % id)
 		var style_walls := art_stage.wall_rects(560)
 		_check(is_equal_approx(style_walls[0].end.x, 70) and is_equal_approx(style_walls[1].position.x, 1210), "%s wall art meets the fixed collision boundaries" % id)
 		if art_stage.has_backdrop():
@@ -142,6 +149,18 @@ func _run() -> void:
 		dojo.reset_props()
 		_check(not pot["broken"], "dojo reset restores intact state")
 	dojo.free()
+	main = _new_main()
+	await physics_frame
+	main.call("select_style", &"karate")
+	main.call("start_training")
+	var practice := main.get("stage") as StyleStage
+	if practice != null and not practice.props.is_empty():
+		var prop: Dictionary = practice.props[0]
+		practice.impact((prop["rect"] as Rect2).get_center().x, 20)
+		_check(prop["broken"], "practice impact can break a dojo prop")
+		main.call("_reset_training")
+		_check(not prop["broken"], "training reset restores dojo props without changing match-round persistence")
+	await _free(main)
 
 	print("RESULT: %s (%d failures)" % ["PASS" if _fails == 0 else "FAIL", _fails])
 	quit(1 if _fails > 0 else 0)
