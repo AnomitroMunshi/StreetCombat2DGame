@@ -306,5 +306,82 @@
                         ],
         "file":  "assets\\art\\decals\\rooftop_concrete_v1\\wall_impact_03.png",
         "height":  1024
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            111,
+                            75,
+                            869,
+                            113
+                        ],
+        "file":  "assets\\art\\decals\\temple_stone_v1\\floor_impact_01.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            53,
+                            302,
+                            1047,
+                            140
+                        ],
+        "file":  "assets\\art\\decals\\temple_stone_v1\\floor_impact_02.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            55,
+                            514,
+                            1045,
+                            234
+                        ],
+        "file":  "assets\\art\\decals\\temple_stone_v1\\floor_impact_03.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            75,
+                            807,
+                            1025,
+                            160
+                        ],
+        "file":  "assets\\art\\decals\\temple_stone_v1\\floor_scuff_light.png",
+        "height":  256
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1310,
+                            13,
+                            85,
+                            243
+                        ],
+        "file":  "assets\\art\\decals\\temple_stone_v1\\wall_impact_01.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1100,
+                            256,
+                            344,
+                            256
+                        ],
+        "file":  "assets\\art\\decals\\temple_stone_v1\\wall_impact_02.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1100,
+                            512,
+                            387,
+                            499
+                        ],
+        "file":  "assets\\art\\decals\\temple_stone_v1\\wall_impact_03.png",
+        "height":  1024
     }
 ]

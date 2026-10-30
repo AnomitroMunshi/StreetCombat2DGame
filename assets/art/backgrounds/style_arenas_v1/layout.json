@@ -1,10 +1,209 @@
 {
-  "boxing": {"floor_edge_row": 658, "floor_material": "rubber", "wall_material": "plaster"},
-  "muay_thai": {"floor_edge_row": 650, "floor_material": "wood", "wall_material": "wood"},
-  "karate": {"floor_material": "wood", "wall_material": "wood"},
-  "kung_fu": {"floor_edge_row": 661, "floor_material": "stone", "wall_material": "plaster"},
-  "taekwondo": {"floor_edge_row": 678, "floor_material": "rubber", "wall_material": "plaster"},
-  "kickboxing": {"floor_edge_row": 646, "floor_material": "rubber", "wall_material": "plaster"},
-  "capoeira": {"floor_edge_row": 697, "floor_material": "stone", "wall_material": "plaster"},
-  "jeet_kune_do": {"floor_edge_row": 646, "floor_material": "concrete", "wall_material": "concrete"}
+  "boxing": {
+    "floor_edge_row": 658,
+    "floor_material": "rubber",
+    "wall_material": "plaster"
+  },
+  "muay_thai": {
+    "floor_edge_row": 650,
+    "floor_material": "wood",
+    "wall_material": "wood"
+  },
+  "karate": {
+    "floor_edge_row": 602,
+    "floor_material": "stone",
+    "wall_material": "stone",
+    "decal_directory": "res://assets/art/decals/temple_stone_v1",
+    "props": "res://assets/art/backgrounds/dojo_props_v1/breakable_props.png",
+    "props_rows": [
+      0,
+      380,
+      690,
+      1024
+    ]
+  },
+  "kung_fu": {
+    "floor_edge_row": 661,
+    "floor_material": "stone",
+    "wall_material": "plaster"
+  },
+  "taekwondo": {
+    "floor_edge_row": 678,
+    "floor_material": "rubber",
+    "wall_material": "plaster"
+  },
+  "kickboxing": {
+    "floor_edge_row": 646,
+    "floor_material": "rubber",
+    "wall_material": "plaster"
+  },
+  "capoeira": {
+    "floor_edge_row": 697,
+    "floor_material": "stone",
+    "wall_material": "plaster"
+  },
+  "jeet_kune_do": {
+    "floor_edge_row": 646,
+    "floor_material": "concrete",
+    "wall_material": "concrete"
+  },
+  "street_market": {
+    "floor_edge_row": 630,
+    "floor_material": "concrete",
+    "wall_material": "concrete",
+    "crowd": "street_market_crowd.png",
+    "crowd_heights": [
+      145,
+      145
+    ],
+    "props": "res://assets/art/backgrounds/street_props_v1/breakable_props.png",
+    "props_rows": [
+      0,
+      365,
+      700,
+      1024
+    ],
+    "props_split_x": 710,
+    "props_specs": [
+      [
+        "tire_crate",
+        210,
+        68,
+        8,
+        [
+          0.32,
+          0.25,
+          0.18
+        ]
+      ],
+      [
+        "produce_crate",
+        1060,
+        60,
+        10,
+        [
+          0.6,
+          0.4,
+          0.2
+        ]
+      ],
+      [
+        "bench",
+        1170,
+        75,
+        12,
+        [
+          0.4,
+          0.3,
+          0.22
+        ]
+      ]
+    ]
+  },
+  "street_neon": {
+    "floor_edge_row": 636,
+    "floor_material": "concrete",
+    "wall_material": "concrete",
+    "crowd": "street_neon_crowd.png",
+    "crowd_heights": [
+      145,
+      145
+    ],
+    "props": "res://assets/art/backgrounds/street_props_v1/breakable_props.png",
+    "props_rows": [
+      0,
+      365,
+      700,
+      1024
+    ],
+    "props_split_x": 710,
+    "props_specs": [
+      [
+        "tire_crate",
+        210,
+        68,
+        8,
+        [
+          0.32,
+          0.25,
+          0.18
+        ]
+      ],
+      [
+        "produce_crate",
+        1060,
+        60,
+        10,
+        [
+          0.6,
+          0.4,
+          0.2
+        ]
+      ],
+      [
+        "bench",
+        1170,
+        75,
+        12,
+        [
+          0.4,
+          0.3,
+          0.22
+        ]
+      ]
+    ]
+  },
+  "street_oldtown": {
+    "floor_edge_row": 678,
+    "floor_material": "stone",
+    "wall_material": "stone",
+    "crowd": "street_oldtown_crowd.png",
+    "crowd_heights": [
+      145,
+      145
+    ],
+    "props": "res://assets/art/backgrounds/street_props_v1/breakable_props.png",
+    "props_rows": [
+      0,
+      365,
+      700,
+      1024
+    ],
+    "props_split_x": 710,
+    "props_specs": [
+      [
+        "tire_crate",
+        210,
+        68,
+        8,
+        [
+          0.32,
+          0.25,
+          0.18
+        ]
+      ],
+      [
+        "produce_crate",
+        1060,
+        60,
+        10,
+        [
+          0.6,
+          0.4,
+          0.2
+        ]
+      ],
+      [
+        "bench",
+        1170,
+        75,
+        12,
+        [
+          0.4,
+          0.3,
+          0.22
+        ]
+      ]
+    ]
+  }
 }

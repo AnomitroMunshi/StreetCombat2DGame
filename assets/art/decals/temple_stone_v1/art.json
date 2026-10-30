@@ -1,0 +1,13 @@
+{
+    "floor_width_power":  28,
+    "wall_height_power":  22,
+    "wall_opacity":  0.8,
+    "scuff_opacity":  0.6,
+    "wall_height_base":  60,
+    "scuff_aspect":  0.12,
+    "floor_opacity":  0.8,
+    "floor_width_base":  110,
+    "clip_floor":  true,
+    "wall_aspect":  0.32,
+    "floor_aspect":  0.18
+}

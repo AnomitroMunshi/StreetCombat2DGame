@@ -20,7 +20,7 @@ say() { echo "$1" | tee -a "$LOG"; }
 
 SUITES=(core knockdown jump music announcer input controls stun bangla flow match ai_finisher
 	double_kick x_moves x_ui_ai x_impact x_flinch ai_defense movement styles new_styles agile_styles capoeira_ai
-	style_expansion expansion_visuals training rounds guard ai_signature stage difficulty settings)
+	style_expansion expansion_visuals training rounds guard ai_signature stage difficulty settings decal_art)
 # finisher_contact, one shard per style (the slowest suite by far).
 CONTACT_STYLES=(boxing taekwondo muay_thai karate kung_fu kickboxing capoeira jeet_kune_do bangla_maar)
 for st in "${CONTACT_STYLES[@]}"; do

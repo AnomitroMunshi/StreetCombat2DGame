@@ -9,6 +9,7 @@
 - Decals must match the selected surface. Wooden dents are shallow grain damage, rubber shows abrasion/compression, and stone/concrete have restrained material-appropriate fractures. Floor damage must remain on the floor; wall damage clips to the actual boundary surface.
 - After activating a replacement, remove superseded version directories only after checking runtime references. A `_v1` suffix alone does not mean unused: West Bengal's active decals and newly used material sets remain valid. Do not keep silent fallbacks to obsolete art.
 - Preserve source prompts, source atlases and mechanical export metadata for active assets. Do not regenerate or replace unrelated artwork.
+- Karate now uses the painted stone temple courtyard, including training and style selection. Match arenas mix the player's home with three shared streets; pick once per match and retain it between rounds. Keep crowd clusters independent, behind fighters and outside the central lane. Use a separate arena RNG so scenery cannot alter finisher selection.
 
 ## Shared workspace
 

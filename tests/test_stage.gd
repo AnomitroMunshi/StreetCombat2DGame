@@ -1,7 +1,7 @@
 extends SceneTree
 ## Stage selection and the Kolkata street (WB-01..05): only a PLAYER Bangla
 ## Maar gets it (a Bangla Maar rival alone does not; training and style select
-## are the dojo); stone decals there, wood in the dojo; the walls line up
+## use the temple courtyard); material decals match the floor; walls line up
 ## with the arena bounds; props break once, from strong nearby impacts only,
 ## and what stands on a prop falls with it; a reset restores them.
 
@@ -22,6 +22,7 @@ func _new_main() -> Node:
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
 	current_scene = main
+	main.set("match_arena_override", &"bangla_maar")
 	return main
 
 
@@ -35,20 +36,21 @@ func _run() -> void:
 	var main := _new_main()
 	await physics_frame
 	main.call("select_style", &"bangla_maar")
-	_check(main.call("get_stage_name") == "dojo", "style select: still the dojo")
+	_check(main.call("get_stage_name") == "temple_courtyard", "style select: still the dojo")
 	main.call("confirm_style")
 	var name: String = main.call("get_stage_name")
 	_check(name.begins_with("west_bengal_"), "player Bangla Maar: the Kolkata street (%s)" % name)
 	_check(String((main.get("fx") as FxLayer).decal_set["floor"][0].resource_path).contains("west_bengal"),
 		"stone damage decals on the street")
 	main.call("change_style")
-	_check(main.call("get_stage_name") == "dojo", "back to style select: the dojo")
+	_check(main.call("get_stage_name") == "temple_courtyard", "back to style select: the dojo")
 	main.call("select_style", &"karate")
+	main.set("match_arena_override", &"karate")
 	(main.get_node("Enemy") as Fighter).set_style(StyleRegistry.by_id(&"bangla_maar"))
 	main.call("confirm_style")
-	_check(main.call("get_stage_name") == "dojo", "a Bangla Maar rival alone does not unlock it")
-	_check(String((main.get("fx") as FxLayer).decal_set["floor"][0].resource_path).contains("dojo_wood"),
-		"wood damage decals in the dojo")
+	_check(main.call("get_stage_name") == "temple_courtyard", "a Bangla Maar rival alone does not unlock it")
+	_check(String((main.get("fx") as FxLayer).decal_set["floor"][0].resource_path).contains("temple_stone"),
+		"stone damage decals in the temple courtyard")
 	await _free(main)
 
 	main = _new_main()
@@ -56,7 +58,7 @@ func _run() -> void:
 	main.call("select_style", &"bangla_maar")
 	main.call("start_training")
 	await physics_frame
-	_check(main.call("get_stage_name") == "dojo", "training as Bangla Maar: the dojo")
+	_check(main.call("get_stage_name") == "temple_courtyard", "training as Bangla Maar: the dojo")
 	await _free(main)
 
 	print("[walls and props]")
@@ -96,7 +98,7 @@ func _run() -> void:
 
 	print("[style-specific arenas]")
 	const ARENAS := {
-		&"boxing": "boxing_gym", &"muay_thai": "thai_training_camp", &"karate": "dojo",
+		&"boxing": "boxing_gym", &"muay_thai": "thai_training_camp", &"karate": "temple_courtyard",
 		&"kung_fu": "kung_fu_courtyard", &"taekwondo": "korean_dojang",
 		&"kickboxing": "kickboxing_gym", &"capoeira": "capoeira_roda", &"jeet_kune_do": "hong_kong_rooftop",
 	}
@@ -104,7 +106,8 @@ func _run() -> void:
 		main = _new_main()
 		await physics_frame
 		main.call("select_style", id)
-		_check(main.call("get_stage_name") == "dojo", "%s preview keeps the shared dojo" % id)
+		main.set("match_arena_override", id)
+		_check(main.call("get_stage_name") == "temple_courtyard", "%s preview keeps the shared dojo" % id)
 		(main.get_node("Enemy") as Fighter).set_style(StyleRegistry.by_id(&"bangla_maar"))
 		main.call("confirm_style")
 		var art_stage := main.get("stage") as StyleStage
@@ -112,17 +115,16 @@ func _run() -> void:
 		if art_stage == null:
 			await _free(main)
 			continue
-		var expected_floor: StringName = &"rubber" if id in [&"boxing", &"taekwondo", &"kickboxing"] else (&"wood" if id in [&"karate", &"muay_thai"] else (&"concrete" if id == &"jeet_kune_do" else &"stone"))
+		var expected_floor: StringName = &"rubber" if id in [&"boxing", &"taekwondo", &"kickboxing"] else (&"wood" if id == &"muay_thai" else (&"concrete" if id == &"jeet_kune_do" else &"stone"))
 		_check(art_stage.floor_material() == expected_floor, "%s supplies explicit floor debris material" % id)
-		if id != &"karate":
-			_check(art_stage.has_backdrop(), "%s has its own imported painted backdrop" % id)
-			var layers := art_stage.cutout_layers()
-			_check(layers.size() == 2, "%s supplies separate left and right painted cutout layers" % id)
-			if layers.size() == 2:
-				var left: Rect2 = layers[0]["rect"]
-				var right: Rect2 = layers[1]["rect"]
-				_check(is_equal_approx(left.end.x, 70) and is_equal_approx(right.position.x, 1210), "%s cutouts leave the entire fighting lane clear" % id)
-				_check(is_equal_approx(left.end.y, 566) and is_equal_approx(right.end.y, 566), "%s cutout foot baselines match the arena surface" % id)
+		_check(art_stage.has_backdrop(), "%s has its own imported painted backdrop" % id)
+		var layers := art_stage.cutout_layers()
+		_check(layers.size() == 2, "%s supplies separate left and right painted cutout layers" % id)
+		if layers.size() == 2:
+			var left: Rect2 = layers[0]["rect"]
+			var right: Rect2 = layers[1]["rect"]
+			_check(is_equal_approx(left.end.x, 70) and is_equal_approx(right.position.x, 1210), "%s cutouts leave the entire fighting lane clear" % id)
+			_check(is_equal_approx(left.end.y, 566) and is_equal_approx(right.end.y, 566), "%s cutout foot baselines match the arena surface" % id)
 		var style_walls := art_stage.wall_rects(560)
 		_check(is_equal_approx(style_walls[0].end.x, 70) and is_equal_approx(style_walls[1].position.x, 1210), "%s wall art meets the fixed collision boundaries" % id)
 		if art_stage.has_backdrop():
@@ -152,6 +154,7 @@ func _run() -> void:
 	main = _new_main()
 	await physics_frame
 	main.call("select_style", &"karate")
+	main.set("match_arena_override", &"karate")
 	main.call("start_training")
 	var practice := main.get("stage") as StyleStage
 	if practice != null and not practice.props.is_empty():
@@ -161,6 +164,51 @@ func _run() -> void:
 		main.call("_reset_training")
 		_check(not prop["broken"], "training reset restores dojo props without changing match-round persistence")
 	await _free(main)
+
+	print("[shared street choices and match persistence]")
+	main = _new_main()
+	await physics_frame
+	main.call("select_style", &"boxing")
+	main.set("match_arena_override", &"")
+	var rng := main.get("_arena_rng") as RandomNumberGenerator
+	rng.seed = 20261030
+	var seen := {}
+	for sample in 48:
+		main.set("_match_arena", &"")
+		main.call("_pick_match_arena")
+		var chosen: StringName = main.get("_match_arena")
+		_check(chosen in main.call("arena_choices"), "random arena belongs to home/street pool")
+		seen[chosen] = true
+	_check(seen.size() == 4, "seeded new-match draws reach home and all three streets")
+	await _free(main)
+	for street: StringName in StyleStage.SHARED_STREETS:
+		main = _new_main()
+		await physics_frame
+		main.call("select_style", &"boxing")
+		main.set("match_arena_override", street)
+		main.call("start_match", true)
+		var street_stage := main.get("stage") as StyleStage
+		_check(street_stage != null and street_stage.style_id == street, "shared street can host any style")
+		if street_stage != null:
+			_check(street_stage.has_backdrop() and street_stage.cutout_layers().size() == 2, "street supplies painted backdrop and independent boundaries")
+			_check(street_stage.crowd_layers().size() == 2, "street supplies independent spectator clusters")
+			for crowd: Dictionary in street_stage.crowd_layers():
+				_check((crowd["rect"] as Rect2).end.y < 560, "spectators stand behind the fighting lane")
+			_check(street_stage.backdrop_rect().encloses(StyleStage.VIEW), "street covers camera overscan")
+			_check(street_stage.props.size() == 3, "street provides three independent breakable props")
+			for prop: Dictionary in street_stage.props:
+				_check(is_equal_approx((prop["rect"] as Rect2).end.y, (prop["broken_rect"] as Rect2).end.y), "street intact/broken props share floor baseline")
+			if not street_stage.props.is_empty():
+				var prop: Dictionary = street_stage.props[0]
+				street_stage.impact((prop["rect"] as Rect2).get_center().x, 30)
+				_check(prop["broken"], "strong nearby street impact breaks prop")
+				street_stage.reset_props()
+				_check(not prop["broken"], "street prop reset restores intact state")
+			var identity := street_stage.get_instance_id()
+			main.call("_next_round")
+			main.call("_apply_stage")
+			_check(main.get("stage").get_instance_id() == identity, "round transition preserves the selected street")
+		await _free(main)
 
 	print("RESULT: %s (%d failures)" % ["PASS" if _fails == 0 else "FAIL", _fails])
 	quit(1 if _fails > 0 else 0)

@@ -12,13 +12,17 @@ const VIEW := Rect2(-200, -200, 1680, 1120)
 const PROFILES := {
 	&"boxing": {"name": "boxing_gym", "floor": &"rubber", "wall": &"plaster"},
 	&"muay_thai": {"name": "thai_training_camp", "floor": &"wood", "wall": &"wood"},
-	&"karate": {"name": "dojo", "floor": &"wood", "wall": &"wood"},
+	&"karate": {"name": "temple_courtyard", "floor": &"stone", "wall": &"stone"},
 	&"kung_fu": {"name": "kung_fu_courtyard", "floor": &"stone", "wall": &"plaster"},
 	&"taekwondo": {"name": "korean_dojang", "floor": &"rubber", "wall": &"plaster"},
 	&"kickboxing": {"name": "kickboxing_gym", "floor": &"rubber", "wall": &"plaster"},
 	&"capoeira": {"name": "capoeira_roda", "floor": &"stone", "wall": &"plaster"},
 	&"jeet_kune_do": {"name": "hong_kong_rooftop", "floor": &"concrete", "wall": &"concrete"},
+	&"street_market": {"name": "street_market", "floor": &"concrete", "wall": &"concrete"},
+	&"street_neon": {"name": "street_neon", "floor": &"concrete", "wall": &"concrete"},
+	&"street_oldtown": {"name": "street_oldtown", "floor": &"stone", "wall": &"stone"},
 }
+const SHARED_STREETS: Array[StringName] = [&"street_market", &"street_neon", &"street_oldtown"]
 const DECAL_DIRS := {
 	&"wood": "res://assets/art/decals/dojo_wood_v2",
 	&"rubber": "res://assets/art/decals/gym_rubber_v1",
@@ -44,17 +48,22 @@ var _front: Node2D
 var _layout: Dictionary = {}
 var _cutout_texture: Texture2D
 var _cutouts: Array[Dictionary] = []
+var _crowd_texture: Texture2D
+var _crowds: Array[Dictionary] = []
 static var _prop_region_cache: Dictionary = {}
 static var _cutout_region_cache: Dictionary = {}
 
 func setup(which: StringName, floor_y: float = 560.0) -> void:
 	style_id = which if PROFILES.has(which) else &"karate"
 	_floor_y = floor_y
+	_layout = {}
+	_backdrop_rect = VIEW
 	if FileAccess.file_exists(LAYOUT_FILE):
 		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(LAYOUT_FILE))
 		if data is Dictionary: _layout = data.get(String(style_id), {})
 	var path := ART_DIR + String(style_id) + "_backdrop.png"
-	if not is_dojo() and ResourceLoader.exists(path):
+	_backdrop = null
+	if ResourceLoader.exists(path):
 		_backdrop = load(path)
 		var size := _backdrop.get_size()
 		var edge := clampf(float(_layout.get("floor_edge_row", 699.0)), 1, size.y - 1)
@@ -63,6 +72,7 @@ func setup(which: StringName, floor_y: float = 560.0) -> void:
 		var scale := maxf(VIEW.size.x / size.x, maxf((_floor_y - VIEW.position.y) / edge, (VIEW.end.y - _floor_y) / (size.y - edge)))
 		_backdrop_rect = Rect2(Vector2(640 - size.x * scale * 0.5, _floor_y - edge * scale), size * scale)
 	_build_cutouts()
+	_build_crowds()
 	_build_props()
 	if _front == null:
 		_front = Node2D.new()
@@ -72,7 +82,7 @@ func setup(which: StringName, floor_y: float = 560.0) -> void:
 	_front.queue_redraw()
 
 func is_dojo() -> bool:
-	return style_id == &"karate"
+	return false  # Karate now uses the painted temple courtyard.
 
 func get_stage_name() -> String:
 	return PROFILES[style_id]["name"]
@@ -84,7 +94,7 @@ func wall_material() -> StringName:
 	return StringName(_layout.get("wall_material", PROFILES[style_id]["wall"]))
 
 func decal_directory() -> String:
-	return DECAL_DIRS.get(floor_material(), DECAL_DIRS[&"wood"])
+	return String(_layout.get("decal_directory", DECAL_DIRS.get(floor_material(), DECAL_DIRS[&"wood"])))
 
 func floor_main() -> Color:
 	return COLORS[floor_material()][0]
@@ -115,7 +125,6 @@ func cutout_layers() -> Array[Dictionary]:
 func _build_cutouts() -> void:
 	_cutouts.clear()
 	_cutout_texture = null
-	if is_dojo(): return
 	var path := String(_layout.get("cutouts", String(style_id) + "_cutouts.png"))
 	if not path.begins_with("res://"): path = ART_DIR + path
 	if not ResourceLoader.exists(path): return
@@ -142,11 +151,39 @@ func _cutout_rect(layer: Dictionary, floor_y: float) -> Rect2:
 	var x := Fighter.ARENA_MIN_X - 20.0 - size.x if int(layer["side"]) < 0 else Fighter.ARENA_MAX_X + 20.0
 	return Rect2(Vector2(x, floor_y + 6.0 - size.y), size)
 
+## Separate spectators sit on the rear pavement, above the fighting lane.
+func _build_crowds() -> void:
+	_crowds.clear()
+	_crowd_texture = null
+	var path := String(_layout.get("crowd", ""))
+	if path == "": return
+	if not path.begins_with("res://"): path = ART_DIR + path
+	if not ResourceLoader.exists(path): return
+	_crowd_texture = load(path)
+	var image := _crowd_texture.get_image()
+	if image.is_compressed(): image.decompress()
+	var split := clampi(int(_layout.get("crowd_split_x", image.get_width() / 2)), 1, image.get_width() - 1)
+	var key := path + ":" + str(split)
+	if not _cutout_region_cache.has(key):
+		_cutout_region_cache[key] = [_alpha_bounds(image, Rect2i(0, 0, split, image.get_height())), _alpha_bounds(image, Rect2i(split, 0, image.get_width() - split, image.get_height()))]
+	var heights: Array = _layout.get("crowd_heights", [130.0, 130.0])
+	for index in 2:
+		var source: Rect2 = _cutout_region_cache[key][index]
+		var scale: float = float(heights[index]) / maxf(source.size.y, 1)
+		var size := source.size * scale
+		var center_x := 260.0 if index == 0 else 1020.0
+		_crowds.append({"source": source, "rect": Rect2(Vector2(center_x - size.x / 2, _floor_y - 22 - size.y), size)})
+
+func crowd_layers() -> Array[Dictionary]:
+	return _crowds.duplicate(true)
+
 func draw_back(c: CanvasItem, floor_y: float) -> void:
 	if _backdrop != null:
 		c.draw_texture_rect(_backdrop, _backdrop_rect, false)
 	else:
 		DojoStage.draw(c, floor_y)
+	for crowd: Dictionary in _crowds:
+		c.draw_texture_rect_region(_crowd_texture, crowd["rect"], crowd["source"])
 	if _cutouts.size() == 2:
 		for layer in _cutouts:
 			c.draw_texture_rect_region(_cutout_texture, _cutout_rect(layer, floor_y), layer["source"])
@@ -164,37 +201,43 @@ func wall_rects(floor_y: float) -> Array[Rect2]:
 func _build_props() -> void:
 	props.clear()
 	# Each atlas is independent of the backdrop, with intact/broken pairs.
-	var path := String(_layout.get("props", DOJO_PROPS if is_dojo() else ""))
+	var path := String(_layout.get("props", DOJO_PROPS if style_id == &"karate" else ""))
 	if path == "" or not ResourceLoader.exists(path): return
 	_props_texture = load(path)
 	var size := _props_texture.get_size()
 	var cuts: Array = _layout.get("props_rows", [0, 380, 690, 1024] if path == DOJO_PROPS and size.y == 1024 else [0, int(size.y / 3), int(size.y * 2 / 3), int(size.y)])
-	var cache_key := path + str(cuts)
+	var split := clampi(int(_layout.get("props_split_x", size.x * 0.5)), 1, int(size.x) - 1)
+	var cache_key := path + str(cuts) + ":" + str(split)
 	if not _prop_region_cache.has(cache_key):
 		var image := _props_texture.get_image()
 		if image.is_compressed(): image.decompress()
 		var regions: Array = []
-		var width := image.get_width() / 2
 		for row in 3:
 			var y0 := int(cuts[row])
 			var height := int(cuts[row + 1]) - y0
-			regions.append([_alpha_bounds(image, Rect2i(0, y0, width, height)), _alpha_bounds(image, Rect2i(width, y0, width, height))])
+			regions.append([_alpha_bounds(image, Rect2i(0, y0, split, height)), _alpha_bounds(image, Rect2i(split, y0, image.get_width() - split, height))])
 		_prop_region_cache[cache_key] = regions
 	var sources: Array = _prop_region_cache[cache_key]
 	# [id, centre x, visible height, impact that breaks it, debris colour]: spread
 	# along the back wall, clear of each other, the pot in the left corner and
 	# the boards and bench apart on the right.
-	var specs := [[&"pot", 170.0, 58.0, 8.0, Color(0.55, 0.32, 0.16)], [&"boards", 900.0, 54.0, 10.0, Color(0.60, 0.40, 0.20)], [&"bench", 1100.0, 64.0, 12.0, Color(0.48, 0.31, 0.17)]]
+	var specs: Array = _layout.get("props_specs", [[&"pot", 170.0, 58.0, 8.0, Color(0.55, 0.32, 0.16)], [&"boards", 900.0, 54.0, 10.0, Color(0.60, 0.40, 0.20)], [&"bench", 1100.0, 64.0, 12.0, Color(0.48, 0.31, 0.17)]])
 	for row in 3:
+		var prop_color: Color
+		var tint: Variant = specs[row][4]
+		if tint is Array:
+			prop_color = Color(float(tint[0]), float(tint[1]), float(tint[2]))
+		else:
+			prop_color = Color.from_string(tint, Color.WHITE) if tint is String else tint
 		var intact: Rect2 = sources[row][0]
 		var broken: Rect2 = sources[row][1]
 		var k: float = float(specs[row][2]) / intact.size.y
 		var base := _floor_y + PROP_BASE
 		var x: float = specs[row][1]
-		props.append({"id": specs[row][0], "intact": intact, "broken_src": broken,
+		props.append({"id": StringName(specs[row][0]), "intact": intact, "broken_src": broken,
 			"rect": Rect2(Vector2(x - intact.size.x * k * 0.5, base - intact.size.y * k), intact.size * k),
 			"broken_rect": Rect2(Vector2(x - broken.size.x * k * 0.5, base - broken.size.y * k), broken.size * k),
-			"broken": false, "breaks_at": specs[row][3], "color": specs[row][4]})
+			"broken": false, "breaks_at": specs[row][3], "color": prop_color})
 
 static func _alpha_bounds(image: Image, region: Rect2i) -> Rect2:
 	var lo := region.end

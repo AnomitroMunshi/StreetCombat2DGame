@@ -1,0 +1,107 @@
+{
+  "karate_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "clear_fraction": 0.6669661204020182,
+    "gutter_extrema": [
+      0,
+      1
+    ]
+  },
+  "street_market_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "clear_fraction": 0.6308848063151041,
+    "gutter_extrema": [
+      0,
+      1
+    ]
+  },
+  "street_market_crowd.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "clear_fraction": 0.6141471862792969,
+    "gutter_extrema": [
+      0,
+      1
+    ]
+  },
+  "street_neon_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "clear_fraction": 0.6731656392415365,
+    "gutter_extrema": [
+      0,
+      0
+    ]
+  },
+  "street_neon_crowd.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "clear_fraction": 0.5331916809082031,
+    "gutter_extrema": [
+      0,
+      1
+    ]
+  },
+  "street_oldtown_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "clear_fraction": 0.6102739969889323,
+    "gutter_extrema": [
+      0,
+      1
+    ]
+  },
+  "street_oldtown_crowd.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "clear_fraction": 0.5786603291829427,
+    "gutter_extrema": [
+      0,
+      1
+    ]
+  }
+}
