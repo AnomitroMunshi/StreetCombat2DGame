@@ -17,9 +17,9 @@ const LIMITER_CEILING_DB: float = -1.0
 var _sfx: Dictionary = {}
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice: int = 0
-## Music id -> [file, gain dB]. Gains match each track's measured loudness to
-## the procedural loop's (about -22 dBFS mean as heard). Add a style's track
-## here when it exists; until then that style plays the procedural loop.
+## Music id -> [file, gain dB]. Gains level every track at the same perceived
+## loudness in game (-19.5 LUFS, measured per file). Add a style's track here
+## when it exists; until then that style plays the procedural loop.
 ## Each registered style has its own track; unknown future styles fall back.
 const MUSIC_FILES: Dictionary = {
 	&"menu": ["res://assets/audio/music/originals/menu_theme.mp3", -5.1],
