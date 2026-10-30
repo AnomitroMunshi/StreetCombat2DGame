@@ -148,6 +148,7 @@ var _debug_visible: bool = false
 var _last_event: String = "-"
 var _fx_rng := RandomNumberGenerator.new()
 var _finisher_rng := RandomNumberGenerator.new()
+var _arena_rng := RandomNumberGenerator.new()
 var _finisher: FinisherDirector = null
 ## The finisher's event this tick ({} if none; tests read it).
 var _last_finisher_event: Dictionary = {}
@@ -189,8 +190,11 @@ var _pause_message: Array = ["", ""]
 # cracks), whether the attacker was airborne last tick (takeoff dust), and the
 # last x of each skidding body (floor scuff marks).
 var _wall_dent := Vector2.INF
-## The Kolkata street (player Bangla Maar only, never training); null = dojo.
+## Arena is selected once for a new match and retained between rounds.
 var stage = null  # WestBengalStage or StyleStage; presentation interface below.
+## Optional deterministic arena selection for capture/tests; empty means random.
+var match_arena_override: StringName = &""
+var _match_arena: StringName = &""
 const DECALS_WOOD: String = "res://assets/art/decals/dojo_wood_v2"
 const DECALS_STONE: String = "res://assets/art/decals/west_bengal_v1"
 const STONE_LIGHT := Color(0.7, 0.66, 0.6)
@@ -219,6 +223,7 @@ func _ready() -> void:
 	_fx_rng.seed = 7
 	# Which finisher plays is presentation, not combat: vary it every match.
 	_finisher_rng.randomize()
+	_arena_rng.randomize()
 	set_game_speed(1.0)
 	# The camera is moved in _process, so it must not be physics-interpolated.
 	camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
@@ -629,12 +634,23 @@ func confirm_style() -> void:
 	_show_ready()
 
 
-## The stage follows the PLAYER's confirmed style. Bangla Maar keeps Kolkata;
-## the other styles use their own arenas. The rival never chooses the stage;
-## training and style select are always the dojo. Picked before the match and
-## kept for all of it (rounds included).
+## Home arena plus three shared streets. The rival never chooses the arena.
+## A single draw at confirmation keeps scenery and damage stable across rounds.
+func arena_choices() -> Array[StringName]:
+	var home: StringName = player.style.id if player.style != null else &"karate"
+	var choices: Array[StringName] = [home]
+	choices.append_array(StyleStage.SHARED_STREETS)
+	return choices
+
+func _pick_match_arena() -> void:
+	if _match_arena != &"": return
+	var choices := arena_choices()
+	_match_arena = match_arena_override if match_arena_override in choices else choices[_arena_rng.randi_range(0, choices.size() - 1)]
+
 func _apply_stage() -> void:
-	var wanted: StringName = &"karate" if training != null or _round_state == RoundState.STYLE_SELECT or player.style == null else player.style.id
+	var practice := training != null or _round_state == RoundState.STYLE_SELECT or player.style == null
+	if not practice: _pick_match_arena()
+	var wanted: StringName = &"karate" if practice else _match_arena
 	var same: bool = (stage is WestBengalStage and wanted == &"bangla_maar") or (stage is StyleStage and stage.style_id == wanted)
 	if same: return  # Keep art, props and variant fixed throughout the match.
 	if stage != null:
@@ -643,7 +659,7 @@ func _apply_stage() -> void:
 		stage = null
 	if wanted == &"bangla_maar":
 		stage = WestBengalStage.new()
-		stage.setup(&"howrah" if _finisher_rng.randf() < 0.5 else &"victoria", FLOOR_Y)
+		stage.setup(&"howrah" if _arena_rng.randf() < 0.5 else &"victoria", FLOOR_Y)
 		fx.decal_set = FxLayer.load_decal_set(DECALS_STONE)
 	else:
 		stage = StyleStage.new()
@@ -693,6 +709,7 @@ func _show_ready() -> void:
 func change_style() -> void:
 	if _round_state == RoundState.PRE_MATCH:
 		_set_round_state(RoundState.STYLE_SELECT)
+		_match_arena = &""
 		_apply_stage()
 		hud.show_button(&"")
 		hud.set_message("", "")
