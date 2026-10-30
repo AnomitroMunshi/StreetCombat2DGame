@@ -19,7 +19,7 @@ Runtime layout: `assets/art/backgrounds/style_arenas_v1/layout.json`. All non-WB
 
 Each new match draws uniformly from the player's home and the three shared streets. A Bangla Maar home draw then chooses its existing Howrah/Victoria variant. Arena stays fixed across rounds; rematch draws again. Rival selection never chooses the arena. Practice uses Karate temple. Crowds are independent decorative rear layers, with two clusters per street; they are static painted sprites.
 
-Floor contact remains560, collision bounds90..1190. Side cutout inner faces70/1210; feet566. Crowds stand on rear baseline538 and props572. Atlas/source prompts retained. The street prop atlas uses column split710 and rows0,365,700,1024; dojo prop rows are unequal as documented in layout.
+Floor contact remains560, collision bounds90..1190. Side cutout inner faces70/1210; feet566. Crowds stand on rear baseline538 and props568. Atlas/source prompts retained. The street prop atlas uses column split710 and rows0,365,700,1024; dojo prop rows are unequal as documented in layout.
 
 Validation: editor imports/parses, stage selection/randomization/persistence/props suite, material decal suite, and rendered normal/damaged/full-overscan captures. Review scripts preserve deterministic home-map captures through match_arena_override.
 
