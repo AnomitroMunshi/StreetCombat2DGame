@@ -1,0 +1,72 @@
+{
+  "candidate": 10,
+  "source_sha256": {
+    "scripts/combat_data.gd": "e35f22d46a0902a9bfd1df5f5a465e5bf8092614a0d6491fc303b9d8fa9bc222",
+    "scripts/enemy_ai.gd": "84c80b633a0674a94618359483bfcfeccb5a255859d3565c2b316a22af2fc019",
+    "scripts/fighter.gd": "caa043e71f88c3ae88f045c3b2a20cbcff2242d024f15da294e9483fd7446396",
+    "scripts/martial_art_style.gd": "73798ab834bc071d17bfbfcbcafe7c94704cba49359ce42d2cd34b994c00fd62",
+    "styles/capoeira.tres": "d19d5f575b2f4644d78f72dd7fa116a38872e8ee413d017d622b905854503f4b",
+    "styles/jeet_kune_do.tres": "9ac7e3eeae6209622edd72e3b5432dbefff6076590f70a00cc2dcefe499aba6f"
+  },
+  "tuning": {
+    "settings": {
+      "ai_personality": "common defaults; style plans and preferred range retained",
+      "health": 100,
+      "scope": "combat-only; no rendering, audio, cinematic slowdown or finishers",
+      "seed_set": [
+        11,
+        23,
+        37,
+        53,
+        71,
+        89,
+        101,
+        127,
+        149,
+        173,
+        197,
+        223
+      ],
+      "target_styles": [
+        "capoeira"
+      ],
+      "tick_limit": 5400
+    },
+    "outcomes": {
+      "win": 100,
+      "loss": 92
+    }
+  },
+  "validation": {
+    "settings": {
+      "ai_personality": "common defaults; style plans and preferred range retained",
+      "health": 100,
+      "scope": "combat-only; no rendering, audio, cinematic slowdown or finishers",
+      "seed_set": [
+        503,
+        541,
+        577,
+        613,
+        653,
+        691,
+        733,
+        773,
+        811,
+        853,
+        907,
+        953
+      ],
+      "target_styles": [
+        "capoeira"
+      ],
+      "tick_limit": 5400
+    },
+    "outcomes": {
+      "loss": 84,
+      "win": 108
+    }
+  },
+  "combined_wins": 208,
+  "combined_matches": 384,
+  "combined_win_percent": 54.166666666666664
+}

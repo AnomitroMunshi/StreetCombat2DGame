@@ -1,0 +1,6644 @@
+{
+	"revision": "Fresh untouched validation of candidate09; palm10/heel15, control/stun revision",
+	"rows": [
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 6
+				},
+				{
+					"BLOCKED": 7,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				31
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:STARTUP": 1,
+					"cap_low_sweep:STARTUP": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"uppercut:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_hook:BLOCKED": 1,
+					"body_hook:HIT": 3,
+					"body_hook:KO": 1,
+					"cross:BLOCKED": 1,
+					"cross:HIT": 2,
+					"dempsey_hook_left:BLOCKED": 2,
+					"dempsey_hook_right:BLOCKED": 2,
+					"jab:HIT": 3,
+					"slip_counter:HIT": 1,
+					"uppercut:BLOCKED": 1,
+					"uppercut:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"bob_weave": 1,
+					"body_hook": 5,
+					"cross": 3,
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 2,
+					"jab": 3,
+					"slip_counter": 1,
+					"uppercut": 3
+				}
+			],
+			"outcome": "loss",
+			"rival": "boxing",
+			"seed": 307,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1185
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 3,
+					"WHIFF": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 8,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				64
+			],
+			"interrupted": [
+				{
+					"cap_crescent:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"dempsey_hook_left:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_crescent:WHIFF": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_hook:HIT": 1,
+					"body_hook:KO": 1,
+					"cross:HIT": 1,
+					"jab:HIT": 2,
+					"overhand:BLOCKED": 1,
+					"overhand:HIT": 2,
+					"power_uppercut:HIT": 1,
+					"slip_counter:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_crescent": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 2,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"bob_weave": 1,
+					"body_hook": 3,
+					"cross": 1,
+					"dempsey_hook_left": 1,
+					"jab": 2,
+					"overhand": 3,
+					"power_uppercut": 1,
+					"slip_counter": 1,
+					"uppercut": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "boxing",
+			"seed": 331,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1000
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 4
+				}
+			],
+			"health": [
+				51,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"dempsey_hook_left:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:HIT": 5,
+					"cap_quick_palm:HIT": 5,
+					"cap_quick_palm:KO": 1
+				},
+				{
+					"dempsey_hook_left:BLOCKED": 1,
+					"dempsey_hook_right:BLOCKED": 1,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 1,
+					"overhand:HIT": 2,
+					"superman_punch:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 6
+				},
+				{
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 1,
+					"jab": 2,
+					"overhand": 2,
+					"superman_punch": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "boxing",
+			"seed": 353,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1062
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 7,
+					"PARRIED": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 7,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				19
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"body_hook:STARTUP": 1,
+					"dempsey_hook_left:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:HIT": 1,
+					"cap_spin_heel:PARRIED": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_hook:HIT": 3,
+					"body_hook:KO": 1,
+					"dempsey_hook_left:BLOCKED": 1,
+					"dempsey_hook_right:BLOCKED": 1,
+					"jab:BLOCKED": 1,
+					"overhand:HIT": 1,
+					"power_uppercut:HIT": 2,
+					"superman_punch:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 3,
+					"cap_spin_heel": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"bob_weave": 2,
+					"body_hook": 5,
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 1,
+					"jab": 1,
+					"overhand": 1,
+					"power_uppercut": 2,
+					"superman_punch": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "boxing",
+			"seed": 379,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1085
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 5,
+					"HIT": 9,
+					"KO": 1,
+					"WHIFF": 1
+				},
+				{
+					"BLOCKED": 9,
+					"HIT": 5
+				}
+			],
+			"health": [
+				54,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"body_hook:STARTUP": 1,
+					"jump_punch:RECOVERY": 1,
+					"slip_counter:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:BLOCKED": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 2,
+					"cap_quick_palm:WHIFF": 1,
+					"cap_spin_heel:BLOCKED": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1,
+					"meia_lua_tornado:KO": 1
+				},
+				{
+					"body_hook:BLOCKED": 2,
+					"cross:BLOCKED": 1,
+					"dempsey_hook_left:BLOCKED": 2,
+					"dempsey_hook_right:BLOCKED": 2,
+					"jab:HIT": 3,
+					"overhand:HIT": 1,
+					"slip_counter:BLOCKED": 1,
+					"superman_punch:HIT": 1,
+					"uppercut:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 2
+				},
+				{
+					"bob_weave": 1,
+					"body_hook": 3,
+					"cross": 2,
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 2,
+					"jab": 3,
+					"jump_punch": 1,
+					"overhand": 1,
+					"slip_counter": 2,
+					"superman_punch": 1,
+					"uppercut": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "boxing",
+			"seed": 401,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1474
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 7,
+					"WHIFF": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 8,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				18
+			],
+			"interrupted": [
+				{},
+				{
+					"dempsey_hook_left:STARTUP": 1,
+					"power_uppercut:STARTUP": 1,
+					"uppercut:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 2,
+					"cap_crescent:BLOCKED": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:WHIFF": 1,
+					"cap_spin_heel:BLOCKED": 2,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_hook:HIT": 1,
+					"cross:HIT": 1,
+					"cross:KO": 1,
+					"dempsey_hook_left:HIT": 1,
+					"dempsey_hook_right:HIT": 1,
+					"jab:BLOCKED": 2,
+					"jab:HIT": 1,
+					"power_uppercut:HIT": 2,
+					"slip_counter:PARRIED": 1,
+					"uppercut:BLOCKED": 1,
+					"uppercut:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 2,
+					"cap_crescent": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"bob_weave": 2,
+					"body_hook": 2,
+					"cross": 2,
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 1,
+					"jab": 3,
+					"power_uppercut": 4,
+					"slip_counter": 1,
+					"uppercut": 3
+				}
+			],
+			"outcome": "loss",
+			"rival": "boxing",
+			"seed": 431,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1348
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 6
+				},
+				{
+					"BLOCKED": 7,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				31
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:STARTUP": 1,
+					"cap_low_sweep:STARTUP": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"uppercut:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_hook:BLOCKED": 1,
+					"body_hook:HIT": 3,
+					"body_hook:KO": 1,
+					"cross:BLOCKED": 1,
+					"cross:HIT": 2,
+					"dempsey_hook_left:BLOCKED": 2,
+					"dempsey_hook_right:BLOCKED": 2,
+					"jab:HIT": 3,
+					"slip_counter:HIT": 1,
+					"uppercut:BLOCKED": 1,
+					"uppercut:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"bob_weave": 1,
+					"body_hook": 5,
+					"cross": 3,
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 2,
+					"jab": 3,
+					"slip_counter": 1,
+					"uppercut": 3
+				}
+			],
+			"outcome": "loss",
+			"rival": "boxing",
+			"seed": 307,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1185
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 3,
+					"WHIFF": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 8,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				64
+			],
+			"interrupted": [
+				{
+					"cap_crescent:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"dempsey_hook_left:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_crescent:WHIFF": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_hook:HIT": 1,
+					"body_hook:KO": 1,
+					"cross:HIT": 1,
+					"jab:HIT": 2,
+					"overhand:BLOCKED": 1,
+					"overhand:HIT": 2,
+					"power_uppercut:HIT": 1,
+					"slip_counter:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_crescent": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 2,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"bob_weave": 1,
+					"body_hook": 3,
+					"cross": 1,
+					"dempsey_hook_left": 1,
+					"jab": 2,
+					"overhand": 3,
+					"power_uppercut": 1,
+					"slip_counter": 1,
+					"uppercut": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "boxing",
+			"seed": 331,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1000
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 4
+				}
+			],
+			"health": [
+				51,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"dempsey_hook_left:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:HIT": 5,
+					"cap_quick_palm:HIT": 5,
+					"cap_quick_palm:KO": 1
+				},
+				{
+					"dempsey_hook_left:BLOCKED": 1,
+					"dempsey_hook_right:BLOCKED": 1,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 1,
+					"overhand:HIT": 2,
+					"superman_punch:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 6
+				},
+				{
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 1,
+					"jab": 2,
+					"overhand": 2,
+					"superman_punch": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "boxing",
+			"seed": 353,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1062
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 7,
+					"PARRIED": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 7,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				19
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"body_hook:STARTUP": 1,
+					"dempsey_hook_left:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:HIT": 1,
+					"cap_spin_heel:PARRIED": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_hook:HIT": 3,
+					"body_hook:KO": 1,
+					"dempsey_hook_left:BLOCKED": 1,
+					"dempsey_hook_right:BLOCKED": 1,
+					"jab:BLOCKED": 1,
+					"overhand:HIT": 1,
+					"power_uppercut:HIT": 2,
+					"superman_punch:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 3,
+					"cap_spin_heel": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"bob_weave": 2,
+					"body_hook": 5,
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 1,
+					"jab": 1,
+					"overhand": 1,
+					"power_uppercut": 2,
+					"superman_punch": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "boxing",
+			"seed": 379,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1085
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 5,
+					"HIT": 9,
+					"KO": 1,
+					"WHIFF": 1
+				},
+				{
+					"BLOCKED": 9,
+					"HIT": 5
+				}
+			],
+			"health": [
+				54,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"body_hook:STARTUP": 1,
+					"jump_punch:RECOVERY": 1,
+					"slip_counter:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:BLOCKED": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 2,
+					"cap_quick_palm:WHIFF": 1,
+					"cap_spin_heel:BLOCKED": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1,
+					"meia_lua_tornado:KO": 1
+				},
+				{
+					"body_hook:BLOCKED": 2,
+					"cross:BLOCKED": 1,
+					"dempsey_hook_left:BLOCKED": 2,
+					"dempsey_hook_right:BLOCKED": 2,
+					"jab:HIT": 3,
+					"overhand:HIT": 1,
+					"slip_counter:BLOCKED": 1,
+					"superman_punch:HIT": 1,
+					"uppercut:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 2
+				},
+				{
+					"bob_weave": 1,
+					"body_hook": 3,
+					"cross": 2,
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 2,
+					"jab": 3,
+					"jump_punch": 1,
+					"overhand": 1,
+					"slip_counter": 2,
+					"superman_punch": 1,
+					"uppercut": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "boxing",
+			"seed": 401,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1474
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 7,
+					"WHIFF": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 8,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				18
+			],
+			"interrupted": [
+				{},
+				{
+					"dempsey_hook_left:STARTUP": 1,
+					"power_uppercut:STARTUP": 1,
+					"uppercut:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 2,
+					"cap_crescent:BLOCKED": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:WHIFF": 1,
+					"cap_spin_heel:BLOCKED": 2,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_hook:HIT": 1,
+					"cross:HIT": 1,
+					"cross:KO": 1,
+					"dempsey_hook_left:HIT": 1,
+					"dempsey_hook_right:HIT": 1,
+					"jab:BLOCKED": 2,
+					"jab:HIT": 1,
+					"power_uppercut:HIT": 2,
+					"slip_counter:PARRIED": 1,
+					"uppercut:BLOCKED": 1,
+					"uppercut:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 2,
+					"cap_crescent": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"bob_weave": 2,
+					"body_hook": 2,
+					"cross": 2,
+					"dempsey_hook_left": 2,
+					"dempsey_hook_right": 1,
+					"jab": 3,
+					"power_uppercut": 4,
+					"slip_counter": 1,
+					"uppercut": 3
+				}
+			],
+			"outcome": "loss",
+			"rival": "boxing",
+			"seed": 431,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1348
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 7
+				}
+			],
+			"health": [
+				36,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:STARTUP": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"thai_roundhouse:STARTUP": 2
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:HIT": 4,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:KO": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_straight:HIT": 4,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 1,
+					"low_roundhouse:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_air_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 1,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_straight": 4,
+					"elbow": 2,
+					"high_kick": 1,
+					"jab": 2,
+					"low_roundhouse": 2,
+					"thai_roundhouse": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "muay_thai",
+			"seed": 307,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1211
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 4,
+					"HIT": 4
+				},
+				{
+					"BLOCKED": 5,
+					"HIT": 9,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				57
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 2
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:BLOCKED": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:BLOCKED": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_roundhouse:KO": 1,
+					"body_straight:BLOCKED": 1,
+					"body_straight:HIT": 3,
+					"elbow:BLOCKED": 1,
+					"elbow:HIT": 2,
+					"jab:BLOCKED": 2,
+					"jab:HIT": 1,
+					"low_roundhouse:HIT": 2,
+					"rising_elbow:HIT": 1,
+					"thai_roundhouse:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 2,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_roundhouse": 1,
+					"body_straight": 4,
+					"elbow": 5,
+					"jab": 3,
+					"low_roundhouse": 2,
+					"rising_elbow": 1,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "muay_thai",
+			"seed": 331,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1147
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 4
+				},
+				{
+					"HIT": 9,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				49
+			],
+			"interrupted": [
+				{
+					"body_punch:STARTUP": 1,
+					"cap_quick_palm:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 2
+				},
+				{
+					"thai_roundhouse:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_quick_palm:HIT": 2,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_roundhouse:HIT": 1,
+					"body_straight:HIT": 2,
+					"high_kick:HIT": 1,
+					"jab:HIT": 1,
+					"jab:KO": 1,
+					"low_roundhouse:HIT": 3,
+					"thai_roundhouse:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_cartwheel": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_roundhouse": 1,
+					"body_straight": 2,
+					"elbow": 1,
+					"high_kick": 1,
+					"jab": 2,
+					"low_roundhouse": 3,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "muay_thai",
+			"seed": 353,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 970
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"HIT": 2,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				78,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_spin_heel:RECOVERY": 1
+				},
+				{
+					"jump_kick:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_low_sweep:HIT": 2,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:HIT": 5,
+					"cap_spin_heel:BLOCKED": 1,
+					"jump_punch:HIT": 1
+				},
+				{
+					"body_straight:HIT": 1,
+					"high_kick:HIT": 1,
+					"thai_roundhouse:PARRIED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 3,
+					"jump_punch": 1
+				},
+				{
+					"body_straight": 1,
+					"high_kick": 1,
+					"jab": 1,
+					"jump_kick": 1,
+					"low_roundhouse": 1,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "muay_thai",
+			"seed": 379,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 747
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 2
+				}
+			],
+			"health": [
+				77,
+				0
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"body_punch:HIT": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 2,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:KO": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"elbow:HIT": 1,
+					"rising_elbow:HIT": 1,
+					"thai_roundhouse:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_crescent": 1,
+					"cap_leap_palm": 2,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"elbow": 1,
+					"low_roundhouse": 1,
+					"rising_elbow": 1,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "muay_thai",
+			"seed": 401,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 779
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 10,
+					"KO": 1,
+					"PARRIED": 2
+				}
+			],
+			"health": [
+				0,
+				8
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1,
+					"cap_spin_heel:RECOVERY": 2
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 2,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_roundhouse:HIT": 3,
+					"body_roundhouse:KO": 1,
+					"body_roundhouse:PARRIED": 1,
+					"body_straight:HIT": 1,
+					"elbow:HIT": 2,
+					"jab:BLOCKED": 2,
+					"jab:HIT": 3,
+					"rising_elbow:HIT": 1,
+					"thai_roundhouse:PARRIED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 2,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_roundhouse": 5,
+					"body_straight": 1,
+					"elbow": 3,
+					"jab": 5,
+					"rising_elbow": 1,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "muay_thai",
+			"seed": 431,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1146
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 7
+				}
+			],
+			"health": [
+				36,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:STARTUP": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"thai_roundhouse:STARTUP": 2
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:HIT": 4,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:KO": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_straight:HIT": 4,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 1,
+					"low_roundhouse:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_air_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 1,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_straight": 4,
+					"elbow": 2,
+					"high_kick": 1,
+					"jab": 2,
+					"low_roundhouse": 2,
+					"thai_roundhouse": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "muay_thai",
+			"seed": 307,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1211
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 4,
+					"HIT": 4
+				},
+				{
+					"BLOCKED": 5,
+					"HIT": 9,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				57
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 2
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:BLOCKED": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:BLOCKED": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_roundhouse:KO": 1,
+					"body_straight:BLOCKED": 1,
+					"body_straight:HIT": 3,
+					"elbow:BLOCKED": 1,
+					"elbow:HIT": 2,
+					"jab:BLOCKED": 2,
+					"jab:HIT": 1,
+					"low_roundhouse:HIT": 2,
+					"rising_elbow:HIT": 1,
+					"thai_roundhouse:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 2,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_roundhouse": 1,
+					"body_straight": 4,
+					"elbow": 5,
+					"jab": 3,
+					"low_roundhouse": 2,
+					"rising_elbow": 1,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "muay_thai",
+			"seed": 331,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1147
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 4
+				},
+				{
+					"HIT": 9,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				49
+			],
+			"interrupted": [
+				{
+					"body_punch:STARTUP": 1,
+					"cap_quick_palm:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 2
+				},
+				{
+					"thai_roundhouse:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_quick_palm:HIT": 2,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_roundhouse:HIT": 1,
+					"body_straight:HIT": 2,
+					"high_kick:HIT": 1,
+					"jab:HIT": 1,
+					"jab:KO": 1,
+					"low_roundhouse:HIT": 3,
+					"thai_roundhouse:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_cartwheel": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_roundhouse": 1,
+					"body_straight": 2,
+					"elbow": 1,
+					"high_kick": 1,
+					"jab": 2,
+					"low_roundhouse": 3,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "muay_thai",
+			"seed": 353,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 970
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"HIT": 2,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				78,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_spin_heel:RECOVERY": 1
+				},
+				{
+					"jump_kick:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_low_sweep:HIT": 2,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:HIT": 5,
+					"cap_spin_heel:BLOCKED": 1,
+					"jump_punch:HIT": 1
+				},
+				{
+					"body_straight:HIT": 1,
+					"high_kick:HIT": 1,
+					"thai_roundhouse:PARRIED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 3,
+					"jump_punch": 1
+				},
+				{
+					"body_straight": 1,
+					"high_kick": 1,
+					"jab": 1,
+					"jump_kick": 1,
+					"low_roundhouse": 1,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "muay_thai",
+			"seed": 379,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 747
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 2
+				}
+			],
+			"health": [
+				77,
+				0
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"body_punch:HIT": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 2,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:KO": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"elbow:HIT": 1,
+					"rising_elbow:HIT": 1,
+					"thai_roundhouse:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_crescent": 1,
+					"cap_leap_palm": 2,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"elbow": 1,
+					"low_roundhouse": 1,
+					"rising_elbow": 1,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "muay_thai",
+			"seed": 401,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 779
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 10,
+					"KO": 1,
+					"PARRIED": 2
+				}
+			],
+			"health": [
+				0,
+				8
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1,
+					"cap_spin_heel:RECOVERY": 2
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 2,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_roundhouse:HIT": 3,
+					"body_roundhouse:KO": 1,
+					"body_roundhouse:PARRIED": 1,
+					"body_straight:HIT": 1,
+					"elbow:HIT": 2,
+					"jab:BLOCKED": 2,
+					"jab:HIT": 3,
+					"rising_elbow:HIT": 1,
+					"thai_roundhouse:PARRIED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 2,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_roundhouse": 5,
+					"body_straight": 1,
+					"elbow": 3,
+					"jab": 5,
+					"rising_elbow": 1,
+					"thai_roundhouse": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "muay_thai",
+			"seed": 431,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1146
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 4,
+					"HIT": 4,
+					"PARRIED": 2
+				}
+			],
+			"health": [
+				54,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"jumping_reverse_punch:STARTUP": 1,
+					"reverse_punch:STARTUP": 1,
+					"step_back_spinning_backfist:STARTUP": 2
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:KO": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_punch:HIT": 1,
+					"body_punch:PARRIED": 1,
+					"jumping_reverse_punch:BLOCKED": 1,
+					"knife_hand:BLOCKED": 1,
+					"reverse_punch:BLOCKED": 1,
+					"reverse_punch:HIT": 3,
+					"reverse_punch:PARRIED": 1,
+					"step_back_spinning_backfist:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 4,
+					"cap_quick_palm": 5,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 2,
+					"jumping_reverse_punch": 3,
+					"knife_hand": 1,
+					"reverse_punch": 6,
+					"step_back_spinning_backfist": 3
+				}
+			],
+			"outcome": "win",
+			"rival": "karate",
+			"seed": 307,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1421
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 10
+				}
+			],
+			"health": [
+				1,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_spin_heel:RECOVERY": 1
+				},
+				{
+					"high_kick:RECOVERY": 1,
+					"jab:STARTUP": 1,
+					"step_back_spinning_backfist:RECOVERY": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 3,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 2,
+					"cap_quick_palm:KO": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_punch:HIT": 2,
+					"high_kick:HIT": 1,
+					"jab:HIT": 2,
+					"jump_kick:HIT": 2,
+					"knife_hand:HIT": 1,
+					"reverse_punch:HIT": 2,
+					"step_back_spinning_backfist:BLOCKED": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 2,
+					"high_kick": 3,
+					"jab": 3,
+					"jump_kick": 2,
+					"knife_hand": 1,
+					"reverse_punch": 2,
+					"step_back_spinning_backfist": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "karate",
+			"seed": 331,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1371
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 4
+				},
+				{
+					"BLOCKED": 5,
+					"HIT": 7,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				51
+			],
+			"interrupted": [
+				{
+					"cap_crescent:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"reverse_punch:STARTUP": 1,
+					"step_back_spinning_backfist:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_crescent:BLOCKED": 1,
+					"cap_crescent:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_punch:BLOCKED": 1,
+					"high_kick:BLOCKED": 1,
+					"high_kick:KO": 1,
+					"jab:HIT": 1,
+					"reverse_punch:BLOCKED": 2,
+					"reverse_punch:HIT": 3,
+					"rising_punch:BLOCKED": 1,
+					"rising_punch:HIT": 1,
+					"step_back_spinning_backfist:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_crescent": 3,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 1,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 1,
+					"high_kick": 2,
+					"jab": 1,
+					"reverse_punch": 6,
+					"rising_punch": 2,
+					"step_back_spinning_backfist": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "karate",
+			"seed": 353,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 956
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				50
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:RECOVERY": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_quick_palm:HIT": 3
+				},
+				{
+					"body_punch:HIT": 3,
+					"flying_side_kick:KO": 1,
+					"jab:HIT": 1,
+					"jumping_reverse_punch:HIT": 1,
+					"reverse_punch:BLOCKED": 1,
+					"reverse_punch:HIT": 2,
+					"rising_punch:HIT": 2,
+					"step_back_spinning_backfist:PARRIED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 2
+				},
+				{
+					"body_punch": 3,
+					"flying_side_kick": 1,
+					"high_kick": 1,
+					"jab": 1,
+					"jumping_reverse_punch": 1,
+					"reverse_punch": 3,
+					"rising_punch": 2,
+					"step_back_spinning_backfist": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "karate",
+			"seed": 379,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 803
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 6,
+					"HIT": 8
+				}
+			],
+			"health": [
+				8,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:RECOVERY": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"knife_hand:STARTUP": 1,
+					"reverse_punch:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:BLOCKED": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:KO": 1,
+					"cap_spin_heel:HIT": 2,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_punch:HIT": 2,
+					"high_kick:BLOCKED": 2,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 1,
+					"reverse_punch:BLOCKED": 2,
+					"reverse_punch:HIT": 4,
+					"step_back_spinning_backfist:BLOCKED": 1,
+					"step_back_spinning_backfist:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 2,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 2,
+					"high_kick": 3,
+					"jab": 2,
+					"jumping_reverse_punch": 2,
+					"knife_hand": 1,
+					"reverse_punch": 7,
+					"step_back_spinning_backfist": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "karate",
+			"seed": 401,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1296
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 3
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				65
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_quick_palm:HIT": 1,
+					"cap_spin_heel:BLOCKED": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_punch:KO": 1,
+					"flying_side_kick:BLOCKED": 1,
+					"flying_side_kick:HIT": 1,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 1,
+					"jumping_reverse_punch:HIT": 1,
+					"knife_hand:HIT": 1,
+					"reverse_punch:HIT": 3,
+					"step_back_spinning_backfist:HIT": 1,
+					"step_back_spinning_backfist:PARRIED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_quick_palm": 1,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 1,
+					"flying_side_kick": 2,
+					"jab": 2,
+					"jumping_reverse_punch": 1,
+					"knife_hand": 1,
+					"reverse_punch": 3,
+					"step_back_spinning_backfist": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "karate",
+			"seed": 431,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 874
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 4,
+					"HIT": 4,
+					"PARRIED": 2
+				}
+			],
+			"health": [
+				54,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"jumping_reverse_punch:STARTUP": 1,
+					"reverse_punch:STARTUP": 1,
+					"step_back_spinning_backfist:STARTUP": 2
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:KO": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_punch:HIT": 1,
+					"body_punch:PARRIED": 1,
+					"jumping_reverse_punch:BLOCKED": 1,
+					"knife_hand:BLOCKED": 1,
+					"reverse_punch:BLOCKED": 1,
+					"reverse_punch:HIT": 3,
+					"reverse_punch:PARRIED": 1,
+					"step_back_spinning_backfist:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 4,
+					"cap_quick_palm": 5,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 2,
+					"jumping_reverse_punch": 3,
+					"knife_hand": 1,
+					"reverse_punch": 6,
+					"step_back_spinning_backfist": 3
+				}
+			],
+			"outcome": "win",
+			"rival": "karate",
+			"seed": 307,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1421
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 10
+				}
+			],
+			"health": [
+				1,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_spin_heel:RECOVERY": 1
+				},
+				{
+					"high_kick:RECOVERY": 1,
+					"jab:STARTUP": 1,
+					"step_back_spinning_backfist:RECOVERY": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 3,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 2,
+					"cap_quick_palm:KO": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_punch:HIT": 2,
+					"high_kick:HIT": 1,
+					"jab:HIT": 2,
+					"jump_kick:HIT": 2,
+					"knife_hand:HIT": 1,
+					"reverse_punch:HIT": 2,
+					"step_back_spinning_backfist:BLOCKED": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 2,
+					"high_kick": 3,
+					"jab": 3,
+					"jump_kick": 2,
+					"knife_hand": 1,
+					"reverse_punch": 2,
+					"step_back_spinning_backfist": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "karate",
+			"seed": 331,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1371
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 4
+				},
+				{
+					"BLOCKED": 5,
+					"HIT": 7,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				51
+			],
+			"interrupted": [
+				{
+					"cap_crescent:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"reverse_punch:STARTUP": 1,
+					"step_back_spinning_backfist:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_crescent:BLOCKED": 1,
+					"cap_crescent:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_punch:BLOCKED": 1,
+					"high_kick:BLOCKED": 1,
+					"high_kick:KO": 1,
+					"jab:HIT": 1,
+					"reverse_punch:BLOCKED": 2,
+					"reverse_punch:HIT": 3,
+					"rising_punch:BLOCKED": 1,
+					"rising_punch:HIT": 1,
+					"step_back_spinning_backfist:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_crescent": 3,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 1,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 1,
+					"high_kick": 2,
+					"jab": 1,
+					"reverse_punch": 6,
+					"rising_punch": 2,
+					"step_back_spinning_backfist": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "karate",
+			"seed": 353,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 956
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				50
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:RECOVERY": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_quick_palm:HIT": 3
+				},
+				{
+					"body_punch:HIT": 3,
+					"flying_side_kick:KO": 1,
+					"jab:HIT": 1,
+					"jumping_reverse_punch:HIT": 1,
+					"reverse_punch:BLOCKED": 1,
+					"reverse_punch:HIT": 2,
+					"rising_punch:HIT": 2,
+					"step_back_spinning_backfist:PARRIED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 2
+				},
+				{
+					"body_punch": 3,
+					"flying_side_kick": 1,
+					"high_kick": 1,
+					"jab": 1,
+					"jumping_reverse_punch": 1,
+					"reverse_punch": 3,
+					"rising_punch": 2,
+					"step_back_spinning_backfist": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "karate",
+			"seed": 379,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 803
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 6,
+					"HIT": 8
+				}
+			],
+			"health": [
+				8,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:RECOVERY": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"knife_hand:STARTUP": 1,
+					"reverse_punch:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:BLOCKED": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:KO": 1,
+					"cap_spin_heel:HIT": 2,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_punch:HIT": 2,
+					"high_kick:BLOCKED": 2,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 1,
+					"reverse_punch:BLOCKED": 2,
+					"reverse_punch:HIT": 4,
+					"step_back_spinning_backfist:BLOCKED": 1,
+					"step_back_spinning_backfist:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 2,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 2,
+					"high_kick": 3,
+					"jab": 2,
+					"jumping_reverse_punch": 2,
+					"knife_hand": 1,
+					"reverse_punch": 7,
+					"step_back_spinning_backfist": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "karate",
+			"seed": 401,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1296
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 3
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				65
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_quick_palm:HIT": 1,
+					"cap_spin_heel:BLOCKED": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"body_punch:KO": 1,
+					"flying_side_kick:BLOCKED": 1,
+					"flying_side_kick:HIT": 1,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 1,
+					"jumping_reverse_punch:HIT": 1,
+					"knife_hand:HIT": 1,
+					"reverse_punch:HIT": 3,
+					"step_back_spinning_backfist:HIT": 1,
+					"step_back_spinning_backfist:PARRIED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_quick_palm": 1,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"body_punch": 1,
+					"flying_side_kick": 2,
+					"jab": 2,
+					"jumping_reverse_punch": 1,
+					"knife_hand": 1,
+					"reverse_punch": 3,
+					"step_back_spinning_backfist": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "karate",
+			"seed": 431,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 874
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 2
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 11,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				73
+			],
+			"interrupted": [
+				{
+					"cap_leap_palm:STARTUP": 1
+				},
+				{
+					"leaping_spin_backfist:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_leap_palm:HIT": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"backhand:HIT": 1,
+					"backhand:KO": 1,
+					"double_palm:HIT": 1,
+					"low_palm:HIT": 1,
+					"rising_palm:BLOCKED": 1,
+					"rising_palm:HIT": 1,
+					"scorpion_kick:HIT": 1,
+					"straight_palm:HIT": 4,
+					"sweep:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_leap_palm": 2,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"backhand": 2,
+					"double_palm": 1,
+					"leaping_spin_backfist": 1,
+					"low_palm": 1,
+					"rising_palm": 2,
+					"scorpion_kick": 1,
+					"straight_palm": 4,
+					"sweep": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kung_fu",
+			"seed": 307,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 872
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				38
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:STARTUP": 1
+				},
+				{
+					"scorpion_kick:RECOVERY": 1,
+					"sweep:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_quick_palm:HIT": 1,
+					"cap_spin_heel:HIT": 2,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"backhand:HIT": 1,
+					"double_palm:HIT": 1,
+					"flying_axe_kick:HIT": 1,
+					"low_palm:HIT": 3,
+					"rising_palm:HIT": 1,
+					"straight_palm:BLOCKED": 2,
+					"straight_palm:HIT": 1,
+					"straight_palm:KO": 1,
+					"sweep:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_quick_palm": 1,
+					"cap_spin_heel": 5,
+					"meia_lua_tornado": 1
+				},
+				{
+					"backhand": 1,
+					"double_palm": 1,
+					"flying_axe_kick": 1,
+					"low_palm": 3,
+					"rising_palm": 2,
+					"scorpion_kick": 1,
+					"straight_palm": 4,
+					"sweep": 3
+				}
+			],
+			"outcome": "loss",
+			"rival": "kung_fu",
+			"seed": 331,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1059
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 8
+				},
+				{
+					"BLOCKED": 6,
+					"HIT": 12,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				11
+			],
+			"interrupted": [
+				{},
+				{
+					"low_palm:STARTUP": 1,
+					"scorpion_kick:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:BLOCKED": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"backhand:BLOCKED": 1,
+					"backhand:HIT": 1,
+					"double_palm:BLOCKED": 1,
+					"front_kick:BLOCKED": 2,
+					"front_kick:HIT": 2,
+					"jump_kick:HIT": 1,
+					"leaping_spin_backfist:KO": 1,
+					"low_palm:HIT": 1,
+					"rising_palm:BLOCKED": 1,
+					"rising_palm:HIT": 1,
+					"straight_palm:BLOCKED": 1,
+					"straight_palm:HIT": 4,
+					"sweep:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 3,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"backhand": 2,
+					"double_palm": 1,
+					"front_kick": 4,
+					"jump_kick": 1,
+					"leaping_spin_backfist": 1,
+					"low_palm": 2,
+					"rising_palm": 3,
+					"scorpion_kick": 1,
+					"straight_palm": 5,
+					"sweep": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kung_fu",
+			"seed": 353,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1515
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				90
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"leaping_spin_backfist:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_quick_palm:HIT": 1
+				},
+				{
+					"double_palm:HIT": 1,
+					"flying_axe_kick:HIT": 1,
+					"front_kick:HIT": 1,
+					"leaping_spin_backfist:HIT": 1,
+					"scorpion_kick:HIT": 1,
+					"straight_palm:BLOCKED": 1,
+					"straight_palm:HIT": 3,
+					"sweep:HIT": 1,
+					"sweep:KO": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_quick_palm": 2
+				},
+				{
+					"double_palm": 1,
+					"flying_axe_kick": 1,
+					"front_kick": 1,
+					"leaping_spin_backfist": 1,
+					"scorpion_kick": 1,
+					"straight_palm": 4,
+					"sweep": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kung_fu",
+			"seed": 379,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 580
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 9
+				}
+			],
+			"health": [
+				26,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:RECOVERY": 1,
+					"meia_lua_tornado:STARTUP": 1
+				},
+				{
+					"leaping_spin_backfist:STARTUP": 1,
+					"scorpion_kick:RECOVERY": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 2,
+					"cap_leap_palm:BLOCKED": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 4,
+					"meia_lua_tornado:KO": 1
+				},
+				{
+					"backhand:HIT": 1,
+					"double_palm:HIT": 1,
+					"leaping_spin_backfist:BLOCKED": 1,
+					"low_palm:HIT": 1,
+					"rising_palm:HIT": 1,
+					"scorpion_kick:BLOCKED": 2,
+					"straight_palm:HIT": 3,
+					"sweep:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 2,
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 4,
+					"cap_quick_palm": 7,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 2
+				},
+				{
+					"backhand": 1,
+					"double_palm": 1,
+					"leaping_spin_backfist": 2,
+					"low_palm": 1,
+					"rising_palm": 1,
+					"scorpion_kick": 2,
+					"straight_palm": 4,
+					"sweep": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "kung_fu",
+			"seed": 401,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1412
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 8
+				}
+			],
+			"health": [
+				35,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:STARTUP": 1
+				},
+				{
+					"scorpion_kick:STARTUP": 1,
+					"straight_palm:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"backhand:HIT": 1,
+					"double_palm:HIT": 1,
+					"low_palm:HIT": 1,
+					"rising_palm:HIT": 1,
+					"straight_palm:HIT": 3,
+					"sweep:BLOCKED": 1,
+					"sweep:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_crescent": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"backhand": 1,
+					"double_palm": 1,
+					"low_palm": 1,
+					"rising_palm": 1,
+					"scorpion_kick": 1,
+					"straight_palm": 4,
+					"sweep": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "kung_fu",
+			"seed": 431,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1172
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 2
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 11,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				73
+			],
+			"interrupted": [
+				{
+					"cap_leap_palm:STARTUP": 1
+				},
+				{
+					"leaping_spin_backfist:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_leap_palm:HIT": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"backhand:HIT": 1,
+					"backhand:KO": 1,
+					"double_palm:HIT": 1,
+					"low_palm:HIT": 1,
+					"rising_palm:BLOCKED": 1,
+					"rising_palm:HIT": 1,
+					"scorpion_kick:HIT": 1,
+					"straight_palm:HIT": 4,
+					"sweep:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_leap_palm": 2,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"backhand": 2,
+					"double_palm": 1,
+					"leaping_spin_backfist": 1,
+					"low_palm": 1,
+					"rising_palm": 2,
+					"scorpion_kick": 1,
+					"straight_palm": 4,
+					"sweep": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kung_fu",
+			"seed": 307,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 872
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				38
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:STARTUP": 1
+				},
+				{
+					"scorpion_kick:RECOVERY": 1,
+					"sweep:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_quick_palm:HIT": 1,
+					"cap_spin_heel:HIT": 2,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"backhand:HIT": 1,
+					"double_palm:HIT": 1,
+					"flying_axe_kick:HIT": 1,
+					"low_palm:HIT": 3,
+					"rising_palm:HIT": 1,
+					"straight_palm:BLOCKED": 2,
+					"straight_palm:HIT": 1,
+					"straight_palm:KO": 1,
+					"sweep:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_quick_palm": 1,
+					"cap_spin_heel": 5,
+					"meia_lua_tornado": 1
+				},
+				{
+					"backhand": 1,
+					"double_palm": 1,
+					"flying_axe_kick": 1,
+					"low_palm": 3,
+					"rising_palm": 2,
+					"scorpion_kick": 1,
+					"straight_palm": 4,
+					"sweep": 3
+				}
+			],
+			"outcome": "loss",
+			"rival": "kung_fu",
+			"seed": 331,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1059
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 8
+				},
+				{
+					"BLOCKED": 6,
+					"HIT": 12,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				11
+			],
+			"interrupted": [
+				{},
+				{
+					"low_palm:STARTUP": 1,
+					"scorpion_kick:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:BLOCKED": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"backhand:BLOCKED": 1,
+					"backhand:HIT": 1,
+					"double_palm:BLOCKED": 1,
+					"front_kick:BLOCKED": 2,
+					"front_kick:HIT": 2,
+					"jump_kick:HIT": 1,
+					"leaping_spin_backfist:KO": 1,
+					"low_palm:HIT": 1,
+					"rising_palm:BLOCKED": 1,
+					"rising_palm:HIT": 1,
+					"straight_palm:BLOCKED": 1,
+					"straight_palm:HIT": 4,
+					"sweep:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 3,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"backhand": 2,
+					"double_palm": 1,
+					"front_kick": 4,
+					"jump_kick": 1,
+					"leaping_spin_backfist": 1,
+					"low_palm": 2,
+					"rising_palm": 3,
+					"scorpion_kick": 1,
+					"straight_palm": 5,
+					"sweep": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kung_fu",
+			"seed": 353,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1515
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				90
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"leaping_spin_backfist:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_quick_palm:HIT": 1
+				},
+				{
+					"double_palm:HIT": 1,
+					"flying_axe_kick:HIT": 1,
+					"front_kick:HIT": 1,
+					"leaping_spin_backfist:HIT": 1,
+					"scorpion_kick:HIT": 1,
+					"straight_palm:BLOCKED": 1,
+					"straight_palm:HIT": 3,
+					"sweep:HIT": 1,
+					"sweep:KO": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_quick_palm": 2
+				},
+				{
+					"double_palm": 1,
+					"flying_axe_kick": 1,
+					"front_kick": 1,
+					"leaping_spin_backfist": 1,
+					"scorpion_kick": 1,
+					"straight_palm": 4,
+					"sweep": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kung_fu",
+			"seed": 379,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 580
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 9
+				}
+			],
+			"health": [
+				26,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:RECOVERY": 1,
+					"meia_lua_tornado:STARTUP": 1
+				},
+				{
+					"leaping_spin_backfist:STARTUP": 1,
+					"scorpion_kick:RECOVERY": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 2,
+					"cap_leap_palm:BLOCKED": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 4,
+					"meia_lua_tornado:KO": 1
+				},
+				{
+					"backhand:HIT": 1,
+					"double_palm:HIT": 1,
+					"leaping_spin_backfist:BLOCKED": 1,
+					"low_palm:HIT": 1,
+					"rising_palm:HIT": 1,
+					"scorpion_kick:BLOCKED": 2,
+					"straight_palm:HIT": 3,
+					"sweep:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 2,
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 4,
+					"cap_quick_palm": 7,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 2
+				},
+				{
+					"backhand": 1,
+					"double_palm": 1,
+					"leaping_spin_backfist": 2,
+					"low_palm": 1,
+					"rising_palm": 1,
+					"scorpion_kick": 2,
+					"straight_palm": 4,
+					"sweep": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "kung_fu",
+			"seed": 401,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1412
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 8
+				}
+			],
+			"health": [
+				35,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:STARTUP": 1
+				},
+				{
+					"scorpion_kick:STARTUP": 1,
+					"straight_palm:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"backhand:HIT": 1,
+					"double_palm:HIT": 1,
+					"low_palm:HIT": 1,
+					"rising_palm:HIT": 1,
+					"straight_palm:HIT": 3,
+					"sweep:BLOCKED": 1,
+					"sweep:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_crescent": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"backhand": 1,
+					"double_palm": 1,
+					"low_palm": 1,
+					"rising_palm": 1,
+					"scorpion_kick": 1,
+					"straight_palm": 4,
+					"sweep": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "kung_fu",
+			"seed": 431,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1171
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 11,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				52
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:STARTUP": 1,
+					"cap_quick_palm:STARTUP": 1,
+					"cap_spin_heel:STARTUP": 1
+				},
+				{
+					"jab:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_crescent:BLOCKED": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:HIT": 2
+				},
+				{
+					"body_punch:BLOCKED": 1,
+					"body_punch:HIT": 1,
+					"double_kick_low:HIT": 1,
+					"double_kick_mid:HIT": 1,
+					"high_kick:HIT": 2,
+					"high_kick:KO": 1,
+					"jab:HIT": 1,
+					"jumping_backfist:PARRIED": 1,
+					"rising_punch:HIT": 2,
+					"side_kick:BLOCKED": 1,
+					"triple_kick_body_one:HIT": 1,
+					"triple_kick_body_two:HIT": 1,
+					"triple_kick_head:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_air_crescent": 1,
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 3,
+					"cap_spin_heel": 1
+				},
+				{
+					"body_punch": 2,
+					"double_kick_low": 1,
+					"double_kick_mid": 1,
+					"high_kick": 3,
+					"jab": 2,
+					"jumping_backfist": 1,
+					"rising_punch": 2,
+					"side_kick": 1,
+					"triple_kick_body_one": 1,
+					"triple_kick_body_two": 1,
+					"triple_kick_head": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 307,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 883
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				54
+			],
+			"interrupted": [
+				{},
+				{
+					"high_kick:STARTUP": 1,
+					"triple_kick_body_one:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:BLOCKED": 1
+				},
+				{
+					"axe_kick:BLOCKED": 1,
+					"axe_kick:HIT": 2,
+					"body_punch:HIT": 2,
+					"double_kick_low:KO": 1,
+					"jab:HIT": 3,
+					"side_kick:HIT": 3
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 2
+				},
+				{
+					"axe_kick": 3,
+					"body_punch": 2,
+					"double_kick_low": 1,
+					"high_kick": 3,
+					"jab": 3,
+					"side_kick": 3,
+					"triple_kick_body_one": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 331,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1009
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				100
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_spin_heel:BLOCKED": 1
+				},
+				{
+					"body_punch:HIT": 2,
+					"high_kick:HIT": 2,
+					"high_kick:KO": 1,
+					"jab:HIT": 3,
+					"jumping_backfist:HIT": 1,
+					"rising_punch:HIT": 1,
+					"side_kick:HIT": 1,
+					"triple_kick_body_one:BLOCKED": 1,
+					"triple_kick_body_two:BLOCKED": 1,
+					"triple_kick_head:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_quick_palm": 1,
+					"cap_spin_heel": 1
+				},
+				{
+					"body_punch": 2,
+					"high_kick": 3,
+					"jab": 3,
+					"jumping_backfist": 1,
+					"rising_punch": 1,
+					"side_kick": 1,
+					"triple_kick_body_one": 1,
+					"triple_kick_body_two": 1,
+					"triple_kick_head": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 353,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 566
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 5,
+					"HIT": 6
+				},
+				{
+					"HIT": 12,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				41
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1,
+					"cap_spin_heel:RECOVERY": 1
+				},
+				{
+					"double_kick_low:STARTUP": 1,
+					"triple_kick_body_one:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 2,
+					"cap_low_sweep:HIT": 3,
+					"cap_quick_palm:BLOCKED": 3,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:HIT": 1
+				},
+				{
+					"axe_kick:PARRIED": 1,
+					"body_punch:HIT": 2,
+					"body_punch:KO": 1,
+					"double_kick_low:HIT": 2,
+					"double_kick_mid:HIT": 2,
+					"high_kick:HIT": 1,
+					"jab:HIT": 3,
+					"jumping_backfist:HIT": 1,
+					"side_kick:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_air_crescent": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 7,
+					"cap_spin_heel": 4
+				},
+				{
+					"axe_kick": 1,
+					"body_punch": 3,
+					"double_kick_low": 4,
+					"double_kick_mid": 3,
+					"high_kick": 1,
+					"jab": 4,
+					"jumping_backfist": 1,
+					"side_kick": 1,
+					"triple_kick_body_one": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 379,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1380
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 1
+				},
+				{
+					"HIT": 12,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				88
+			],
+			"interrupted": [
+				{
+					"cap_leap_palm:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 2
+				},
+				{
+					"axe_kick:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_leap_palm:HIT": 1
+				},
+				{
+					"axe_kick:HIT": 1,
+					"double_kick_low:HIT": 3,
+					"double_kick_mid:HIT": 3,
+					"jab:HIT": 2,
+					"jumping_spin_hook:KO": 1,
+					"triple_kick_body_one:HIT": 1,
+					"triple_kick_body_two:HIT": 1,
+					"triple_kick_head:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_leap_palm": 1,
+					"cap_quick_palm": 2
+				},
+				{
+					"axe_kick": 1,
+					"double_kick_low": 3,
+					"double_kick_mid": 3,
+					"jab": 2,
+					"jumping_spin_hook": 1,
+					"triple_kick_body_one": 1,
+					"triple_kick_body_two": 1,
+					"triple_kick_head": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 401,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 481
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 11,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				40
+			],
+			"interrupted": [
+				{
+					"cap_spin_heel:ACTIVE": 1
+				},
+				{
+					"jab:ACTIVE": 1,
+					"side_kick:STARTUP": 1,
+					"triple_kick_body_one:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 1,
+					"cap_spin_heel:HIT": 2
+				},
+				{
+					"axe_kick:BLOCKED": 1,
+					"body_punch:HIT": 1,
+					"body_punch:PARRIED": 1,
+					"double_kick_low:HIT": 1,
+					"double_kick_mid:HIT": 1,
+					"high_kick:HIT": 2,
+					"jab:HIT": 3,
+					"jumping_backfist:HIT": 1,
+					"rising_punch:HIT": 1,
+					"rising_punch:KO": 1,
+					"side_kick:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 2,
+					"cap_spin_heel": 2,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"axe_kick": 1,
+					"body_punch": 2,
+					"double_kick_low": 1,
+					"double_kick_mid": 1,
+					"high_kick": 3,
+					"jab": 3,
+					"jumping_backfist": 1,
+					"rising_punch": 3,
+					"side_kick": 2,
+					"triple_kick_body_one": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 431,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1181
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 11,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				52
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:STARTUP": 1,
+					"cap_quick_palm:STARTUP": 1,
+					"cap_spin_heel:STARTUP": 1
+				},
+				{
+					"jab:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_crescent:BLOCKED": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:HIT": 2
+				},
+				{
+					"body_punch:BLOCKED": 1,
+					"body_punch:HIT": 1,
+					"double_kick_low:HIT": 1,
+					"double_kick_mid:HIT": 1,
+					"high_kick:HIT": 2,
+					"high_kick:KO": 1,
+					"jab:HIT": 1,
+					"jumping_backfist:PARRIED": 1,
+					"rising_punch:HIT": 2,
+					"side_kick:BLOCKED": 1,
+					"triple_kick_body_one:HIT": 1,
+					"triple_kick_body_two:HIT": 1,
+					"triple_kick_head:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_air_crescent": 1,
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 3,
+					"cap_spin_heel": 1
+				},
+				{
+					"body_punch": 2,
+					"double_kick_low": 1,
+					"double_kick_mid": 1,
+					"high_kick": 3,
+					"jab": 2,
+					"jumping_backfist": 1,
+					"rising_punch": 2,
+					"side_kick": 1,
+					"triple_kick_body_one": 1,
+					"triple_kick_body_two": 1,
+					"triple_kick_head": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 307,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 883
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				54
+			],
+			"interrupted": [
+				{},
+				{
+					"high_kick:STARTUP": 1,
+					"triple_kick_body_one:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:BLOCKED": 1
+				},
+				{
+					"axe_kick:BLOCKED": 1,
+					"axe_kick:HIT": 2,
+					"body_punch:HIT": 2,
+					"double_kick_low:KO": 1,
+					"jab:HIT": 3,
+					"side_kick:HIT": 3
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 2
+				},
+				{
+					"axe_kick": 3,
+					"body_punch": 2,
+					"double_kick_low": 1,
+					"high_kick": 3,
+					"jab": 3,
+					"side_kick": 3,
+					"triple_kick_body_one": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 331,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1009
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				100
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_spin_heel:BLOCKED": 1
+				},
+				{
+					"body_punch:HIT": 2,
+					"high_kick:HIT": 2,
+					"high_kick:KO": 1,
+					"jab:HIT": 3,
+					"jumping_backfist:HIT": 1,
+					"rising_punch:HIT": 1,
+					"side_kick:HIT": 1,
+					"triple_kick_body_one:BLOCKED": 1,
+					"triple_kick_body_two:BLOCKED": 1,
+					"triple_kick_head:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_quick_palm": 1,
+					"cap_spin_heel": 1
+				},
+				{
+					"body_punch": 2,
+					"high_kick": 3,
+					"jab": 3,
+					"jumping_backfist": 1,
+					"rising_punch": 1,
+					"side_kick": 1,
+					"triple_kick_body_one": 1,
+					"triple_kick_body_two": 1,
+					"triple_kick_head": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 353,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 566
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 5,
+					"HIT": 6
+				},
+				{
+					"HIT": 12,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				41
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1,
+					"cap_spin_heel:RECOVERY": 1
+				},
+				{
+					"double_kick_low:STARTUP": 1,
+					"triple_kick_body_one:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 2,
+					"cap_low_sweep:HIT": 3,
+					"cap_quick_palm:BLOCKED": 3,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:HIT": 1
+				},
+				{
+					"axe_kick:PARRIED": 1,
+					"body_punch:HIT": 2,
+					"body_punch:KO": 1,
+					"double_kick_low:HIT": 2,
+					"double_kick_mid:HIT": 2,
+					"high_kick:HIT": 1,
+					"jab:HIT": 3,
+					"jumping_backfist:HIT": 1,
+					"side_kick:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_air_crescent": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 7,
+					"cap_spin_heel": 4
+				},
+				{
+					"axe_kick": 1,
+					"body_punch": 3,
+					"double_kick_low": 4,
+					"double_kick_mid": 3,
+					"high_kick": 1,
+					"jab": 4,
+					"jumping_backfist": 1,
+					"side_kick": 1,
+					"triple_kick_body_one": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 379,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1380
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 1
+				},
+				{
+					"HIT": 12,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				88
+			],
+			"interrupted": [
+				{
+					"cap_leap_palm:ACTIVE": 1,
+					"cap_quick_palm:STARTUP": 2
+				},
+				{
+					"axe_kick:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_leap_palm:HIT": 1
+				},
+				{
+					"axe_kick:HIT": 1,
+					"double_kick_low:HIT": 3,
+					"double_kick_mid:HIT": 3,
+					"jab:HIT": 2,
+					"jumping_spin_hook:KO": 1,
+					"triple_kick_body_one:HIT": 1,
+					"triple_kick_body_two:HIT": 1,
+					"triple_kick_head:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_leap_palm": 1,
+					"cap_quick_palm": 2
+				},
+				{
+					"axe_kick": 1,
+					"double_kick_low": 3,
+					"double_kick_mid": 3,
+					"jab": 2,
+					"jumping_spin_hook": 1,
+					"triple_kick_body_one": 1,
+					"triple_kick_body_two": 1,
+					"triple_kick_head": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 401,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 481
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 11,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				40
+			],
+			"interrupted": [
+				{
+					"cap_spin_heel:ACTIVE": 1
+				},
+				{
+					"jab:ACTIVE": 1,
+					"side_kick:STARTUP": 1,
+					"triple_kick_body_one:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 1,
+					"cap_spin_heel:HIT": 2
+				},
+				{
+					"axe_kick:BLOCKED": 1,
+					"body_punch:HIT": 1,
+					"body_punch:PARRIED": 1,
+					"double_kick_low:HIT": 1,
+					"double_kick_mid:HIT": 1,
+					"high_kick:HIT": 2,
+					"jab:HIT": 3,
+					"jumping_backfist:HIT": 1,
+					"rising_punch:HIT": 1,
+					"rising_punch:KO": 1,
+					"side_kick:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 2,
+					"cap_spin_heel": 2,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"axe_kick": 1,
+					"body_punch": 2,
+					"double_kick_low": 1,
+					"double_kick_mid": 1,
+					"high_kick": 3,
+					"jab": 3,
+					"jumping_backfist": 1,
+					"rising_punch": 3,
+					"side_kick": 2,
+					"triple_kick_body_one": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "taekwondo",
+			"seed": 431,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1181
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 2
+				},
+				{
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				82
+			],
+			"interrupted": [
+				{},
+				{
+					"big_foot:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 1
+				},
+				{
+					"body_hook:HIT": 2,
+					"body_roundhouse:HIT": 2,
+					"cross:HIT": 1,
+					"high_kick:HIT": 1,
+					"jab:HIT": 3,
+					"low_roundhouse:HIT": 1,
+					"low_roundhouse:KO": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 1
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 2,
+					"body_roundhouse": 2,
+					"cross": 1,
+					"high_kick": 1,
+					"jab": 3,
+					"low_roundhouse": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kickboxing",
+			"seed": 307,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 532
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 4,
+					"HIT": 4
+				}
+			],
+			"health": [
+				58,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:ACTIVE": 1
+				},
+				{
+					"big_foot:STARTUP": 1,
+					"body_hook:ACTIVE": 1,
+					"jab:STARTUP": 1,
+					"uppercut:RECOVERY": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:BLOCKED": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 5,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"big_foot:BLOCKED": 1,
+					"body_hook:HIT": 1,
+					"cross:BLOCKED": 1,
+					"cross:HIT": 2,
+					"high_kick:BLOCKED": 1,
+					"jab:HIT": 1,
+					"uppercut:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_low_sweep": 6,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 2,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"big_foot": 2,
+					"body_hook": 1,
+					"cross": 3,
+					"high_kick": 1,
+					"jab": 2,
+					"superman_punch": 1,
+					"uppercut": 3
+				}
+			],
+			"outcome": "win",
+			"rival": "kickboxing",
+			"seed": 331,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1292
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 4
+				}
+			],
+			"health": [
+				63,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"big_foot:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 2,
+					"cap_leap_palm:KO": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 3,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"cross:BLOCKED": 2,
+					"cross:HIT": 1,
+					"jab:HIT": 1,
+					"low_roundhouse:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 2,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 1,
+					"cross": 3,
+					"high_kick": 1,
+					"jab": 1,
+					"low_roundhouse": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "kickboxing",
+			"seed": 353,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1031
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 2
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				80
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_quick_palm:HIT": 2
+				},
+				{
+					"big_foot:HIT": 1,
+					"body_hook:BLOCKED": 1,
+					"body_hook:HIT": 2,
+					"body_roundhouse:BLOCKED": 1,
+					"body_roundhouse:HIT": 2,
+					"cross:HIT": 1,
+					"cross:KO": 1,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 4
+				}
+			],
+			"move_starts": [
+				{
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 2
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 3,
+					"body_roundhouse": 3,
+					"cross": 2,
+					"high_kick": 1,
+					"jab": 5
+				}
+			],
+			"outcome": "loss",
+			"rival": "kickboxing",
+			"seed": 379,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 820
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 2
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				72
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:ACTIVE": 1
+				},
+				{
+					"big_foot:RECOVERY": 1,
+					"jab:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_hook:HIT": 2,
+					"body_hook:KO": 1,
+					"cross:BLOCKED": 1,
+					"cross:HIT": 4,
+					"jab:HIT": 4
+				}
+			],
+			"move_starts": [
+				{
+					"cap_leap_palm": 1,
+					"cap_quick_palm": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 3,
+					"cross": 5,
+					"high_kick": 2,
+					"jab": 4
+				}
+			],
+			"outcome": "loss",
+			"rival": "kickboxing",
+			"seed": 401,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 771
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 4
+				},
+				{
+					"BLOCKED": 4,
+					"HIT": 10,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				54
+			],
+			"interrupted": [
+				{
+					"jump_punch:STARTUP": 1
+				},
+				{
+					"uppercut:RECOVERY": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"big_foot:BLOCKED": 1,
+					"body_hook:HIT": 2,
+					"body_hook:PARRIED": 1,
+					"body_roundhouse:HIT": 1,
+					"cross:BLOCKED": 1,
+					"cross:HIT": 3,
+					"cross:KO": 1,
+					"high_kick:BLOCKED": 1,
+					"jab:HIT": 3,
+					"low_roundhouse:HIT": 1,
+					"uppercut:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 3,
+					"cap_spin_heel": 1,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 3,
+					"body_roundhouse": 1,
+					"cross": 5,
+					"high_kick": 1,
+					"jab": 3,
+					"low_roundhouse": 1,
+					"uppercut": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kickboxing",
+			"seed": 431,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 973
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 2
+				},
+				{
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				82
+			],
+			"interrupted": [
+				{},
+				{
+					"big_foot:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 1
+				},
+				{
+					"body_hook:HIT": 2,
+					"body_roundhouse:HIT": 2,
+					"cross:HIT": 1,
+					"high_kick:HIT": 1,
+					"jab:HIT": 3,
+					"low_roundhouse:HIT": 1,
+					"low_roundhouse:KO": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 1
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 2,
+					"body_roundhouse": 2,
+					"cross": 1,
+					"high_kick": 1,
+					"jab": 3,
+					"low_roundhouse": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kickboxing",
+			"seed": 307,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 532
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 4,
+					"HIT": 4
+				}
+			],
+			"health": [
+				58,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:ACTIVE": 1
+				},
+				{
+					"big_foot:STARTUP": 1,
+					"body_hook:ACTIVE": 1,
+					"jab:STARTUP": 1,
+					"uppercut:RECOVERY": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_low_sweep:BLOCKED": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 5,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"big_foot:BLOCKED": 1,
+					"body_hook:HIT": 1,
+					"cross:BLOCKED": 1,
+					"cross:HIT": 2,
+					"high_kick:BLOCKED": 1,
+					"jab:HIT": 1,
+					"uppercut:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_low_sweep": 6,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 2,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"big_foot": 2,
+					"body_hook": 1,
+					"cross": 3,
+					"high_kick": 1,
+					"jab": 2,
+					"superman_punch": 1,
+					"uppercut": 3
+				}
+			],
+			"outcome": "win",
+			"rival": "kickboxing",
+			"seed": 331,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1292
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 4
+				}
+			],
+			"health": [
+				63,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"big_foot:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:HIT": 2,
+					"cap_leap_palm:KO": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 3,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"cross:BLOCKED": 2,
+					"cross:HIT": 1,
+					"jab:HIT": 1,
+					"low_roundhouse:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 2,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 1,
+					"cross": 3,
+					"high_kick": 1,
+					"jab": 1,
+					"low_roundhouse": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "kickboxing",
+			"seed": 353,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1031
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 2
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				80
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_quick_palm:HIT": 2
+				},
+				{
+					"big_foot:HIT": 1,
+					"body_hook:BLOCKED": 1,
+					"body_hook:HIT": 2,
+					"body_roundhouse:BLOCKED": 1,
+					"body_roundhouse:HIT": 2,
+					"cross:HIT": 1,
+					"cross:KO": 1,
+					"jab:BLOCKED": 1,
+					"jab:HIT": 4
+				}
+			],
+			"move_starts": [
+				{
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 2
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 3,
+					"body_roundhouse": 3,
+					"cross": 2,
+					"high_kick": 1,
+					"jab": 5
+				}
+			],
+			"outcome": "loss",
+			"rival": "kickboxing",
+			"seed": 379,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 820
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 2
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				72
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:ACTIVE": 1
+				},
+				{
+					"big_foot:RECOVERY": 1,
+					"jab:ACTIVE": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"body_hook:HIT": 2,
+					"body_hook:KO": 1,
+					"cross:BLOCKED": 1,
+					"cross:HIT": 4,
+					"jab:HIT": 4
+				}
+			],
+			"move_starts": [
+				{
+					"cap_leap_palm": 1,
+					"cap_quick_palm": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 3,
+					"cross": 5,
+					"high_kick": 2,
+					"jab": 4
+				}
+			],
+			"outcome": "loss",
+			"rival": "kickboxing",
+			"seed": 401,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 771
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 4
+				},
+				{
+					"BLOCKED": 4,
+					"HIT": 10,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				54
+			],
+			"interrupted": [
+				{
+					"jump_punch:STARTUP": 1
+				},
+				{
+					"uppercut:RECOVERY": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"big_foot:BLOCKED": 1,
+					"body_hook:HIT": 2,
+					"body_hook:PARRIED": 1,
+					"body_roundhouse:HIT": 1,
+					"cross:BLOCKED": 1,
+					"cross:HIT": 3,
+					"cross:KO": 1,
+					"high_kick:BLOCKED": 1,
+					"jab:HIT": 3,
+					"low_roundhouse:HIT": 1,
+					"uppercut:BLOCKED": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 3,
+					"cap_spin_heel": 1,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"big_foot": 1,
+					"body_hook": 3,
+					"body_roundhouse": 1,
+					"cross": 5,
+					"high_kick": 1,
+					"jab": 3,
+					"low_roundhouse": 1,
+					"uppercut": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "kickboxing",
+			"seed": 431,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 973
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"HIT": 10,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				10,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"dropkick:STARTUP": 1,
+					"street_punch:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"cap_low_sweep:HIT": 5,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 4,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:KO": 1
+				},
+				{
+					"dropkick:HIT": 1,
+					"hammer_fist:PARRIED": 1,
+					"jor_dhakka:HIT": 2,
+					"leg_kick:HIT": 2,
+					"stomach_shot:HIT": 1,
+					"street_punch:HIT": 4
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_low_sweep": 6,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 1,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dropkick": 2,
+					"flying_chest_kick": 1,
+					"hammer_fist": 1,
+					"jor_dhakka": 2,
+					"leg_kick": 3,
+					"stomach_shot": 1,
+					"street_punch": 5,
+					"thrust_kick": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 307,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1689
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 2
+				}
+			],
+			"health": [
+				71,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"dropkick:STARTUP": 1,
+					"head_elbow:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 5
+				},
+				{
+					"dropkick:HIT": 1,
+					"flying_chest_kick:BLOCKED": 1,
+					"jor_dhakka:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 1
+				},
+				{
+					"dropkick": 2,
+					"flying_chest_kick": 1,
+					"head_elbow": 1,
+					"jor_dhakka": 1,
+					"stomach_shot": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 331,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1081
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 4
+				}
+			],
+			"health": [
+				59,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:KO": 1,
+					"cap_cartwheel:HIT": 2,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 2,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dropkick:HIT": 1,
+					"head_elbow:BLOCKED": 1,
+					"leg_kick:HIT": 1,
+					"stomach_shot:HIT": 1,
+					"street_punch:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_cartwheel": 2,
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dropkick": 1,
+					"head_elbow": 1,
+					"leg_kick": 1,
+					"stomach_shot": 1,
+					"street_punch": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 353,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 985
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 4,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 5
+				}
+			],
+			"health": [
+				48,
+				0
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:BLOCKED": 3,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dropkick:BLOCKED": 1,
+					"dropkick:HIT": 1,
+					"head_elbow:BLOCKED": 1,
+					"head_elbow:HIT": 2,
+					"street_punch:BLOCKED": 1,
+					"street_punch:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_crescent": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dropkick": 2,
+					"flying_slap": 2,
+					"head_elbow": 3,
+					"leg_kick": 1,
+					"street_punch": 3
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 379,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1405
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 5,
+					"HIT": 10,
+					"KO": 1,
+					"PARRIED": 1
+				},
+				{
+					"BLOCKED": 3,
+					"GUARD_BREAK": 2,
+					"HIT": 9,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				10,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"head_elbow:STARTUP": 1,
+					"leg_kick:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"body_punch:HIT": 2,
+					"body_punch:KO": 1,
+					"cap_cartwheel:BLOCKED": 1,
+					"cap_low_sweep:HIT": 3,
+					"cap_low_sweep:PARRIED": 1,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 5,
+					"cap_spin_heel:BLOCKED": 1
+				},
+				{
+					"dropkick:HIT": 2,
+					"hammer_fist:GUARD_BREAK": 1,
+					"head_elbow:BLOCKED": 1,
+					"jor_dhakka:GUARD_BREAK": 1,
+					"jor_dhakka:PARRIED": 1,
+					"leg_kick:HIT": 2,
+					"stomach_shot:HIT": 1,
+					"street_punch:BLOCKED": 2,
+					"street_punch:HIT": 3,
+					"thrust_kick:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 4,
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 8,
+					"cap_spin_heel": 3
+				},
+				{
+					"dropkick": 2,
+					"hammer_fist": 1,
+					"head_elbow": 2,
+					"jor_dhakka": 2,
+					"leg_kick": 3,
+					"stomach_shot": 1,
+					"street_punch": 5,
+					"thrust_kick": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 401,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1798
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 6,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"HIT": 3,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				77,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:RECOVERY": 1
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"body_punch:KO": 1,
+					"cap_cartwheel:HIT": 2,
+					"cap_leap_palm:BLOCKED": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 3,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:BLOCKED": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dropkick:PARRIED": 1,
+					"leg_kick:HIT": 1,
+					"stomach_shot:HIT": 1,
+					"street_punch:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 2,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dropkick": 1,
+					"leg_kick": 1,
+					"stomach_shot": 1,
+					"street_punch": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 431,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1013
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 3,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"HIT": 10,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				10,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"dropkick:STARTUP": 1,
+					"street_punch:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"cap_low_sweep:HIT": 5,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 4,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:KO": 1
+				},
+				{
+					"dropkick:HIT": 1,
+					"hammer_fist:PARRIED": 1,
+					"jor_dhakka:HIT": 2,
+					"leg_kick:HIT": 2,
+					"stomach_shot:HIT": 1,
+					"street_punch:HIT": 4
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_low_sweep": 6,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 1,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dropkick": 2,
+					"flying_chest_kick": 1,
+					"hammer_fist": 1,
+					"jor_dhakka": 2,
+					"leg_kick": 3,
+					"stomach_shot": 1,
+					"street_punch": 5,
+					"thrust_kick": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 307,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1689
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 2
+				}
+			],
+			"health": [
+				71,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"dropkick:STARTUP": 1,
+					"head_elbow:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 5
+				},
+				{
+					"dropkick:HIT": 1,
+					"flying_chest_kick:BLOCKED": 1,
+					"jor_dhakka:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 1
+				},
+				{
+					"dropkick": 2,
+					"flying_chest_kick": 1,
+					"head_elbow": 1,
+					"jor_dhakka": 1,
+					"stomach_shot": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 331,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1081
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 4
+				}
+			],
+			"health": [
+				59,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:KO": 1,
+					"cap_cartwheel:HIT": 2,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 2,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dropkick:HIT": 1,
+					"head_elbow:BLOCKED": 1,
+					"leg_kick:HIT": 1,
+					"stomach_shot:HIT": 1,
+					"street_punch:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_cartwheel": 2,
+					"cap_crescent": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dropkick": 1,
+					"head_elbow": 1,
+					"leg_kick": 1,
+					"stomach_shot": 1,
+					"street_punch": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 353,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 985
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 4,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 3,
+					"HIT": 5
+				}
+			],
+			"health": [
+				48,
+				0
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"cap_low_sweep:HIT": 4,
+					"cap_low_sweep:KO": 1,
+					"cap_quick_palm:BLOCKED": 3,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dropkick:BLOCKED": 1,
+					"dropkick:HIT": 1,
+					"head_elbow:BLOCKED": 1,
+					"head_elbow:HIT": 2,
+					"street_punch:BLOCKED": 1,
+					"street_punch:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 1,
+					"cap_air_crescent": 1,
+					"cap_crescent": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dropkick": 2,
+					"flying_slap": 2,
+					"head_elbow": 3,
+					"leg_kick": 1,
+					"street_punch": 3
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 379,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1405
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 5,
+					"HIT": 10,
+					"KO": 1,
+					"PARRIED": 1
+				},
+				{
+					"BLOCKED": 3,
+					"GUARD_BREAK": 2,
+					"HIT": 9,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				10,
+				0
+			],
+			"interrupted": [
+				{},
+				{
+					"head_elbow:STARTUP": 1,
+					"leg_kick:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"body_punch:HIT": 2,
+					"body_punch:KO": 1,
+					"cap_cartwheel:BLOCKED": 1,
+					"cap_low_sweep:HIT": 3,
+					"cap_low_sweep:PARRIED": 1,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 5,
+					"cap_spin_heel:BLOCKED": 1
+				},
+				{
+					"dropkick:HIT": 2,
+					"hammer_fist:GUARD_BREAK": 1,
+					"head_elbow:BLOCKED": 1,
+					"jor_dhakka:GUARD_BREAK": 1,
+					"jor_dhakka:PARRIED": 1,
+					"leg_kick:HIT": 2,
+					"stomach_shot:HIT": 1,
+					"street_punch:BLOCKED": 2,
+					"street_punch:HIT": 3,
+					"thrust_kick:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 4,
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 5,
+					"cap_quick_palm": 8,
+					"cap_spin_heel": 3
+				},
+				{
+					"dropkick": 2,
+					"hammer_fist": 1,
+					"head_elbow": 2,
+					"jor_dhakka": 2,
+					"leg_kick": 3,
+					"stomach_shot": 1,
+					"street_punch": 5,
+					"thrust_kick": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 401,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1798
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 6,
+					"HIT": 8,
+					"KO": 1
+				},
+				{
+					"HIT": 3,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				77,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_air_crescent:RECOVERY": 1
+				},
+				{}
+			],
+			"move_contacts": [
+				{
+					"body_punch:BLOCKED": 1,
+					"body_punch:KO": 1,
+					"cap_cartwheel:HIT": 2,
+					"cap_leap_palm:BLOCKED": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 3,
+					"cap_quick_palm:HIT": 3,
+					"cap_spin_heel:BLOCKED": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dropkick:PARRIED": 1,
+					"leg_kick:HIT": 1,
+					"stomach_shot:HIT": 1,
+					"street_punch:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_air_crescent": 1,
+					"cap_cartwheel": 2,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 2,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dropkick": 1,
+					"leg_kick": 1,
+					"stomach_shot": 1,
+					"street_punch": 1
+				}
+			],
+			"outcome": "win",
+			"rival": "bangla_maar",
+			"seed": 431,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1013
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"HIT": 6
+				}
+			],
+			"health": [
+				45,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:STARTUP": 1
+				},
+				{
+					"dragons_burst:STARTUP": 1,
+					"jkd_chain_cross:RECOVERY": 1,
+					"low_roundhouse:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"body_punch:KO": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 4,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"jkd_chain_cross:HIT": 1,
+					"jkd_chain_jab:HIT": 1,
+					"jkd_high_hook:HIT": 1,
+					"low_roundhouse:HIT": 1,
+					"side_kick:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 2,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 1,
+					"jkd_chain_cross": 3,
+					"jkd_chain_jab": 3,
+					"jkd_high_hook": 1,
+					"low_roundhouse": 2,
+					"side_kick": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "jeet_kune_do",
+			"seed": 307,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 985
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 4,
+					"HIT": 3,
+					"PARRIED": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 11,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				74
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:BLOCKED": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_low_sweep:PARRIED": 1,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"dragons_burst:BLOCKED": 1,
+					"jkd_chain_cross:HIT": 3,
+					"jkd_chain_jab:HIT": 3,
+					"jkd_hammerfist:HIT": 2,
+					"jkd_high_hook:HIT": 1,
+					"jkd_jump_straight:HIT": 1,
+					"low_roundhouse:HIT": 1,
+					"side_kick:KO": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 1,
+					"jkd_chain_cross": 5,
+					"jkd_chain_jab": 5,
+					"jkd_hammerfist": 2,
+					"jkd_high_hook": 1,
+					"jkd_jump_straight": 1,
+					"low_roundhouse": 1,
+					"side_kick": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "jeet_kune_do",
+			"seed": 331,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 953
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 4,
+					"HIT": 5
+				}
+			],
+			"health": [
+				50,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"dragons_burst:RECOVERY": 1,
+					"jkd_chain_jab:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_crescent:HIT": 1,
+					"cap_low_sweep:HIT": 3,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:KO": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dragons_burst:BLOCKED": 1,
+					"dragons_burst:HIT": 1,
+					"jkd_chain_cross:BLOCKED": 1,
+					"jkd_chain_cross:HIT": 1,
+					"jkd_chain_jab:BLOCKED": 1,
+					"jkd_chain_jab:HIT": 1,
+					"side_kick:BLOCKED": 1,
+					"side_kick:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_crescent": 2,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 2,
+					"jkd_chain_cross": 2,
+					"jkd_chain_jab": 3,
+					"side_kick": 3
+				}
+			],
+			"outcome": "win",
+			"rival": "jeet_kune_do",
+			"seed": 353,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1245
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 6,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				30,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"dragons_burst:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_cartwheel:HIT": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 4,
+					"cap_quick_palm:KO": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dragons_burst:PARRIED": 1,
+					"flying_side_kick:HIT": 1,
+					"jkd_high_hook:HIT": 2,
+					"jkd_jump_straight:BLOCKED": 1,
+					"low_roundhouse:HIT": 2,
+					"side_kick:BLOCKED": 1,
+					"side_kick:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_crescent": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 7,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 2,
+					"flying_side_kick": 1,
+					"jkd_chain_cross": 1,
+					"jkd_chain_jab": 1,
+					"jkd_high_hook": 2,
+					"jkd_jump_straight": 2,
+					"low_roundhouse": 2,
+					"side_kick": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "jeet_kune_do",
+			"seed": 379,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1112
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 4,
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 6,
+					"GUARD_BREAK": 1,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				40
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:RECOVERY": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"low_roundhouse:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:BLOCKED": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:BLOCKED": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"dragons_burst:BLOCKED": 1,
+					"dragons_burst:HIT": 1,
+					"jkd_chain_cross:BLOCKED": 1,
+					"jkd_chain_cross:HIT": 3,
+					"jkd_chain_jab:BLOCKED": 1,
+					"jkd_chain_jab:HIT": 2,
+					"jkd_hammerfist:BLOCKED": 1,
+					"jkd_hammerfist:HIT": 1,
+					"jkd_hammerfist:KO": 1,
+					"jkd_high_hook:GUARD_BREAK": 1,
+					"jkd_jump_straight:BLOCKED": 1,
+					"jkd_jump_straight:HIT": 1,
+					"side_kick:BLOCKED": 1,
+					"side_kick:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 3,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 2,
+					"jkd_chain_cross": 4,
+					"jkd_chain_jab": 4,
+					"jkd_hammerfist": 3,
+					"jkd_high_hook": 2,
+					"jkd_jump_straight": 2,
+					"low_roundhouse": 1,
+					"side_kick": 3
+				}
+			],
+			"outcome": "loss",
+			"rival": "jeet_kune_do",
+			"seed": 401,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1421
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				17
+			],
+			"interrupted": [
+				{},
+				{
+					"low_roundhouse:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 3,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"dragons_burst:HIT": 1,
+					"dragons_burst:PARRIED": 1,
+					"jkd_chain_cross:HIT": 3,
+					"jkd_chain_jab:HIT": 3,
+					"jkd_hammerfist:HIT": 1,
+					"jkd_high_hook:KO": 1,
+					"low_roundhouse:BLOCKED": 1,
+					"side_kick:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 2,
+					"jkd_chain_cross": 6,
+					"jkd_chain_jab": 6,
+					"jkd_hammerfist": 1,
+					"jkd_high_hook": 1,
+					"low_roundhouse": 2,
+					"side_kick": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "jeet_kune_do",
+			"seed": 431,
+			"side": 1,
+			"style": "capoeira",
+			"ticks": 1257
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 1,
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"HIT": 6
+				}
+			],
+			"health": [
+				45,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:STARTUP": 1
+				},
+				{
+					"dragons_burst:STARTUP": 1,
+					"jkd_chain_cross:RECOVERY": 1,
+					"low_roundhouse:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 1,
+					"body_punch:KO": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 4,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"jkd_chain_cross:HIT": 1,
+					"jkd_chain_jab:HIT": 1,
+					"jkd_high_hook:HIT": 1,
+					"low_roundhouse:HIT": 1,
+					"side_kick:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 6,
+					"cap_spin_heel": 2,
+					"jump_punch": 1,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 1,
+					"jkd_chain_cross": 3,
+					"jkd_chain_jab": 3,
+					"jkd_high_hook": 1,
+					"low_roundhouse": 2,
+					"side_kick": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "jeet_kune_do",
+			"seed": 307,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 985
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 4,
+					"HIT": 3,
+					"PARRIED": 1
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 11,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				74
+			],
+			"interrupted": [
+				{},
+				{}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:BLOCKED": 1,
+					"cap_low_sweep:HIT": 2,
+					"cap_low_sweep:PARRIED": 1,
+					"cap_quick_palm:BLOCKED": 2,
+					"cap_quick_palm:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"dragons_burst:BLOCKED": 1,
+					"jkd_chain_cross:HIT": 3,
+					"jkd_chain_jab:HIT": 3,
+					"jkd_hammerfist:HIT": 2,
+					"jkd_high_hook:HIT": 1,
+					"jkd_jump_straight:HIT": 1,
+					"low_roundhouse:HIT": 1,
+					"side_kick:KO": 1
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 1,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 1,
+					"jkd_chain_cross": 5,
+					"jkd_chain_jab": 5,
+					"jkd_hammerfist": 2,
+					"jkd_high_hook": 1,
+					"jkd_jump_straight": 1,
+					"low_roundhouse": 1,
+					"side_kick": 1
+				}
+			],
+			"outcome": "loss",
+			"rival": "jeet_kune_do",
+			"seed": 331,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 953
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 4,
+					"HIT": 5
+				}
+			],
+			"health": [
+				50,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"dragons_burst:RECOVERY": 1,
+					"jkd_chain_jab:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_crescent:HIT": 1,
+					"cap_low_sweep:HIT": 3,
+					"cap_quick_palm:HIT": 3,
+					"cap_quick_palm:KO": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dragons_burst:BLOCKED": 1,
+					"dragons_burst:HIT": 1,
+					"jkd_chain_cross:BLOCKED": 1,
+					"jkd_chain_cross:HIT": 1,
+					"jkd_chain_jab:BLOCKED": 1,
+					"jkd_chain_jab:HIT": 1,
+					"side_kick:BLOCKED": 1,
+					"side_kick:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_crescent": 2,
+					"cap_low_sweep": 3,
+					"cap_quick_palm": 5,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 2,
+					"jkd_chain_cross": 2,
+					"jkd_chain_jab": 3,
+					"side_kick": 3
+				}
+			],
+			"outcome": "win",
+			"rival": "jeet_kune_do",
+			"seed": 353,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1245
+		},
+		{
+			"contacts": [
+				{
+					"HIT": 9,
+					"KO": 1
+				},
+				{
+					"BLOCKED": 2,
+					"HIT": 6,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				30,
+				0
+			],
+			"interrupted": [
+				{
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"dragons_burst:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_cartwheel:HIT": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:HIT": 4,
+					"cap_quick_palm:KO": 1,
+					"meia_lua_tornado:HIT": 1
+				},
+				{
+					"dragons_burst:PARRIED": 1,
+					"flying_side_kick:HIT": 1,
+					"jkd_high_hook:HIT": 2,
+					"jkd_jump_straight:BLOCKED": 1,
+					"low_roundhouse:HIT": 2,
+					"side_kick:BLOCKED": 1,
+					"side_kick:HIT": 1
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_crescent": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 7,
+					"cap_spin_heel": 2,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 2,
+					"flying_side_kick": 1,
+					"jkd_chain_cross": 1,
+					"jkd_chain_jab": 1,
+					"jkd_high_hook": 2,
+					"jkd_jump_straight": 2,
+					"low_roundhouse": 2,
+					"side_kick": 2
+				}
+			],
+			"outcome": "win",
+			"rival": "jeet_kune_do",
+			"seed": 379,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1112
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 4,
+					"HIT": 5
+				},
+				{
+					"BLOCKED": 6,
+					"GUARD_BREAK": 1,
+					"HIT": 10,
+					"KO": 1
+				}
+			],
+			"health": [
+				0,
+				40
+			],
+			"interrupted": [
+				{
+					"cap_low_sweep:RECOVERY": 1,
+					"cap_quick_palm:STARTUP": 1
+				},
+				{
+					"low_roundhouse:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"cap_cartwheel:BLOCKED": 1,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 2,
+					"cap_spin_heel:BLOCKED": 1,
+					"cap_spin_heel:HIT": 1,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"dragons_burst:BLOCKED": 1,
+					"dragons_burst:HIT": 1,
+					"jkd_chain_cross:BLOCKED": 1,
+					"jkd_chain_cross:HIT": 3,
+					"jkd_chain_jab:BLOCKED": 1,
+					"jkd_chain_jab:HIT": 2,
+					"jkd_hammerfist:BLOCKED": 1,
+					"jkd_hammerfist:HIT": 1,
+					"jkd_hammerfist:KO": 1,
+					"jkd_high_hook:GUARD_BREAK": 1,
+					"jkd_jump_straight:BLOCKED": 1,
+					"jkd_jump_straight:HIT": 1,
+					"side_kick:BLOCKED": 1,
+					"side_kick:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"cap_cartwheel": 3,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 3,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 2,
+					"jkd_chain_cross": 4,
+					"jkd_chain_jab": 4,
+					"jkd_hammerfist": 3,
+					"jkd_high_hook": 2,
+					"jkd_jump_straight": 2,
+					"low_roundhouse": 1,
+					"side_kick": 3
+				}
+			],
+			"outcome": "loss",
+			"rival": "jeet_kune_do",
+			"seed": 401,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1421
+		},
+		{
+			"contacts": [
+				{
+					"BLOCKED": 2,
+					"HIT": 8
+				},
+				{
+					"BLOCKED": 1,
+					"HIT": 10,
+					"KO": 1,
+					"PARRIED": 1
+				}
+			],
+			"health": [
+				0,
+				17
+			],
+			"interrupted": [
+				{},
+				{
+					"low_roundhouse:STARTUP": 1
+				}
+			],
+			"move_contacts": [
+				{
+					"body_punch:HIT": 2,
+					"cap_cartwheel:HIT": 1,
+					"cap_leap_palm:HIT": 1,
+					"cap_low_sweep:HIT": 1,
+					"cap_quick_palm:BLOCKED": 1,
+					"cap_quick_palm:HIT": 3,
+					"meia_lua_tornado:BLOCKED": 1
+				},
+				{
+					"dragons_burst:HIT": 1,
+					"dragons_burst:PARRIED": 1,
+					"jkd_chain_cross:HIT": 3,
+					"jkd_chain_jab:HIT": 3,
+					"jkd_hammerfist:HIT": 1,
+					"jkd_high_hook:KO": 1,
+					"low_roundhouse:BLOCKED": 1,
+					"side_kick:HIT": 2
+				}
+			],
+			"move_starts": [
+				{
+					"body_punch": 2,
+					"cap_cartwheel": 1,
+					"cap_leap_palm": 1,
+					"cap_low_sweep": 1,
+					"cap_quick_palm": 4,
+					"cap_spin_heel": 4,
+					"meia_lua_tornado": 1
+				},
+				{
+					"dragons_burst": 2,
+					"jkd_chain_cross": 6,
+					"jkd_chain_jab": 6,
+					"jkd_hammerfist": 1,
+					"jkd_high_hook": 1,
+					"low_roundhouse": 2,
+					"side_kick": 2
+				}
+			],
+			"outcome": "loss",
+			"rival": "jeet_kune_do",
+			"seed": 431,
+			"side": -1,
+			"style": "capoeira",
+			"ticks": 1257
+		}
+	],
+	"settings": {
+		"ai_personality": "common defaults; style plans and preferred range retained",
+		"health": 100,
+		"scope": "combat-only; no rendering, audio, cinematic slowdown or finishers",
+		"seed_set": [
+			307,
+			331,
+			353,
+			379,
+			401,
+			431
+		],
+		"target_styles": [
+			"capoeira"
+		],
+		"tick_limit": 5400
+	},
+	"source_sha256": {
+		"scripts/combat_data.gd": "bb8cc839064745876647f45664aaeb4749905f44f14089f82b833eea7ef3f792",
+		"scripts/enemy_ai.gd": "84c80b633a0674a94618359483bfcfeccb5a255859d3565c2b316a22af2fc019",
+		"scripts/fighter.gd": "caa043e71f88c3ae88f045c3b2a20cbcff2242d024f15da294e9483fd7446396",
+		"scripts/martial_art_style.gd": "73798ab834bc071d17bfbfcbcafe7c94704cba49359ce42d2cd34b994c00fd62",
+		"styles/capoeira.tres": "d19d5f575b2f4644d78f72dd7fa116a38872e8ee413d017d622b905854503f4b",
+		"styles/jeet_kune_do.tres": "9ac7e3eeae6209622edd72e3b5432dbefff6076590f70a00cc2dcefe499aba6f"
+	}
+}

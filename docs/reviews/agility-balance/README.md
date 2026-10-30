@@ -2,6 +2,8 @@
 
 This is a combat-only AI comparison, not a human playtest or a claim that the roster is balanced.
 
+This page records the first control revision (`e44cfbf`) and its historical 27.1% Capoeira result. Subsequent tuning toward the requested 50–60% target, including independent validation and unsuccessful trials, is recorded in [the target-rate review](target-50-60/README.md).
+
 ## Method
 
 - Godot 4.7.2, 100 HP, 90-second limit, six fixed seeds: 11, 23, 37, 53, 71, 89.

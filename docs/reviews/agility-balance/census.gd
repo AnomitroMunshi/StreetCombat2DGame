@@ -129,16 +129,36 @@ func match_one(style: StringName, rival: StringName, side: int, seed_value: int)
 	return row
 
 func run() -> void:
-	for style: StringName in [&"capoeira", &"jeet_kune_do"]:
+	var seeds: Array[int] = []
+	var seed_text := OS.get_environment("CENSUS_SEEDS")
+	if seed_text == "":
+		for value in SEEDS: seeds.append(value)
+	else:
+		for value in seed_text.split(","):
+			if value.strip_edges().is_valid_int(): seeds.append(int(value.strip_edges()))
+	var targets: Array[StringName] = []
+	var target_text := OS.get_environment("CENSUS_STYLES")
+	if target_text == "": target_text = "capoeira,jeet_kune_do"
+	for value in target_text.split(","):
+		var id := StringName(value.strip_edges())
+		if StyleRegistry.by_id(id) != null: targets.append(id)
+	if seeds.is_empty() or targets.is_empty():
+		push_error("Census requires valid target styles and seeds")
+		quit(1)
+		return
+	for style: StringName in targets:
 		for other in StyleRegistry.all():
 			if other.id == style: continue
 			for side in [1, -1]:
-				for seed_value in SEEDS: rows.append(match_one(style, other.id, side, seed_value))
+				for seed_value in seeds: rows.append(match_one(style, other.id, side, seed_value))
 	var out := OS.get_environment("CENSUS_OUT")
-	if out == "": out = "res://docs/reviews/agility-balance/baseline.json"
+	if out == "": out = "res://docs/reviews/agility-balance/latest.json"
 	var file := FileAccess.open(out, FileAccess.WRITE)
 	var revision := OS.get_environment("CENSUS_REV")
-	if revision == "": revision = "dd088a0"
-	file.store_string(JSON.stringify({"revision": revision, "settings": {"seed_set": SEEDS, "tick_limit": LIMIT, "health": 100, "ai_personality": "common defaults; style plans and preferred range retained", "scope": "combat-only; no rendering, audio, cinematic slowdown or finishers"}, "rows": rows}, "\t"))
+	if revision == "": revision = "working tree; see source_sha256"
+	var source_hashes := {}
+	for path in ["scripts/combat_data.gd", "scripts/fighter.gd", "scripts/enemy_ai.gd", "scripts/martial_art_style.gd", "styles/capoeira.tres", "styles/jeet_kune_do.tres"]:
+		source_hashes[path] = FileAccess.get_sha256("res://" + path)
+	file.store_string(JSON.stringify({"revision": revision, "source_sha256": source_hashes, "settings": {"target_styles": targets, "seed_set": seeds, "tick_limit": LIMIT, "health": 100, "ai_personality": "common defaults; style plans and preferred range retained", "scope": "combat-only; no rendering, audio, cinematic slowdown or finishers"}, "rows": rows}, "\t"))
 	print("RESULT: census complete ", rows.size(), " matches -> ", out)
 	quit()
