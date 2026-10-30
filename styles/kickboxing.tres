@@ -18,9 +18,7 @@ move_names = {
 &"body_roundhouse": "Body Roundhouse"
 }
 ai_tuning = {
-"aggression": 0.56,
-"block_chance": 0.4,
-"punish_chance": 0.55
+"aggression": 0.62
 }
 input_map = {
 &"x_move": &"big_foot",
@@ -54,4 +52,4 @@ signature = &"breaker_combo"
 finishers = PackedStringArray("last_combination", "knockout_rhythm")
 air_finisher = &"air_breaker"
 wall_finisher = &"corner_breaker"
-ai_preferred_range = 120.0
+ai_preferred_range = 135.0

@@ -18,7 +18,7 @@ step_scale = 1.4
 ai_tuning = {
 "parry_chance": 0.3,
 "punish_chance": 0.95,
-"aggression": 0.66
+"aggression": 0.56
 }
 move_names = {
 &"high_kick": "High Roundhouse",

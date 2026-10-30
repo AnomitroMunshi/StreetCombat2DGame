@@ -572,7 +572,7 @@ const ATTACK_TABLE: Dictionary = {
 	AttackType.REVERSE_PUNCH: {
 		"id": &"reverse_punch", "name": "Reverse Punch", "posture": 14.0,
 		"startup": 9, "active": 3, "recovery": 17, "cancel_window": 8,
-		"damage": 12, "hitstun": 21, "blockstun": 14,
+		"damage": 10, "hitstun": 21, "blockstun": 14,
 		"knockback": 6.0, "lunge": 2.5, "hitstop": 7,
 		"hitbox": Rect2(36.0, -154.0, 64.0, 30.0),
 	},
@@ -887,7 +887,7 @@ const ATTACK_TABLE: Dictionary = {
 	AttackType.STREET_PUNCH: {
 		"id": &"street_punch", "name": "Street Punch", "posture": 6.0,
 		"startup": 5, "active": 2, "recovery": 11, "cancel_window": 9,
-		"damage": 6, "hitstun": 16, "blockstun": 10,
+		"damage": 8, "hitstun": 16, "blockstun": 10,
 		"knockback": 2.8, "lunge": 1.0, "hitstop": 5,
 		"hitbox": Rect2(26.0, -160.0, 54.0, 30.0),
 	},
@@ -895,7 +895,7 @@ const ATTACK_TABLE: Dictionary = {
 	AttackType.THRUST_KICK: {
 		"id": &"thrust_kick", "name": "Front Thrust Kick", "posture": 16.0,
 		"startup": 9, "active": 4, "recovery": 18, "cancel_window": 6,
-		"damage": 10, "hitstun": 19, "blockstun": 13,
+		"damage": 12, "hitstun": 19, "blockstun": 13,
 		"knockback": 8.5, "lunge": 1.0, "hitstop": 6,
 		"hitbox": Rect2(36.0, -118.0, 62.0, 32.0),
 	},
@@ -922,7 +922,7 @@ const ATTACK_TABLE: Dictionary = {
 		"id": &"jor_dhakka", "name": "Jor Dhakka", "posture": 16.0, "charge": true, "guard_break": true,
 		"off_balance": 40,
 		"startup": 12, "active": 4, "recovery": 26, "cancel_window": 0,
-		"damage": 11, "hitstun": 20, "blockstun": 14,
+		"damage": 13, "hitstun": 20, "blockstun": 14,
 		"knockback": 14.0, "lunge": 4.5, "hitstop": 10,
 		"hitbox": Rect2(4.0, -140.0, 40.0, 54.0),
 	},
@@ -930,7 +930,7 @@ const ATTACK_TABLE: Dictionary = {
 	AttackType.HEAD_ELBOW: {
 		"id": &"head_elbow", "name": "Head Elbow", "posture": 14.0,
 		"startup": 8, "active": 3, "recovery": 17, "cancel_window": 6,
-		"damage": 11, "hitstun": 21, "blockstun": 13,
+		"damage": 13, "hitstun": 21, "blockstun": 13,
 		"knockback": 4.5, "lunge": 1.2, "hitstop": 7,
 		"hitbox": Rect2(14.0, -170.0, 48.0, 40.0),
 	},
@@ -939,7 +939,7 @@ const ATTACK_TABLE: Dictionary = {
 	AttackType.HAMMER_FIST: {
 		"id": &"hammer_fist", "name": "Double-Hand Hammer", "stun": 80, "posture": 22.0, "guard_break": true, "overhead": true,
 		"startup": 15, "active": 4, "recovery": 25, "cancel_window": 0,
-		"damage": 15, "hitstun": 24, "blockstun": 16,
+		"damage": 17, "hitstun": 24, "blockstun": 16,
 		"knockback": 6.5, "lunge": 1.5, "hitstop": 10,
 		"hitbox": Rect2(26.0, -172.0, 56.0, 56.0),
 	},
@@ -947,7 +947,7 @@ const ATTACK_TABLE: Dictionary = {
 	AttackType.STOMACH_SHOT: {
 		"id": &"stomach_shot", "name": "Stomach Shot", "posture": 10.0,
 		"startup": 7, "active": 3, "recovery": 14, "cancel_window": 8,
-		"damage": 8, "hitstun": 18, "blockstun": 11,
+		"damage": 10, "hitstun": 18, "blockstun": 11,
 		"knockback": 4.0, "lunge": 1.2, "hitstop": 5,
 		"hitbox": Rect2(30.0, -118.0, 54.0, 30.0),
 	},
@@ -955,7 +955,7 @@ const ATTACK_TABLE: Dictionary = {
 	AttackType.PARA_LEG_KICK: {
 		"id": &"leg_kick", "name": "Leg Kick", "posture": 12.0, "low": true,
 		"startup": 9, "active": 3, "recovery": 17, "cancel_window": 6,
-		"damage": 9, "hitstun": 18, "blockstun": 12,
+		"damage": 10, "hitstun": 18, "blockstun": 12,
 		"knockback": 3.5, "lunge": 0.8, "hitstop": 6,
 		"hitbox": Rect2(30.0, -62.0, 60.0, 36.0),
 	},

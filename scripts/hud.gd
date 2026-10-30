@@ -654,7 +654,12 @@ func _process(delta: float) -> void:
 		if f == null:
 			continue
 		var ratio := float(f.health) / float(f.max_health)
-		_trail[i] = ratio if _trail[i] < ratio else move_toward(_trail[i], ratio, TRAIL_DRAIN_PER_SEC * delta)
+		# Out of health (finisher / K.O.): the bar empties at once, so the
+		# slowed-down finisher never reads as if health were left.
+		if f.health <= 0:
+			_trail[i] = 0.0
+		else:
+			_trail[i] = ratio if _trail[i] < ratio else move_toward(_trail[i], ratio, TRAIL_DRAIN_PER_SEC * delta)
 		var pr := f.posture / CombatData.POSTURE_MAX
 		_posture_shown[i] = lerpf(_posture_shown[i], pr, 1.0 - exp(-14.0 * real_delta))
 	for side in _speech:
