@@ -541,8 +541,9 @@ func _joypad_menu(button: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	var pad := event as InputEventJoypadButton
 	if pad != null and pad.pressed and pad.button_index in [JOY_BUTTON_START, JOY_BUTTON_BACK]:
+		var viewport := get_viewport()  # Back in training reloads the scene
 		_joypad_menu(pad.button_index)
-		get_viewport().set_input_as_handled()
+		viewport.set_input_as_handled()
 		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
@@ -567,8 +568,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_N: &"lesson_skip", KEY_U: &"lesson_replay",
 	}.get(key.physical_keycode, &"")
 	if action != &"":
+		# Leaving training reloads the scene, taking this node out of the tree:
+		# mark the key handled on the viewport held from before.
+		var viewport := get_viewport()
 		training_action(action)
-		get_viewport().set_input_as_handled()
+		viewport.set_input_as_handled()
 
 
 # --- Pause (matches; training has its own) -------------------------------------

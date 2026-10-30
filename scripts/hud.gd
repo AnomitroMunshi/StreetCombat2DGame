@@ -116,6 +116,11 @@ var _button5: Button = null
 var _lesson_panel: PanelContainer = null
 var _lesson_label: RichTextLabel = null
 var _settings_button: Button = null
+## Bottom-left QUIT (menus and pause): the first press asks, a second press
+## within QUIT_CONFIRM_TIME closes the game.
+var _quit_button: Button = null
+var _quit_armed: bool = false
+const QUIT_CONFIRM_TIME: float = 3.0
 var _settings_panel: PanelContainer = null
 var _settings_sliders: Dictionary = {}
 var _settings_fullscreen: CheckButton = null
@@ -472,6 +477,12 @@ func _build_settings() -> void:
 	_settings_button.visible = false
 	add_child(_settings_button)
 
+	_quit_button = _settings_button.duplicate(0) as Button  # its look, not its signal
+	_quit_button.position = Vector2(12.0, 720.0 - 36.0)
+	_quit_button.text = "QUIT"
+	_quit_button.pressed.connect(_on_quit_pressed)
+	add_child(_quit_button)
+
 	_settings_panel = PanelContainer.new()
 	var box := _panel_box()
 	box.bg_color = Color(0.05, 0.04, 0.04, 0.94)
@@ -603,8 +614,35 @@ func _layout_settings() -> void:
 
 func show_settings_button(on: bool) -> void:
 	_settings_button.visible = on
+	show_quit_button(on)
 	if not on and _settings_panel.visible:
 		toggle_settings()
+
+
+## QUIT sits with SETTINGS (and on the style-select home screen); a browser
+## page cannot close itself, so the web build has none.
+func show_quit_button(on: bool) -> void:
+	_quit_button.visible = on and not OS.has_feature("web")
+	_disarm_quit()
+
+
+func is_quit_button_visible() -> bool:
+	return _quit_button.visible
+
+
+func _on_quit_pressed() -> void:
+	if _quit_armed:
+		get_tree().quit()
+		return
+	_quit_armed = true
+	_quit_button.text = "CONFIRM QUIT"
+	# Runs while paused and ignores slow motion.
+	get_tree().create_timer(QUIT_CONFIRM_TIME, true, false, true).timeout.connect(_disarm_quit)
+
+
+func _disarm_quit() -> void:
+	_quit_armed = false
+	_quit_button.text = "QUIT"
 
 
 func is_settings_button_visible() -> bool:
@@ -817,6 +855,7 @@ func show_style_select(styles: Array[MartialArtStyle], selected_id: StringName) 
 		_details.text = _style_details(chosen)
 		_confirm.text = "CONFIRM %s" % chosen.display_name.to_upper()
 	_select_panel.visible = true
+	show_quit_button(true)
 
 
 func hide_style_select() -> void:
