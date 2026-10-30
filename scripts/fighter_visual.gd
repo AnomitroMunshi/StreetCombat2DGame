@@ -116,7 +116,7 @@ const YIELD_STRIKE: float = 0.7
 const KNEE_REVERSE_MAX: float = 0.07
 ## A committed strike from a long stance sinks the hips further (a lunge).
 const MAX_SETTLE_STRIKE: float = 18.0
-## Boxing stays tall through its punches: the hips may sink only this far
+## Boxing (and upright Muay Thai) stay tall through punches and elbows: the hips may sink only this far
 ## before the rear foot drags in behind them (the boxer's step-drag) instead
 ## of collapsing into a deep lunge.
 const MAX_SETTLE_STRIKE_BOXING: float = 6.0
@@ -3923,7 +3923,7 @@ func _wants_plant() -> bool:
 ## How far the hips may sink over planted feet during a strike.
 func _strike_settle_max() -> float:
 	match _kit:
-		&"boxing":
+		&"boxing", &"muay_thai":
 			return MAX_SETTLE_STRIKE_BOXING
 		&"karate":
 			return MAX_SETTLE_STRIKE_KARATE
