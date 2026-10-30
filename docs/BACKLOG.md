@@ -29,12 +29,12 @@ Timestamps are `clip @ seconds`.
 
 ## Discussed earlier, not yet done
 
-- [ ] **Bangla Maar balance.** *STALE: the 21% figure predates rounds, health, Focus, guard heights, Jor Dhakka and X moves; remeasure in the balance batch.* It wins about 21% of AI-vs-AI matches because of the spec's lighter damage. Decide whether to buff it.
-- [ ] **Overall style balance spread.** *STALE: figures predate nine styles and recent changes; remeasure in the balance batch.* From Kung Fu at 67% down to Boxing at 38%; the target is roughly 45–55%.
+- [x] **Bangla Maar balance.** *Done (2026-10-30, balance pass 1): remeasured at 25% in a 96-seed census; damage up across the kit (timings unchanged) and AI range 95 -> 135 bring it to 45%. See docs/reviews/balance/2026-10-30-pass-1.* It wins about 21% of AI-vs-AI matches because of the spec's lighter damage. Decide whether to buff it.
+- [x] **Overall style balance spread.** *Done (2026-10-30, balance pass 1): 25-64% -> 45-56% across all nine styles (AI census, not human win rates). Re-run with tools/balance/run_census.sh.* From Kung Fu at 67% down to Boxing at 38%; the target is roughly 45–55%.
 - [ ] **Bundle a Bengali font.** Speech currently needs Nirmala UI or Vrinda installed. A free, openly licensed font (e.g. Noto Sans Bengali, OFL) would fix this, but it needs your approval before download.
 - [x] **Rounds.** *Balance batch: best of 3 with a finisher every round; 2 wins ends the match. Health is 200 per round (rounds ~34 s, 34 hits). Focus gains cut ~40%, and focus from taking hits is capped at 12 per 2 s; the meter is first full ~20 s into a round (60%), ~0.8 signatures per fighter per round. ROUND 2 / FINAL ROUND voice calls, round pips. No round timer yet.*
 - [ ] **Hurtboxes are fixed rectangles** and don't follow extended limbs.
-- [ ] **AI difficulty select.** Difficulty is only adjustable through exported values on `EnemyAI`; there's no menu option.
+- [x] **AI difficulty select.** *Done (2026-10-30): Easy / Normal / Hard on the pre-match screen (AI button or G), kept across rematches; tests/test_difficulty.gd.* Difficulty is only adjustable through exported values on `EnemyAI`; there's no menu option.
 - [ ] **Throws and grappling.** Design note only (`docs/V0.3_PLAN.md` §4). Parked on purpose; the Bangla Maar spec said no grappling yet.
 - [ ] **Boxing quality checklist** (11 items from the Boxing pass) has never been checked off by a human playtest.
 - [ ] Harmless "2 ObjectDB instances leaked" warning on exit (looping music held by the audio server).
