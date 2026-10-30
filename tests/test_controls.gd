@@ -34,7 +34,7 @@ const SPEC: Dictionary = {
 	&"capoeira": {&"light": &"cap_quick_palm", &"heavy": &"cap_spin_heel", &"technique": &"cap_cartwheel",
 		&"up_light": &"rising_elbow", &"up_heavy": &"cap_crescent", &"down_light": &"body_punch", &"down_heavy": &"cap_low_sweep",
 		&"power_light": &"cap_leap_palm", &"power_heavy": &"cap_flying_scissor", &"x_move": &"meia_lua_tornado", &"F": &"roda_storm"},
-	&"jeet_kune_do": {&"light": &"jkd_lead_straight", &"heavy": &"cross", &"technique": &"side_kick",
+	&"jeet_kune_do": {&"light": &"jkd_jab_cross", &"heavy": &"jkd_hammerfist", &"technique": &"side_kick",
 		&"up_light": &"rising_elbow", &"up_heavy": &"jkd_high_hook", &"down_light": &"body_straight", &"down_heavy": &"low_roundhouse",
 		&"power_light": &"jkd_jump_straight", &"power_heavy": &"flying_side_kick", &"x_move": &"dragons_burst", &"F": &"intercepting_fury"},
 }
@@ -295,7 +295,7 @@ func _power_chords() -> void:
 				results.append([space_first["first"], attack_first["first"], together["first"]])
 				_check(space_first["first"] == want and not space_first["air_before"],
 					"%s %s Space then %s -> %s, no jump first (facing %d, %s)" % [sid, key, ["J", "K"][k], want, side, space_first["first"]])
-				_check(attack_first["first"] == slot_move(st, slot) and attack_first["moves"].has(want) and attack_first["moves"].size() == 2,
+				_check(attack_first["first"] == _first_strike(slot_move(st, slot)) and attack_first["moves"].has(want) and attack_first["moves"].size() == 2,
 					"%s %s then Space -> converts to %s in startup (facing %d, %s)" % [sid, ["J", "K"][k], want, side, attack_first["moves"]])
 				_check(together["first"] == want, "%s %s same tick -> %s (facing %d)" % [sid, key, want, side])
 				_check(space_first["hits"] <= 1 and together["hits"] <= 1, "%s %s hits at most once (%d)" % [sid, want, together["hits"]])
@@ -340,13 +340,14 @@ func _chains(st: MartialArtStyle, from: StringName, to_slot: StringName, to: Str
 	i.attack = CombatData.type_for_id(from)
 	a.push_intent(i)
 	var at := CombatData.get_attack(i.attack)
+	var final_id: StringName = at.sequence.back() if not at.sequence.is_empty() else at.id
 	var ok := false
 	for t in 70:
 		a.tick()
 		b.tick()
 		if a.is_hitbox_active() and a.get_hitbox_world().intersects(b.get_hurtbox_world()):
 			a.confirm_hit(b.receive_hit(a.current_attack, a, a.combo_step))
-		if t == at.startup + at.active - 2:
+		if a.current_attack != null and a.current_attack.id == final_id and a.state_frame == a.current_attack.startup + a.current_attack.active - 2:
 			a.push_intent(_slot(to_slot))
 		if a.state == Fighter.State.ATTACK and a.combo_step == 2 and a.current_attack.id == _first_strike(to):
 			ok = true

@@ -1,0 +1,81 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[style]
+  ok   Bangla Maar is registered and valid
+  ok   nine styles (9)
+  ok   relaxed stance: neither hand raised into a guard (ua 0.35 / 0.15)
+[every move, both directions]
+  ok   street_punch hits once, same either way ([[1, 94], [1, 94]])
+  ok   thrust_kick hits once, same either way ([[1, 90], [1, 90]])
+  ok   jor_dhakka hits once, same either way ([[1, 89], [1, 89]])
+  ok   head_elbow hits once, same either way ([[1, 89], [1, 89]])
+  ok   hammer_fist hits once, same either way ([[1, 85], [1, 85]])
+  ok   stomach_shot hits once, same either way ([[1, 92], [1, 92]])
+  ok   leg_kick hits once, same either way ([[1, 91], [1, 91]])
+  ok   flying_slap hits once, same either way ([[1, 89], [1, 89]])
+  ok   flying_chest_kick hits once, same either way ([[1, 86], [1, 86]])
+  ok   belly_bomb hits once, same either way ([[1, 78], [1, 78]])
+[jor dhakka]
+  ok   L is Jor Dhakka
+  ok   no random knockdown inherited from the old shove
+  ok   a long recovery: punishable on a miss (26)
+  ok   a clean shoulder bash never knocks down (0 / 200, seeded)
+  ok   one shoulder hit from 150 px (1, facing right)
+  ok   closes in, heavy knockback, space made (attacker +87, defender +87, gap 150, facing right)
+  ok   the charge stops on contact: no chasing the body (0.0 px, facing right)
+  ok   blocked: the charge breaks the guard, never a knockdown (GUARD_BREAK, facing right)
+  ok   a miss: bounded charge (91 px), no hit (facing right)
+  ok   one shoulder hit from 150 px (1, facing left)
+  ok   closes in, heavy knockback, space made (attacker +87, defender +87, gap 150, facing left)
+  ok   the charge stops on contact: no chasing the body (0.0 px, facing left)
+  ok   blocked: the charge breaks the guard, never a knockdown (GUARD_BREAK, facing left)
+  ok   a miss: bounded charge (91 px), no hit (facing left)
+[jor dhakka: off balance]
+  ok   a clean hit throws them off balance for 40 ticks (facing 1, STAGGER)
+  ok   the knockback is kept while they reel (14.0 px/tick)
+  ok   a follow-up on the reeling opponent is a counter hit
+  ok   a clean hit throws them off balance for 40 ticks (facing -1, STAGGER)
+  ok   the knockback is kept while they reel (-14.0 px/tick)
+  ok   a follow-up on the reeling opponent is a counter hit
+  ok   a parry still beats Jor Dhakka
+  ok   invulnerable frames: the bash passes through
+[guard breaker]
+  ok   guard breakers are Bangla Maar's hammer/shove and JKD's high hook (["bangla_maar:hammer_fist", "bangla_maar:jor_dhakka", "jeet_kune_do:jkd_high_hook"])
+  ok   a blocked hammer breaks the guard outright (facing 1, GUARD_BREAK)
+  ok   a blocked hammer breaks the guard outright (facing -1, GUARD_BREAK)
+  ok   a parry still beats the hammer
+  ok   other Bangla Maar moves are ordinary blocks
+[belly bomb]
+  ok   belly bomb steps back first (30 px)
+  ok   belly bomb in range: belly-first hit, heavy knockback, bounces off, quick landing (lag 10)
+  ok   belly bomb steps back first (30 px)
+  ok   belly bomb whiff: long recovery (lag 30)
+[finishers]
+  ok   open floor: only Paaye Lathi and Super Chor ([18, 17])
+[speech font]
+  ok   speech font has Bengali glyphs (Nirmala UI)
+[speech bubbles]
+  ok   match start line
+  ok   a rival without lines stays silent
+  ok   'hurt' does not interrupt the opening line
+  ok   bubble gone after its time
+  ok   quiet during the cooldown
+  ok   slap lands: the slap line
+  ok   a repeated event never restarts the bubble
+  ok   low health: urgent line replaces the slap line
+  ok   low-health line is said once and not cut off
+  ok   blocking line
+  ok   whiffed hammer: the miss line (বেঁচে গেলি!)
+[FOOTBALL SHOT]
+  ok   finisher line: জয় মা কালী!
+  ok   Paaye Lathi: lying on the floor, head towards the attacker (head (631.7027, 541.4815), hip (707.0789, 549.7952))
+  ok   Paaye Lathi: the punt lands with the foot on the head (20 px)
+  ok   FOOTBALL SHOT knocks out
+  ok   FOOTBALL SHOT: the body slides along the floor
+[SUPER CHOR]
+  ok   finisher line: জয় মা কালী!
+  ok   Super Chor: the open palm is on the face as the slap lands (9 px, hand (676.164, 411.0952) head (681.7452, 403.7271) shoulder (621.3699, 435.3656))
+  ok   knocked out: মার গেরেছে !!
+  ok   SUPER CHOR knocks out
+  ok   SUPER CHOR: the body slides along the floor
+RESULT: PASS (0 failures)

@@ -1,0 +1,626 @@
+[
+	{
+		"attacker_travel": 20.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 70.0,
+		"peak_air_travel": 98.3932495117188,
+		"peak_target_travel": 138.668212890625,
+		"recovered_tick": 61.0,
+		"side": 1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 798.668212890625,
+		"wall": false,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 40.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 90.0,
+		"peak_air_travel": 98.3932495117188,
+		"peak_target_travel": 138.668212890625,
+		"recovered_tick": 61.0,
+		"side": 1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 818.668212890625,
+		"wall": false,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 66.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 136.0,
+		"peak_air_travel": 98.3932495117188,
+		"peak_target_travel": 138.668212890625,
+		"recovered_tick": 61.0,
+		"side": 1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 864.668212890625,
+		"wall": false,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 13.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 70.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61.0,
+		"side": 1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 1105.0,
+		"wall": true,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 33.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 90.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61.0,
+		"side": 1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 1105.0,
+		"wall": true,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 66.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 136.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61.0,
+		"side": 1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 1105.0,
+		"wall": true,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 20.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 70.0,
+		"peak_air_travel": 98.3933715820313,
+		"peak_target_travel": 138.668487548828,
+		"recovered_tick": 61.0,
+		"side": -1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 381.331512451172,
+		"wall": false,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 40.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 90.0,
+		"peak_air_travel": 98.3933715820313,
+		"peak_target_travel": 138.668487548828,
+		"recovered_tick": 61.0,
+		"side": -1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 361.331512451172,
+		"wall": false,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 66.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 136.0,
+		"peak_air_travel": 98.3933715820313,
+		"peak_target_travel": 138.668487548828,
+		"recovered_tick": 61.0,
+		"side": -1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 315.331512451172,
+		"wall": false,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 13.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 70.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61.0,
+		"side": -1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 175.0,
+		"wall": true,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 33.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 90.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61.0,
+		"side": -1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 175.0,
+		"wall": true,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 66.5,
+		"contacts": [
+			{
+				"damage": 18.0,
+				"id": "dragons_burst",
+				"tick": 22.0,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18.0,
+		"gap": 136.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61.0,
+		"side": -1.0,
+		"style": "jeet_kune_do",
+		"target_end_x": 175.0,
+		"wall": true,
+		"windows": {
+			"dragons_burst": [
+				22.0,
+				22.0
+			]
+		}
+	},
+	{
+		"attacker_travel": 0.0,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18,
+		"gap": 70.0,
+		"peak_air_travel": 125.724853515625,
+		"peak_target_travel": 178.558776855469,
+		"recovered_tick": 61,
+		"side": 1,
+		"style": "capoeira",
+		"target_end_x": 838.558776855469,
+		"wall": false,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 0.0,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18,
+		"gap": 90.0,
+		"peak_air_travel": 125.724853515625,
+		"peak_target_travel": 178.558776855469,
+		"recovered_tick": 61,
+		"side": 1,
+		"style": "capoeira",
+		"target_end_x": 858.558776855469,
+		"wall": false,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 7.19989013671875,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 8.38409423828125
+			}
+		],
+		"damage": 18,
+		"gap": 133.2,
+		"peak_air_travel": 125.724853515625,
+		"peak_target_travel": 178.558776855469,
+		"recovered_tick": 61,
+		"side": 1,
+		"style": "capoeira",
+		"target_end_x": 901.7587890625,
+		"wall": false,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 0.0,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18,
+		"gap": 70.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61,
+		"side": 1,
+		"style": "capoeira",
+		"target_end_x": 1105.0,
+		"wall": true,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 0.0,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18,
+		"gap": 90.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61,
+		"side": 1,
+		"style": "capoeira",
+		"target_end_x": 1105.0,
+		"wall": true,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 5.600341796875,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 8.3836669921875
+			}
+		],
+		"damage": 18,
+		"gap": 133.2,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61,
+		"side": 1,
+		"style": "capoeira",
+		"target_end_x": 1105.0,
+		"wall": true,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 0.0,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18,
+		"gap": 70.0,
+		"peak_air_travel": 125.724761962891,
+		"peak_target_travel": 178.558654785156,
+		"recovered_tick": 61,
+		"side": -1,
+		"style": "capoeira",
+		"target_end_x": 341.441345214844,
+		"wall": false,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 0.0,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18,
+		"gap": 90.0,
+		"peak_air_travel": 125.724761962891,
+		"peak_target_travel": 178.558654785156,
+		"recovered_tick": 61,
+		"side": -1,
+		"style": "capoeira",
+		"target_end_x": 321.441345214844,
+		"wall": false,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 7.19989013671875,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 8.38412475585938
+			}
+		],
+		"damage": 18,
+		"gap": 133.2,
+		"peak_air_travel": 125.724761962891,
+		"peak_target_travel": 178.558654785156,
+		"recovered_tick": 61,
+		"side": -1,
+		"style": "capoeira",
+		"target_end_x": 278.241333007813,
+		"wall": false,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 0.0,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18,
+		"gap": 70.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61,
+		"side": -1,
+		"style": "capoeira",
+		"target_end_x": 175.0,
+		"wall": true,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 0.0,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 0.0
+			}
+		],
+		"damage": 18,
+		"gap": 90.0,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61,
+		"side": -1,
+		"style": "capoeira",
+		"target_end_x": 175.0,
+		"wall": true,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	},
+	{
+		"attacker_travel": 5.60002136230469,
+		"contacts": [
+			{
+				"damage": 18,
+				"id": "meia_lua_tornado",
+				"tick": 24,
+				"visible_gap": 8.38401794433594
+			}
+		],
+		"damage": 18,
+		"gap": 133.2,
+		"peak_air_travel": 5.0,
+		"peak_target_travel": 5.0,
+		"recovered_tick": 61,
+		"side": -1,
+		"style": "capoeira",
+		"target_end_x": 175.0,
+		"wall": true,
+		"windows": {
+			"meia_lua_tornado": [
+				24,
+				24
+			]
+		}
+	}
+]

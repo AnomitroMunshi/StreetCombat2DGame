@@ -569,7 +569,7 @@ func _intended_limb(beat: Dictionary, joints: PackedVector2Array) -> int:
 ## After a lunge into a blow, the attacker steps back out to striking distance
 ## (a recoil step, never a snap) unless this beat drives forward on purpose.
 func _recover_spacing(beat: Dictionary) -> void:
-	if float(beat.get("atk_move", 0.0)) > 0.0 or attacker.airborne or victim.is_down():
+	if beat.get("hold_spacing", false) or float(beat.get("atk_move", 0.0)) > 0.0 or attacker.airborne or victim.is_down():
 		return
 	var gap := (victim.position.x - attacker.position.x) * _dir
 	if gap < MIN_GAP:
@@ -614,7 +614,9 @@ func _try_land() -> Dictionary:
 	var arrived := g <= CONTACT_SLOP
 	# Spinning and airborne blows swing away before they come round (or drop
 	# from above), so they get longer to arrive and no closest-approach rule.
-	var sweeping: bool = float(_pending.get("atk_spin", 0.0)) > 0.0 or _pending.get("atk_spin_hold", false) 		or attacker.airborne
+	# Inverted transitions can also momentarily recede while the supporting
+	# palm settles. Their authored settle_contact beats use the same bound.
+	var sweeping: bool = float(_pending.get("atk_spin", 0.0)) > 0.0 or _pending.get("atk_spin_hold", false) or _pending.get("settle_contact", false) or attacker.airborne
 	# (A gap that grew only because the attacker was just repositioned is not
 	# the limb going past.)
 	var receding: bool = not sweeping and not stepped and _pending_ticks > 1 and g > _pending_gap + 0.5
@@ -842,10 +844,12 @@ func _build(k: Kind) -> Array[Dictionary]:
 			return [
 				{"ticks": 8, "atk": &"deflect", "def": &"stagger"},
 				{"ticks": 8, "atk": &"gyaku_hit", "def": &"hitstun_body", "hit": true, "power": 2, "atk_move": 1.5, "def_move": 0.5},
-				{"ticks": 18, "atk": &"gyaku_load", "def": &"stagger"},
-				{"ticks": 18, "atk": &"gyaku_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
-					"ko_vy": -8.0, "ko_drift": 17.0, "ko_rolls": 2, "ko_tumble": true},
-				{"ticks": 50, "atk": &"guard", "def": &"knock_fly"},
+				{"ticks": 18, "atk": &"kt_verdict_load", "def": &"stagger"},
+				{"ticks": 18, "atk": &"kt_verdict_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"contact": &"body", "high": false, "limb": FighterVisual.J_HAND_B,
+					"ko_vy": -8.0, "ko_drift": 18.0, "ko_rolls": 1, "ko_tumble": false},
+				{"ticks": 12, "atk": &"kt_verdict_follow", "def": &"knock_fly"},
+				{"ticks": 38, "atk": &"guard", "def": &"knock_fly"},
 			]
 		Kind.CRIMSON_CRESCENT:
 			# Karate: front kick, advancing reverse punch, spinning high kick.
@@ -1257,7 +1261,8 @@ func _build(k: Kind) -> Array[Dictionary]:
 					"contact": &"body", "power": 2, "atk_move": 3.0, "def_move": 9.0, "slam": true},
 				{"ticks": 9, "atk": &"cap_au_entry", "def": &"stagger"},
 				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger"},
-				{"ticks": 9, "atk": &"cap_au_hit", "def": &"hitstun", "hit": true, "power": 2, "wall": true},
+				{"ticks": 14, "atk": &"cap_au_hit", "def": &"hitstun", "hit": true, "power": 2, "wall": true,
+					"settle_contact": true},
 				{"ticks": 9, "atk": &"cap_armada_load", "def": &"stagger", "atk_spin": 0.5},
 				{"ticks": 7, "atk": &"cap_armada_hit", "def": &"stagger", "atk_spin": 0.5},
 				{"ticks": 18, "atk": &"cap_armada_hit", "def": &"slumped", "hit": true, "power": 3, "final": true,
@@ -1268,10 +1273,13 @@ func _build(k: Kind) -> Array[Dictionary]:
 		Kind.ONE_INCH_ENDING:
 			return [
 				{"ticks": 8, "atk": &"jkd_lead_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2},
-				{"ticks": 14, "atk": &"jkd_burst_load", "def": &"stagger", "atk_move": 1.0},
-				{"ticks": 18, "atk": &"jkd_burst_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
-					"contact": &"body", "high": false, "ko_vy": -7.0, "ko_drift": 17.0, "ko_rolls": 1, "ko_tumble": true},
-				{"ticks": 48, "atk": &"guard", "def": &"knock_fly"},
+				{"ticks": 10, "atk": &"jkd_inch_set", "def": &"stagger", "hold_spacing": true},
+				{"ticks": 18, "atk": &"jkd_inch_load", "def": &"stagger", "hold_spacing": true},
+				{"ticks": 18, "atk": &"jkd_inch_hit", "def": &"knock_fly", "hit": true, "power": 3, "final": true,
+					"contact": &"body", "high": false, "hold_spacing": true, "limb": FighterVisual.J_HAND_F,
+					"ko_vy": -6.5, "ko_drift": 19.0, "ko_rolls": 1, "ko_tumble": false},
+				{"ticks": 12, "atk": &"jkd_inch_follow", "def": &"knock_fly", "hold_spacing": true},
+				{"ticks": 36, "atk": &"guard", "def": &"knock_fly"},
 			]
 		Kind.NO_SECOND_CHANCE:
 			return [

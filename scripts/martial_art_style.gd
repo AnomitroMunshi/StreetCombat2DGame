@@ -51,6 +51,11 @@ const CATEGORIES: Array[StringName] = [&"striking", &"kicking", &"sweeping", &"c
 @export var kit: StringName = &"gi"
 ## Footwork: scales how far this style's strikes step in (CombatData.STEP_IN).
 @export var step_scale: float = 1.0
+## Style footwork and voluntary jump travel. These never scale knockback.
+@export_range(0.5, 1.6) var movement_scale: float = 1.0
+@export_range(0.5, 1.6) var jump_travel_scale: float = 1.0
+## Directional voluntary jumps use this style's rolling crossover presentation.
+@export var rolling_jump: bool = false
 ## Rival AI tuning for this style (EnemyAI property -> value), e.g. a boxer's
 ## pressure and head movement. Applied on top of the AI's defaults.
 @export var ai_tuning: Dictionary = {}
@@ -127,7 +132,16 @@ func moves() -> Array[StringName]:
 
 
 func can_chain(from: CombatData.AttackType, to: CombatData.AttackType) -> bool:
-	var next: Array = chains.get(CombatData.id_for_type(from), [])
+	var from_id := CombatData.id_for_type(from)
+	var next: Array = chains.get(from_id, [])
+	# A mapped automatic combination exposes its cancel routes from its last
+	# strike, while plans and move lists refer to the mapped parent.
+	if next.is_empty():
+		for parent_id in moves():
+			var sequence := CombatData.get_attack(CombatData.type_for_id(parent_id)).sequence
+			if not sequence.is_empty() and sequence.back() == from_id:
+				next = chains.get(parent_id, [])
+				break
 	return CombatData.id_for_type(to) in next
 
 

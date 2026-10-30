@@ -30,7 +30,8 @@ enum AttackType { NONE, LIGHT, HEAVY, KICK, FRONT_KICK, BACKHAND, UPPERCUT, JUMP
 	TRIPLE_KICK_BODY_TWO, TRIPLE_KICK_HEAD, BIG_FOOT, DROPKICK, SCORPION_KICK, THAI_ROUNDHOUSE,
 	CAP_QUICK_PALM, CAP_SPIN_HEEL, CAP_CARTWHEEL, CAP_CRESCENT, CAP_LOW_SWEEP, CAP_LEAP_PALM, CAP_FLYING_SCISSOR, CAP_AIR_CRESCENT, CAP_AIR_SPIN,
 	RODA_STORM, CAP_RODA_SWEEP, CAP_RODA_CARTWHEEL, CAP_RODA_HEEL, MEIA_LUA_TORNADO,
-	JKD_LEAD_STRAIGHT, JKD_HIGH_HOOK, JKD_JUMP_STRAIGHT, JKD_AIR_FRONT, INTERCEPTING_FURY, JKD_STOP_KICK, JKD_INTERCEPT_LEAD, JKD_INTERCEPT_REAR, JKD_INTERCEPT_SIDE, DRAGONS_BURST, JKD_X_STOP, JKD_X_SIDE }
+	JKD_LEAD_STRAIGHT, JKD_HIGH_HOOK, JKD_JUMP_STRAIGHT, JKD_AIR_FRONT, INTERCEPTING_FURY, JKD_STOP_KICK, JKD_INTERCEPT_LEAD, JKD_INTERCEPT_REAR, JKD_INTERCEPT_SIDE, DRAGONS_BURST, JKD_X_STOP, JKD_X_SIDE,
+	JKD_JAB_CROSS, JKD_CHAIN_JAB, JKD_CHAIN_CROSS, JKD_HAMMERFIST }
 enum HitResult { WHIFF, HIT, BLOCKED, KO, PARRIED, GUARD_BREAK }
 ## Step-in (px of root motion through the startup, front-loaded into its late
 ## part): strikes travel into range like real footwork instead of being thrown
@@ -1126,38 +1127,38 @@ const ATTACK_TABLE: Dictionary = {
 	# --- Capoeira and Jeet Kune Do ---
 	AttackType.CAP_QUICK_PALM: {
 		"id": &"cap_quick_palm", "name": "Quick Palm",
-		"startup": 6, "active": 3, "recovery": 13, "cancel_window": 6,
-		"damage": 8, "hitstun": 23, "blockstun": 14, "posture": 8.0,
+		"startup": 4, "active": 3, "recovery": 9, "cancel_window": 6,
+		"damage": 11, "hitstun": 23, "blockstun": 14, "posture": 8.0,
 		"knockback": 4.0, "lunge": 0.8, "hitstop": 6,
 		"hitbox": Rect2(25.0, -158.0, 54.0, 34.0),
 	},
 	AttackType.CAP_SPIN_HEEL: {
 		"id": &"cap_spin_heel", "name": "Spinning Heel Kick",
-		"startup": 15, "active": 4, "recovery": 23, "cancel_window": 5,
-		"damage": 14, "hitstun": 23, "blockstun": 14, "posture": 18.0,
+		"startup": 11, "active": 4, "recovery": 17, "cancel_window": 5,
+		"damage": 16, "hitstun": 23, "blockstun": 14, "posture": 18.0, "stun": 40,
 		"knockback": 6.0, "lunge": 0.8, "hitstop": 6,
 		"hitbox": Rect2(32.0, -180.0, 56.0, 62.0), "spin": true,
 	},
 	AttackType.CAP_CARTWHEEL: {
 		"id": &"cap_cartwheel", "name": "Cartwheel Kick",
-		"startup": 18, "active": 5, "recovery": 28, "cancel_window": 0,
-		"damage": 13, "hitstun": 23, "blockstun": 14, "posture": 14.0,
-		"knockback": 6.0, "lunge": 0.5, "hitstop": 6,
-		"hitbox": Rect2(30.0, -176.0, 56.0, 66.0), "pose_hurtbox": Rect2(-48.0, -152.0, 96.0, 152.0), "hurtbox_start": 8, "hurtbox_end": 32, "recovery_hurtbox": Rect2(-48.0, -125.0, 96.0, 125.0), "recovery_hurtbox_start": 33, "recovery_hurtbox_end": 47,
+		"startup": 14, "active": 5, "recovery": 20, "cancel_window": 0,
+		"damage": 13, "hitstun": 23, "blockstun": 14, "posture": 16.0, "stun": 80,
+		"knockback": 6.0, "lunge": 0.5, "hitstop": 8, "impact_power": 2,
+		"hitbox": Rect2(30.0, -176.0, 56.0, 66.0), "pose_hurtbox": Rect2(-48.0, -152.0, 96.0, 152.0), "hurtbox_start": 8, "hurtbox_end": 28, "recovery_hurtbox": Rect2(-48.0, -125.0, 96.0, 125.0), "recovery_hurtbox_start": 29, "recovery_hurtbox_end": 35,
 	},
 	AttackType.CAP_CRESCENT: {
 		"id": &"cap_crescent", "name": "Crescent Kick",
-		"startup": 12, "active": 4, "recovery": 21, "cancel_window": 5,
-		"damage": 12, "hitstun": 23, "blockstun": 14, "posture": 16.0,
+		"startup": 10, "active": 4, "recovery": 18, "cancel_window": 5,
+		"damage": 12, "hitstun": 23, "blockstun": 14, "posture": 16.0, "stun": 35,
 		"knockback": 4.0, "lunge": 0.8, "hitstop": 6,
 		"hitbox": Rect2(32.0, -190.0, 55.0, 64.0),
 	},
 	AttackType.CAP_LOW_SWEEP: {
 		"id": &"cap_low_sweep", "name": "Low Spinning Sweep",
-		"startup": 13, "active": 4, "recovery": 24, "cancel_window": 6,
-		"damage": 8, "hitstun": 23, "blockstun": 14, "posture": 12.0,
+		"startup": 10, "active": 4, "recovery": 24, "cancel_window": 0,
+		"damage": 8, "hitstun": 23, "blockstun": 14, "posture": 12.0, "knockdown": true,
 		"knockback": 4.0, "lunge": 0.8, "hitstop": 6,
-		"hitbox": Rect2(26.0, -58.0, 64.0, 45.0), "low": true, "pose_hurtbox": Rect2(-44.0, -98.0, 90.0, 98.0), "hurtbox_start": 5, "hurtbox_end": 25,
+		"hitbox": Rect2(26.0, -45.0, 60.0, 40.0), "low": true, "pose_hurtbox": Rect2(-65.0, -100.0, 115.0, 100.0), "hurtbox_start": 5, "hurtbox_end": 25,
 	},
 	AttackType.CAP_LEAP_PALM: {
 		"id": &"cap_leap_palm", "name": "Leaping Palm",
@@ -1199,7 +1200,7 @@ const ATTACK_TABLE: Dictionary = {
 		"startup": 12, "active": 3, "recovery": 10, "cancel_window": 0,
 		"damage": 8, "hitstun": 23, "blockstun": 14, "posture": 10.0,
 		"knockback": 0.5, "lunge": 1.0, "hitstop": 6,
-		"hitbox": Rect2(26.0, -58.0, 60.0, 45.0), "x_strike": true, "low": true, "pose_hurtbox": Rect2(-44.0, -98.0, 90.0, 98.0), "hurtbox_start": 4, "hurtbox_end": 18,
+		"hitbox": Rect2(26.0, -45.0, 60.0, 40.0), "x_strike": true, "low": true, "pose_hurtbox": Rect2(-65.0, -100.0, 115.0, 100.0), "hurtbox_start": 4, "hurtbox_end": 18,
 	},
 	AttackType.CAP_RODA_CARTWHEEL: {
 		"id": &"cap_roda_cartwheel", "name": "Roda Storm (cartwheel)",
@@ -1216,11 +1217,12 @@ const ATTACK_TABLE: Dictionary = {
 		"hitbox": Rect2(32.0, -180.0, 56.0, 62.0), "x_strike": true, "spin": true,
 	},
 	AttackType.MEIA_LUA_TORNADO: {
-		"id": &"meia_lua_tornado", "name": "Meia-Lua Tornado",
+		"id": &"meia_lua_tornado", "name": "Handstand Hammer",
 		"startup": 24, "active": 5, "recovery": 32, "cancel_window": 0,
 		"damage": 18, "hitstun": 23, "blockstun": 14, "posture": 18.0,
-		"knockback": 10.0, "lunge": 0.8, "hitstop": 10,
-		"hitbox": Rect2(30.0, -178.0, 58.0, 66.0), "x_move": true, "x_cooldown_frames": 900, "impact_power": 3, "pose_hurtbox": Rect2(-50.0, -160.0, 104.0, 160.0), "hurtbox_start": 10, "hurtbox_end": 39, "recovery_hurtbox": Rect2(-52.0, -125.0, 104.0, 125.0), "recovery_hurtbox_start": 40, "recovery_hurtbox_end": 57,
+		"knockback": 12.0, "lunge": 0.8, "hitstop": 12,
+		"blowback_chance": 1.0, "blowback_vx": 11.5, "blowback_vy": -5.5, "blowback_rolls": 0,
+		"hitbox": Rect2(45.0, -143.0, 70.0, 55.0), "x_move": true, "x_cooldown_frames": 900, "impact_power": 3, "pose_hurtbox": Rect2(-40.0, -150.0, 120.0, 150.0), "hurtbox_start": 10, "hurtbox_end": 39, "recovery_hurtbox": Rect2(-45.0, -125.0, 115.0, 125.0), "recovery_hurtbox_start": 40, "recovery_hurtbox_end": 57,
 	},
 	AttackType.JKD_LEAD_STRAIGHT: {
 		"id": &"jkd_lead_straight", "name": "Lead Straight",
@@ -1231,9 +1233,9 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	AttackType.JKD_HIGH_HOOK: {
 		"id": &"jkd_high_hook", "name": "High Hook Kick",
-		"startup": 13, "active": 4, "recovery": 22, "cancel_window": 4,
-		"damage": 13, "hitstun": 23, "blockstun": 14, "posture": 18.0,
-		"knockback": 6.0, "lunge": 0.8, "hitstop": 6,
+		"startup": 14, "active": 4, "recovery": 26, "cancel_window": 0,
+		"damage": 14, "hitstun": 23, "blockstun": 14, "posture": 18.0, "stun": 50, "guard_break": true,
+		"knockback": 6.0, "lunge": 0.8, "hitstop": 8, "impact_power": 2,
 		"hitbox": Rect2(32.0, -190.0, 56.0, 62.0),
 	},
 	AttackType.JKD_JUMP_STRAIGHT: {
@@ -1287,11 +1289,11 @@ const ATTACK_TABLE: Dictionary = {
 	},
 	AttackType.DRAGONS_BURST: {
 		"id": &"dragons_burst", "name": "Dragon's Burst",
-		"startup": 18, "active": 3, "recovery": 30, "cancel_window": 0,
-		"damage": 0, "hitstun": 0, "blockstun": 0, "posture": 0.0,
-		"knockback": 0.0, "lunge": 0.0, "hitstop": 0,
-		"hitbox": Rect2(28.0, -108.0, 60.0, 50.0), "x_move": true, "x_cooldown_frames": 900,
-		"sequence": [&"jkd_x_stop", &"jkd_x_side"],
+		"startup": 22, "active": 5, "recovery": 34, "cancel_window": 0,
+		"damage": 18, "hitstun": 25, "blockstun": 16, "posture": 18.0,
+		"knockback": 9.0, "lunge": 3.5, "travel_start": 8, "hitstop": 12, "impact_power": 3,
+		"hitbox": Rect2(30.0, -140.0, 58.0, 56.0), "x_move": true, "x_cooldown_frames": 900,
+		"blowback_chance": 1.0, "blowback_vx": 9.0, "blowback_vy": -5.5, "blowback_rolls": 0,
 	},
 	AttackType.JKD_X_STOP: {
 		"id": &"jkd_x_stop", "name": "Dragon's Burst (stop kick)", "x_strike": true,
@@ -1306,6 +1308,34 @@ const ATTACK_TABLE: Dictionary = {
 		"damage": 12, "hitstun": 23, "blockstun": 14, "posture": 16.0,
 		"knockback": 16.0, "lunge": 1.2, "hitstop": 11, "impact_power": 3,
 		"hitbox": Rect2(30.0, -136.0, 58.0, 52.0),
+	},
+	AttackType.JKD_JAB_CROSS: {
+		"id": &"jkd_jab_cross", "name": "Rapid Jab-Cross",
+		"startup": 3, "active": 2, "recovery": 13, "cancel_window": 0,
+		"damage": 0, "hitstun": 20, "blockstun": 12, "posture": 0.0,
+		"knockback": 0.0, "lunge": 1.0, "hitstop": 4,
+		"hitbox": Rect2(28.0, -160.0, 56.0, 30.0), "sequence": [&"jkd_chain_jab", &"jkd_chain_cross"],
+	},
+	AttackType.JKD_CHAIN_JAB: {
+		"id": &"jkd_chain_jab", "name": "Rapid Jab-Cross (jab)", "x_strike": true,
+		"startup": 3, "active": 2, "recovery": 5, "cancel_window": 0, "sequence_gap": 2,
+		"damage": 5, "hitstun": 20, "blockstun": 12, "posture": 6.0,
+		"knockback": 0.5, "lunge": 1.0, "hitstop": 3,
+		"hitbox": Rect2(28.0, -160.0, 56.0, 30.0),
+	},
+	AttackType.JKD_CHAIN_CROSS: {
+		"id": &"jkd_chain_cross", "name": "Rapid Jab-Cross (cross)", "x_strike": true,
+		"startup": 3, "active": 3, "recovery": 13, "cancel_window": 5,
+		"damage": 7, "hitstun": 23, "blockstun": 13, "posture": 10.0,
+		"knockback": 5.0, "lunge": 1.0, "hitstop": 5, "impact_power": 2,
+		"hitbox": Rect2(28.0, -160.0, 56.0, 30.0),
+	},
+	AttackType.JKD_HAMMERFIST: {
+		"id": &"jkd_hammerfist", "name": "Heavy Hammerfist",
+		"startup": 10, "active": 4, "recovery": 23, "cancel_window": 4,
+		"damage": 14, "hitstun": 26, "blockstun": 14, "posture": 20.0,
+		"knockback": 7.0, "lunge": 1.1, "step": 15.0, "hitstop": 9, "impact_power": 3,
+		"hitbox": Rect2(26.0, -174.0, 60.0, 54.0), "overhead": true,
 	},
 
 }
@@ -1524,7 +1554,7 @@ static func focus_for_hit(attack: Attack, counter: bool) -> float:
 	if counter:
 		return FOCUS_COUNTER
 	var n := String(attack.id)
-	if n.contains("kick") or n == "sweep" or n.contains("knee") or attack.type in [AttackType.CAP_SPIN_HEEL, AttackType.CAP_CARTWHEEL, AttackType.CAP_CRESCENT, AttackType.CAP_LOW_SWEEP, AttackType.CAP_FLYING_SCISSOR, AttackType.CAP_AIR_CRESCENT, AttackType.CAP_AIR_SPIN, AttackType.JKD_HIGH_HOOK, AttackType.JKD_AIR_FRONT, AttackType.JKD_X_STOP, AttackType.JKD_X_SIDE]:
+	if n.contains("kick") or n == "sweep" or n.contains("knee") or attack.type in [AttackType.CAP_SPIN_HEEL, AttackType.CAP_CARTWHEEL, AttackType.CAP_CRESCENT, AttackType.CAP_LOW_SWEEP, AttackType.CAP_FLYING_SCISSOR, AttackType.CAP_AIR_CRESCENT, AttackType.CAP_AIR_SPIN, AttackType.JKD_HIGH_HOOK, AttackType.JKD_AIR_FRONT, AttackType.JKD_X_STOP, AttackType.JKD_X_SIDE, AttackType.DRAGONS_BURST]:
 		return FOCUS_KICK
 	return FOCUS_HEAVY if attack.damage >= 10 else FOCUS_LIGHT
 
@@ -1558,7 +1588,7 @@ static func impact_kind(type: AttackType) -> ImpactKind:
 				AttackType.RISING_ELBOW, AttackType.POWER_UPPERCUT, AttackType.FLYING_KNEE_FACE:
 			return ImpactKind.RISING
 		AttackType.AXE_KICK, AttackType.OVERHAND, AttackType.JUMP_PUNCH, AttackType.JUMPING_ELBOW, \
-				AttackType.FLYING_AXE_KICK, AttackType.HAMMER_FIST:
+			AttackType.FLYING_AXE_KICK, AttackType.HAMMER_FIST, AttackType.JKD_HAMMERFIST:
 			return ImpactKind.DOWNWARD
 		AttackType.JUMPING_BACKFIST, AttackType.JUMPING_SPIN_HOOK, AttackType.LEAPING_ROUNDHOUSE, \
 				AttackType.LEAPING_SPIN_BACKFIST, AttackType.LIGHT_SLAP, AttackType.HEAD_ELBOW, AttackType.FLYING_SLAP:

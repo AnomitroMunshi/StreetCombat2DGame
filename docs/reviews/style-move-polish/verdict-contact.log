@@ -1,0 +1,20 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 Core Profile Context 26.10.1.261008 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon RX 6600 XT
+
+Movie Maker mode enabled, recording movie in 1280×720 @ 60 FPS...
+  ok   karate one_inch_verdict right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate one_inch_verdict right: completes
+  ok   karate one_inch_verdict right: each of 2 blows lands once (2)
+  ok   karate one_inch_verdict right: every blow within 6 px of the body (worst 1.6)
+  ok   karate one_inch_verdict left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   karate one_inch_verdict left: completes
+  ok   karate one_inch_verdict left: each of 2 blows lands once (2)
+  ok   karate one_inch_verdict left: every blow within 6 px of the body (worst 1.6)
+RESULT: PASS (0 failures)
+--------------------------------------------------------------------------------
+Done recording movie at path: D:/firstGame/docs/reviews/style-move-polish/one_inch_verdict.avi
+546 frames at 60 FPS (movie length: 00:00:09:06), recorded in 00:00:15 (60% of real-time speed).
+CPU render time: 0.73 seconds (average: 1.34 ms/frame)
+GPU render time: 0.93 seconds (average: 1.70 ms/frame)
+Encoding time: 4.43 seconds (average: 8.11 ms/frame)
+--------------------------------------------------------------------------------

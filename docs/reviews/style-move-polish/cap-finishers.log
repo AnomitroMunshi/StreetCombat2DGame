@@ -1,0 +1,120 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  ok   capoeira rodas_end right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira rodas_end right: completes
+  ok   capoeira rodas_end right: each of 2 blows lands once (2)
+  ok   capoeira rodas_end right: every blow within 6 px of the body (worst -2.0)
+  ok   capoeira rodas_end left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira rodas_end left: completes
+  ok   capoeira rodas_end left: each of 2 blows lands once (2)
+  ok   capoeira rodas_end left: every blow within 6 px of the body (worst -2.0)
+  ok   capoeira handstand_havoc right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira handstand_havoc right: completes
+  ok   capoeira handstand_havoc right: each of 3 blows lands once (3)
+  ok   capoeira handstand_havoc right: every blow within 6 px of the body (worst 4.5)
+  ok   capoeira handstand_havoc left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira handstand_havoc left: completes
+  ok   capoeira handstand_havoc left: each of 3 blows lands once (3)
+  ok   capoeira handstand_havoc left: every blow within 6 px of the body (worst 4.5)
+  ok   capoeira sky_wheel right (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 70, vy -9): completes
+  ok   capoeira sky_wheel right (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 70, vy -9): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel right (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 120, vy -9): completes
+  ok   capoeira sky_wheel right (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 120, vy -9): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel right (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 70, vy -2): completes
+  ok   capoeira sky_wheel right (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 70, vy -2): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel right (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 120, vy -2): completes
+  ok   capoeira sky_wheel right (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 120, vy -2): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel right (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 70, vy +5): completes
+  ok   capoeira sky_wheel right (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 70, vy +5): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel right (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 120, vy +5): completes
+  ok   capoeira sky_wheel right (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 120, vy +5): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel right (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 70, vy -9): completes
+  ok   capoeira sky_wheel left (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 70, vy -9): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel left (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 120, vy -9): completes
+  ok   capoeira sky_wheel left (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 120, vy -9): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel left (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 70, vy -2): completes
+  ok   capoeira sky_wheel left (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 70, vy -2): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel left (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 120, vy -2): completes
+  ok   capoeira sky_wheel left (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 120, vy -2): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel left (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 70, vy +5): completes
+  ok   capoeira sky_wheel left (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 70, vy +5): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel left (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 120, vy +5): completes
+  ok   capoeira sky_wheel left (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 120, vy +5): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel left (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   capoeira corner_carnival right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival right (60 px from the wall): completes
+  ok   capoeira corner_carnival right (60 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival right (60 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   capoeira corner_carnival right (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival right (110 px from the wall): completes
+  ok   capoeira corner_carnival right (110 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival right (110 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   capoeira corner_carnival right (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival right (160 px from the wall): completes
+  ok   capoeira corner_carnival right (160 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival right (160 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   capoeira corner_carnival right (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival left (60 px from the wall): completes
+  ok   capoeira corner_carnival left (60 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival left (60 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   capoeira corner_carnival left (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival left (110 px from the wall): completes
+  ok   capoeira corner_carnival left (110 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival left (110 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   capoeira corner_carnival left (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival left (160 px from the wall): completes
+  ok   capoeira corner_carnival left (160 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival left (160 px from the wall): every blow within 6 px of the body (worst 4.4)
+  ok   capoeira corner_carnival left (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+RESULT: PASS (0 failures)
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 16 ObjectDB instances were leaked at exit (run with `--verbose` for
+details).
+At line:2 char:29
++ ... 'capoeira'; & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 16 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

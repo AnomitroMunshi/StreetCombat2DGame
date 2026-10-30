@@ -1,0 +1,727 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+KEY_F1 = 4194332
+InputMap actions present: true events:1
+[jab timing + single hit]
+  ok   jab hits exactly once (hits at ticks [5])
+  ok   jab connects on first active tick (5)
+  ok   jab dealt 6 damage (hp 94)
+  ok   attacker back to IDLE after recovery
+[3-hit combo via buffer]
+  ok   chain progressed through steps 1,2,3 ([1, 2, 3])
+  ok   all three combo hits landed (3)
+  ok   defender registered a 3-hit combo (3)
+  ok   combo damage correct (hp 75)
+[blocking]
+  ok   defender in BLOCKSTUN
+  ok   heavy was blocked
+  ok   no damage through block
+[no block / movement mid-attack]
+  ok   block/move input does not cancel attack startup
+  ok   no backwards walking during attack
+[KO]
+  ok   lethal hit -> FINISHED (awaiting finisher) at 0 hp
+  ok   finished fighter ignores further hits
+KEY_SHIFT = 4194325  block bound to shift: true
+[front kick]
+  ok   front kick hits once on tick 7 ([7])
+  ok   front kick dealt 8 (hp 92)
+  ok   front kick pushed defender away (gap 147 net of step)
+[jump arc + landing]
+  ok   jump peak height ~100 px (100)
+  ok   airtime ~30 ticks (30)
+  ok   went through LAND recovery back to IDLE
+  ok   back on the floor exactly
+[jump kick vs standing opponent]
+  ok   jump kick hit standing opponent once (1)
+  ok   jump kick dealt 11 (hp 89)
+  ok   only one air attack per jump
+  ok   attacker landed
+[jump punch]
+  ok   J in the air becomes a jump punch
+  ok   jump punch hit late in the jump for 8 (hp 92)
+[knockdown + get-up]
+  ok   hit 4 of a combo -> KNOCKDOWN -> GETUP -> IDLE (["HITSTUN", "KNOCKDOWN", "GETUP", "IDLE"])
+  ok   body bounced on landing
+  ok   cannot be hit while knocked down
+  ok   back on feet at floor level
+[backhand]
+  ok   backhand hits once on tick 6 ([6])
+  ok   backhand dealt 7 (hp 93)
+[uppercut launches + juggle]
+  ok   uppercut launched defender (peak 35 px)
+  ok   chained jab juggled the airborne defender
+  ok   defender came back down
+[uppercut as anti-air]
+  ok   uppercut hit a jumping opponent
+[blocked uppercut does not launch]
+  ok   blocked: no launch, no damage
+[finisher selection]
+  ok   airborne victim -> Air Smash most of the time (128/200)
+  ok   uppercut kill -> Air Smash most of the time (146/200)
+  ok   victim near wall -> Wall Crush most of the time (121/200)
+  ok   never the same finisher twice in a row (0 repeats)
+  ok   near the wall, finishers still never repeat back-to-back
+  ok   open floor -> random Palm Flurry / Spinning Heel / Tornado Kick
+[finisher PALM FLURRY (facing right)]
+  ok   PALM FLURRY (facing right) completes (113 ticks, 5 hits)
+  ok   PALM FLURRY (facing right) ends in exactly one final blow -> KO
+  ok   PALM FLURRY (facing right): both at rest on the floor
+  ok   PALM FLURRY (facing right): attacker never passes through the victim
+  ok   PALM FLURRY (facing right): victim driven away from the attacker
+  ok   PALM FLURRY (facing right): both inside the arena
+[finisher PALM FLURRY (facing left)]
+  ok   PALM FLURRY (facing left) completes (113 ticks, 5 hits)
+  ok   PALM FLURRY (facing left) ends in exactly one final blow -> KO
+  ok   PALM FLURRY (facing left): both at rest on the floor
+  ok   PALM FLURRY (facing left): attacker never passes through the victim
+  ok   PALM FLURRY (facing left): victim driven away from the attacker
+  ok   PALM FLURRY (facing left): both inside the arena
+[finisher SPINNING HEEL KICK (facing right)]
+  ok   SPINNING HEEL KICK (facing right) completes (103 ticks, 3 hits)
+  ok   SPINNING HEEL KICK (facing right) ends in exactly one final blow -> KO
+  ok   SPINNING HEEL KICK (facing right): both at rest on the floor
+  ok   SPINNING HEEL KICK (facing right): attacker never passes through the victim
+  ok   SPINNING HEEL KICK (facing right): victim driven away from the attacker
+  ok   SPINNING HEEL KICK (facing right): both inside the arena
+[finisher SPINNING HEEL KICK (facing left)]
+  ok   SPINNING HEEL KICK (facing left) completes (103 ticks, 3 hits)
+  ok   SPINNING HEEL KICK (facing left) ends in exactly one final blow -> KO
+  ok   SPINNING HEEL KICK (facing left): both at rest on the floor
+  ok   SPINNING HEEL KICK (facing left): attacker never passes through the victim
+  ok   SPINNING HEEL KICK (facing left): victim driven away from the attacker
+  ok   SPINNING HEEL KICK (facing left): both inside the arena
+[finisher CLASSIC AIR SMASH (facing right)]
+  ok   CLASSIC AIR SMASH (facing right) completes (90 ticks, 1 hits)
+  ok   CLASSIC AIR SMASH (facing right) ends in exactly one final blow -> KO
+  ok   CLASSIC AIR SMASH (facing right): both at rest on the floor
+  ok   CLASSIC AIR SMASH (facing right): attacker never passes through the victim
+  ok   CLASSIC AIR SMASH (facing right): victim driven away from the attacker
+  ok   CLASSIC AIR SMASH (facing right): both inside the arena
+[finisher CLASSIC AIR SMASH (facing left)]
+  ok   CLASSIC AIR SMASH (facing left) completes (90 ticks, 1 hits)
+  ok   CLASSIC AIR SMASH (facing left) ends in exactly one final blow -> KO
+  ok   CLASSIC AIR SMASH (facing left): both at rest on the floor
+  ok   CLASSIC AIR SMASH (facing left): attacker never passes through the victim
+  ok   CLASSIC AIR SMASH (facing left): victim driven away from the attacker
+  ok   CLASSIC AIR SMASH (facing left): both inside the arena
+[finisher CLASSIC WALL CRUSH (facing right)]
+  ok   CLASSIC WALL CRUSH (facing right) completes (116 ticks, 3 hits)
+  ok   CLASSIC WALL CRUSH (facing right) ends in exactly one final blow -> KO
+  ok   CLASSIC WALL CRUSH (facing right): both at rest on the floor
+  ok   CLASSIC WALL CRUSH (facing right): attacker never passes through the victim
+  ok   CLASSIC WALL CRUSH (facing right): victim driven away from the attacker
+  ok   CLASSIC WALL CRUSH (facing right): both inside the arena
+[finisher CLASSIC WALL CRUSH (facing left)]
+  ok   CLASSIC WALL CRUSH (facing left) completes (116 ticks, 3 hits)
+  ok   CLASSIC WALL CRUSH (facing left) ends in exactly one final blow -> KO
+  ok   CLASSIC WALL CRUSH (facing left): both at rest on the floor
+  ok   CLASSIC WALL CRUSH (facing left): attacker never passes through the victim
+  ok   CLASSIC WALL CRUSH (facing left): victim driven away from the attacker
+  ok   CLASSIC WALL CRUSH (facing left): both inside the arena
+[finisher TORNADO KICK 360 (facing right)]
+  ok   TORNADO KICK 360 (facing right) completes (118 ticks, 3 hits)
+  ok   TORNADO KICK 360 (facing right) ends in exactly one final blow -> KO
+  ok   TORNADO KICK 360 (facing right): both at rest on the floor
+  ok   TORNADO KICK 360 (facing right): attacker never passes through the victim
+  ok   TORNADO KICK 360 (facing right): victim driven away from the attacker
+  ok   TORNADO KICK 360 (facing right): both inside the arena
+[finisher TORNADO KICK 360 (facing left)]
+  ok   TORNADO KICK 360 (facing left) completes (118 ticks, 3 hits)
+  ok   TORNADO KICK 360 (facing left) ends in exactly one final blow -> KO
+  ok   TORNADO KICK 360 (facing left): both at rest on the floor
+  ok   TORNADO KICK 360 (facing left): attacker never passes through the victim
+  ok   TORNADO KICK 360 (facing left): victim driven away from the attacker
+  ok   TORNADO KICK 360 (facing left): both inside the arena
+[finisher THE FINAL BELL (facing right)]
+  ok   THE FINAL BELL (facing right) completes (126 ticks, 3 hits)
+  ok   THE FINAL BELL (facing right) ends in exactly one final blow -> KO
+  ok   THE FINAL BELL (facing right): both at rest on the floor
+  ok   THE FINAL BELL (facing right): attacker never passes through the victim
+  ok   THE FINAL BELL (facing right): victim driven away from the attacker
+  ok   THE FINAL BELL (facing right): both inside the arena
+[finisher THE FINAL BELL (facing left)]
+  ok   THE FINAL BELL (facing left) completes (126 ticks, 3 hits)
+  ok   THE FINAL BELL (facing left) ends in exactly one final blow -> KO
+  ok   THE FINAL BELL (facing left): both at rest on the floor
+  ok   THE FINAL BELL (facing left): attacker never passes through the victim
+  ok   THE FINAL BELL (facing left): victim driven away from the attacker
+  ok   THE FINAL BELL (facing left): both inside the arena
+[finisher EIGHT-COUNT (facing right)]
+  ok   EIGHT-COUNT (facing right) completes (133 ticks, 7 hits)
+  ok   EIGHT-COUNT (facing right) ends in exactly one final blow -> KO
+  ok   EIGHT-COUNT (facing right): both at rest on the floor
+  ok   EIGHT-COUNT (facing right): attacker never passes through the victim
+  ok   EIGHT-COUNT (facing right): victim driven away from the attacker
+  ok   EIGHT-COUNT (facing right): both inside the arena
+[finisher EIGHT-COUNT (facing left)]
+  ok   EIGHT-COUNT (facing left) completes (133 ticks, 7 hits)
+  ok   EIGHT-COUNT (facing left) ends in exactly one final blow -> KO
+  ok   EIGHT-COUNT (facing left): both at rest on the floor
+  ok   EIGHT-COUNT (facing left): attacker never passes through the victim
+  ok   EIGHT-COUNT (facing left): victim driven away from the attacker
+  ok   EIGHT-COUNT (facing left): both inside the arena
+[finisher CYCLONE 360 (facing right)]
+  ok   CYCLONE 360 (facing right) completes (119 ticks, 3 hits)
+  ok   CYCLONE 360 (facing right) ends in exactly one final blow -> KO
+  ok   CYCLONE 360 (facing right): both at rest on the floor
+  ok   CYCLONE 360 (facing right): attacker never passes through the victim
+  ok   CYCLONE 360 (facing right): victim driven away from the attacker
+  ok   CYCLONE 360 (facing right): both inside the arena
+[finisher CYCLONE 360 (facing left)]
+  ok   CYCLONE 360 (facing left) completes (119 ticks, 3 hits)
+  ok   CYCLONE 360 (facing left) ends in exactly one final blow -> KO
+  ok   CYCLONE 360 (facing left): both at rest on the floor
+  ok   CYCLONE 360 (facing left): attacker never passes through the victim
+  ok   CYCLONE 360 (facing left): victim driven away from the attacker
+  ok   CYCLONE 360 (facing left): both inside the arena
+[finisher HEAVEN'S HEEL (facing right)]
+  ok   HEAVEN'S HEEL (facing right) completes (106 ticks, 2 hits)
+  ok   HEAVEN'S HEEL (facing right) ends in exactly one final blow -> KO
+  ok   HEAVEN'S HEEL (facing right): both at rest on the floor
+  ok   HEAVEN'S HEEL (facing right): attacker never passes through the victim
+  ok   HEAVEN'S HEEL (facing right): victim driven away from the attacker
+  ok   HEAVEN'S HEEL (facing right): both inside the arena
+[finisher HEAVEN'S HEEL (facing left)]
+  ok   HEAVEN'S HEEL (facing left) completes (106 ticks, 2 hits)
+  ok   HEAVEN'S HEEL (facing left) ends in exactly one final blow -> KO
+  ok   HEAVEN'S HEEL (facing left): both at rest on the floor
+  ok   HEAVEN'S HEEL (facing left): attacker never passes through the victim
+  ok   HEAVEN'S HEEL (facing left): victim driven away from the attacker
+  ok   HEAVEN'S HEEL (facing left): both inside the arena
+[finisher EIGHT LIMBS (facing right)]
+  ok   EIGHT LIMBS (facing right) completes (111 ticks, 5 hits)
+  ok   EIGHT LIMBS (facing right) ends in exactly one final blow -> KO
+  ok   EIGHT LIMBS (facing right): both at rest on the floor
+  ok   EIGHT LIMBS (facing right): attacker never passes through the victim
+  ok   EIGHT LIMBS (facing right): victim driven away from the attacker
+  ok   EIGHT LIMBS (facing right): both inside the arena
+[finisher EIGHT LIMBS (facing left)]
+  ok   EIGHT LIMBS (facing left) completes (111 ticks, 5 hits)
+  ok   EIGHT LIMBS (facing left) ends in exactly one final blow -> KO
+  ok   EIGHT LIMBS (facing left): both at rest on the floor
+  ok   EIGHT LIMBS (facing left): attacker never passes through the victim
+  ok   EIGHT LIMBS (facing left): victim driven away from the attacker
+  ok   EIGHT LIMBS (facing left): both inside the arena
+[finisher IRON KNEE (facing right)]
+  ok   IRON KNEE (facing right) completes (108 ticks, 3 hits)
+  ok   IRON KNEE (facing right) ends in exactly one final blow -> KO
+  ok   IRON KNEE (facing right): both at rest on the floor
+  ok   IRON KNEE (facing right): attacker never passes through the victim
+  ok   IRON KNEE (facing right): victim driven away from the attacker
+  ok   IRON KNEE (facing right): both inside the arena
+[finisher IRON KNEE (facing left)]
+  ok   IRON KNEE (facing left) completes (108 ticks, 3 hits)
+  ok   IRON KNEE (facing left) ends in exactly one final blow -> KO
+  ok   IRON KNEE (facing left): both at rest on the floor
+  ok   IRON KNEE (facing left): attacker never passes through the victim
+  ok   IRON KNEE (facing left): victim driven away from the attacker
+  ok   IRON KNEE (facing left): both inside the arena
+[finisher ONE-INCH VERDICT (facing right)]
+  ok   ONE-INCH VERDICT (facing right) completes (103 ticks, 2 hits)
+  ok   ONE-INCH VERDICT (facing right) ends in exactly one final blow -> KO
+  ok   ONE-INCH VERDICT (facing right): both at rest on the floor
+  ok   ONE-INCH VERDICT (facing right): attacker never passes through the victim
+  ok   ONE-INCH VERDICT (facing right): victim driven away from the attacker
+  ok   ONE-INCH VERDICT (facing right): both inside the arena
+[finisher ONE-INCH VERDICT (facing left)]
+  ok   ONE-INCH VERDICT (facing left) completes (103 ticks, 2 hits)
+  ok   ONE-INCH VERDICT (facing left) ends in exactly one final blow -> KO
+  ok   ONE-INCH VERDICT (facing left): both at rest on the floor
+  ok   ONE-INCH VERDICT (facing left): attacker never passes through the victim
+  ok   ONE-INCH VERDICT (facing left): victim driven away from the attacker
+  ok   ONE-INCH VERDICT (facing left): both inside the arena
+[finisher CRIMSON CRESCENT (facing right)]
+  ok   CRIMSON CRESCENT (facing right) completes (104 ticks, 3 hits)
+  ok   CRIMSON CRESCENT (facing right) ends in exactly one final blow -> KO
+  ok   CRIMSON CRESCENT (facing right): both at rest on the floor
+  ok   CRIMSON CRESCENT (facing right): attacker never passes through the victim
+  ok   CRIMSON CRESCENT (facing right): victim driven away from the attacker
+  ok   CRIMSON CRESCENT (facing right): both inside the arena
+[finisher CRIMSON CRESCENT (facing left)]
+  ok   CRIMSON CRESCENT (facing left) completes (104 ticks, 3 hits)
+  ok   CRIMSON CRESCENT (facing left) ends in exactly one final blow -> KO
+  ok   CRIMSON CRESCENT (facing left): both at rest on the floor
+  ok   CRIMSON CRESCENT (facing left): attacker never passes through the victim
+  ok   CRIMSON CRESCENT (facing left): victim driven away from the attacker
+  ok   CRIMSON CRESCENT (facing left): both inside the arena
+[finisher HUNDRED PALMS (facing right)]
+  ok   HUNDRED PALMS (facing right) completes (116 ticks, 7 hits)
+  ok   HUNDRED PALMS (facing right) ends in exactly one final blow -> KO
+  ok   HUNDRED PALMS (facing right): both at rest on the floor
+  ok   HUNDRED PALMS (facing right): attacker never passes through the victim
+  ok   HUNDRED PALMS (facing right): victim driven away from the attacker
+  ok   HUNDRED PALMS (facing right): both inside the arena
+[finisher HUNDRED PALMS (facing left)]
+  ok   HUNDRED PALMS (facing left) completes (116 ticks, 7 hits)
+  ok   HUNDRED PALMS (facing left) ends in exactly one final blow -> KO
+  ok   HUNDRED PALMS (facing left): both at rest on the floor
+  ok   HUNDRED PALMS (facing left): attacker never passes through the victim
+  ok   HUNDRED PALMS (facing left): victim driven away from the attacker
+  ok   HUNDRED PALMS (facing left): both inside the arena
+[finisher DRAGON'S DESCENT (facing right)]
+  ok   DRAGON'S DESCENT (facing right) completes (105 ticks, 3 hits)
+  ok   DRAGON'S DESCENT (facing right) ends in exactly one final blow -> KO
+  ok   DRAGON'S DESCENT (facing right): both at rest on the floor
+  ok   DRAGON'S DESCENT (facing right): attacker never passes through the victim
+  ok   DRAGON'S DESCENT (facing right): victim driven away from the attacker
+  ok   DRAGON'S DESCENT (facing right): both inside the arena
+[finisher DRAGON'S DESCENT (facing left)]
+  ok   DRAGON'S DESCENT (facing left) completes (105 ticks, 3 hits)
+  ok   DRAGON'S DESCENT (facing left) ends in exactly one final blow -> KO
+  ok   DRAGON'S DESCENT (facing left): both at rest on the floor
+  ok   DRAGON'S DESCENT (facing left): attacker never passes through the victim
+  ok   DRAGON'S DESCENT (facing left): victim driven away from the attacker
+  ok   DRAGON'S DESCENT (facing left): both inside the arena
+[finisher LAST COMBINATION (facing right)]
+  ok   LAST COMBINATION (facing right) completes (115 ticks, 5 hits)
+  ok   LAST COMBINATION (facing right) ends in exactly one final blow -> KO
+  ok   LAST COMBINATION (facing right): both at rest on the floor
+  ok   LAST COMBINATION (facing right): attacker never passes through the victim
+  ok   LAST COMBINATION (facing right): victim driven away from the attacker
+  ok   LAST COMBINATION (facing right): both inside the arena
+[finisher LAST COMBINATION (facing left)]
+  ok   LAST COMBINATION (facing left) completes (115 ticks, 5 hits)
+  ok   LAST COMBINATION (facing left) ends in exactly one final blow -> KO
+  ok   LAST COMBINATION (facing left): both at rest on the floor
+  ok   LAST COMBINATION (facing left): attacker never passes through the victim
+  ok   LAST COMBINATION (facing left): victim driven away from the attacker
+  ok   LAST COMBINATION (facing left): both inside the arena
+[finisher KNOCKOUT RHYTHM (facing right)]
+  ok   KNOCKOUT RHYTHM (facing right) completes (110 ticks, 5 hits)
+  ok   KNOCKOUT RHYTHM (facing right) ends in exactly one final blow -> KO
+  ok   KNOCKOUT RHYTHM (facing right): both at rest on the floor
+  ok   KNOCKOUT RHYTHM (facing right): attacker never passes through the victim
+  ok   KNOCKOUT RHYTHM (facing right): victim driven away from the attacker
+  ok   KNOCKOUT RHYTHM (facing right): both inside the arena
+[finisher KNOCKOUT RHYTHM (facing left)]
+  ok   KNOCKOUT RHYTHM (facing left) completes (110 ticks, 5 hits)
+  ok   KNOCKOUT RHYTHM (facing left) ends in exactly one final blow -> KO
+  ok   KNOCKOUT RHYTHM (facing left): both at rest on the floor
+  ok   KNOCKOUT RHYTHM (facing left): attacker never passes through the victim
+  ok   KNOCKOUT RHYTHM (facing left): victim driven away from the attacker
+  ok   KNOCKOUT RHYTHM (facing left): both inside the arena
+[finisher FOOTBALL SHOT (facing right)]
+  ok   FOOTBALL SHOT (facing right) completes (143 ticks, 2 hits)
+  ok   FOOTBALL SHOT (facing right) ends in exactly one final blow -> KO
+  ok   FOOTBALL SHOT (facing right): both at rest on the floor
+  ok   FOOTBALL SHOT (facing right): attacker never passes through the victim
+  ok   FOOTBALL SHOT (facing right): victim driven away from the attacker
+  ok   FOOTBALL SHOT (facing right): both inside the arena
+[finisher FOOTBALL SHOT (facing left)]
+  ok   FOOTBALL SHOT (facing left) completes (143 ticks, 2 hits)
+  ok   FOOTBALL SHOT (facing left) ends in exactly one final blow -> KO
+  ok   FOOTBALL SHOT (facing left): both at rest on the floor
+  ok   FOOTBALL SHOT (facing left): attacker never passes through the victim
+  ok   FOOTBALL SHOT (facing left): victim driven away from the attacker
+  ok   FOOTBALL SHOT (facing left): both inside the arena
+[finisher SUPER CHOR (facing right)]
+  ok   SUPER CHOR (facing right) completes (132 ticks, 2 hits)
+  ok   SUPER CHOR (facing right) ends in exactly one final blow -> KO
+  ok   SUPER CHOR (facing right): both at rest on the floor
+  ok   SUPER CHOR (facing right): attacker never passes through the victim
+  ok   SUPER CHOR (facing right): victim driven away from the attacker
+  ok   SUPER CHOR (facing right): both inside the arena
+[finisher SUPER CHOR (facing left)]
+  ok   SUPER CHOR (facing left) completes (132 ticks, 2 hits)
+  ok   SUPER CHOR (facing left) ends in exactly one final blow -> KO
+  ok   SUPER CHOR (facing left): both at rest on the floor
+  ok   SUPER CHOR (facing left): attacker never passes through the victim
+  ok   SUPER CHOR (facing left): victim driven away from the attacker
+  ok   SUPER CHOR (facing left): both inside the arena
+[finisher SKYLINE VERDICT (facing right)]
+  ok   SKYLINE VERDICT (facing right) completes (85 ticks, 1 hits)
+  ok   SKYLINE VERDICT (facing right) ends in exactly one final blow -> KO
+  ok   SKYLINE VERDICT (facing right): both at rest on the floor
+  ok   SKYLINE VERDICT (facing right): attacker never passes through the victim
+  ok   SKYLINE VERDICT (facing right): victim driven away from the attacker
+  ok   SKYLINE VERDICT (facing right): both inside the arena
+[finisher SKYLINE VERDICT (facing left)]
+  ok   SKYLINE VERDICT (facing left) completes (85 ticks, 1 hits)
+  ok   SKYLINE VERDICT (facing left) ends in exactly one final blow -> KO
+  ok   SKYLINE VERDICT (facing left): both at rest on the floor
+  ok   SKYLINE VERDICT (facing left): attacker never passes through the victim
+  ok   SKYLINE VERDICT (facing left): victim driven away from the attacker
+  ok   SKYLINE VERDICT (facing left): both inside the arena
+[finisher IRON CORNER (facing right)]
+  ok   IRON CORNER (facing right) completes (106 ticks, 4 hits)
+  ok   IRON CORNER (facing right) ends in exactly one final blow -> KO
+  ok   IRON CORNER (facing right): both at rest on the floor
+  ok   IRON CORNER (facing right): attacker never passes through the victim
+  ok   IRON CORNER (facing right): victim driven away from the attacker
+  ok   IRON CORNER (facing right): both inside the arena
+[finisher IRON CORNER (facing left)]
+  ok   IRON CORNER (facing left) completes (106 ticks, 4 hits)
+  ok   IRON CORNER (facing left) ends in exactly one final blow -> KO
+  ok   IRON CORNER (facing left): both at rest on the floor
+  ok   IRON CORNER (facing left): attacker never passes through the victim
+  ok   IRON CORNER (facing left): victim driven away from the attacker
+  ok   IRON CORNER (facing left): both inside the arena
+[finisher FALLING CROSS (facing right)]
+  ok   FALLING CROSS (facing right) completes (83 ticks, 2 hits)
+  ok   FALLING CROSS (facing right) ends in exactly one final blow -> KO
+  ok   FALLING CROSS (facing right): both at rest on the floor
+  ok   FALLING CROSS (facing right): attacker never passes through the victim
+  ok   FALLING CROSS (facing right): victim driven away from the attacker
+  ok   FALLING CROSS (facing right): both inside the arena
+[finisher FALLING CROSS (facing left)]
+  ok   FALLING CROSS (facing left) completes (83 ticks, 2 hits)
+  ok   FALLING CROSS (facing left) ends in exactly one final blow -> KO
+  ok   FALLING CROSS (facing left): both at rest on the floor
+  ok   FALLING CROSS (facing left): attacker never passes through the victim
+  ok   FALLING CROSS (facing left): victim driven away from the attacker
+  ok   FALLING CROSS (facing left): both inside the arena
+[finisher THE CORNER COUNT (facing right)]
+  ok   THE CORNER COUNT (facing right) completes (106 ticks, 4 hits)
+  ok   THE CORNER COUNT (facing right) ends in exactly one final blow -> KO
+  ok   THE CORNER COUNT (facing right): both at rest on the floor
+  ok   THE CORNER COUNT (facing right): attacker never passes through the victim
+  ok   THE CORNER COUNT (facing right): victim driven away from the attacker
+  ok   THE CORNER COUNT (facing right): both inside the arena
+[finisher THE CORNER COUNT (facing left)]
+  ok   THE CORNER COUNT (facing left) completes (106 ticks, 4 hits)
+  ok   THE CORNER COUNT (facing left) ends in exactly one final blow -> KO
+  ok   THE CORNER COUNT (facing left): both at rest on the floor
+  ok   THE CORNER COUNT (facing left): attacker never passes through the victim
+  ok   THE CORNER COUNT (facing left): victim driven away from the attacker
+  ok   THE CORNER COUNT (facing left): both inside the arena
+[finisher AIR BREAKER (facing right)]
+  ok   AIR BREAKER (facing right) completes (85 ticks, 2 hits)
+  ok   AIR BREAKER (facing right) ends in exactly one final blow -> KO
+  ok   AIR BREAKER (facing right): both at rest on the floor
+  ok   AIR BREAKER (facing right): attacker never passes through the victim
+  ok   AIR BREAKER (facing right): victim driven away from the attacker
+  ok   AIR BREAKER (facing right): both inside the arena
+[finisher AIR BREAKER (facing left)]
+  ok   AIR BREAKER (facing left) completes (85 ticks, 2 hits)
+  ok   AIR BREAKER (facing left) ends in exactly one final blow -> KO
+  ok   AIR BREAKER (facing left): both at rest on the floor
+  ok   AIR BREAKER (facing left): attacker never passes through the victim
+  ok   AIR BREAKER (facing left): victim driven away from the attacker
+  ok   AIR BREAKER (facing left): both inside the arena
+[finisher CORNER BREAKER (facing right)]
+  ok   CORNER BREAKER (facing right) completes (107 ticks, 5 hits)
+  ok   CORNER BREAKER (facing right) ends in exactly one final blow -> KO
+  ok   CORNER BREAKER (facing right): both at rest on the floor
+  ok   CORNER BREAKER (facing right): attacker never passes through the victim
+  ok   CORNER BREAKER (facing right): victim driven away from the attacker
+  ok   CORNER BREAKER (facing right): both inside the arena
+[finisher CORNER BREAKER (facing left)]
+  ok   CORNER BREAKER (facing left) completes (107 ticks, 5 hits)
+  ok   CORNER BREAKER (facing left) ends in exactly one final blow -> KO
+  ok   CORNER BREAKER (facing left): both at rest on the floor
+  ok   CORNER BREAKER (facing left): attacker never passes through the victim
+  ok   CORNER BREAKER (facing left): victim driven away from the attacker
+  ok   CORNER BREAKER (facing left): both inside the arena
+[finisher SKYFALL AXE (facing right)]
+  ok   SKYFALL AXE (facing right) completes (85 ticks, 1 hits)
+  ok   SKYFALL AXE (facing right) ends in exactly one final blow -> KO
+  ok   SKYFALL AXE (facing right): both at rest on the floor
+  ok   SKYFALL AXE (facing right): attacker never passes through the victim
+  ok   SKYFALL AXE (facing right): victim driven away from the attacker
+  ok   SKYFALL AXE (facing right): both inside the arena
+[finisher SKYFALL AXE (facing left)]
+  ok   SKYFALL AXE (facing left) completes (85 ticks, 1 hits)
+  ok   SKYFALL AXE (facing left) ends in exactly one final blow -> KO
+  ok   SKYFALL AXE (facing left): both at rest on the floor
+  ok   SKYFALL AXE (facing left): attacker never passes through the victim
+  ok   SKYFALL AXE (facing left): victim driven away from the attacker
+  ok   SKYFALL AXE (facing left): both inside the arena
+[finisher CORNER CYCLONE (facing right)]
+  ok   CORNER CYCLONE (facing right) completes (97 ticks, 3 hits)
+  ok   CORNER CYCLONE (facing right) ends in exactly one final blow -> KO
+  ok   CORNER CYCLONE (facing right): both at rest on the floor
+  ok   CORNER CYCLONE (facing right): attacker never passes through the victim
+  ok   CORNER CYCLONE (facing right): victim driven away from the attacker
+  ok   CORNER CYCLONE (facing right): both inside the arena
+[finisher CORNER CYCLONE (facing left)]
+  ok   CORNER CYCLONE (facing left) completes (97 ticks, 3 hits)
+  ok   CORNER CYCLONE (facing left) ends in exactly one final blow -> KO
+  ok   CORNER CYCLONE (facing left): both at rest on the floor
+  ok   CORNER CYCLONE (facing left): attacker never passes through the victim
+  ok   CORNER CYCLONE (facing left): victim driven away from the attacker
+  ok   CORNER CYCLONE (facing left): both inside the arena
+[finisher DESCENDING DRAGON PALM (facing right)]
+  ok   DESCENDING DRAGON PALM (facing right) completes (98 ticks, 2 hits)
+  ok   DESCENDING DRAGON PALM (facing right) ends in exactly one final blow -> KO
+  ok   DESCENDING DRAGON PALM (facing right): both at rest on the floor
+  ok   DESCENDING DRAGON PALM (facing right): attacker never passes through the victim
+  ok   DESCENDING DRAGON PALM (facing right): victim driven away from the attacker
+  ok   DESCENDING DRAGON PALM (facing right): both inside the arena
+[finisher DESCENDING DRAGON PALM (facing left)]
+  ok   DESCENDING DRAGON PALM (facing left) completes (98 ticks, 2 hits)
+  ok   DESCENDING DRAGON PALM (facing left) ends in exactly one final blow -> KO
+  ok   DESCENDING DRAGON PALM (facing left): both at rest on the floor
+  ok   DESCENDING DRAGON PALM (facing left): attacker never passes through the victim
+  ok   DESCENDING DRAGON PALM (facing left): victim driven away from the attacker
+  ok   DESCENDING DRAGON PALM (facing left): both inside the arena
+[finisher WALL OF PALMS (facing right)]
+  ok   WALL OF PALMS (facing right) completes (107 ticks, 5 hits)
+  ok   WALL OF PALMS (facing right) ends in exactly one final blow -> KO
+  ok   WALL OF PALMS (facing right): both at rest on the floor
+  ok   WALL OF PALMS (facing right): attacker never passes through the victim
+  ok   WALL OF PALMS (facing right): victim driven away from the attacker
+  ok   WALL OF PALMS (facing right): both inside the arena
+[finisher WALL OF PALMS (facing left)]
+  ok   WALL OF PALMS (facing left) completes (107 ticks, 5 hits)
+  ok   WALL OF PALMS (facing left) ends in exactly one final blow -> KO
+  ok   WALL OF PALMS (facing left): both at rest on the floor
+  ok   WALL OF PALMS (facing left): attacker never passes through the victim
+  ok   WALL OF PALMS (facing left): victim driven away from the attacker
+  ok   WALL OF PALMS (facing left): both inside the arena
+[finisher AIR SMASH (facing right)]
+  ok   AIR SMASH (facing right) completes (91 ticks, 1 hits)
+  ok   AIR SMASH (facing right) ends in exactly one final blow -> KO
+  ok   AIR SMASH (facing right): both at rest on the floor
+  ok   AIR SMASH (facing right): attacker never passes through the victim
+  ok   AIR SMASH (facing right): victim driven away from the attacker
+  ok   AIR SMASH (facing right): both inside the arena
+[finisher AIR SMASH (facing left)]
+  ok   AIR SMASH (facing left) completes (91 ticks, 1 hits)
+  ok   AIR SMASH (facing left) ends in exactly one final blow -> KO
+  ok   AIR SMASH (facing left): both at rest on the floor
+  ok   AIR SMASH (facing left): attacker never passes through the victim
+  ok   AIR SMASH (facing left): victim driven away from the attacker
+  ok   AIR SMASH (facing left): both inside the arena
+[finisher DEOWAL DHAKKA (facing right)]
+  ok   DEOWAL DHAKKA (facing right) completes (106 ticks, 3 hits)
+  ok   DEOWAL DHAKKA (facing right) ends in exactly one final blow -> KO
+  ok   DEOWAL DHAKKA (facing right): both at rest on the floor
+  ok   DEOWAL DHAKKA (facing right): attacker never passes through the victim
+  ok   DEOWAL DHAKKA (facing right): victim driven away from the attacker
+  ok   DEOWAL DHAKKA (facing right): both inside the arena
+[finisher DEOWAL DHAKKA (facing left)]
+  ok   DEOWAL DHAKKA (facing left) completes (106 ticks, 3 hits)
+  ok   DEOWAL DHAKKA (facing left) ends in exactly one final blow -> KO
+  ok   DEOWAL DHAKKA (facing left): both at rest on the floor
+  ok   DEOWAL DHAKKA (facing left): attacker never passes through the victim
+  ok   DEOWAL DHAKKA (facing left): victim driven away from the attacker
+  ok   DEOWAL DHAKKA (facing left): both inside the arena
+[finisher RODA'S END (facing right)]
+  ok   RODA'S END (facing right) completes (93 ticks, 2 hits)
+  ok   RODA'S END (facing right) ends in exactly one final blow -> KO
+  ok   RODA'S END (facing right): both at rest on the floor
+  ok   RODA'S END (facing right): attacker never passes through the victim
+  ok   RODA'S END (facing right): victim driven away from the attacker
+  ok   RODA'S END (facing right): both inside the arena
+[finisher RODA'S END (facing left)]
+  ok   RODA'S END (facing left) completes (93 ticks, 2 hits)
+  ok   RODA'S END (facing left) ends in exactly one final blow -> KO
+  ok   RODA'S END (facing left): both at rest on the floor
+  ok   RODA'S END (facing left): attacker never passes through the victim
+  ok   RODA'S END (facing left): victim driven away from the attacker
+  ok   RODA'S END (facing left): both inside the arena
+[finisher HANDSTAND HAVOC (facing right)]
+  ok   HANDSTAND HAVOC (facing right) completes (124 ticks, 3 hits)
+  ok   HANDSTAND HAVOC (facing right) ends in exactly one final blow -> KO
+  ok   HANDSTAND HAVOC (facing right): both at rest on the floor
+  ok   HANDSTAND HAVOC (facing right): attacker never passes through the victim
+  ok   HANDSTAND HAVOC (facing right): victim driven away from the attacker
+  ok   HANDSTAND HAVOC (facing right): both inside the arena
+[finisher HANDSTAND HAVOC (facing left)]
+  ok   HANDSTAND HAVOC (facing left) completes (124 ticks, 3 hits)
+  ok   HANDSTAND HAVOC (facing left) ends in exactly one final blow -> KO
+  ok   HANDSTAND HAVOC (facing left): both at rest on the floor
+  ok   HANDSTAND HAVOC (facing left): attacker never passes through the victim
+  ok   HANDSTAND HAVOC (facing left): victim driven away from the attacker
+  ok   HANDSTAND HAVOC (facing left): both inside the arena
+[finisher SKY WHEEL (facing right)]
+  ok   SKY WHEEL (facing right) completes (84 ticks, 1 hits)
+  ok   SKY WHEEL (facing right) ends in exactly one final blow -> KO
+  ok   SKY WHEEL (facing right): both at rest on the floor
+  ok   SKY WHEEL (facing right): attacker never passes through the victim
+  ok   SKY WHEEL (facing right): victim driven away from the attacker
+  ok   SKY WHEEL (facing right): both inside the arena
+[finisher SKY WHEEL (facing left)]
+  ok   SKY WHEEL (facing left) completes (84 ticks, 1 hits)
+  ok   SKY WHEEL (facing left) ends in exactly one final blow -> KO
+  ok   SKY WHEEL (facing left): both at rest on the floor
+  ok   SKY WHEEL (facing left): attacker never passes through the victim
+  ok   SKY WHEEL (facing left): victim driven away from the attacker
+  ok   SKY WHEEL (facing left): both inside the arena
+[finisher CORNER CARNIVAL (facing right)]
+  ok   CORNER CARNIVAL (facing right) completes (132 ticks, 4 hits)
+  ok   CORNER CARNIVAL (facing right) ends in exactly one final blow -> KO
+  ok   CORNER CARNIVAL (facing right): both at rest on the floor
+  ok   CORNER CARNIVAL (facing right): attacker never passes through the victim
+  ok   CORNER CARNIVAL (facing right): victim driven away from the attacker
+  ok   CORNER CARNIVAL (facing right): both inside the arena
+[finisher CORNER CARNIVAL (facing left)]
+  ok   CORNER CARNIVAL (facing left) completes (132 ticks, 4 hits)
+  ok   CORNER CARNIVAL (facing left) ends in exactly one final blow -> KO
+  ok   CORNER CARNIVAL (facing left): both at rest on the floor
+  ok   CORNER CARNIVAL (facing left): attacker never passes through the victim
+  ok   CORNER CARNIVAL (facing left): victim driven away from the attacker
+  ok   CORNER CARNIVAL (facing left): both inside the arena
+[finisher ONE-INCH ENDING (facing right)]
+  ok   ONE-INCH ENDING (facing right) completes (109 ticks, 2 hits)
+  ok   ONE-INCH ENDING (facing right) ends in exactly one final blow -> KO
+  ok   ONE-INCH ENDING (facing right): both at rest on the floor
+  ok   ONE-INCH ENDING (facing right): attacker never passes through the victim
+  ok   ONE-INCH ENDING (facing right): victim driven away from the attacker
+  ok   ONE-INCH ENDING (facing right): both inside the arena
+[finisher ONE-INCH ENDING (facing left)]
+  ok   ONE-INCH ENDING (facing left) completes (109 ticks, 2 hits)
+  ok   ONE-INCH ENDING (facing left) ends in exactly one final blow -> KO
+  ok   ONE-INCH ENDING (facing left): both at rest on the floor
+  ok   ONE-INCH ENDING (facing left): attacker never passes through the victim
+  ok   ONE-INCH ENDING (facing left): victim driven away from the attacker
+  ok   ONE-INCH ENDING (facing left): both inside the arena
+[finisher NO SECOND CHANCE (facing right)]
+  ok   NO SECOND CHANCE (facing right) completes (102 ticks, 3 hits)
+  ok   NO SECOND CHANCE (facing right) ends in exactly one final blow -> KO
+  ok   NO SECOND CHANCE (facing right): both at rest on the floor
+  ok   NO SECOND CHANCE (facing right): attacker never passes through the victim
+  ok   NO SECOND CHANCE (facing right): victim driven away from the attacker
+  ok   NO SECOND CHANCE (facing right): both inside the arena
+[finisher NO SECOND CHANCE (facing left)]
+  ok   NO SECOND CHANCE (facing left) completes (102 ticks, 3 hits)
+  ok   NO SECOND CHANCE (facing left) ends in exactly one final blow -> KO
+  ok   NO SECOND CHANCE (facing left): both at rest on the floor
+  ok   NO SECOND CHANCE (facing left): attacker never passes through the victim
+  ok   NO SECOND CHANCE (facing left): victim driven away from the attacker
+  ok   NO SECOND CHANCE (facing left): both inside the arena
+[finisher DRAGON INTERCEPT (facing right)]
+  ok   DRAGON INTERCEPT (facing right) completes (84 ticks, 1 hits)
+  ok   DRAGON INTERCEPT (facing right) ends in exactly one final blow -> KO
+  ok   DRAGON INTERCEPT (facing right): both at rest on the floor
+  ok   DRAGON INTERCEPT (facing right): attacker never passes through the victim
+  ok   DRAGON INTERCEPT (facing right): victim driven away from the attacker
+  ok   DRAGON INTERCEPT (facing right): both inside the arena
+[finisher DRAGON INTERCEPT (facing left)]
+  ok   DRAGON INTERCEPT (facing left) completes (84 ticks, 1 hits)
+  ok   DRAGON INTERCEPT (facing left) ends in exactly one final blow -> KO
+  ok   DRAGON INTERCEPT (facing left): both at rest on the floor
+  ok   DRAGON INTERCEPT (facing left): attacker never passes through the victim
+  ok   DRAGON INTERCEPT (facing left): victim driven away from the attacker
+  ok   DRAGON INTERCEPT (facing left): both inside the arena
+[finisher END OF THE LINE (facing right)]
+  ok   END OF THE LINE (facing right) completes (107 ticks, 4 hits)
+  ok   END OF THE LINE (facing right) ends in exactly one final blow -> KO
+  ok   END OF THE LINE (facing right): both at rest on the floor
+  ok   END OF THE LINE (facing right): attacker never passes through the victim
+  ok   END OF THE LINE (facing right): victim driven away from the attacker
+  ok   END OF THE LINE (facing right): both inside the arena
+[finisher END OF THE LINE (facing left)]
+  ok   END OF THE LINE (facing left) completes (107 ticks, 4 hits)
+  ok   END OF THE LINE (facing left) ends in exactly one final blow -> KO
+  ok   END OF THE LINE (facing left): both at rest on the floor
+  ok   END OF THE LINE (facing left): attacker never passes through the victim
+  ok   END OF THE LINE (facing left): victim driven away from the attacker
+  ok   END OF THE LINE (facing left): both inside the arena
+[destruction effects]
+  ok   cracks grow outward progressively (0.00 -> 0.21 -> 1.00)
+  ok   debris pool capped at 120 (120)
+  ok   debris chips come to rest on the floor
+  ok   settled debris fades out
+  ok   crack decals capped at 140
+  ok   wall damage (dents, cracks, specks) stays on the pillar (20 seeds, 1971 decals)
+  ok   pillar jolt settles back to rest
+[blowback: tumble -> bounce -> roll -> crouch get-up]
+  ok   tumbled, bounced and rolled
+  ok   rolled a full roll (201 px)
+  ok   quick get-up from the roll, back to IDLE
+  ok   travelled far (308 px)
+[wall bounce]
+  ok   bounced off the wall exactly once (1)
+  ok   rebounded away from the wall
+  ok   stayed inside the arena
+[block startup 2 / release 6]
+  ok   guard raised 1 tick before impact does not block (startup 2)
+  ok   attacking out of block waits for the guard release (attack at 17)
+[sweep]
+  ok   sweep connects on tick 10 (10)
+  ok   sweep always knocks down, hit registered as low
+  ok   sweep dealt 9 (hp 91)
+  ok   low block (S+Shift) stops the sweep
+  ok   standing block does NOT stop a sweep (low attack)
+[crouch]
+  ok   high kick whiffs over a crouching opponent
+  ok   backhand whiffs over a crouching opponent
+  ok   jab still hits a crouching opponent
+  ok   no walking while crouched
+[high kick]
+  ok   high kick hits once on tick 7 ([7])
+  ok   high kick dealt 12 (hp 88)
+  ok   high kick lands at head height
+[dodge / step]
+  ok   jab during the dodge's invulnerable frames whiffs
+  ok   backstep moved away 94 px
+  ok   attack buffered during the dodge fires as it ends (tick 16)
+  ok   a dodge started too late (before its i-frames) still gets hit
+[stances]
+  ok   AI stance is never the player's stance
+  ok   all 13 stances can be picked
+[both facing directions]
+  ok   every grounded attack hits on the same tick, for the same damage, with a mirrored hitbox facing left or right
+[directional guard: cross-up]
+  ok   defender guarding toward the attacker (left)
+  ok   a held guard does not turn: an attack from behind hits (HIT)
+  ok   after turning and re-raising the guard, the same attack is blocked
+[perfect parry]
+  ok   Shift pressed 2 ticks before impact parries (PARRIED)
+  ok   parry: no damage
+  ok   attacker staggers, defender deflects
+  ok   counter attack cancels the deflect immediately (tick 0)
+  ok   counter jab lands on the staggered attacker (hp 94)
+  ok   Shift pressed 5 ticks early: normal block, not a parry (BLOCKED)
+  ok   releasing an unused parry early: whiff recovery 14 ticks
+  ok   parry spam: a press inside the cooldown cannot parry (BLOCKED)
+  ok   standing parry does not stop a sweep (HIT)
+  ok   S + Shift timed: sweep parried low (PARRIED)
+[posture]
+  ok   posture values are per attack, not copied from damage (jab 6, cross 14)
+  ok   blocking crosses breaks the guard on block 8 (expected 8)
+  ok   guard broken: BROKEN state, still no damage
+  ok   posture emptied and locked after the break
+  ok   a broken fighter can neither attack nor block
+  ok   punish lands; the hit ends the break (no stun loop)
+  ok   no posture gain while locked (breaks cannot chain)
+  ok   no recovery during the first 90 ticks
+  ok   posture recovers when unpressured (26.0)
+  ok   posture fully recovered
+  ok   being parried costs the attacker 17 posture (17)
+  ok   parried at high posture: attacker's guard breaks (GUARD_BREAK)
+  ok   hit on a staggered fighter is a counter hit
+  ok   a counter hit stops one point short of a break (99)
+[combo branches]
+  ok   jab (hit) -> W+L high kick chains as step 2 ([2, 9])
+  ok   jab (hit) -> cross chains in the cancel window ([2, 9])
+  ok   whiffed jab cannot cancel: full recovery first ([0, -1])
+  ok   cross -> cross is not a branch ([1, 1])
+  ok   sweep never chains ([0, -1])
+  ok   every AI combo plan follows the branch table
+[juggle limits]
+  ok   uppercut + mashed jabs: juggle reaches 4 hits, then knockdown (max 4, knocked true)
+[contact-aware reach (visual)]
+  ok   point-blank cross stops at the body (free 92 px -> 56 px, limit 56)
+  ok   a strike with nothing in reach keeps its full extension
+  ok   a strike through a dodge passes freely
+[active idle (visual)]
+  ok   idle fades in and bounces (amount 1.00, dip up to 2.8 px)
+  ok   the idle never moves the gameplay root
+  ok   acting fades the idle out within 0.1 s (0.00)
+  ok   after an action the idle eases back in slowly (0.44 after 0.2 s)
+  ok   full posture damps the idle (0.30)
+[counter hits and clashes]
+  ok   counter hit (caught in startup) stuns longer: 22 vs 16
+  ok   simultaneous jabs at close range register a clash
+  ok   a single strike never counts as a clash
+  ok   transient effects capped at 260 (260)
+[perfect dodge]
+  ok   a strike passing through the i-frames counts as a perfect dodge
+  ok   perfect dodge skips the recovery (free at tick 12 < 16)
+[procedural audio]
+  ok   all 20 sound effects synthesized
+  ok   background music rendered and playing (1257 ms)
+  ok   fight music loop: 16 bars at 140 BPM = 27.43 s (27.43 s)
+RESULT: PASS (0 failures)
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for
+details).
+At line:2 char:207
++ ... bangla')) { & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+   at: cleanup (core/object/object.cpp:2536)

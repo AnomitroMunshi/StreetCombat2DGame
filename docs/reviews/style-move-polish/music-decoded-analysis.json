@@ -1,0 +1,16 @@
+{
+  "capoeira": {
+    "decoded_seconds": 68.57142857142857,
+    "peak": 0.5904074311256409,
+    "rms_db": -16.975358963012695,
+    "boundary_delta": 0.005440546199679375,
+    "finite": true
+  },
+  "jeet_kune_do": {
+    "decoded_seconds": 65.08473922902495,
+    "peak": 0.4954402446746826,
+    "rms_db": -16.966426849365234,
+    "boundary_delta": 0.00986778736114502,
+    "finite": true
+  }
+}

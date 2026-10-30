@@ -1,0 +1,602 @@
+[
+	{
+		"contacts": [
+			{
+				"id": "cap_cartwheel",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "technique",
+		"start_gap": 80.0,
+		"style": "capoeira",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_cartwheel",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "technique",
+		"start_gap": 100.0,
+		"style": "capoeira",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_cartwheel",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "technique",
+		"start_gap": 80.0,
+		"style": "capoeira",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_cartwheel",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "technique",
+		"start_gap": 100.0,
+		"style": "capoeira",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_cartwheel",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "technique",
+		"start_gap": 80.0,
+		"style": "capoeira",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_cartwheel",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "technique",
+		"start_gap": 100.0,
+		"style": "capoeira",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_cartwheel",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "technique",
+		"start_gap": 80.0,
+		"style": "capoeira",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_cartwheel",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "technique",
+		"start_gap": 100.0,
+		"style": "capoeira",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_low_sweep",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "down_heavy",
+		"start_gap": 80.0,
+		"style": "capoeira",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_low_sweep",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "down_heavy",
+		"start_gap": 100.0,
+		"style": "capoeira",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_low_sweep",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "down_heavy",
+		"start_gap": 80.0,
+		"style": "capoeira",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_low_sweep",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "down_heavy",
+		"start_gap": 100.0,
+		"style": "capoeira",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_low_sweep",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "down_heavy",
+		"start_gap": 80.0,
+		"style": "capoeira",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_low_sweep",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "down_heavy",
+		"start_gap": 100.0,
+		"style": "capoeira",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_low_sweep",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "down_heavy",
+		"start_gap": 80.0,
+		"style": "capoeira",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "cap_low_sweep",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "down_heavy",
+		"start_gap": 100.0,
+		"style": "capoeira",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_chain_jab",
+				"tick": 3,
+				"visible_gap": 0.0
+			},
+			{
+				"id": "jkd_chain_cross",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "light",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_chain_jab",
+				"tick": 3,
+				"visible_gap": 0.0
+			},
+			{
+				"id": "jkd_chain_cross",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "light",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_chain_jab",
+				"tick": 3,
+				"visible_gap": 0.0
+			},
+			{
+				"id": "jkd_chain_cross",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "light",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_chain_jab",
+				"tick": 3,
+				"visible_gap": 0.0
+			},
+			{
+				"id": "jkd_chain_cross",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "light",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_chain_jab",
+				"tick": 3,
+				"visible_gap": 0.0
+			},
+			{
+				"id": "jkd_chain_cross",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "light",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_chain_jab",
+				"tick": 3,
+				"visible_gap": 0.0
+			},
+			{
+				"id": "jkd_chain_cross",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "light",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_chain_jab",
+				"tick": 3,
+				"visible_gap": 0.0
+			},
+			{
+				"id": "jkd_chain_cross",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "light",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_chain_jab",
+				"tick": 3,
+				"visible_gap": 0.0
+			},
+			{
+				"id": "jkd_chain_cross",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "light",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_hammerfist",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "heavy",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_hammerfist",
+				"tick": 10,
+				"visible_gap": 4.00244140625
+			}
+		],
+		"side": 1,
+		"slot": "heavy",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_hammerfist",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "heavy",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_hammerfist",
+				"tick": 10,
+				"visible_gap": 4.00244140625
+			}
+		],
+		"side": 1,
+		"slot": "heavy",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_hammerfist",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "heavy",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_hammerfist",
+				"tick": 10,
+				"visible_gap": 4.00244140625
+			}
+		],
+		"side": -1,
+		"slot": "heavy",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_hammerfist",
+				"tick": 10,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "heavy",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_hammerfist",
+				"tick": 10,
+				"visible_gap": 4.00241088867188
+			}
+		],
+		"side": -1,
+		"slot": "heavy",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_high_hook",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "up_heavy",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_high_hook",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "up_heavy",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_high_hook",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "up_heavy",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_high_hook",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": 1,
+		"slot": "up_heavy",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_high_hook",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "up_heavy",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_high_hook",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "up_heavy",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": false
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_high_hook",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "up_heavy",
+		"start_gap": 80.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	},
+	{
+		"contacts": [
+			{
+				"id": "jkd_high_hook",
+				"tick": 14,
+				"visible_gap": 0.0
+			}
+		],
+		"side": -1,
+		"slot": "up_heavy",
+		"start_gap": 100.0,
+		"style": "jeet_kune_do",
+		"wall": true
+	}
+]

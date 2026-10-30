@@ -175,12 +175,14 @@ func _initialize() -> void:
 
 	print("[guard breaker]")
 	var hammer := CombatData.get_attack(CombatData.AttackType.HAMMER_FIST)
-	var only := 0
+	var breakers: Array[String] = []
 	for st2 in StyleRegistry.all():
 		for m in st2.moves():
 			if CombatData.get_attack(CombatData.type_for_id(m)).guard_break:
-				only += 1 if st2.id == &"bangla_maar" else 100
-	_check(only == 2, "exactly two guard breakers in the game, both Bangla Maar's: the hammer and Jor Dhakka (%d)" % only)
+				breakers.append("%s:%s" % [st2.id, m])
+	breakers.sort()
+	_check(breakers == ["bangla_maar:hammer_fist", "bangla_maar:jor_dhakka", "jeet_kune_do:jkd_high_hook"],
+		"guard breakers are Bangla Maar's hammer/shove and JKD's high hook (%s)" % [breakers])
 	for side in [1, -1]:
 		var pg := _pair(80.0, side)
 		var g := pg[1]

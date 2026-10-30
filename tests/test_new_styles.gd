@@ -54,26 +54,52 @@ func jkd_x_regression(side: int) -> void:
 	var intent:=CombatData.Intent.new()
 	intent.slot=&"x_move"
 	p[0].push_intent(intent)
-	var hits:=play(p[0],p[1],100)
-	check(hits.size()==2 and hits[0][0]==&"jkd_x_stop" and hits[1][0]==&"jkd_x_side" and p[1].health==p[1].max_health-18,"JKD X stop kick then side kick: 6+12, both directions")
-	check(p[0].x_cooldown==801 and p[0].focus==0,"JKD two-hit X charges one 900-tick cooldown without Focus")
+	var start_target:=p[1].position.x
+	var hits: Array=[]
+	var air_travel:=0.0
+	var total_travel:=0.0
+	var first_contact:=-1
+	for tick in 150:
+		var contact:=play(p[0],p[1],1)
+		if not contact.is_empty():
+			hits.append_array(contact)
+			if first_contact<0:
+				first_contact=tick+1
+		var travel:float=(p[1].position.x-start_target)*side
+		total_travel=maxf(total_travel,travel)
+		if p[1].airborne:
+			air_travel=maxf(air_travel,travel)
+	check(hits.size()==1 and hits[0][0]==&"dragons_burst" and p[1].health==p[1].max_health-18 and first_contact==23,"JKD X is one stepping side kick after readable22-tick startup")
+	check(p[0].x_cooldown==751 and p[0].focus==0,"single side-kick X charges one900-tick cooldown without Focus")
+	check(air_travel>60.0 and air_travel<160.0 and total_travel>120.0 and total_travel<230.0,"side-kick clean hit produces strong short airborne recoil: air%.1f total%.1f" %[air_travel,total_travel])
+	free_pair(p)
+	p=pair(&"jeet_kune_do",side)
+	p[1].position.x+=side*20.0 # 100px is already within the ordinary range margin.
+	var start:float=p[0].position.x
+	p[0].push_intent(intent)
+	for tick in 23:
+		p[0].tick()
+	var stepped:float=(p[0].position.x-start)*side
+	check(stepped>=35.0 and stepped<=40.1 and (p[1].position.x-p[0].position.x)*side>=Fighter.PUSH_HALF_WIDTH*2.0,"X takes a real bounded step even already in range (%.1fpx)" %stepped)
 	free_pair(p)
 	p=pair(&"jeet_kune_do",side)
 	p[0].push_intent(intent)
-	play(p[0],p[1],19)
-	check(p[1].health==p[1].max_health-6 and p[0].is_mid_sequence(),"stop kick lands before committed second kick")
+	play(p[0],p[1],10)
+	check(p[1].health==p[1].max_health,"committed stepping anticipation cannot hit early")
 	var cd:=p[0].x_cooldown
 	p[0].receive_hit(CombatData.get_attack(CombatData.AttackType.LIGHT),p[1],1)
 	play(p[0],p[1],100)
-	check(not p[0].is_mid_sequence() and p[1].health==p[1].max_health-6 and p[0].x_cooldown==cd-100,"interruption removes second kick without refund")
+	check(p[1].health==p[1].max_health and p[0].x_cooldown==cd-100,"side-kick startup is interruptible without cooldown refund")
 	free_pair(p)
 	p=pair(&"jeet_kune_do",side)
 	p[1].position.x+=side*400.0
+	start=p[0].position.x
 	var started: Array=[]
 	p[0].attack_started.connect(func(_f: Fighter, attack: CombatData.Attack): started.append(attack.id))
 	p[0].push_intent(intent)
 	play(p[0],p[1],80)
-	check(started==[&"jkd_x_stop",&"jkd_x_side"] and p[1].health==p[1].max_health and p[0].x_cooldown==821,"whiff still completes both kicks and preserves cooldown")
+	stepped=(p[0].position.x-start)*side
+	check(started==[&"dragons_burst"] and p[1].health==p[1].max_health and p[0].x_cooldown==821 and stepped>55.0 and stepped<70.0,"whiff stays one kick with bounded travel and full cooldown")
 	free_pair(p)
 	p=pair(&"jeet_kune_do",side)
 	for child in [CombatData.AttackType.JKD_X_STOP,CombatData.AttackType.JKD_X_SIDE]:
@@ -81,11 +107,30 @@ func jkd_x_regression(side: int) -> void:
 		raw.attack=child
 		p[0].push_intent(raw)
 		p[0].tick()
-		check(p[0].state==Fighter.State.IDLE and p[0].x_cooldown==0,"raw X child cannot bypass parent cooldown")
+		check(p[0].state==Fighter.State.IDLE and p[0].x_cooldown==0,"old permanent X children stay unmapped and cannot bypass the parent")
 	free_pair(p)
 
+func cap_x_launch_regression(side: int) -> void:
+	for block in [false, true]:
+		var p := pair(&"capoeira", side)
+		var intent := CombatData.Intent.new()
+		intent.slot = &"x_move"
+		p[0].push_intent(intent)
+		var start := p[1].position.x
+		var air_travel := 0.0
+		for tick in 150:
+			play(p[0], p[1], 1, block)
+			if p[1].airborne:
+				air_travel = maxf(air_travel, (p[1].position.x - start) * side)
+		if block:
+			check(air_travel == 0 and p[1].health == p[1].max_health, "blocked Capoeira X does not launch or damage")
+		else:
+			check(air_travel > 110 and air_travel < 180 and p[1].health == p[1].max_health - 18, "Capoeira X launches strongly without increasing damage: %.1fpx airborne" % air_travel)
+		check(p[0].x_cooldown == 751, "Capoeira impact retains full 15s cooldown")
+		free_pair(p)
+
 func recovery_hurtbox_regression(side: int) -> void:
-	for test in [[CombatData.AttackType.CAP_CARTWHEEL,32,33,47,48],[CombatData.AttackType.MEIA_LUA_TORNADO,39,40,57,58]]:
+	for test in [[CombatData.AttackType.CAP_CARTWHEEL,28,29,35,36],[CombatData.AttackType.MEIA_LUA_TORNADO,39,40,57,58]]:
 		var p:=pair(&"capoeira",side)
 		var a:=p[0]
 		a.call("_start_attack",test[0],1,true)
@@ -93,7 +138,7 @@ func recovery_hurtbox_regression(side: int) -> void:
 		var inverted:=a.get_hurtbox_world()
 		a.state_frame=test[2]
 		var crouched:=a.get_hurtbox_world()
-		check(inverted.size.y>crouched.size.y and crouched.size.y==125.0 and crouched.size.x>=96.0,"inverted body transitions to broad low recovery hurtbox")
+		check(inverted.size.y>crouched.size.y and crouched.size.y==125.0 and crouched.size.x>=96.0,"supported body transitions to broad low recovery hurtbox")
 		for frame in range(test[2],test[3]+1):
 			a.state_frame=frame
 			check(a.get_hurtbox_world().size==crouched.size and a.can_be_hit(),"low recovery stays vulnerable throughout authored phase")
@@ -102,6 +147,25 @@ func recovery_hurtbox_regression(side: int) -> void:
 		check(not crouched.intersects(ghost_head) and crouched.intersects(body_strike),"high strike above crouched body whiffs while body strike still contacts")
 		a.state_frame=test[4]
 		check(a.get_hurtbox_world().size==Fighter.HURTBOX.size,"upright hurtbox returns at authored guard recovery")
+		free_pair(p)
+
+func sweep_geometry_regression(side: int) -> void:
+	for signature in [false,true]:
+		var p:=pair(&"capoeira",side)
+		var intent:=CombatData.Intent.new()
+		if signature:
+			p[0].focus=CombatData.FOCUS_MAX
+			intent.signature=true
+		else:
+			intent.slot=&"down_heavy"
+		p[0].push_intent(intent)
+		p[0].tick()
+		var attack:=p[0].current_attack
+		p[0].state_frame=attack.startup
+		var head_world:=p[0].position+Vector2(-50*side,-86)
+		var heel_world:=p[0].position+Vector2(85*side,-11)
+		check(p[0].get_hurtbox_world().has_point(head_world) and p[0].can_be_hit(),"low sweep counterleaning head remains in vulnerable mirrored hurtbox")
+		check(attack.low and p[0].get_hitbox_world().has_point(heel_world),"low sweep hitbox follows the floor-level heel while requiring low guard")
 		free_pair(p)
 
 func _initialize() -> void:
@@ -201,7 +265,9 @@ func _initialize() -> void:
 		free_pair(wrong)
 	for side in [1,-1]:
 		jkd_x_regression(side)
+		cap_x_launch_regression(side)
 		recovery_hurtbox_regression(side)
+		sweep_geometry_regression(side)
 		var p:=pair(&"capoeira",side)
 		var intent:=CombatData.Intent.new()
 		intent.slot=&"technique"

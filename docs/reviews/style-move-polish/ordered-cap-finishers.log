@@ -1,0 +1,232 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  ok   kickboxing last_combination right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing last_combination right: completes
+  ok   kickboxing last_combination right: each of 5 blows lands once (5)
+  ok   kickboxing last_combination right: every blow within 6 px of the body (worst 1.5)
+  ok   kickboxing last_combination left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing last_combination left: completes
+  ok   kickboxing last_combination left: each of 5 blows lands once (5)
+  ok   kickboxing last_combination left: every blow within 6 px of the body (worst 1.5)
+  ok   kickboxing knockout_rhythm right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing knockout_rhythm right: completes
+  ok   kickboxing knockout_rhythm right: each of 5 blows lands once (5)
+  ok   kickboxing knockout_rhythm right: every blow within 6 px of the body (worst 5.4)
+  ok   kickboxing knockout_rhythm left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing knockout_rhythm left: completes
+  ok   kickboxing knockout_rhythm left: each of 5 blows lands once (5)
+  ok   kickboxing knockout_rhythm left: every blow within 6 px of the body (worst 5.4)
+  ok   kickboxing air_breaker right (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 70, vy -9): completes
+  ok   kickboxing air_breaker right (gap 70, vy -9): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 70, vy -9): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker right (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 120, vy -9): completes
+  ok   kickboxing air_breaker right (gap 120, vy -9): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 120, vy -9): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker right (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 70, vy -2): completes
+  ok   kickboxing air_breaker right (gap 70, vy -2): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 70, vy -2): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker right (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 120, vy -2): completes
+  ok   kickboxing air_breaker right (gap 120, vy -2): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 120, vy -2): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker right (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 70, vy +5): completes
+  ok   kickboxing air_breaker right (gap 70, vy +5): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 70, vy +5): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker right (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker right (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker right (gap 120, vy +5): completes
+  ok   kickboxing air_breaker right (gap 120, vy +5): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker right (gap 120, vy +5): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker right (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 70, vy -9): completes
+  ok   kickboxing air_breaker left (gap 70, vy -9): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 70, vy -9): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker left (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 120, vy -9): completes
+  ok   kickboxing air_breaker left (gap 120, vy -9): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 120, vy -9): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker left (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 70, vy -2): completes
+  ok   kickboxing air_breaker left (gap 70, vy -2): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 70, vy -2): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker left (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 120, vy -2): completes
+  ok   kickboxing air_breaker left (gap 120, vy -2): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 120, vy -2): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker left (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 70, vy +5): completes
+  ok   kickboxing air_breaker left (gap 70, vy +5): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 70, vy +5): every blow within 6 px of the body (worst -0.7)
+  ok   kickboxing air_breaker left (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   kickboxing air_breaker left (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing air_breaker left (gap 120, vy +5): completes
+  ok   kickboxing air_breaker left (gap 120, vy +5): each of 2 blows lands once (2)
+  ok   kickboxing air_breaker left (gap 120, vy +5): every blow within 6 px of the body (worst 1.7)
+  ok   kickboxing air_breaker left (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   kickboxing corner_breaker right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker right (60 px from the wall): completes
+  ok   kickboxing corner_breaker right (60 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker right (60 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker right (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker right (110 px from the wall): completes
+  ok   kickboxing corner_breaker right (110 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker right (110 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker right (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker right (160 px from the wall): completes
+  ok   kickboxing corner_breaker right (160 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker right (160 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker right (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker left (60 px from the wall): completes
+  ok   kickboxing corner_breaker left (60 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker left (60 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker left (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker left (110 px from the wall): completes
+  ok   kickboxing corner_breaker left (110 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker left (110 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker left (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   kickboxing corner_breaker left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   kickboxing corner_breaker left (160 px from the wall): completes
+  ok   kickboxing corner_breaker left (160 px from the wall): each of 4 blows lands once (4)
+  ok   kickboxing corner_breaker left (160 px from the wall): every blow within 6 px of the body (worst -1.1)
+  ok   kickboxing corner_breaker left (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira rodas_end right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira rodas_end right: completes
+  ok   capoeira rodas_end right: each of 2 blows lands once (2)
+  ok   capoeira rodas_end right: every blow within 6 px of the body (worst -2.0)
+  ok   capoeira rodas_end left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira rodas_end left: completes
+  ok   capoeira rodas_end left: each of 2 blows lands once (2)
+  ok   capoeira rodas_end left: every blow within 6 px of the body (worst -2.0)
+  ok   capoeira handstand_havoc right: every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira handstand_havoc right: completes
+  ok   capoeira handstand_havoc right: each of 3 blows lands once (3)
+  ok   capoeira handstand_havoc right: every blow within 6 px of the body (worst 4.5)
+  ok   capoeira handstand_havoc left: every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira handstand_havoc left: completes
+  ok   capoeira handstand_havoc left: each of 3 blows lands once (3)
+  ok   capoeira handstand_havoc left: every blow within 6 px of the body (worst 4.5)
+  ok   capoeira sky_wheel right (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 70, vy -9): completes
+  ok   capoeira sky_wheel right (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 70, vy -9): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel right (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 120, vy -9): completes
+  ok   capoeira sky_wheel right (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 120, vy -9): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel right (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 70, vy -2): completes
+  ok   capoeira sky_wheel right (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 70, vy -2): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel right (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 120, vy -2): completes
+  ok   capoeira sky_wheel right (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 120, vy -2): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel right (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 70, vy +5): completes
+  ok   capoeira sky_wheel right (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 70, vy +5): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel right (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel right (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel right (gap 120, vy +5): completes
+  ok   capoeira sky_wheel right (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel right (gap 120, vy +5): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel right (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 70, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 70, vy -9): completes
+  ok   capoeira sky_wheel left (gap 70, vy -9): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 70, vy -9): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel left (gap 70, vy -9): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 120, vy -9): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 120, vy -9): completes
+  ok   capoeira sky_wheel left (gap 120, vy -9): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 120, vy -9): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel left (gap 120, vy -9): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 70, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 70, vy -2): completes
+  ok   capoeira sky_wheel left (gap 70, vy -2): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 70, vy -2): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel left (gap 70, vy -2): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 120, vy -2): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 120, vy -2): completes
+  ok   capoeira sky_wheel left (gap 120, vy -2): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 120, vy -2): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel left (gap 120, vy -2): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 70, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 70, vy +5): completes
+  ok   capoeira sky_wheel left (gap 70, vy +5): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 70, vy +5): every blow within 6 px of the body (worst -5.5)
+  ok   capoeira sky_wheel left (gap 70, vy +5): the victim is driven into the floor and lands
+  ok   capoeira sky_wheel left (gap 120, vy +5): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira sky_wheel left (gap 120, vy +5): completes
+  ok   capoeira sky_wheel left (gap 120, vy +5): each of 1 blows lands once (1)
+  ok   capoeira sky_wheel left (gap 120, vy +5): every blow within 6 px of the body (worst -5.8)
+  ok   capoeira sky_wheel left (gap 120, vy +5): the victim is driven into the floor and lands
+  ok   capoeira corner_carnival right (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival right (60 px from the wall): completes
+  ok   capoeira corner_carnival right (60 px from the wall): each of 3 blows lands once (3)
+  FAIL capoeira corner_carnival right (60 px from the wall): every blow within 6 px of the body (worst 7.6)
+  contact gaps by beat: [-7.36208820343018, 7.6074333190918, -8.42228221893311]
+  ok   capoeira corner_carnival right (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival right (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival right (110 px from the wall): completes
+  ok   capoeira corner_carnival right (110 px from the wall): each of 3 blows lands once (3)
+  FAIL capoeira corner_carnival right (110 px from the wall): every blow within 6 px of the body (worst 7.6)
+  contact gaps by beat: [-7.3621187210083, 7.6074333190918, -8.42228221893311]
+  ok   capoeira corner_carnival right (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival right (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival right (160 px from the wall): completes
+  ok   capoeira corner_carnival right (160 px from the wall): each of 3 blows lands once (3)
+  FAIL capoeira corner_carnival right (160 px from the wall): every blow within 6 px of the body (worst 7.6)
+  contact gaps by beat: [-7.3621187210083, 7.6074333190918, -8.42228221893311]
+  ok   capoeira corner_carnival right (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival left (60 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival left (60 px from the wall): completes
+  ok   capoeira corner_carnival left (60 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival left (60 px from the wall): every blow within 6 px of the body (worst 2.1)
+  contact gaps by beat: [-7.3621301651001, 2.05679702758789, -8.46191692352295]
+  ok   capoeira corner_carnival left (60 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival left (110 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival left (110 px from the wall): completes
+  ok   capoeira corner_carnival left (110 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival left (110 px from the wall): every blow within 6 px of the body (worst 2.1)
+  contact gaps by beat: [-7.3621301651001, 2.05679702758789, -8.46191692352295]
+  ok   capoeira corner_carnival left (110 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+  ok   capoeira corner_carnival left (160 px from the wall): every blow measured on the drawn bodies (0 unmeasured)
+  ok   capoeira corner_carnival left (160 px from the wall): completes
+  ok   capoeira corner_carnival left (160 px from the wall): each of 3 blows lands once (3)
+  ok   capoeira corner_carnival left (160 px from the wall): every blow within 6 px of the body (worst 2.1)
+  contact gaps by beat: [-7.3621301651001, 2.05679702758789, -8.46191692352295]
+  ok   capoeira corner_carnival left (160 px from the wall): the wall cracks only with the body against it (3 impacts, 0 early)
+RESULT: FAIL (3 failures)
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 18 ObjectDB instances were leaked at exit (run with `--verbose` for
+details).
+At line:2 char:40
++ ... ,capoeira'; & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 18 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

@@ -71,8 +71,8 @@ func _initialize() -> void:
 	for t in T.values():
 		if t != T.NONE and CombatData.get_attack(t).overhead:
 			overheads.append(CombatData.get_attack(t).id)
-	_check(overheads.size() == 4 and not CombatData.get_attack(T.SWEEP).overhead,
-		"overheads: overhand, axe kick, flying axe kick, double-hand hammer (%s)" % [overheads])
+	_check(overheads == [&"overhand", &"axe_kick", &"flying_axe_kick", &"hammer_fist", &"jkd_hammerfist"] and not CombatData.get_attack(T.SWEEP).overhead,
+		"overheads include the existing four and JKD's heavy hammerfist (%s)" % [overheads])
 	for t in T.values():
 		if t != T.NONE and CombatData.get_attack(t).overhead and CombatData.get_attack(t).low:
 			_check(false, "%s is both low and overhead" % CombatData.get_attack(t).id)

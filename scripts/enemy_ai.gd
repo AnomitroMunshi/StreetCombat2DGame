@@ -211,7 +211,7 @@ func compute_intent() -> CombatData.Intent:
 			var reach := move.hitbox.end.x + move.step + move.lunge * travel_ticks - move.backstep
 			if move.leap_vy != 0.0:
 				reach += move.leap_vx * maxi(0, move.startup - move.leap_at)
-			if dist > 50.0 and dist < reach:
+			if dist > 50.0 and dist < reach and _x_opening_is_safe(move):
 				_plan.clear()
 				_plan_pending = false
 				intent.slot = &"x_move"
@@ -351,6 +351,22 @@ func compute_intent() -> CombatData.Intent:
 		_dodge_now = false
 		intent.dodge = -toward  # backstep away from the attack
 	return intent
+
+
+## The hand-supported Capoeira X has a long commitment: use a visible
+## recovery/stun opening instead of sacrificing it into neutral jabs. This
+## reads public states only, and never changes the move's player rules.
+func _x_opening_is_safe(move: CombatData.Attack) -> bool:
+	if _me.style == null or _me.style.id != &"capoeira":
+		return true
+	if _target.state in [Fighter.State.DIZZY, Fighter.State.BROKEN]:
+		return true
+	var remaining := 0
+	if _target.state in [Fighter.State.HITSTUN, Fighter.State.STAGGER]:
+		remaining = _target.stun_frames - _target.state_frame
+	elif _target.get_phase() == Fighter.Phase.RECOVERY and _target.current_attack != null:
+		remaining = _target.current_attack.total_frames() - _target.state_frame
+	return remaining >= maxi(move.startup - 8, 8)
 
 
 func _next_attack() -> CombatData.AttackType:

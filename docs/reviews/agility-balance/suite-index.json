@@ -1,0 +1,157 @@
+[
+  {
+    "suite": "core",
+    "log": "final_core.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "knockdown",
+    "log": "test_knockdown.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "jump",
+    "log": "test_jump.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "music",
+    "log": "test_music.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "announcer",
+    "log": "test_announcer.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "input",
+    "log": "test_input.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "controls",
+    "log": "final_controls.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "stun",
+    "log": "final_stun.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "bangla",
+    "log": "final_bangla.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "flow",
+    "log": "test_flow.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "match",
+    "log": "test_match.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "ai_finisher",
+    "log": "test_ai_finisher.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "finisher_contact",
+    "log": "test_finisher_contact.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "double_kick",
+    "log": "test_double_kick.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "x_moves",
+    "log": "test_x_moves.log",
+    "result": "RESULT: PASS"
+  },
+  {
+    "suite": "x_ui_ai",
+    "log": "final_x_ui_ai.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "x_impact",
+    "log": "test_x_impact.log",
+    "result": "RESULT: PASS"
+  },
+  {
+    "suite": "x_flinch",
+    "log": "test_x_flinch.log",
+    "result": "RESULT: PASS X flinch: 0 failures"
+  },
+  {
+    "suite": "ai_defense",
+    "log": "final_ai_defense.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "movement",
+    "log": "final_movement.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "styles",
+    "log": "test_styles.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "new_styles",
+    "log": "final_new_styles.log",
+    "result": "RESULT: PASS"
+  },
+  {
+    "suite": "agile_styles",
+    "log": "final_agile_styles.log",
+    "result": "RESULT: PASS agile styles: 0 failures"
+  },
+  {
+    "suite": "capoeira_ai",
+    "log": "final_capoeira_ai.log",
+    "result": "RESULT: PASS Capoeira AI: 0 failures"
+  },
+  {
+    "suite": "style_expansion",
+    "log": "final_style_expansion.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "expansion_visuals",
+    "log": "final_expansion_visuals.log",
+    "result": "RESULT: PASS expansion visuals: 68 move/facing probes, 0 failures"
+  },
+  {
+    "suite": "training",
+    "log": "final_training.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "rounds",
+    "log": "test_rounds.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "guard",
+    "log": "final_guard.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "ai_signature",
+    "log": "final_ai_signature.log",
+    "result": "RESULT: PASS (0 failures)"
+  },
+  {
+    "suite": "stage",
+    "log": "test_stage.log",
+    "result": "RESULT: PASS (0 failures)"
+  }
+]

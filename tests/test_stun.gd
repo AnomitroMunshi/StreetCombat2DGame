@@ -6,7 +6,7 @@ extends SceneTree
 var _fails: int = 0
 const STUN_MOVES: Array[StringName] = [&"overhand", &"superman_punch", &"jumping_elbow", &"flying_knee_face",
 	&"flying_side_kick", &"jumping_reverse_punch", &"flying_axe_kick", &"leaping_spin_backfist", &"axe_kick",
-	&"jumping_spin_hook", &"leaping_roundhouse"]
+	&"jumping_spin_hook", &"leaping_roundhouse", &"cap_cartwheel", &"cap_spin_heel", &"cap_crescent", &"jkd_high_hook"]
 
 
 func _check(cond: bool, msg: String) -> void:
@@ -78,7 +78,8 @@ func _initialize() -> void:
 				if dizzy_ticks > 0 and b.state == Fighter.State.IDLE and not recovered:
 					recovered = true
 			results.append(dizzy_ticks)
-			_check(at.stun >= 60 and at.stun <= 120, "%s stuns for 1-2 s (%d ticks)" % [move, at.stun])
+			var minimum: int = {&"jkd_high_hook": 50, &"cap_spin_heel": 40, &"cap_crescent": 35}.get(move, 60)
+			_check(at.stun >= minimum and at.stun <= 120, "%s uses its bounded stun duration (%d ticks)" % [move, at.stun])
 			_check(dizzy_ticks > 0 and recovered and not acted,
 				"%s facing %d: dizzy after the hit reaction, helpless, then recovers (%d ticks)" % [move, side, dizzy_ticks])
 			_free(p)

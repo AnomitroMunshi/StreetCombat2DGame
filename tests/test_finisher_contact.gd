@@ -45,8 +45,10 @@ func _initialize() -> void:
 	# ONLY=<finisher id> runs that finisher's cases alone (tuning).
 	var only := OS.get_environment("ONLY")
 	for style in STYLES:
+		if OS.get_environment("ONLY_STYLE") != "" and not String(style) in OS.get_environment("ONLY_STYLE").split(","):
+			continue
 		for fid in STYLES[style]:
-			if only != "" and String(fid) != only:
+			if only != "" and not String(fid) in only.split(","):
 				continue
 			var k := FinisherDirector.kind_for_id(fid)
 			for left in [false, true]:
@@ -161,6 +163,8 @@ func _report(c: Array) -> void:
 	_check(gaps.size() == hits, label + ": each of %d blows lands once (%d)" % [hits, gaps.size()])
 	_check(worst <= FinisherDirector.CONTACT_SLOP and worst > -INF,
 		label + ": every blow within %.0f px of the body (worst %.1f)" % [FinisherDirector.CONTACT_SLOP, worst])
+	if worst > FinisherDirector.CONTACT_SLOP or c[1] == &"corner_carnival":
+		print("  contact gaps by beat: ", gaps)
 	var k := FinisherDirector.kind_for_id(c[1])
 	var e: Fighter = _main.get_node("Enemy")
 	if k in FinisherDirector.WALL_KINDS:

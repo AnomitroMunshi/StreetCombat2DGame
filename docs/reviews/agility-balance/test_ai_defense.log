@@ -1,0 +1,8 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+  kicks 36  enemy parries 2  blocks 16  punish attempts 1
+  ok   AI parries sometimes
+  ok   AI blocks more often than it parries
+  ok   AI does not parry everything
+  ok   AI counter-attacks a staggered player
+RESULT: PASS (0 failures)

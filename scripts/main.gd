@@ -386,6 +386,10 @@ func _move_list_text() -> String:
 	var lines := PackedStringArray(["[b]%s MOVES[/b]" % player.style.display_name.to_upper()])
 	for row in player.style.move_list():
 		lines.append("[color=#f2c14e]%s[/color]  %s" % [row[0], row[1]])
+	if player.style.id == &"capoeira":
+		lines.append("A/D + Space: rolling crossover jump. L/K/W+K stun; S+K knocks down.")
+	elif player.style.id == &"jeet_kune_do":
+		lines.append("J: jab-cross. K: hammerfist. W+K stuns on hit and breaks guard on block.")
 	if player.style.input_map.has(&"x_move"):
 		var x_attack := CombatData.get_attack(player.style.resolve(&"x_move", false))
 		lines.append("X: %d s cooldown, no Focus. Block, parry or evade." % (x_attack.x_cooldown_frames / CombatData.TICK_RATE))
@@ -751,6 +755,9 @@ func _tick_match_flow() -> void:
 
 ## The style's own pre-fight gesture, or the shared one.
 static func _intro_pose(f: Fighter, fallback: StringName) -> StringName:
+	# The acrobatic intro lands before the countdown unlocks combat.
+	if f.style != null and f.style.id == &"capoeira" and fallback == &"":
+		return &""
 	return f.style.intro_pose if f.style != null and f.style.intro_pose != &"" else fallback
 
 

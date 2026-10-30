@@ -1,0 +1,34 @@
+[
+	{
+		"cooldown_seconds": 15,
+		"hits": [
+			{
+				"damage": 18,
+				"head_recoil_px": 1.93072509765625,
+				"id": "meia_lua_tornado",
+				"tick": 50,
+				"x_flinch": false
+			}
+		],
+		"peak_air_travel": 125.724853515625,
+		"peak_travel": 178.558776855469,
+		"side": 1,
+		"style": "capoeira"
+	},
+	{
+		"cooldown_seconds": 15,
+		"hits": [
+			{
+				"damage": 18,
+				"head_recoil_px": 15.1407470703125,
+				"id": "dragons_burst",
+				"tick": 48,
+				"x_flinch": false
+			}
+		],
+		"peak_air_travel": 98.3932495117188,
+		"peak_travel": 138.668212890625,
+		"side": 1,
+		"style": "jeet_kune_do"
+	}
+]

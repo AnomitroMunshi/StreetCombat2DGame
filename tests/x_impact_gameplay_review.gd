@@ -28,6 +28,7 @@ class Driver extends Node:
 			main.call("_reset_training")
 			var st: MartialArtStyle = styles[index]
 			main.player.set_style(st)
+			main.audio.set_music(st.id)
 			main.enemy.set_style(StyleRegistry.by_id(&"karate"))
 			main.player.x_cooldown = 0
 			main.enemy.x_cooldown = 600

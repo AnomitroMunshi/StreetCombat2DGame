@@ -1,0 +1,51 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[style select]
+  ok   style select plays the menu theme
+  ok   previewing a style keeps the menu theme
+[match]
+  ok   confirming Bangla Maar plays its own track
+  ok   the rival's style never changes the music
+  ok   after the crossfade only one track plays (1)
+  ok   music has its own bus
+[distinct tracks for all nine styles]
+  ok   boxing has its own track
+  ok   boxing music does not alias another style
+  ok   muay_thai has its own track
+  ok   muay_thai music does not alias another style
+  ok   karate has its own track
+  ok   karate music does not alias another style
+  ok   kung_fu has its own track
+  ok   kung_fu music does not alias another style
+  ok   taekwondo has its own track
+  ok   taekwondo music does not alias another style
+  ok   kickboxing has its own track
+  ok   kickboxing music does not alias another style
+  ok   bangla_maar has its own track
+  ok   bangla_maar music does not alias another style
+  ok   capoeira has its own track
+  ok   capoeira music does not alias another style
+  ok   capoeira selects its dedicated looping OGG
+  ok   capoeira has a full musical arrangement
+  ok   jeet_kune_do has its own track
+  ok   jeet_kune_do music does not alias another style
+  ok   jeet_kune_do selects its dedicated looping OGG
+  ok   jeet_kune_do has a full musical arrangement
+[styles without a track fall back]
+  ok   CHANGE STYLE goes back to the menu theme
+  ok   Karate plays its own looping track
+  ok   a style with no track yet plays the procedural loop
+[same track: no restart]
+  ok   asking for the playing track again changes nothing
+RESULT: PASS (0 failures)
+Godot_v4.7.2-stable_win64_console.exe : WARNING: 6 ObjectDB instances were leaked at exit (run with `--verbose` for
+details).
+At line:2 char:377
++ ...  $suites) { & 'D:\GODOT\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-st ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 6 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

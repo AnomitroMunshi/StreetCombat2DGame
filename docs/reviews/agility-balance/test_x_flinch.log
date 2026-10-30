@@ -1,0 +1,116 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ok scorpion_kick side1 wallfalse clean grounded hit selects flinch
+ok scorpion_kick side1 wallfalse snap visible during frozen contact
+ok scorpion_kick side1 wallfalse head snaps away in world facing (65.28px)
+ok scorpion_kick side1 wallfalse no root teleport or new control state
+ok scorpion_kick side1 wallfalse knees soften under recoil
+ok scorpion_kick side1 wallfalse torso length preserved
+ok scorpion_kick side1 wallfalse forearm length preserved
+ok scorpion_kick side1 wallfalse grounded joints stay within planted-foot correction
+ok scorpion_kick side1 wallfalse head and shoulders clear both wall faces
+ok scorpion_kick side1 wallfalse holds first six ticks
+ok scorpion_kick side1 wallfalse guard restored within existing hitstun
+ok scorpion_kick side1 wallfalse stale context does not alter block reaction
+ok scorpion_kick side1 wallfalse stale context does not alter parry
+ok scorpion_kick side1 wallfalse ordinary hit keeps ordinary reaction
+ok scorpion_kick side1 walltrue clean grounded hit selects flinch
+ok scorpion_kick side1 walltrue snap visible during frozen contact
+ok scorpion_kick side1 walltrue head snaps away in world facing (17.73px)
+ok scorpion_kick side1 walltrue no root teleport or new control state
+ok scorpion_kick side1 walltrue knees soften under recoil
+ok scorpion_kick side1 walltrue torso length preserved
+ok scorpion_kick side1 walltrue forearm length preserved
+ok scorpion_kick side1 walltrue grounded joints stay within planted-foot correction
+ok scorpion_kick side1 walltrue head and shoulders clear both wall faces
+ok scorpion_kick side1 walltrue holds first six ticks
+ok scorpion_kick side1 walltrue guard restored within existing hitstun
+ok scorpion_kick side1 walltrue stale context does not alter block reaction
+ok scorpion_kick side1 walltrue stale context does not alter parry
+ok scorpion_kick side1 walltrue ordinary hit keeps ordinary reaction
+ok scorpion_kick side-1 wallfalse clean grounded hit selects flinch
+ok scorpion_kick side-1 wallfalse snap visible during frozen contact
+ok scorpion_kick side-1 wallfalse head snaps away in world facing (65.28px)
+ok scorpion_kick side-1 wallfalse no root teleport or new control state
+ok scorpion_kick side-1 wallfalse knees soften under recoil
+ok scorpion_kick side-1 wallfalse torso length preserved
+ok scorpion_kick side-1 wallfalse forearm length preserved
+ok scorpion_kick side-1 wallfalse grounded joints stay within planted-foot correction
+ok scorpion_kick side-1 wallfalse head and shoulders clear both wall faces
+ok scorpion_kick side-1 wallfalse holds first six ticks
+ok scorpion_kick side-1 wallfalse guard restored within existing hitstun
+ok scorpion_kick side-1 wallfalse stale context does not alter block reaction
+ok scorpion_kick side-1 wallfalse stale context does not alter parry
+ok scorpion_kick side-1 wallfalse ordinary hit keeps ordinary reaction
+ok scorpion_kick side-1 walltrue clean grounded hit selects flinch
+ok scorpion_kick side-1 walltrue snap visible during frozen contact
+ok scorpion_kick side-1 walltrue head snaps away in world facing (17.73px)
+ok scorpion_kick side-1 walltrue no root teleport or new control state
+ok scorpion_kick side-1 walltrue knees soften under recoil
+ok scorpion_kick side-1 walltrue torso length preserved
+ok scorpion_kick side-1 walltrue forearm length preserved
+ok scorpion_kick side-1 walltrue grounded joints stay within planted-foot correction
+ok scorpion_kick side-1 walltrue head and shoulders clear both wall faces
+ok scorpion_kick side-1 walltrue holds first six ticks
+ok scorpion_kick side-1 walltrue guard restored within existing hitstun
+ok scorpion_kick side-1 walltrue stale context does not alter block reaction
+ok scorpion_kick side-1 walltrue stale context does not alter parry
+ok scorpion_kick side-1 walltrue ordinary hit keeps ordinary reaction
+ok step_back_spinning_backfist side1 wallfalse clean grounded hit selects flinch
+ok step_back_spinning_backfist side1 wallfalse snap visible during frozen contact
+ok step_back_spinning_backfist side1 wallfalse head snaps away in world facing (69.16px)
+ok step_back_spinning_backfist side1 wallfalse no root teleport or new control state
+ok step_back_spinning_backfist side1 wallfalse knees soften under recoil
+ok step_back_spinning_backfist side1 wallfalse torso length preserved
+ok step_back_spinning_backfist side1 wallfalse forearm length preserved
+ok step_back_spinning_backfist side1 wallfalse grounded joints stay within planted-foot correction
+ok step_back_spinning_backfist side1 wallfalse head and shoulders clear both wall faces
+ok step_back_spinning_backfist side1 wallfalse holds first six ticks
+ok step_back_spinning_backfist side1 wallfalse guard restored within existing hitstun
+ok step_back_spinning_backfist side1 wallfalse stale context does not alter block reaction
+ok step_back_spinning_backfist side1 wallfalse stale context does not alter parry
+ok step_back_spinning_backfist side1 wallfalse ordinary hit keeps ordinary reaction
+ok step_back_spinning_backfist side1 walltrue clean grounded hit selects flinch
+ok step_back_spinning_backfist side1 walltrue snap visible during frozen contact
+ok step_back_spinning_backfist side1 walltrue head snaps away in world facing (17.77px)
+ok step_back_spinning_backfist side1 walltrue no root teleport or new control state
+ok step_back_spinning_backfist side1 walltrue knees soften under recoil
+ok step_back_spinning_backfist side1 walltrue torso length preserved
+ok step_back_spinning_backfist side1 walltrue forearm length preserved
+ok step_back_spinning_backfist side1 walltrue grounded joints stay within planted-foot correction
+ok step_back_spinning_backfist side1 walltrue head and shoulders clear both wall faces
+ok step_back_spinning_backfist side1 walltrue holds first six ticks
+ok step_back_spinning_backfist side1 walltrue guard restored within existing hitstun
+ok step_back_spinning_backfist side1 walltrue stale context does not alter block reaction
+ok step_back_spinning_backfist side1 walltrue stale context does not alter parry
+ok step_back_spinning_backfist side1 walltrue ordinary hit keeps ordinary reaction
+ok step_back_spinning_backfist side-1 wallfalse clean grounded hit selects flinch
+ok step_back_spinning_backfist side-1 wallfalse snap visible during frozen contact
+ok step_back_spinning_backfist side-1 wallfalse head snaps away in world facing (69.16px)
+ok step_back_spinning_backfist side-1 wallfalse no root teleport or new control state
+ok step_back_spinning_backfist side-1 wallfalse knees soften under recoil
+ok step_back_spinning_backfist side-1 wallfalse torso length preserved
+ok step_back_spinning_backfist side-1 wallfalse forearm length preserved
+ok step_back_spinning_backfist side-1 wallfalse grounded joints stay within planted-foot correction
+ok step_back_spinning_backfist side-1 wallfalse head and shoulders clear both wall faces
+ok step_back_spinning_backfist side-1 wallfalse holds first six ticks
+ok step_back_spinning_backfist side-1 wallfalse guard restored within existing hitstun
+ok step_back_spinning_backfist side-1 wallfalse stale context does not alter block reaction
+ok step_back_spinning_backfist side-1 wallfalse stale context does not alter parry
+ok step_back_spinning_backfist side-1 wallfalse ordinary hit keeps ordinary reaction
+ok step_back_spinning_backfist side-1 walltrue clean grounded hit selects flinch
+ok step_back_spinning_backfist side-1 walltrue snap visible during frozen contact
+ok step_back_spinning_backfist side-1 walltrue head snaps away in world facing (17.77px)
+ok step_back_spinning_backfist side-1 walltrue no root teleport or new control state
+ok step_back_spinning_backfist side-1 walltrue knees soften under recoil
+ok step_back_spinning_backfist side-1 walltrue torso length preserved
+ok step_back_spinning_backfist side-1 walltrue forearm length preserved
+ok step_back_spinning_backfist side-1 walltrue grounded joints stay within planted-foot correction
+ok step_back_spinning_backfist side-1 walltrue head and shoulders clear both wall faces
+ok step_back_spinning_backfist side-1 walltrue holds first six ticks
+ok step_back_spinning_backfist side-1 walltrue guard restored within existing hitstun
+ok step_back_spinning_backfist side-1 walltrue stale context does not alter block reaction
+ok step_back_spinning_backfist side-1 walltrue stale context does not alter parry
+ok step_back_spinning_backfist side-1 walltrue ordinary hit keeps ordinary reaction
+ok all facing/wall probes completed
+RESULT: PASS X flinch: 0 failures

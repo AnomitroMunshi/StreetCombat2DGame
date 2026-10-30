@@ -27,6 +27,11 @@ func run() -> void:
 			var ai := EnemyAI.new()
 			root.add_child(ai)
 			ai.setup(me, target)
+			if st.id == &"capoeira":
+				check(ai.compute_intent().slot != &"x_move", "Capoeira saves its committed X for an observable opening")
+				target.dizzy_left = 70
+				target.call("_enter_state", Fighter.State.DIZZY)
+				ai.setup(me, target)
 			check(ai.compute_intent().slot == &"x_move", "%s facing %d: ready AI chooses X in range" % [st.id, side])
 			me.x_cooldown = 300
 			check(ai.compute_intent().slot != &"x_move", "%s: AI waits for cooldown" % st.id)
