@@ -1,0 +1,569 @@
+{
+  "boxing": {
+    "file": "boxing_props.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "fully_clear_fraction": 0.5622285207112631,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "sprites": [
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            236,
+            9,
+            317,
+            371
+          ],
+          "source_baseline_y": 380
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            781,
+            101,
+            670,
+            286
+          ],
+          "source_baseline_y": 387
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            72,
+            401,
+            475,
+            324
+          ],
+          "source_baseline_y": 725
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            767,
+            422,
+            717,
+            345
+          ],
+          "source_baseline_y": 767
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            24,
+            789,
+            739,
+            202
+          ],
+          "source_baseline_y": 991
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            801,
+            789,
+            700,
+            211
+          ],
+          "source_baseline_y": 1000
+        }
+      ]
+    ],
+    "placement": "Use one uniform scale per intact/broken pair; align each measured source baseline to the same world floor. Source rectangles supersede requested equal thirds."
+  },
+  "muay_thai": {
+    "file": "muay_thai_props.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "fully_clear_fraction": 0.5119876861572266,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "sprites": [
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            200,
+            7,
+            377,
+            353
+          ],
+          "source_baseline_y": 360
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            785,
+            92,
+            738,
+            281
+          ],
+          "source_baseline_y": 373
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            173,
+            377,
+            432,
+            328
+          ],
+          "source_baseline_y": 705
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            761,
+            411,
+            766,
+            303
+          ],
+          "source_baseline_y": 714
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            24,
+            738,
+            726,
+            253
+          ],
+          "source_baseline_y": 991
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            750,
+            762,
+            775,
+            235
+          ],
+          "source_baseline_y": 997
+        }
+      ]
+    ],
+    "placement": "Use one uniform scale per intact/broken pair; align each measured source baseline to the same world floor. Source rectangles supersede requested equal thirds."
+  },
+  "kung_fu": {
+    "file": "kung_fu_props.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "fully_clear_fraction": 0.5851866404215494,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "sprites": [
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            130,
+            8,
+            444,
+            351
+          ],
+          "source_baseline_y": 359
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            676,
+            89,
+            840,
+            295
+          ],
+          "source_baseline_y": 384
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            168,
+            376,
+            368,
+            344
+          ],
+          "source_baseline_y": 720
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            663,
+            508,
+            837,
+            226
+          ],
+          "source_baseline_y": 734
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            58,
+            738,
+            591,
+            241
+          ],
+          "source_baseline_y": 979
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            697,
+            777,
+            808,
+            215
+          ],
+          "source_baseline_y": 992
+        }
+      ]
+    ],
+    "placement": "Use one uniform scale per intact/broken pair; align each measured source baseline to the same world floor. Source rectangles supersede requested equal thirds."
+  },
+  "taekwondo": {
+    "file": "taekwondo_props.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "fully_clear_fraction": 0.548943837483724,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "sprites": [
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            182,
+            78,
+            447,
+            238
+          ],
+          "source_baseline_y": 316
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            811,
+            83,
+            699,
+            251
+          ],
+          "source_baseline_y": 334
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            136,
+            394,
+            547,
+            238
+          ],
+          "source_baseline_y": 632
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            780,
+            381,
+            730,
+            285
+          ],
+          "source_baseline_y": 666
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            44,
+            747,
+            707,
+            173
+          ],
+          "source_baseline_y": 920
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            793,
+            740,
+            708,
+            224
+          ],
+          "source_baseline_y": 964
+        }
+      ]
+    ],
+    "placement": "Use one uniform scale per intact/broken pair; align each measured source baseline to the same world floor. Source rectangles supersede requested equal thirds."
+  },
+  "kickboxing": {
+    "file": "kickboxing_props.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "fully_clear_fraction": 0.7129751841227213,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "sprites": [
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            306,
+            11,
+            280,
+            326
+          ],
+          "source_baseline_y": 337
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            886,
+            186,
+            465,
+            154
+          ],
+          "source_baseline_y": 340
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            332,
+            353,
+            208,
+            320
+          ],
+          "source_baseline_y": 673
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            890,
+            433,
+            578,
+            240
+          ],
+          "source_baseline_y": 673
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            177,
+            678,
+            441,
+            314
+          ],
+          "source_baseline_y": 992
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            794,
+            719,
+            690,
+            282
+          ],
+          "source_baseline_y": 1001
+        }
+      ]
+    ],
+    "placement": "Use one uniform scale per intact/broken pair; align each measured source baseline to the same world floor. Source rectangles supersede requested equal thirds."
+  },
+  "capoeira": {
+    "file": "capoeira_props.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "fully_clear_fraction": 0.4753958384195964,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "sprites": [
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            90,
+            5,
+            479,
+            371
+          ],
+          "source_baseline_y": 376
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            663,
+            111,
+            838,
+            283
+          ],
+          "source_baseline_y": 394
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            112,
+            376,
+            442,
+            302
+          ],
+          "source_baseline_y": 678
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            660,
+            418,
+            839,
+            271
+          ],
+          "source_baseline_y": 689
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            15,
+            705,
+            693,
+            295
+          ],
+          "source_baseline_y": 1000
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            766,
+            705,
+            752,
+            298
+          ],
+          "source_baseline_y": 1003
+        }
+      ]
+    ],
+    "placement": "Use one uniform scale per intact/broken pair; align each measured source baseline to the same world floor. Source rectangles supersede requested equal thirds."
+  },
+  "jeet_kune_do": {
+    "file": "jeet_kune_do_props.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "fully_clear_fraction": 0.5110422770182291,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "sprites": [
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            233,
+            13,
+            286,
+            321
+          ],
+          "source_baseline_y": 334
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            779,
+            77,
+            728,
+            260
+          ],
+          "source_baseline_y": 337
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            27,
+            366,
+            677,
+            294
+          ],
+          "source_baseline_y": 660
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            752,
+            365,
+            758,
+            283
+          ],
+          "source_baseline_y": 648
+        }
+      ],
+      [
+        {
+          "state": "intact",
+          "source_rect_xywh": [
+            89,
+            660,
+            528,
+            327
+          ],
+          "source_baseline_y": 987
+        },
+        {
+          "state": "broken",
+          "source_rect_xywh": [
+            740,
+            672,
+            767,
+            324
+          ],
+          "source_baseline_y": 996
+        }
+      ]
+    ],
+    "placement": "Use one uniform scale per intact/broken pair; align each measured source baseline to the same world floor. Source rectangles supersede requested equal thirds."
+  }
+}

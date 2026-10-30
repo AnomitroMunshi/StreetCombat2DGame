@@ -244,6 +244,15 @@ func _build_props() -> void:
 	var cuts: Array = _layout.get("props_rows", [0, 380, 690, 1024] if path == DOJO_PROPS and size.y == 1024 else [0, int(size.y / 3), int(size.y * 2 / 3), int(size.y)])
 	var split := clampi(int(_layout.get("props_split_x", size.x * 0.5)), 1, int(size.x) - 1)
 	var cache_key := path + str(cuts) + ":" + str(split)
+	# Measured sprite rectangles ([[intact x, y, w, h], [broken x, y, w, h]] per
+	# prop, bottom edge = floor baseline) win over row cuts: generated sheets
+	# do not keep to equal rows.
+	var measured: Array = _layout.get("props_sprites", [])
+	if measured.size() == 3:
+		var regions: Array = []
+		for pair: Array in measured:
+			regions.append([Rect2(pair[0][0], pair[0][1], pair[0][2], pair[0][3]), Rect2(pair[1][0], pair[1][1], pair[1][2], pair[1][3])])
+		_prop_region_cache[cache_key] = regions
 	if not _prop_region_cache.has(cache_key):
 		var image := _props_texture.get_image()
 		if image.is_compressed(): image.decompress()
@@ -255,9 +264,9 @@ func _build_props() -> void:
 		_prop_region_cache[cache_key] = regions
 	var sources: Array = _prop_region_cache[cache_key]
 	# [id, centre x, visible height, impact that breaks it, debris colour]: spread
-	# along the back wall, clear of each other, the pot in the left corner and
-	# the boards and bench apart on the right.
-	var specs: Array = _layout.get("props_specs", [[&"pot", 170.0, 58.0, 8.0, Color(0.55, 0.32, 0.16)], [&"boards", 900.0, 54.0, 10.0, Color(0.60, 0.40, 0.20)], [&"bench", 1100.0, 64.0, 12.0, Color(0.48, 0.31, 0.17)]])
+	# along the back wall, clear of each other and of both starting spots: the
+	# pot and boards on the left, the bench on the right.
+	var specs: Array = _layout.get("props_specs", [[&"pot", 170.0, 58.0, 8.0, Color(0.55, 0.32, 0.16)], [&"boards", 290.0, 54.0, 10.0, Color(0.60, 0.40, 0.20)], [&"bench", 1100.0, 64.0, 12.0, Color(0.48, 0.31, 0.17)]])
 	for row in 3:
 		var prop_color: Color
 		var tint: Variant = specs[row][4]
