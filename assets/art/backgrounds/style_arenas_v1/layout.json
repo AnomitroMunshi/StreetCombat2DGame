@@ -14,6 +14,7 @@
     "floor_material": "stone",
     "wall_material": "stone",
     "decal_directory": "res://assets/art/decals/temple_stone_v1",
+    "crack_on_cutout": true,
     "props": "res://assets/art/backgrounds/dojo_props_v1/breakable_props.png",
     "props_rows": [
       0,

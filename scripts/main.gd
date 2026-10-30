@@ -1751,6 +1751,8 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 	var side := -1 if pos.x < 640.0 else 1
 	var pillar := _pillar_rect(side)
 	var hit := Vector2(pos.x + side * 10.0, pos.y)
+	if stage is StyleStage:
+		hit.x = stage.wall_crack_x(side, pos.y, hit.x)
 	if stage != null:
 		stage.impact(pos.x, 6.0 + power * 3.0)
 	fx.wall_crack(hit, power, pillar)

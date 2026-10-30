@@ -193,6 +193,42 @@ func draw_back(c: CanvasItem, floor_y: float) -> void:
 			c.draw_rect(rect, wall_dark())
 			c.draw_rect(Rect2(rect.position, Vector2(4, rect.size.y)), wall_light().darkened(0.2))
 
+## Where a wall hit at height `y` should crack: by default the struck x
+## (`fallback`). Arenas whose side cutouts are themselves the wall (layout
+## "crack_on_cutout", e.g. the temple's stone pillars) crack the solid part of
+## the cutout instead: its innermost opaque pixel at that height, inset a
+## little, so the crack never lands on foliage or the scenery beside it.
+func wall_crack_x(side: int, y: float, fallback: float) -> float:
+	if not bool(_layout.get("crack_on_cutout", false)) or _cutouts.size() != 2:
+		return fallback
+	var layer: Dictionary = _cutouts[0 if side < 0 else 1]
+	var rect := _cutout_rect(layer, _floor_y)
+	var v := (y - rect.position.y) / rect.size.y
+	if v < 0.0 or v > 1.0:
+		return fallback
+	var image := _cutout_alpha_image()
+	var src: Rect2 = layer["source"]
+	var sy := int(src.position.y + v * (src.size.y - 1.0))
+	var cols := int(rect.size.x)
+	for k in cols:
+		# Scan from the inner face outward to the first solid pixel.
+		var i := cols - 1 - k if side < 0 else k
+		var sx := int(src.position.x + (i + 0.5) / rect.size.x * src.size.x)
+		if image.get_pixel(sx, sy).a > 0.6:
+			return rect.position.x + i + side * 22.0
+	return fallback
+
+
+static var _cutout_image_cache: Dictionary = {}
+
+func _cutout_alpha_image() -> Image:
+	var key := _cutout_texture.resource_path
+	if not _cutout_image_cache.has(key):
+		var image := _cutout_texture.get_image()
+		if image.is_compressed(): image.decompress()
+		_cutout_image_cache[key] = image
+	return _cutout_image_cache[key]
+
 func wall_rects(floor_y: float) -> Array[Rect2]:
 	if _cutouts.size() == 2:
 		return [_cutout_rect(_cutouts[0], floor_y), _cutout_rect(_cutouts[1], floor_y)]
