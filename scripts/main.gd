@@ -294,6 +294,7 @@ func _ready() -> void:
 	touch = TouchControls.new()
 	touch.name = "TouchControls"
 	add_child(touch)
+	touch.setup(player)
 	_apply_touch_setting()
 	hud.touch_setting_changed.connect(_apply_touch_setting)
 	hud.training_action.connect(training_action)
@@ -735,15 +736,36 @@ func arena_choices() -> Array[StringName]:
 	choices.append_array(StyleStage.SHARED_STREETS)
 	return choices
 
+## Chance a match is fought in the player's home arena; otherwise one of the
+## shared streets ("sometimes": each street about 13%).
+const HOME_ARENA_CHANCE: float = 0.6
+## The street behind the style-select (home) screen: picked once per launch,
+## so it stays put while browsing styles and coming back from matches.
+static var _home_street: StringName = &""
+
 func _pick_match_arena() -> void:
 	if _match_arena != &"": return
 	var choices := arena_choices()
-	_match_arena = match_arena_override if match_arena_override in choices else choices[_arena_rng.randi_range(0, choices.size() - 1)]
+	if match_arena_override in choices:
+		_match_arena = match_arena_override
+	elif _arena_rng.randf() < HOME_ARENA_CHANCE:
+		_match_arena = choices[0]
+	else:
+		_match_arena = choices[_arena_rng.randi_range(1, choices.size() - 1)]
+
+
+func home_street() -> StringName:
+	if _home_street == &"":
+		_home_street = StyleStage.SHARED_STREETS[randi() % StyleStage.SHARED_STREETS.size()]
+	return _home_street
 
 func _apply_stage() -> void:
-	var practice := training != null or _round_state == RoundState.STYLE_SELECT or player.style == null
+	# Training: the temple. Style select (the home screen): a street. Matches:
+	# home arena or a street, drawn once per match.
+	var home_screen := _round_state == RoundState.STYLE_SELECT or player.style == null
+	var practice := training != null or home_screen
 	if not practice: _pick_match_arena()
-	var wanted: StringName = &"karate" if practice else _match_arena
+	var wanted: StringName = _match_arena if not practice else (&"karate" if training != null else home_street())
 	var same: bool = (stage is WestBengalStage and wanted == &"bangla_maar") or (stage is StyleStage and stage.style_id == wanted)
 	if same: return  # Keep art, props and variant fixed throughout the match.
 	if stage != null:
@@ -958,6 +980,10 @@ func _read_player_intent() -> CombatData.Intent:
 				_last_tap[dir] = -1000
 			else:
 				_last_tap[dir] = _tick
+	# Touch joystick 6 -> 4 / 6 -> 8 flick: a roll (crouch is held with it).
+	if TouchControls.dodge_request != 0:
+		intent.dodge = TouchControls.dodge_request
+		TouchControls.dodge_request = 0
 	# Attack buttons produce a slot; the fighter's martial art decides the move
 	# (and refuses anything its style does not have).
 	intent.slot = attack_slot(Input.is_action_just_pressed("attack_light"),

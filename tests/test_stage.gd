@@ -1,7 +1,8 @@
 extends SceneTree
 ## Stage selection and the Kolkata street (WB-01..05): only a PLAYER Bangla
-## Maar gets it (a Bangla Maar rival alone does not; training and style select
-## use the temple courtyard); material decals match the floor; walls line up
+## Maar gets it (a Bangla Maar rival alone does not; training uses the temple
+## courtyard, the style-select home screen one street per launch); matches
+## draw the home arena ~60% of the time; material decals match the floor; walls line up
 ## with the arena bounds; props break once, from strong nearby impacts only,
 ## and what stands on a prop falls with it; a reset restores them.
 
@@ -36,14 +37,14 @@ func _run() -> void:
 	var main := _new_main()
 	await physics_frame
 	main.call("select_style", &"bangla_maar")
-	_check(main.call("get_stage_name") == "temple_courtyard", "style select: still the dojo")
+	_check(main.call("get_stage_name") in ["street_market", "street_neon", "street_oldtown"], "style select (home screen): a street (%s)" % main.call("get_stage_name"))
 	main.call("confirm_style")
 	var name: String = main.call("get_stage_name")
 	_check(name.begins_with("west_bengal_"), "player Bangla Maar: the Kolkata street (%s)" % name)
 	_check(String((main.get("fx") as FxLayer).decal_set["floor"][0].resource_path).contains("west_bengal"),
 		"stone damage decals on the street")
 	main.call("change_style")
-	_check(main.call("get_stage_name") == "temple_courtyard", "back to style select: the dojo")
+	_check(main.call("get_stage_name") in ["street_market", "street_neon", "street_oldtown"], "back to style select: the home street again")
 	main.call("select_style", &"karate")
 	main.set("match_arena_override", &"karate")
 	(main.get_node("Enemy") as Fighter).set_style(StyleRegistry.by_id(&"bangla_maar"))
@@ -107,7 +108,7 @@ func _run() -> void:
 		await physics_frame
 		main.call("select_style", id)
 		main.set("match_arena_override", id)
-		_check(main.call("get_stage_name") == "temple_courtyard", "%s preview keeps the shared dojo" % id)
+		_check(main.call("get_stage_name") == String(main.call("home_street")), "%s preview keeps the same home-screen street" % id)
 		(main.get_node("Enemy") as Fighter).set_style(StyleRegistry.by_id(&"bangla_maar"))
 		main.call("confirm_style")
 		var art_stage := main.get("stage") as StyleStage
@@ -180,6 +181,13 @@ func _run() -> void:
 		_check(chosen in main.call("arena_choices"), "random arena belongs to home/street pool")
 		seen[chosen] = true
 	_check(seen.size() == 4, "seeded new-match draws reach home and all three streets")
+	var home_draws := 0
+	for sample in 400:
+		main.set("_match_arena", &"")
+		main.call("_pick_match_arena")
+		if main.get("_match_arena") == &"boxing":
+			home_draws += 1
+	_check(home_draws > 200 and home_draws < 280, "the home arena comes up about 60%% of the time (%d / 400)" % home_draws)
 	await _free(main)
 	for street: StringName in StyleStage.SHARED_STREETS:
 		main = _new_main()
