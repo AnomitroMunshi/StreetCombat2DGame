@@ -16,7 +16,7 @@ stance = 8
 kit = &"taekwondo"
 step_scale = 1.6
 ai_tuning = {
-"aggression": 0.76,
+"aggression": 0.66,
 "block_chance": 0.56,
 "dodge_chance": 0.2
 }

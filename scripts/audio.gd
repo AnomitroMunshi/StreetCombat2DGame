@@ -17,22 +17,24 @@ const LIMITER_CEILING_DB: float = -1.0
 var _sfx: Dictionary = {}
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice: int = 0
-## Music id -> [file, gain dB]. Gains match each track's measured loudness to
-## the procedural loop's (about -22 dBFS mean as heard). Add a style's track
-## here when it exists; until then that style plays the procedural loop.
+## Music id -> [file, gain dB]. Gains level every track at the same perceived
+## loudness in game (-19.5 LUFS, measured per file). Add a style's track here
+## when it exists; until then that style plays the procedural loop.
 ## Each registered style has its own track; unknown future styles fall back.
 const MUSIC_FILES: Dictionary = {
-	&"menu": ["res://assets/audio/music/originals/menu_theme.mp3", -4.5],
-	&"boxing": ["res://assets/audio/music/originals/boxing_theme.mp3", -5.8],
-	&"muay_thai": ["res://assets/audio/music/originals/muay_thai_theme.mp3", -4.2],
-	&"kung_fu": ["res://assets/audio/music/originals/kung_fu_theme.mp3", -3.9],
-	&"bangla_maar": ["res://assets/audio/music/originals/bangla_maar_theme.mp3", -4.4],
-	# Placeholders rendered by tools/music/gen_style_music.py (-17 dB RMS).
-	&"karate": ["res://assets/audio/music/generated/karate_theme.ogg", -5.0],
-	&"taekwondo": ["res://assets/audio/music/generated/taekwondo_theme.ogg", -5.0],
-	&"kickboxing": ["res://assets/audio/music/generated/kickboxing_theme.ogg", -5.0],
-	&"capoeira": ["res://assets/audio/music/generated/capoeira_theme.ogg", -5.0],
-	&"jeet_kune_do": ["res://assets/audio/music/generated/jeet_kune_do_theme.ogg", -5.0],
+	&"menu": ["res://assets/audio/music/originals/menu_theme.mp3", -5.1],
+	&"boxing": ["res://assets/audio/music/originals/boxing_theme.mp3", -5.5],
+	&"muay_thai": ["res://assets/audio/music/originals/muay_thai_theme.mp3", -3.6],
+	&"kung_fu": ["res://assets/audio/music/originals/kung_fu_theme.mp3", -4.5],
+	&"bangla_maar": ["res://assets/audio/music/originals/bangla_maar_theme.mp3", -4.8],
+	# Placeholders rendered by tools/music/gen_style_music.py. All ten gains level
+	# the tracks at -19.5 LUFS in game (measured 2026-10-30, see
+	# docs/reviews/2026-10-30-music-listening).
+	&"karate": ["res://assets/audio/music/generated/karate_theme.ogg", -3.0],
+	&"taekwondo": ["res://assets/audio/music/generated/taekwondo_theme.ogg", -2.5],
+	&"kickboxing": ["res://assets/audio/music/generated/kickboxing_theme.ogg", -2.1],
+	&"capoeira": ["res://assets/audio/music/generated/capoeira_theme.ogg", -3.0],
+	&"jeet_kune_do": ["res://assets/audio/music/generated/jeet_kune_do_theme.ogg", -3.6],
 }
 const MUSIC_BUS: StringName = &"Music"
 ## Announcer clips (placeholders: Windows text-to-speech, processed; replace

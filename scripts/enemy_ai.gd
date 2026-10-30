@@ -51,6 +51,23 @@ const REACH_SLACK: float = 14.0
 const TUNABLE: Array[String] = ["aggression", "block_chance", "dodge_chance", "parry_chance", "punish_chance",
 	"jump_in_chance", "anti_air_chance"]
 var _defaults: Dictionary = {}
+## Difficulty levels, easiest first. Each scales the style's tuned
+## personality: chances are multiplied (capped at 0.95), reaction_frames is
+## set outright. Normal is the style's own tuning, unchanged. The 6-tick
+## Normal reaction cannot see a 5-tick jab coming; Hard's 3 can.
+const DIFFICULTIES: Array[StringName] = [&"easy", &"normal", &"hard"]
+const DIFFICULTY_SCALE: Dictionary = {
+	&"easy": {"reaction_frames": 11, "aggression": 0.75, "block_chance": 0.45, "dodge_chance": 0.5,
+		"parry_chance": 0.25, "punish_chance": 0.4, "anti_air_chance": 0.4, "signature_chance": 0.5},
+	&"normal": {},
+	&"hard": {"reaction_frames": 3, "aggression": 1.0, "block_chance": 1.5, "dodge_chance": 1.3,
+		"parry_chance": 2.0, "punish_chance": 1.25, "anti_air_chance": 1.8},
+}
+## The rival's difficulty, chosen on the pre-match screen. Static, so it
+## survives the scene reload of a rematch (like StyleRegistry.player_choice).
+static var selected_difficulty: StringName = &"normal"
+## This controller's difficulty; applied by setup().
+var difficulty: StringName = &"normal"
 ## Chance to pick a jump-in when at mid range.
 @export_range(0.0, 1.0) var jump_in_chance: float = 0.15
 ## Chance to backstep (dodge) a noticed attack instead of blocking it.
@@ -101,7 +118,7 @@ func setup(me: Fighter, target: Fighter) -> void:
 	# Style tuning on top of this AI's own defaults (remembered once, so a
 	# re-setup with another style never inherits the previous one's tuning).
 	if _defaults.is_empty():
-		for key in TUNABLE:
+		for key in TUNABLE + ["reaction_frames", "signature_chance"]:
 			_defaults[key] = get(key)
 	for key in _defaults:
 		set(key, _defaults[key])
@@ -110,6 +127,13 @@ func setup(me: Fighter, target: Fighter) -> void:
 		for key in _me.style.ai_tuning:
 			if String(key) in TUNABLE:
 				set(String(key), _me.style.ai_tuning[key])
+	# Difficulty scales the style's personality (reaction time is absolute).
+	var scale: Dictionary = DIFFICULTY_SCALE.get(difficulty, {})
+	for key: String in scale:
+		if key == "reaction_frames":
+			reaction_frames = scale[key]
+		else:
+			set(key, clampf(float(get(key)) * float(scale[key]), 0.0, 0.95))
 	# Forget everything from a previous setup (restart / unlock at FIGHT).
 	_plan.clear()
 	_plan_index = 0

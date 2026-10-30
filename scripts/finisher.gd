@@ -1237,7 +1237,10 @@ func _build(k: Kind) -> Array[Dictionary]:
 				{"ticks": 10, "atk": &"cap_au_entry", "def": &"stagger"},
 				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger"},
 				{"ticks": 8, "atk": &"cap_au_hit", "def": &"hitstun_body", "hit": true, "high": false, "power": 2},
-				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger"},
+				# Shift the hands back a little: from where the first kick leaves the
+				# body the second one swung over the back of the head and only met
+				# it on its timeout (up to 10 px off at 30 / 120 fps).
+				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger", "atk_move": -2.0},
 				{"ticks": 8, "atk": &"cap_au_hit", "def": &"hitstun", "hit": true, "power": 2},
 				{"ticks": 8, "atk": &"cap_au_support", "def": &"stagger"},
 				{"ticks": 5, "atk": &"cap_au_hit", "def": &"stagger"},

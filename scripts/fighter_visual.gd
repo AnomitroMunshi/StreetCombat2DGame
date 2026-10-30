@@ -116,6 +116,13 @@ const YIELD_STRIKE: float = 0.7
 const KNEE_REVERSE_MAX: float = 0.07
 ## A committed strike from a long stance sinks the hips further (a lunge).
 const MAX_SETTLE_STRIKE: float = 18.0
+## Boxing (and upright Muay Thai) stay tall through punches and elbows: the hips may sink only this far
+## before the rear foot drags in behind them (the boxer's step-drag) instead
+## of collapsing into a deep lunge.
+const MAX_SETTLE_STRIKE_BOXING: float = 6.0
+## Karate keeps its long low stance but drives the hips square instead of
+## sinking onto the front knee.
+const MAX_SETTLE_STRIKE_KARATE: float = 10.0
 ## Fastest the hips settle or rise for the knee bend (px/s).
 const SETTLE_RATE: float = 70.0
 ## Strikes sink into their lunge with the drive (still over a few frames).
@@ -124,7 +131,7 @@ const SETTLE_RATE_STRIKE: float = 360.0
 const DEFAULT_SPREAD: float = 6.0
 ## Body rotation per pose (var name -> px). Others use DEFAULT_SPREAD.
 const POSE_SPREAD: Dictionary = {
-	"_jab_windup": 9.0, "_jab_strike": 15.0, "_heavy_windup": 12.0, "_heavy_strike": -8.0,
+	"_jab_windup": 9.0, "_jab_strike": 15.0, "_heavy_windup": 12.0, "_heavy_strike": -8.0, "_box_cross_strike": -8.0,
 	"_backhand_windup": 14.0, "_backhand_strike": 15.0, "_uppercut_windup": 4.0, "_uppercut_strike": -6.0,
 	"_side_chamber": 12.0, "_side_extend": 14.0, "_front_chamber": 5.0, "_front_extend": 6.0,
 	"_high_chamber": 10.0, "_high_extend": 12.0, "_block": 5.0, "_crouch": 6.0, "_crouch_block": 4.0,
@@ -240,6 +247,10 @@ var _jab_strike := PackedFloat32Array([0.3, 0.1, 1.57, 1.6, 0.55, 2.95, 0.66, 0.
 var _heavy_windup := PackedFloat32Array([0.05, 0.15, 0.95, 2.7, 0.25, 2.5, 0.55, -0.1, -0.6, -0.35, -6.0, 0.0])
 # The rear heel turns out (pivot) as the hips drive the cross through.
 var _heavy_strike := PackedFloat32Array([0.32, 0.05, 0.75, 2.8, 1.57, 1.6, 0.6, 0.0, -0.5, -0.78, 12.0, 0.0, 0.8])
+# Boxing cross: compact. The rear heel turns and the hips rotate through, but
+# the hips stay over the stance (no lunge past the lead foot): front shin
+# near vertical, rear leg drives short, chin behind the lead glove.
+var _box_cross_strike := PackedFloat32Array([0.2, 0.08, 0.7, 2.9, 1.57, 1.6, 0.32, 0.08, -0.24, -0.32, -4.0, -4.0, 0.9])
 var _backhand_windup := PackedFloat32Array([0.1, 0.15, 1.3, 4.08, 0.55, 2.95, 0.6, -0.05, -0.62, -0.3, -3.0, 0.0])
 var _backhand_strike := PackedFloat32Array([0.25, 0.05, 1.8, 2.05, 0.55, 2.95, 0.68, 0.05, -0.66, -0.32, 6.0, 0.0])
 var _uppercut_windup := PackedFloat32Array([0.45, 0.15, 0.9, 2.6, 0.15, 0.9, 1.0, -0.4, -0.75, -1.1, -4.0, 0.0])
@@ -284,9 +295,13 @@ var _jump_punch_strike := PackedFloat32Array([0.4, 0.05, 1.6, 1.55, 0.4, 2.9, 1.
 #   active:  lead leg straight along the floor at ankle height, sweeping through;
 #   follow-through: the leg carries on in a low rising arc, then recover.
 var _sweep_load := PackedFloat32Array([0.5, 0.35, 0.7, 0.9, 0.85, 2.9, 1.25, -1.1, 1.0, -1.25, -4.0, 0.0, 0.0, 8.0])
-var _sweep_chamber := PackedFloat32Array([0.8, 0.5, 0.35, 0.15, 0.85, 2.9, 1.35, 1.0, 1.15, -1.3, -10.0, 0.0, 0.0, 6.0])
-var _sweep_extend := PackedFloat32Array([0.85, 0.55, 0.35, 0.15, 0.85, 2.9, 1.28, 1.4, 1.15, -1.3, -8.0, 0.0, 0.3, 4.0])
-var _sweep_follow := PackedFloat32Array([0.7, 0.5, 0.45, 0.3, 0.9, 2.9, 1.55, 1.68, 1.15, -1.3, -4.0, 0.0, 0.6, 2.0])
+# The hips stay up, crouched over the rear foot (a deep squat: thigh near
+# horizontal, shin back under the hips), so the sweeping leg runs straight
+# from the raised hip down to the floor and reads long; a kneel on the rear
+# shin sat the hips on the floor and read as sitting with a stubby leg.
+var _sweep_chamber := PackedFloat32Array([0.85, 0.5, 0.4, 0.2, 0.85, 2.9, 1.2, 0.6, 1.3, -0.55, -10.0, 0.0, 0.0, 6.0])
+var _sweep_extend := PackedFloat32Array([0.95, 0.6, 0.4, 0.2, 0.85, 2.9, 1.12, 1.15, 1.3, -0.6, -8.0, 0.0, 0.3, 4.0])
+var _sweep_follow := PackedFloat32Array([0.8, 0.55, 0.45, 0.3, 0.9, 2.9, 1.4, 1.42, 1.3, -0.6, -4.0, 0.0, 0.6, 2.0])
 # Back kick (away + L from standing). Drawn while the body is turned away from
 # the opponent (see _back_turn), so the kicking leg is the one pointing back:
 # knee pulled to the chest, then a heel thrust straight back at the opponent.
@@ -564,6 +579,10 @@ var _fknee_hit := PackedFloat32Array([0.35, -0.05, 1.7, 2.6, 1.6, 2.5, 2.1, -0.5
 # snap square as the rear fist drives straight out, rear heel turning.
 var _gyaku_load := PackedFloat32Array([0.1, 0.15, 1.2, 2.0, 0.3, 2.4, 0.9, -0.25, -0.85, -0.35, -8.0, 0.0, 0.0, 16.0])
 var _gyaku_hit := PackedFloat32Array([0.25, 0.05, 0.6, 2.4, 1.57, 1.57, 1.0, -0.25, -0.95, -0.4, 18.0, 0.0, 0.9, -10.0])
+# In-match reverse punch (and Perfect Gyaku): the torso stays upright and the
+# hips drive square over the long stance (no collapse onto the front knee);
+# the lead fist pulls back to the hip (hikite) as the rear fist extends.
+var _kt_gyaku_hit := PackedFloat32Array([0.06, 0.05, -0.35, 1.75, 1.57, 1.57, 0.95, -0.15, -0.9, -0.4, 4.0, -3.0, 0.9, -10.0])
 # Knife hand: the blade of the lead hand raised beside the head, chopping down.
 var _knife_load := PackedFloat32Array([0.05, 0.15, 2.7, 3.7, 0.9, 3.0, 0.6, -0.15, -0.6, -0.3, -2.0, 0.0, 0.0, 14.0])
 var _knife_hit := PackedFloat32Array([0.3, 0.1, 1.6, 1.25, 0.9, 3.0, 0.7, -0.1, -0.65, -0.35, 8.0, 0.0, 0.3, 6.0])
@@ -954,6 +973,11 @@ func _ready() -> void:
 		[S, 0.35, _kf_rpalm_draw, EASE_SMOOTH], [A, 0.0, _kf_rpalm_thrust, EASE_IN],
 		[A, 1.0, _over(_kf_rpalm_thrust, _kf_rpalm_draw), EASE_LINEAR], [R, 0.5, _kf_rpalm_draw, EASE_SMOOTH]]
 	_kit_moves = {
+		&"boxing": {
+			CombatData.AttackType.HEAVY: [
+				[S, 0.5, _heavy_windup, EASE_SMOOTH], [A, 0.0, _box_cross_strike, EASE_IN],
+				[A, 1.0, _over(_box_cross_strike, _heavy_windup), EASE_LINEAR], [R, 0.25, _box_cross_strike, EASE_LINEAR]],
+		},
 		&"kung_fu": {
 			CombatData.AttackType.STRAIGHT_PALM: [
 				[S, 0.35, _kf_palm_draw, EASE_SMOOTH], [A, 0.0, _kf_palm_thrust, EASE_IN],
@@ -1078,11 +1102,11 @@ func _ready() -> void:
 			[S, 0.35, _jump_squat, EASE_SMOOTH], [S, 0.85, _fknee_load, EASE_SMOOTH],
 			[A, 0.0, _fknee_hit, EASE_IN], [A, 1.0, _fknee_hit, EASE_LINEAR], [R, 0.5, _fknee_load, EASE_OUT]],
 		CombatData.AttackType.REVERSE_PUNCH: [
-			[S, 0.55, _gyaku_load, EASE_SMOOTH], [A, 0.0, _gyaku_hit, EASE_IN],
-			[A, 1.0, _over(_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.35, _gyaku_hit, EASE_LINEAR]],
+			[S, 0.55, _gyaku_load, EASE_SMOOTH], [A, 0.0, _kt_gyaku_hit, EASE_IN],
+			[A, 1.0, _over(_kt_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.35, _kt_gyaku_hit, EASE_LINEAR]],
 		CombatData.AttackType.PERFECT_GYAKU: [
-			[S, 0.55, _gyaku_load, EASE_SMOOTH], [S, 0.9, _gyaku_load, EASE_LINEAR], [A, 0.0, _gyaku_hit, EASE_IN],
-			[A, 1.0, _over(_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.45, _gyaku_hit, EASE_LINEAR]],
+			[S, 0.55, _gyaku_load, EASE_SMOOTH], [S, 0.9, _gyaku_load, EASE_LINEAR], [A, 0.0, _kt_gyaku_hit, EASE_IN],
+			[A, 1.0, _over(_kt_gyaku_hit, _gyaku_load), EASE_LINEAR], [R, 0.45, _kt_gyaku_hit, EASE_LINEAR]],
 		CombatData.AttackType.KNIFE_HAND: [
 			[S, 0.55, _knife_load, EASE_SMOOTH], [A, 0.0, _knife_hit, EASE_IN],
 			[A, 1.0, _over(_knife_hit, _knife_load), EASE_LINEAR], [R, 0.35, _knife_hit, EASE_LINEAR]],
@@ -3896,6 +3920,16 @@ func _wants_plant() -> bool:
 		Fighter.State.PARRY, Fighter.State.STAGGER, Fighter.State.BROKEN]
 
 
+## How far the hips may sink over planted feet during a strike.
+func _strike_settle_max() -> float:
+	match _kit:
+		&"boxing", &"muay_thai":
+			return MAX_SETTLE_STRIKE_BOXING
+		&"karate":
+			return MAX_SETTLE_STRIKE_KARATE
+	return MAX_SETTLE_STRIKE
+
+
 ## Replaces the legs of a world-space skeleton with IK legs reaching planted
 ## feet. Each foot has a home spot (the pose's foot position with the weight
 ## shift removed); when a foot drifts too far from it, that foot steps there in
@@ -3974,7 +4008,7 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 					continue
 				# Measured with the hips at their deepest strike sink: a foot the
 				# sink alone keeps in reach stays planted.
-				var hip_p: Vector2 = j[J_HIP_F if leg == 0 else J_HIP_B] + Vector2(0.0, MAX_SETTLE_STRIKE)
+				var hip_p: Vector2 = j[J_HIP_F if leg == 0 else J_HIP_B] + Vector2(0.0, _strike_settle_max())
 				if _feet[leg].distance_to(hip_p) > (THIGH + SHIN) * KNEE_SOFT:
 					# Only as far as needed: the nearest spot the leg reaches.
 					var spot := _reach_spot(hip_p, _feet[leg].x, floor_y)
@@ -4016,7 +4050,7 @@ func _plant_feet(j: PackedVector2Array, to_world: Transform2D, forward: Vector2)
 		if leg == 0:
 			need *= 1.0 - _lift
 		settle = maxf(settle, need)
-	settle = minf(settle, MAX_SETTLE_STRIKE if fighter.state == Fighter.State.ATTACK else MAX_SETTLE) * _plant
+	settle = minf(settle, _strike_settle_max() if fighter.state == Fighter.State.ATTACK else MAX_SETTLE) * _plant
 	# Eased, never applied in one frame: near full stretch the needed drop
 	# rises steeply, which would pop the whole upper body.
 	_settle = move_toward(_settle, settle, dt * (SETTLE_RATE_STRIKE if fighter.state == Fighter.State.ATTACK else SETTLE_RATE))

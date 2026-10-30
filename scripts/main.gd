@@ -272,8 +272,10 @@ func _ready() -> void:
 	_stance_rng.randomize()
 	player.set_style(StyleRegistry.player_style())
 	enemy.set_style(StyleRegistry.random_except(player.style.id, _stance_rng))
+	enemy_ai.difficulty = EnemyAI.selected_difficulty
 	enemy_ai.setup(enemy, player)
 	hud.setup(player, enemy)
+	hud.difficulty_pressed.connect(cycle_difficulty)
 	hud.start_pressed.connect(start_match)
 	hud.restart_pressed.connect(restart_match)
 	hud.change_style_pressed.connect(change_style)
@@ -451,6 +453,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if training == null:
 		if key.physical_keycode == KEY_T and _round_state == RoundState.PRE_MATCH:
 			start_training()
+		elif key.physical_keycode == KEY_G and _round_state == RoundState.PRE_MATCH:
+			cycle_difficulty()
 		elif key.physical_keycode in [KEY_P, KEY_ESCAPE] and (match_paused or can_pause()):
 			toggle_pause()
 			get_viewport().set_input_as_handled()
@@ -703,6 +707,17 @@ func _show_ready() -> void:
 	hud.set_message("%s  vs  %s" % [player.style.display_name.to_upper(), enemy.style.display_name.to_upper()],
 		"ENTER or click to start")
 	hud.show_button(&"start")
+
+
+## AI button / G before the match: the rival's next difficulty (Easy, Normal,
+## Hard, round again). Kept for rematches and later matches.
+func cycle_difficulty() -> void:
+	if _round_state != RoundState.PRE_MATCH:
+		return
+	var levels := EnemyAI.DIFFICULTIES
+	EnemyAI.selected_difficulty = levels[(levels.find(EnemyAI.selected_difficulty) + 1) % levels.size()]
+	enemy_ai.difficulty = EnemyAI.selected_difficulty
+	hud.set_difficulty(EnemyAI.selected_difficulty)
 
 
 ## CHANGE STYLE (pre-match or after a match): back to the style screen.
