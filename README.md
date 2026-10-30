@@ -1074,6 +1074,19 @@ check:
 GODOT="D:/GODOT/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe" bash tests/run_all.sh
 ```
 
+How the runner works:
+- **Parallel:** suites run 8 at a time (set `JOBS=1` to run them one by one,
+  or another number to change that).
+- **Low priority:** suites run at low CPU priority, so the game stays smooth
+  while they run.
+- **Fixed 60 FPS:** suites run at a fixed 60 FPS, so the contact checks are
+  repeatable.
+- **Split by style:** the finisher contact suite runs as one shard per style.
+- **Duration:** a full run takes about 2 minutes on a 16-core machine (about 9
+  one by one).
+- **Progress:** one line per suite as it finishes. Follow it with
+  `tail -f tests/last_run.log`.
+
 | Test | Covers |
 |---|---|
 | `test_core.gd` | Frame data, combos, block / low block, parry (window, whiff, cooldown, low), perfect dodge, cross-up guard, both facing directions, knockdown, dodge, finisher selection and choreography, audio |
