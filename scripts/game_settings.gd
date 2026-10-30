@@ -13,6 +13,8 @@ static var master_volume: float = 1.0
 static var music_volume: float = 1.0
 static var sfx_volume: float = 1.0
 static var fullscreen: bool = false
+## Show the on-screen touch controls even without a touch screen.
+static var touch_controls: bool = false
 static var _loaded: bool = false
 
 
@@ -28,6 +30,7 @@ static func load_once() -> void:
 	music_volume = clampf(float(cfg.get_value("audio", "music", music_volume)), 0.0, 1.0)
 	sfx_volume = clampf(float(cfg.get_value("audio", "sfx", sfx_volume)), 0.0, 1.0)
 	fullscreen = bool(cfg.get_value("display", "fullscreen", fullscreen))
+	touch_controls = bool(cfg.get_value("display", "touch_controls", touch_controls))
 	if cfg.has_section("controls"):
 		for action: String in cfg.get_section_keys("controls"):
 			controls[StringName(action)] = int(cfg.get_value("controls", action))
@@ -39,6 +42,7 @@ static func save() -> void:
 	cfg.set_value("audio", "music", music_volume)
 	cfg.set_value("audio", "sfx", sfx_volume)
 	cfg.set_value("display", "fullscreen", fullscreen)
+	cfg.set_value("display", "touch_controls", touch_controls)
 	for action: StringName in controls:
 		cfg.set_value("controls", String(action), controls[action])
 	cfg.save(file)

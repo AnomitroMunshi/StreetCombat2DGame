@@ -218,6 +218,8 @@ var _stance_rng := RandomNumberGenerator.new()
 var last_finisher_name: String = ""
 ## Training ground (null in a normal match). See TrainingMode.
 var training: TrainingMode = null
+## On-screen touch controls (see TouchControls).
+var touch: TouchControls = null
 
 
 func _ready() -> void:
@@ -289,6 +291,11 @@ func _ready() -> void:
 	hud.style_confirmed.connect(confirm_style)
 	hud.training_pressed.connect(start_training)
 	hud.tutorial_pressed.connect(start_tutorial)
+	touch = TouchControls.new()
+	touch.name = "TouchControls"
+	add_child(touch)
+	_apply_touch_setting()
+	hud.touch_setting_changed.connect(_apply_touch_setting)
 	hud.training_action.connect(training_action)
 	overlay.draw.connect(_draw_overlay)
 	_enter_pre_match()
@@ -394,6 +401,13 @@ func start_training() -> void:
 	hud.set_move_list(_move_list_text())
 	start_match(true)
 	hud.set_countdown("TRAINING")
+
+
+## TOUCH CONTROLS setting: show the on-screen buttons even without a touch
+## screen, and let the mouse press them (mouse clicks become touches).
+func _apply_touch_setting() -> void:
+	TouchControls.forced = GameSettings.touch_controls
+	Input.emulate_touch_from_mouse = GameSettings.touch_controls
 
 
 ## TUTORIAL (or U) from the pre-match screen: the training ground with the
@@ -1905,6 +1919,8 @@ func _refresh_presentation() -> void:
 			lines.append("contact: drawn limb %.0f px from contact point" % _contacts[-1]["gap"])
 		lines.append("overlay: green hurtbox · yellow pushbox · red hitbox · cyan + drawn limb · yellow o contact")
 	hud.set_debug(_debug_visible and training == null, lines)
+	if touch != null:
+		touch.update_visibility(_round_state in [RoundState.FIGHTING, RoundState.FINISHER] or training != null)
 	if training != null:
 		hud.set_training_info(training.info_text())
 		if training.tutorial != null:

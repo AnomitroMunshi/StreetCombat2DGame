@@ -16,6 +16,8 @@ signal training_pressed
 signal difficulty_pressed
 ## TUTORIAL (pre-match): start the beginner tutorial.
 signal tutorial_pressed
+## The TOUCH CONTROLS setting was switched.
+signal touch_setting_changed
 ## A training panel button (same names as main.gd's training actions).
 signal training_action(action: StringName)
 ## The on-screen pause button.
@@ -117,6 +119,7 @@ var _settings_button: Button = null
 var _settings_panel: PanelContainer = null
 var _settings_sliders: Dictionary = {}
 var _settings_fullscreen: CheckButton = null
+var _settings_touch: CheckButton = null
 ## Key binding buttons by action, the action waiting for its new key (&""
 ## when none) and the note under the list ("Esc cancels", "reserved").
 var _bind_buttons: Dictionary = {}
@@ -498,6 +501,15 @@ func _build_settings() -> void:
 		GameSettings.fullscreen = on
 		GameSettings.apply_display())
 	left.add_child(_settings_fullscreen)
+	_settings_touch = CheckButton.new()
+	_settings_touch.text = "TOUCH CONTROLS"
+	_settings_touch.tooltip_text = "On-screen buttons (always on with a touch screen)"
+	_settings_touch.focus_mode = Control.FOCUS_NONE
+	_settings_touch.add_theme_color_override("font_color", COLOR_TEXT)
+	_settings_touch.toggled.connect(func(on: bool) -> void:
+		GameSettings.touch_controls = on
+		touch_setting_changed.emit())
+	left.add_child(_settings_touch)
 	# Controls: click an action, then press its new key (Esc cancels).
 	var right := VBoxContainer.new()
 	right.add_theme_constant_override("separation", 4)
@@ -572,6 +584,7 @@ func toggle_settings() -> void:
 	for key: String in _settings_sliders:
 		_settings_sliders[key].value = GameSettings.get_volume(key) * 100.0
 	_settings_fullscreen.set_pressed_no_signal(GameSettings.fullscreen)
+	_settings_touch.set_pressed_no_signal(GameSettings.touch_controls)
 	_settings_panel.visible = true
 	_settings_panel.reset_size()
 	_settings_panel.position = (Vector2(SCREEN_W, 720.0) - _settings_panel.size) * 0.5
@@ -1052,7 +1065,7 @@ func _draw_gameplay_hud() -> void:
 	_draw_popups()
 	_draw_combo(_enemy, BAR_MARGIN, HORIZONTAL_ALIGNMENT_LEFT)
 	_draw_combo(_player, SCREEN_W - BAR_MARGIN - BAR_WIDTH, HORIZONTAL_ALIGNMENT_RIGHT)
-	if _show_hints and _headline == "" and not _lesson_panel.visible:
+	if _show_hints and _headline == "" and not _lesson_panel.visible and not TouchControls.shown:
 		_canvas.draw_string(_font, Vector2(0.0, 706.0), hint_line(), HORIZONTAL_ALIGNMENT_CENTER, SCREEN_W, 13, COLOR_DIM)
 
 
