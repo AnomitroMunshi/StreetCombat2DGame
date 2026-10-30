@@ -190,8 +190,8 @@ var _pause_message: Array = ["", ""]
 # last x of each skidding body (floor scuff marks).
 var _wall_dent := Vector2.INF
 ## The Kolkata street (player Bangla Maar only, never training); null = dojo.
-var stage: WestBengalStage = null
-const DECALS_WOOD: String = "res://assets/art/decals/dojo_wood_v1"
+var stage = null  # WestBengalStage or StyleStage; presentation interface below.
+const DECALS_WOOD: String = "res://assets/art/decals/dojo_wood_v2"
 const DECALS_STONE: String = "res://assets/art/decals/west_bengal_v1"
 const STONE_LIGHT := Color(0.7, 0.66, 0.6)
 const STONE_DARK := Color(0.42, 0.4, 0.37)
@@ -253,7 +253,7 @@ func _ready() -> void:
 	fx.decals_changed.connect(queue_redraw)
 	# Painted stage art is drawn scaled down: smooth it with mipmaps.
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	fx.decal_set = FxLayer.load_decal_set(DECALS_WOOD)
+	fx.decal_set = _load_stage_decals(DECALS_WOOD)
 	# Pause: this node and the HUD keep running (input, the pause screen); the
 	# fighters and effects freeze with the tree.
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -511,6 +511,8 @@ func _training_finisher(kind: FinisherDirector.Kind) -> void:
 ## Both fighters back on their marks, fresh, ready to go again.
 func _reset_training() -> void:
 	_fx_queue.clear()
+	if stage != null:
+		stage.reset_props()
 	_finisher = null
 	_follow_victim = false
 	_ko_focus = Vector2.INF
@@ -592,6 +594,7 @@ func _enter_pre_match() -> void:
 		_show_ready()
 		return
 	_set_round_state(RoundState.STYLE_SELECT)
+	_apply_stage()
 	# Preview the style live: the player stands in its guard with its idle.
 	player.prefight_pose = &""
 	hud.set_message("", "")
@@ -626,39 +629,53 @@ func confirm_style() -> void:
 	_show_ready()
 
 
-## The stage follows the PLAYER's confirmed style: the Kolkata street for
-## Bangla Maar (a Bangla Maar rival alone never unlocks it), else the dojo;
+## The stage follows the PLAYER's confirmed style. Bangla Maar keeps Kolkata;
+## the other styles use their own arenas. The rival never chooses the stage;
 ## training and style select are always the dojo. Picked before the match and
 ## kept for all of it (rounds included).
 func _apply_stage() -> void:
-	var want := training == null and _round_state != RoundState.STYLE_SELECT \
-		and player.style != null and player.style.id == &"bangla_maar"
-	if want and stage == null:
-		stage = WestBengalStage.new()
-		stage.name = "Stage"
-		add_child(stage)
-		move_child(stage, 0)  # under the fighters (later children draw on top)
-		stage.setup(&"howrah" if _finisher_rng.randf() < 0.5 else &"victoria", FLOOR_Y)
-		stage.on_prop_broken = _on_prop_broken
-		fx.decal_set = FxLayer.load_decal_set(DECALS_STONE)
-	elif not want and stage != null:
+	var wanted: StringName = &"karate" if training != null or _round_state == RoundState.STYLE_SELECT or player.style == null else player.style.id
+	var same: bool = (stage is WestBengalStage and wanted == &"bangla_maar") or (stage is StyleStage and stage.style_id == wanted)
+	if same: return  # Keep art, props and variant fixed throughout the match.
+	if stage != null:
+		remove_child(stage)
 		stage.queue_free()
 		stage = null
-		fx.decal_set = FxLayer.load_decal_set(DECALS_WOOD)
+	if wanted == &"bangla_maar":
+		stage = WestBengalStage.new()
+		stage.setup(&"howrah" if _finisher_rng.randf() < 0.5 else &"victoria", FLOOR_Y)
+		fx.decal_set = FxLayer.load_decal_set(DECALS_STONE)
+	else:
+		stage = StyleStage.new()
+		stage.setup(wanted, FLOOR_Y)
+		fx.decal_set = _load_stage_decals(stage.decal_directory())
+	stage.name = "Stage"
+	stage.on_prop_broken = _on_prop_broken
+	add_child(stage)
+	move_child(stage, 0)  # under the fighters (later children draw on top)
 	queue_redraw()
 
 
+## Missing art during development uses procedural damage. Superseded asset
+## versions are not retained as silent fallbacks; final checks require art.
+func _load_stage_decals(folder: String) -> Dictionary:
+	if not ResourceLoader.exists(folder + "/floor_impact_01.png"):
+		return {}
+	return FxLayer.load_decal_set(folder)
+
+
 func get_stage_name() -> String:
-	return "west_bengal_%s" % stage.variant if stage != null else "dojo"
+	if stage is WestBengalStage: return "west_bengal_%s" % stage.variant
+	return stage.get_stage_name() if stage is StyleStage else "dojo"
 
 
 ## A stage prop broke: its material flies, a crack of wood or clay.
 func _on_prop_broken(p: Dictionary) -> void:
 	var r: Rect2 = p["rect"]
-	var col := WestBengalStage.prop_color(p["id"])
+	var col: Color = p.get("color", WestBengalStage.prop_color(p["id"]))
 	fx.chunks(r.get_center(), 8, col, 6.0, 0.0, 0.9, 3.0, 7.0)
 	fx.dust_cloud(Vector2(r.get_center().x, FLOOR_Y), 0.7, 35, 6)
-	audio.play(&"guard_break" if p["id"] == &"cups" else &"wall_hit", -8.0)
+	audio.play(&"guard_break" if p["id"] in [&"cups", &"pot"] else &"wall_hit", -8.0)
 	queue_redraw()
 
 
@@ -1397,7 +1414,7 @@ func _on_fighter_landed(fighter: Fighter) -> void:
 		fx.flare(centre + Vector2(0.0, -10.0), 2, fx.GLOW_WARM, -PI * 0.5)
 		fx.chunks(centre + Vector2(0.0, -6.0), 14, _floor_main(), 12.0, 0.0, 0.85, 7.0, 15.0)
 		fx.chunks(centre + Vector2(0.0, -6.0), 10, _floor_second(), 8.0, 0.0, 1.1, 4.0, 8.0)
-		if stage == null:
+		if _floor_is_wood():
 			fx.splinters(centre + Vector2(0.0, -4.0), 16, FLOOR_WOOD, 11.0, 0.0, 0.9)  # wood splits; paving chips
 		# Dust kept low and short so the body in the crater stays readable.
 		fx.dust_cloud(floor_pos, 1.4, 45, 8)
@@ -1628,7 +1645,8 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 		fx.flare(hit, 1, fx.GLOW_WARM)
 	fx.dust_cloud(hit + Vector2(-side * 14.0, 10.0), 0.6 + power * 0.3, 45, 4 + power * 2)
 	# Splinters of raw wood burst out of the dent, flung inward (more each hit).
-	fx.splinters(hit, 4 + power * 5, RAW_WOOD, 5.0 + power * 1.5, -side * 1.1, 0.9)
+	if stage == null or (stage is StyleStage and stage.wall_material() == &"wood"):
+		fx.splinters(hit, 4 + power * 5, RAW_WOOD, 5.0 + power * 1.5, -side * 1.1, 0.9)
 	fx.dust_cloud(pos + Vector2(-side * 10.0, 0.0), 0.5 + power * 0.25, 30)
 	fx.jolt_wall(side, 2.0 + power * 2.0)
 	audio.play(&"wall_hit")
@@ -1640,19 +1658,27 @@ func _wall_impact(pos: Vector2, power: int) -> void:
 
 ## Floor debris colours: boards in the dojo, paving on the street.
 func _floor_main() -> Color:
-	return STONE_LIGHT if stage != null else FLOOR_WOOD
+	if stage is StyleStage: return stage.floor_main()
+	return STONE_LIGHT if stage is WestBengalStage else FLOOR_WOOD
 
 
 func _floor_second() -> Color:
-	return STONE_DARK if stage != null else WOOD_COLOR
+	if stage is StyleStage: return stage.floor_second()
+	return STONE_DARK if stage is WestBengalStage else WOOD_COLOR
 
 
 func _wall_light() -> Color:
-	return PLASTER_LIGHT if stage != null else PILLAR_LIGHT
+	if stage is StyleStage: return stage.wall_light()
+	return PLASTER_LIGHT if stage is WestBengalStage else PILLAR_LIGHT
 
 
 func _wall_dark() -> Color:
-	return PLASTER_DARK if stage != null else PILLAR_DARK
+	if stage is StyleStage: return stage.wall_dark()
+	return PLASTER_DARK if stage is WestBengalStage else PILLAR_DARK
+
+
+func _floor_is_wood() -> bool:
+	return stage == null or (stage is StyleStage and stage.floor_material() == &"wood")
 
 func _trail_rolling_dust() -> void:
 	if _tick % 4 != 0:
@@ -1819,7 +1845,7 @@ func _refresh_presentation() -> void:
 # --- Drawing ------------------------------------------------------------------
 
 func _draw() -> void:
-	if stage != null:
+	if stage != null and not (stage is StyleStage and stage.is_dojo()):
 		# The Kolkata street: backdrop, walls, rickshaw and props.
 		stage.draw_back(self, FLOOR_Y)
 		fx.draw_decals(self)

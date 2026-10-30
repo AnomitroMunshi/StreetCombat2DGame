@@ -392,10 +392,11 @@ func crack(pos: Vector2, size: float, vertical: bool, branches: int = 6) -> void
 func wall_crack(pos: Vector2, power: int, clip: Rect2) -> void:
 	if not decal_set.is_empty():
 		# A painted wall impact (1:2), kept on the struck surface (`clip`).
-		var h := 80.0 + power * 30.0
+		var h := float(decal_set.get("wall_height_base", 80.0)) + power * float(decal_set.get("wall_height_power", 30.0))
+		var w := h * float(decal_set.get("wall_aspect", 0.5))
 		pos.x = clampf(pos.x, clip.position.x + 6.0, clip.end.x - 6.0)
 		_add_decal({"kind": "tex", "tex": _pick(decal_set["wall"]), "age": 0, "grow": 3, "clip": clip,
-			"rect": Rect2(pos - Vector2(h * 0.25, h * 0.5), Vector2(h * 0.5, h))})
+			"rect": Rect2(pos - Vector2(w * 0.5, h * 0.5), Vector2(w, h)), "opacity": decal_set.get("wall_opacity", 1.0)})
 		decals_changed.emit()
 		return
 	pos.x = clampf(pos.x, clip.position.x + 6.0, clip.end.x - 6.0)
@@ -466,9 +467,11 @@ func floor_break(pos: Vector2, power: int) -> void:
 	if not decal_set.is_empty():
 		# A painted crater (4:1, already seen at the floor's low angle),
 		# centred on the impact; one variant kept for its whole life.
-		var w := 170.0 + power * 45.0
-		_add_decal({"kind": "tex", "tex": _pick(decal_set["floor"]), "age": 0, "grow": 5, "clip": Rect2(),
-			"rect": Rect2(pos - Vector2(w * 0.5, w * 0.125), Vector2(w, w * 0.25))})
+		var w := float(decal_set.get("floor_width_base", 170.0)) + power * float(decal_set.get("floor_width_power", 45.0))
+		var h := w * float(decal_set.get("floor_aspect", 0.25))
+		var floor_clip := Rect2(-10000, floor_y, 20000, 10000) if decal_set.get("clip_floor", false) else Rect2()
+		_add_decal({"kind": "tex", "tex": _pick(decal_set["floor"]), "age": 0, "grow": 5, "clip": floor_clip,
+			"rect": Rect2(pos - Vector2(w * 0.5, h * 0.5), Vector2(w, h)), "opacity": decal_set.get("floor_opacity", 1.0)})
 		decals_changed.emit()
 		return
 	var r := 30.0 + power * 12.0
@@ -673,8 +676,10 @@ func floor_scuff(pos: Vector2, strength: float) -> void:
 	if decal_set.is_empty():
 		return
 	var w := clampf(90.0 + strength * 6.0, 90.0, 200.0)
-	_add_decal({"kind": "tex", "tex": decal_set["scuff"], "age": 0, "grow": 4, "clip": Rect2(),
-		"rect": Rect2(pos - Vector2(w * 0.5, w * 0.125), Vector2(w, w * 0.25))})
+	var h := w * float(decal_set.get("scuff_aspect", 0.25))
+	var floor_clip := Rect2(-10000, floor_y, 20000, 10000) if decal_set.get("clip_floor", false) else Rect2()
+	_add_decal({"kind": "tex", "tex": decal_set["scuff"], "age": 0, "grow": 4, "clip": floor_clip,
+		"rect": Rect2(pos - Vector2(w * 0.5, h * 0.5), Vector2(w, h)), "opacity": decal_set.get("scuff_opacity", 1.0)})
 	decals_changed.emit()
 
 
@@ -686,6 +691,12 @@ static func load_decal_set(folder: String) -> Dictionary:
 		d["floor"].append(load("%s/floor_impact_%02d.png" % [folder, i]))
 		d["wall"].append(load("%s/wall_impact_%02d.png" % [folder, i]))
 	d["scuff"] = load(folder + "/floor_scuff_light.png")
+	var metadata_path := folder + "/art.json"
+	if FileAccess.file_exists(metadata_path):
+		var metadata: Variant = JSON.parse_string(FileAccess.get_file_as_string(metadata_path))
+		if metadata is Dictionary:
+			for key in ["wall_height_base", "wall_height_power", "wall_aspect", "wall_opacity", "floor_width_base", "floor_width_power", "floor_aspect", "floor_opacity", "scuff_aspect", "scuff_opacity", "clip_floor"]:
+				if metadata.has(key): d[key] = metadata[key]
 	return d
 
 
@@ -707,7 +718,7 @@ func _draw_tex_decal(canvas: CanvasItem, d: Dictionary, g: float) -> void:
 			return
 		src = Rect2(src.position + (inter.position - r.position) / r.size * src.size, inter.size / r.size * src.size)
 		r = inter
-	canvas.draw_texture_rect_region(tex, r, src, Color(1.0, 1.0, 1.0, g))
+	canvas.draw_texture_rect_region(tex, r, src, Color(1.0, 1.0, 1.0, g * float(d.get("opacity", 1.0))))
 
 
 ## Called by the arena's _draw so cracks and craters sit under the fighters.

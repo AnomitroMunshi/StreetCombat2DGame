@@ -1,0 +1,10 @@
+{
+  "boxing": {"floor_edge_row": 658, "floor_material": "rubber", "wall_material": "plaster"},
+  "muay_thai": {"floor_edge_row": 650, "floor_material": "wood", "wall_material": "wood"},
+  "karate": {"floor_material": "wood", "wall_material": "wood"},
+  "kung_fu": {"floor_edge_row": 661, "floor_material": "stone", "wall_material": "plaster"},
+  "taekwondo": {"floor_edge_row": 678, "floor_material": "rubber", "wall_material": "plaster"},
+  "kickboxing": {"floor_edge_row": 646, "floor_material": "rubber", "wall_material": "plaster"},
+  "capoeira": {"floor_edge_row": 697, "floor_material": "stone", "wall_material": "plaster"},
+  "jeet_kune_do": {"floor_edge_row": 646, "floor_material": "concrete", "wall_material": "concrete"}
+}

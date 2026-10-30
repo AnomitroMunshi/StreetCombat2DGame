@@ -94,5 +94,73 @@ func _run() -> void:
 	_check(not bench["broken"] and not cups["broken"], "a reset restores the props")
 	await _free(main)
 
+	print("[style-specific arenas]")
+	const ARENAS := {
+		&"boxing": "boxing_gym", &"muay_thai": "thai_training_camp", &"karate": "dojo",
+		&"kung_fu": "kung_fu_courtyard", &"taekwondo": "korean_dojang",
+		&"kickboxing": "kickboxing_gym", &"capoeira": "capoeira_roda", &"jeet_kune_do": "hong_kong_rooftop",
+	}
+	for id: StringName in ARENAS:
+		main = _new_main()
+		await physics_frame
+		main.call("select_style", id)
+		_check(main.call("get_stage_name") == "dojo", "%s preview keeps the shared dojo" % id)
+		(main.get_node("Enemy") as Fighter).set_style(StyleRegistry.by_id(&"bangla_maar"))
+		main.call("confirm_style")
+		var art_stage := main.get("stage") as StyleStage
+		_check(art_stage != null and main.call("get_stage_name") == ARENAS[id], "%s selects its own arena independently of the rival" % id)
+		if art_stage == null:
+			await _free(main)
+			continue
+		var expected_floor: StringName = &"rubber" if id in [&"boxing", &"taekwondo", &"kickboxing"] else (&"wood" if id in [&"karate", &"muay_thai"] else (&"concrete" if id == &"jeet_kune_do" else &"stone"))
+		_check(art_stage.floor_material() == expected_floor, "%s supplies explicit floor debris material" % id)
+		if id != &"karate":
+			_check(art_stage.has_backdrop(), "%s has its own imported painted backdrop" % id)
+			var layers := art_stage.cutout_layers()
+			_check(layers.size() == 2, "%s supplies separate left and right painted cutout layers" % id)
+			if layers.size() == 2:
+				var left: Rect2 = layers[0]["rect"]
+				var right: Rect2 = layers[1]["rect"]
+				_check(is_equal_approx(left.end.x, 70) and is_equal_approx(right.position.x, 1210), "%s cutouts leave the entire fighting lane clear" % id)
+				_check(is_equal_approx(left.end.y, 566) and is_equal_approx(right.end.y, 566), "%s cutout foot baselines match the arena surface" % id)
+		var style_walls := art_stage.wall_rects(560)
+		_check(is_equal_approx(style_walls[0].end.x, 70) and is_equal_approx(style_walls[1].position.x, 1210), "%s wall art meets the fixed collision boundaries" % id)
+		if art_stage.has_backdrop():
+			_check(art_stage.backdrop_rect().encloses(StyleStage.VIEW), "%s painted art covers maximum camera extents" % id)
+		var before: int = art_stage.get_instance_id()
+		main.call("start_match", true)
+		main.call("_apply_stage")
+		_check((main.get("stage") as StyleStage).get_instance_id() == before, "%s retains arena and props for the match" % id)
+		await _free(main)
+
+	print("[dojo breakable props]")
+	var dojo := StyleStage.new()
+	root.add_child(dojo)
+	dojo.setup(&"karate")
+	if ResourceLoader.exists(StyleStage.DOJO_PROPS):
+		_check(dojo.props.size() == 3, "dojo prop sheet supplies pot, boards and bench")
+		var pot: Dictionary = dojo.props[0]
+		var pot_x := (pot["rect"] as Rect2).get_center().x
+		_check(dojo.impact(pot_x, 2).is_empty(), "light dojo contact preserves the prop")
+		_check(not dojo.impact(pot_x, 20).is_empty() and pot["broken"], "strong nearby dojo impact swaps to broken state")
+		_check(dojo.impact(pot_x, 20).is_empty(), "dojo props break once")
+		for prop: Dictionary in dojo.props:
+			_check(is_equal_approx((prop["rect"] as Rect2).end.y, (prop["broken_rect"] as Rect2).end.y), "dojo intact/broken prop shares one floor baseline")
+		dojo.reset_props()
+		_check(not pot["broken"], "dojo reset restores intact state")
+	dojo.free()
+	main = _new_main()
+	await physics_frame
+	main.call("select_style", &"karate")
+	main.call("start_training")
+	var practice := main.get("stage") as StyleStage
+	if practice != null and not practice.props.is_empty():
+		var prop: Dictionary = practice.props[0]
+		practice.impact((prop["rect"] as Rect2).get_center().x, 20)
+		_check(prop["broken"], "practice impact can break a dojo prop")
+		main.call("_reset_training")
+		_check(not prop["broken"], "training reset restores dojo props without changing match-round persistence")
+	await _free(main)
+
 	print("RESULT: %s (%d failures)" % ["PASS" if _fails == 0 else "FAIL", _fails])
 	quit(1 if _fails > 0 else 0)
