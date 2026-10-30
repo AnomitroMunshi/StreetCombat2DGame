@@ -67,3 +67,32 @@ These are all within 70/30, and none was targeted in this pass:
 - Boxing over Capoeira: 28% (Capoeira wins)
 - Kickboxing over Taekwondo: 26% (Taekwondo wins)
 - Capoeira over Kickboxing: 24% (Kickboxing wins)
+
+## AI difficulty
+
+The rival AI has three levels: Easy, Normal and Hard. Choose one on the pre-match screen with the **AI** button or
+**G**. The choice is kept for rematches. Each level scales the style's own AI tuning, and Normal is that tuning
+unchanged. The values are in `EnemyAI.DIFFICULTY_SCALE`:
+
+| | Easy | Normal | Hard |
+|---|---|---|---|
+| Reaction (ticks into the opponent's startup) | 11 | 6 | 3 |
+| Block / dodge | ×0.45 / ×0.5 | style | ×1.5 / ×1.3 |
+| Parry / punish | ×0.25 / ×0.4 | style | ×2.0 / ×1.25 |
+| Anti-air / aggression / signature | ×0.4 / ×0.75 / ×0.5 | style | ×1.8 / ×1.0 / ×1.0 |
+
+Chances are capped at 0.95, so even Hard sometimes fails to block. Reaction time is the strongest lever: on Normal
+the AI notices an attack 6 ticks in, so a 5-tick jab always beats its guard; on Hard it can block a jab.
+
+Census, 48 seeds. Each figure is the higher level's win rate against the lower level, across all eight rival styles:
+
+| | Lowest style | Highest style |
+|---|---|---|
+| Hard vs Normal | 56% (Capoeira) | 76% (Kung Fu) |
+| Normal vs Easy | 67% (Bangla Maar) | 89% (Taekwondo) |
+| Hard vs Easy | 80% (Capoeira) | 94% (Taekwondo) |
+
+Faster reactions should matter more against a human than in AI-vs-AI, so Hard is probably harder to play against
+than these numbers suggest. That needs your playtest.
+
+Test: `tests/test_difficulty.gd`.

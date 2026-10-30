@@ -80,8 +80,7 @@ func match_one(style: StringName, rival: StringName, side: int, seed_value: int,
 	for n in 2:
 		fs[n].face_opponent()
 		ais[n].rng_seed = seed_value * 10 + n
-		if ais[n].has_method("set_difficulty"):
-			ais[n].call("set_difficulty", diffs[n])
+		ais[n].difficulty = diffs[n]
 		ais[n].setup(fs[n], fs[1 - n])
 		if common:
 			ais[n].aggression = 0.62

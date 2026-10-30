@@ -12,6 +12,8 @@ signal change_style_pressed
 signal style_chosen(style_id: StringName)
 signal style_confirmed
 signal training_pressed
+## The AI difficulty button (pre-match): cycle to the next level.
+signal difficulty_pressed
 ## A training panel button (same names as main.gd's training actions).
 signal training_action(action: StringName)
 ## The on-screen pause button.
@@ -126,6 +128,8 @@ var _button_mode: StringName = &""
 var _button2: Button = null
 ## TRAINING, beside START MATCH.
 var _button3: Button = null
+## AI difficulty, the other side of START MATCH ("AI: NORMAL  [G]").
+var _button4: Button = null
 var _train_panel: PanelContainer = null
 var _train_info: RichTextLabel = null
 var _move_panel: PanelContainer = null
@@ -170,6 +174,14 @@ func _ready() -> void:
 		show_button(&"")
 		training_pressed.emit())
 	add_child(_button3)
+	_button4 = _make_button()
+	_button4.size = Vector2(200.0, 52.0)
+	_button4.position = Vector2(SCREEN_W * 0.5 - 180.0 - _button4.size.x, 570.0)
+	_button4.add_theme_font_size_override("font_size", 20)
+	_button4.pressed.disconnect(_on_button_pressed)
+	_button4.pressed.connect(func() -> void: difficulty_pressed.emit())
+	add_child(_button4)
+	set_difficulty(EnemyAI.selected_difficulty)
 	_build_style_panel()
 	_build_training_panels()
 
@@ -216,12 +228,26 @@ func show_button(mode: StringName) -> void:
 	_button.disabled = mode == &""
 	_button2.visible = mode == &"start" or mode == &"rematch"
 	_button3.visible = mode == &"start"
+	_button4.visible = mode == &"start"
 	if mode == &"start":
 		_button.text = "START MATCH"
 	elif mode == &"rematch":
 		_button.text = "REMATCH"
 	elif mode == &"restart":
 		_button.text = "RESTART MATCH"
+
+
+## Shows the rival AI's difficulty on its button.
+func set_difficulty(level: StringName) -> void:
+	_button4.text = "AI: %s  [G]" % String(level).to_upper()
+
+
+func get_difficulty_text() -> String:
+	return _button4.text
+
+
+func is_difficulty_button_visible() -> bool:
+	return _button4.visible
 
 
 func is_training_button_visible() -> bool:
