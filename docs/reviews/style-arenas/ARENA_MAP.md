@@ -24,3 +24,5 @@ Floor contact remains560, collision bounds90..1190. Side cutout inner faces70/12
 Validation: editor imports/parses, stage selection/randomization/persistence/props suite, material decal suite, and rendered normal/damaged/full-overscan captures. Review scripts preserve deterministic home-map captures through match_arena_override.
 
 Cleanup: obsolete tracked dojo_wood_v1 removed. Unused untracked original-checkout West Bengal v1/Victoria v1 and Colosseum sources were moved recoverably to D:/firstGame-retired-art-v1. Active West Bengal decals and other referenced v1 directories retained. AGENTS.md records the rule.
+
+Final merged validation: all 41 headless suites passed in 2m44s, including all nine finisher-contact shards, difficulty, stage and material decals. Independent code review reported no actionable correctness findings. Render capture passed with zero missing layers.
