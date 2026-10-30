@@ -489,7 +489,47 @@ func training_action(action: StringName) -> void:
 				training.tutorial.restart()
 
 
+## Android's back button pauses a fight (or resumes it), like P / Esc.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and training == null and (match_paused or can_pause()):
+		toggle_pause()
+
+
+## Controller menu buttons: START confirms / starts / rematches, or pauses a
+## fight; SELECT cycles the style on the style screen (like Q) or goes back
+## to it from the pre-match screen. Combat buttons are input actions
+## (GameSettings.JOY_BINDINGS).
+func _joypad_menu(button: int) -> void:
+	if training != null:
+		if button == JOY_BUTTON_START:
+			training_action(&"pause")
+		elif button == JOY_BUTTON_BACK:
+			training_action(&"exit")
+		return
+	if button == JOY_BUTTON_START:
+		match _round_state:
+			RoundState.STYLE_SELECT:
+				confirm_style()
+			RoundState.PRE_MATCH:
+				start_match()
+			RoundState.RESULT:
+				hud.press_button()
+			_:
+				if match_paused or can_pause():
+					toggle_pause()
+	elif button == JOY_BUTTON_BACK:
+		if _round_state == RoundState.STYLE_SELECT:
+			_cycle_style_choice()
+		elif _round_state == RoundState.PRE_MATCH:
+			change_style()
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	var pad := event as InputEventJoypadButton
+	if pad != null and pad.pressed and pad.button_index in [JOY_BUTTON_START, JOY_BUTTON_BACK]:
+		_joypad_menu(pad.button_index)
+		get_viewport().set_input_as_handled()
+		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return

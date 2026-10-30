@@ -66,7 +66,7 @@ func run() -> void:
 	check(held.slot != &"x_move", "holding X never repeats its input edge")
 	Input.action_release("x_move")
 	var keys := InputMap.action_get_events("x_move")
-	check(keys.size() == 1 and (keys[0] as InputEventKey).physical_keycode == KEY_X, "physical X is mapped")
+	check(keys.filter(func(e): return e is InputEventKey).map(func(e): return e.physical_keycode) == [KEY_X], "physical X is the one key mapped (pad buttons alongside)")
 	for st in StyleRegistry.all():
 		main.player.set_style(st)
 		var seconds := CombatData.get_attack(st.resolve(&"x_move", false)).x_cooldown_frames / CombatData.TICK_RATE

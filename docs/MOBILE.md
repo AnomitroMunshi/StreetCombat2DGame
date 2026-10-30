@@ -34,6 +34,7 @@ Steps 1 and 2 are multi-gigabyte downloads, so they were left for you to start.
 
 - **Real-phone check:** button size and placement for thumbs, performance on a mid-range phone, and the notch / safe
   area.
-- **Pausing:** the PAUSE button works by tap. Android's back button should probably also pause the game; this is not
-  wired yet.
-- **Controller support:** still open (REVIEW-05).
+- **Pausing:** done. Android's back button pauses and resumes a fight, as P / Esc do.
+- **Controller:** done, with default bindings (see `GameSettings.JOY_BINDINGS`). The d-pad or left stick moves, A
+  jumps, X / Y / B are light / heavy / technique, RB blocks, LB is X and RT is the signature. START confirms, starts,
+  rematches or pauses; SELECT cycles the style. Pad buttons can't be remapped yet.

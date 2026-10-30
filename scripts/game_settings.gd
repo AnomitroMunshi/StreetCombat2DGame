@@ -110,6 +110,23 @@ const REMAPPABLE: Array = [
 ## Keys kept for the menus and screens (never bound to a combat action).
 const RESERVED_KEYS: Array[int] = [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE, KEY_P, KEY_O, KEY_G, KEY_T, KEY_R, KEY_U, KEY_N,
 	KEY_Q, KEY_F1, KEY_F2, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_H, KEY_PERIOD]
+## Controller bindings, alongside the keys (not remappable yet): the d-pad
+## and left stick move / aim up and down, A jumps, X / Y / B are light / heavy
+## / technique, RB blocks (a fresh press parries), LB is X, RT the signature.
+## [button] or [axis, direction].
+const JOY_BINDINGS: Dictionary = {
+	&"move_left": [[JOY_BUTTON_DPAD_LEFT], [JOY_AXIS_LEFT_X, -1.0]],
+	&"move_right": [[JOY_BUTTON_DPAD_RIGHT], [JOY_AXIS_LEFT_X, 1.0]],
+	&"mod_up": [[JOY_BUTTON_DPAD_UP], [JOY_AXIS_LEFT_Y, -1.0]],
+	&"mod_down": [[JOY_BUTTON_DPAD_DOWN], [JOY_AXIS_LEFT_Y, 1.0]],
+	&"jump": [[JOY_BUTTON_A]],
+	&"attack_light": [[JOY_BUTTON_X]],
+	&"attack_heavy": [[JOY_BUTTON_Y]],
+	&"attack_technique": [[JOY_BUTTON_B]],
+	&"block": [[JOY_BUTTON_RIGHT_SHOULDER]],
+	&"x_move": [[JOY_BUTTON_LEFT_SHOULDER]],
+	&"signature": [[JOY_AXIS_TRIGGER_RIGHT, 1.0]],
+}
 ## Action -> physical keycode the player chose (only actions they changed).
 static var controls: Dictionary = {}
 ## The project's own bindings, read once before any change (for reset).
@@ -163,7 +180,8 @@ static func reset_controls() -> void:
 	apply_controls()
 
 
-## Writes every remappable action's key into the InputMap.
+## Writes every remappable action's key (and controller bindings) into the
+## InputMap.
 static func apply_controls() -> void:
 	_remembers_defaults()
 	for entry in REMAPPABLE:
@@ -173,3 +191,13 @@ static func apply_controls() -> void:
 		var ev := InputEventKey.new()
 		ev.physical_keycode = code
 		InputMap.action_add_event(action, ev)
+		for spec: Array in JOY_BINDINGS.get(action, []):
+			if spec.size() == 1:
+				var button := InputEventJoypadButton.new()
+				button.button_index = spec[0]
+				InputMap.action_add_event(action, button)
+			else:
+				var motion := InputEventJoypadMotion.new()
+				motion.axis = spec[0]
+				motion.axis_value = spec[1]
+				InputMap.action_add_event(action, motion)

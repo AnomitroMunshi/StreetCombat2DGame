@@ -59,8 +59,8 @@ class Driver extends Node:
 				check(GameSettings.key_for(&"attack_light") == KEY_J and hud.bind_button_text(&"attack_light") == "PRESS A KEY",
 					"a menu key (P) is refused and the action keeps waiting")
 				hud.rebind_with(KEY_Y)
-				var light_events := InputMap.action_get_events(&"attack_light")
-				check(light_events.size() == 1 and (light_events[0] as InputEventKey).physical_keycode == KEY_Y,
+				var light_keys := InputMap.action_get_events(&"attack_light").filter(func(e): return e is InputEventKey)
+				check(light_keys.size() == 1 and (light_keys[0] as InputEventKey).physical_keycode == KEY_Y,
 					"Y now drives LIGHT in the input map")
 				check(MartialArtStyle.slot_key(&"up_light") == "W+Y" and MartialArtStyle.slot_key(&"light") == "Y",
 					"move-list prompts follow the binding (%s)" % MartialArtStyle.slot_key(&"up_light"))
