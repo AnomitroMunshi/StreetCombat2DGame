@@ -52,6 +52,12 @@ const FINISHER_ZOOM: float = 1.3
 const FIN_ZOOM_START: float = 1.1
 const FIN_ZOOM_END: float = 1.2
 const FIN_ZOOM_KO: float = 1.3
+## The held breath before the knockout blow (_finisher_build_up): the camera
+## leans in this much more and the music drops from the finisher's duck to
+## near silence.
+const FIN_HUSH_ZOOM: float = 0.07
+const FIN_MUSIC_DUCK_DB: float = -14.0
+const FIN_HUSH_DUCK_DB: float = -30.0
 const FIN_KO_HOLD: int = 16
 const FIN_TILT: float = 0.06
 const FIN_FOCUS_Y: float = -118.0
@@ -210,6 +216,10 @@ var _fx_queue: Array = []
 ## Ticks a final blow's wall impact follows the blow itself.
 const FINAL_WALL_FX_DELAY: int = 4
 var _fin_attacker_air: bool = false
+## Finisher build-up: the beat last seen (a new strike beat swings) and how far
+## into the pre-knockout hush the camera is (0..1).
+var _fin_beat_seen: Dictionary = {}
+var _fin_hush: float = 0.0
 var _skid_prev_x: Dictionary = {}
 ## Developer overlay: recent contact points {pos, age, gap} (gap = distance from
 ## the drawn fist / foot to the contact point at impact, -1 if unknown).
@@ -350,6 +360,7 @@ func _physics_process(_delta: float) -> void:
 		set_game_speed(_finisher.playback_speed() * _base_time_scale())
 		_finisher_feedback(event)
 		_finisher_ambient()
+		_finisher_build_up()
 		if _finisher.done:
 			_end_round()
 	else:
@@ -585,7 +596,7 @@ func toggle_pause() -> void:
 		audio.duck_bgm(-12.0)
 	else:
 		hud.set_message(_pause_message[0], _pause_message[1])
-		audio.duck_bgm(-14.0 if _round_state == RoundState.FINISHER else 0.0)
+		audio.duck_bgm(FIN_MUSIC_DUCK_DB if _round_state == RoundState.FINISHER else 0.0)
 	hud.set_paused(match_paused)
 
 
@@ -1275,7 +1286,9 @@ func _start_finisher(attacker: Fighter, victim: Fighter, kind: FinisherDirector.
 	audio.play(&"finisher_sting")
 	audio.play(&"finisher_drums", -2.0, 0.0)
 	say(attacker, "finisher")
-	audio.duck_bgm(-14.0)
+	audio.duck_bgm(FIN_MUSIC_DUCK_DB)
+	_fin_beat_seen = {}
+	_fin_hush = 0.0
 
 
 func _finisher_feedback(event: Dictionary) -> void:
@@ -1382,6 +1395,26 @@ func _finisher_kind_fx(pos: Vector2, dir: Vector2, power: int, final: bool) -> v
 ## Continuous finisher effects between hits: the attacker's blue speed lines,
 ## spin arcs, takeoff dust, the launched victim's flight trail.
 var _fin_prev_pos := {}
+
+
+## Build-up to the knockout: each strike swings with a whoosh as its beat
+## starts (a deep one for the knockout blow), and in the held breath before
+## that blow (FinisherDirector.in_hush) the music drops away and the camera
+## leans in; the knockout's boom then lands on near silence.
+func _finisher_build_up() -> void:
+	var beat := _finisher.current_beat()
+	if not is_same(beat, _fin_beat_seen):
+		_fin_beat_seen = beat
+		if beat.get("hit", false):
+			if beat.get("final", false):
+				audio.play(&"whoosh_heavy", 1.0, 0.03)
+			else:
+				audio.play(&"whoosh_light", -4.0, 0.1)
+	var hush := _finisher.in_hush()
+	_fin_hush = move_toward(_fin_hush, 1.0 if hush else 0.0, 0.25)
+	if _finisher.ticks_since_ko() >= 0:
+		_fin_hush = 0.0
+	audio.duck_bgm(FIN_HUSH_DUCK_DB if hush else FIN_MUSIC_DUCK_DB)
 
 
 func _finisher_ambient() -> void:
@@ -1918,7 +1951,8 @@ func _process(delta: float) -> void:
 		var mid := (attacker.position + victim.position) * 0.5
 		var since_ko := _finisher.ticks_since_ko()
 		var focus := mid + Vector2(0.0, FIN_FOCUS_Y)
-		target_zoom = lerpf(FIN_ZOOM_START, FIN_ZOOM_END, smoothstep(0.0, 1.0, _finisher.progress()))
+		target_zoom = lerpf(FIN_ZOOM_START, FIN_ZOOM_END, smoothstep(0.0, 1.0, _finisher.progress())) \
+			+ FIN_HUSH_ZOOM * smoothstep(0.0, 1.0, _fin_hush)
 		target_rot = 0.0
 		if since_ko >= 0 and since_ko < FIN_KO_HOLD and _ko_focus != Vector2.INF:
 			# The knockout shot: tight on the blow, tilted.

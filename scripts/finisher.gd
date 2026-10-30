@@ -119,6 +119,11 @@ const SPEED_SETUP: float = 1.0
 const SPEED_STRIKE: float = 1.0
 const SPEED_KO: float = 0.5
 const SPEED_WALL: float = 0.8
+## Anticipation: the last HUSH_TICKS of the wind-up before the knockout blow
+## (when that beat is a wind-up, not a strike in a chain) play at HUSH_SPEED,
+## then the blow travels in at full speed: a held breath, then the snap.
+const HUSH_TICKS: int = 8
+const HUSH_SPEED: float = 0.55
 const KO_SLOW_TICKS: int = 4
 ## Ticks the knockout blow eases out of its slow motion.
 const KO_EASE_TICKS: float = 6.0
@@ -329,6 +334,23 @@ func progress() -> float:
 	return clampf(float(maxi(_index, 0)) / maxf(float(final_index), 1.0), 0.0, 1.0)
 
 
+## The held breath before the knockout blow: the last HUSH_TICKS of the
+## wind-up beat right before the final beat (not when that beat is itself a
+## strike: a chain keeps its momentum).
+func in_hush() -> bool:
+	if done or _index < 0 or _index + 1 >= _beats.size():
+		return false
+	var beat := _beats[_index]
+	if beat.get("hit", false) or beat.has("speed") or not _beats[_index + 1].get("final", false):
+		return false
+	return _beat_tick >= int(beat["ticks"]) - HUSH_TICKS
+
+
+## The beat being played ({} before the first and after the last).
+func current_beat() -> Dictionary:
+	return _beats[_index] if _index >= 0 and _index < _beats.size() and not done else {}
+
+
 ## Ticks since the knockout blow landed (-1 before it).
 func ticks_since_ko() -> int:
 	return -1 if _ko_clock < 0 else _clock - _ko_clock
@@ -348,6 +370,8 @@ func playback_speed() -> float:
 	var beat := _beats[_index]
 	if beat.has("speed"):
 		return beat["speed"]
+	if in_hush():
+		return HUSH_SPEED
 	if beat.get("final", false):
 		var since := ticks_since_ko()
 		if since < 0:
