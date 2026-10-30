@@ -1,0 +1,275 @@
+{
+  "boxing_backdrop.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.0,
+    "opaque_fraction": 1.0,
+    "boundary_candidates": [
+      [
+        656,
+        54.3
+      ],
+      [
+        655,
+        37.3
+      ],
+      [
+        644,
+        35.5
+      ],
+      [
+        657,
+        32.8
+      ],
+      [
+        658,
+        28.7
+      ]
+    ]
+  },
+  "boxing_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.6814689636230469,
+    "opaque_fraction": 0.0,
+    "gutter_max_alpha": 1
+  },
+  "capoeira_backdrop.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.0,
+    "opaque_fraction": 1.0,
+    "boundary_candidates": [
+      [
+        680,
+        35.6
+      ],
+      [
+        696,
+        30.2
+      ],
+      [
+        695,
+        26.1
+      ],
+      [
+        682,
+        22.0
+      ],
+      [
+        700,
+        19.7
+      ]
+    ]
+  },
+  "capoeira_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.5703283945719401,
+    "opaque_fraction": 0.0,
+    "gutter_max_alpha": 1
+  },
+  "jeet_kune_do_backdrop.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.0,
+    "opaque_fraction": 1.0,
+    "boundary_candidates": [
+      [
+        645,
+        49.5
+      ],
+      [
+        662,
+        41.1
+      ],
+      [
+        643,
+        40.2
+      ],
+      [
+        700,
+        25.3
+      ],
+      [
+        701,
+        25.0
+      ]
+    ]
+  },
+  "jeet_kune_do_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.5523090362548828,
+    "opaque_fraction": 0.0,
+    "gutter_max_alpha": 1
+  },
+  "kickboxing_backdrop.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.0,
+    "opaque_fraction": 1.0,
+    "boundary_candidates": [
+      [
+        645,
+        51.4
+      ],
+      [
+        639,
+        25.5
+      ],
+      [
+        641,
+        16.7
+      ],
+      [
+        643,
+        11.6
+      ],
+      [
+        682,
+        11.0
+      ]
+    ]
+  },
+  "kickboxing_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.6402498881022135,
+    "opaque_fraction": 0.0,
+    "gutter_max_alpha": 0
+  },
+  "kung_fu_backdrop.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.0,
+    "opaque_fraction": 1.0,
+    "boundary_candidates": [
+      [
+        660,
+        52.5
+      ],
+      [
+        700,
+        24.6
+      ],
+      [
+        648,
+        24.0
+      ],
+      [
+        685,
+        23.5
+      ],
+      [
+        662,
+        20.2
+      ]
+    ]
+  },
+  "kung_fu_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.6177762349446615,
+    "opaque_fraction": 0.0,
+    "gutter_max_alpha": 1
+  },
+  "muay_thai_backdrop.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.0,
+    "opaque_fraction": 1.0,
+    "boundary_candidates": [
+      [
+        705,
+        43.0
+      ],
+      [
+        632,
+        37.9
+      ],
+      [
+        692,
+        37.4
+      ],
+      [
+        679,
+        27.8
+      ],
+      [
+        706,
+        27.1
+      ]
+    ]
+  },
+  "muay_thai_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.6036167144775391,
+    "opaque_fraction": 0.0,
+    "gutter_max_alpha": 0
+  },
+  "taekwondo_backdrop.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.0,
+    "opaque_fraction": 1.0,
+    "boundary_candidates": [
+      [
+        661,
+        72.9
+      ],
+      [
+        677,
+        57.0
+      ],
+      [
+        676,
+        21.0
+      ],
+      [
+        663,
+        16.8
+      ],
+      [
+        678,
+        16.0
+      ]
+    ]
+  },
+  "taekwondo_cutouts.png": {
+    "size": [
+      1536,
+      1024
+    ],
+    "clear_fraction": 0.5348726908365885,
+    "opaque_fraction": 0.0,
+    "gutter_max_alpha": 1
+  }
+}

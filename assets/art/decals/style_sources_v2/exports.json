@@ -1,0 +1,310 @@
+[
+    {
+        "width":  1024,
+        "source_rect":  [
+                            352,
+                            218,
+                            560,
+                            59
+                        ],
+        "file":  "assets\\art\\decals\\dojo_wood_v2\\floor_impact_01.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            251,
+                            500,
+                            772,
+                            79
+                        ],
+        "file":  "assets\\art\\decals\\dojo_wood_v2\\floor_impact_02.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            59,
+                            775,
+                            1115,
+                            99
+                        ],
+        "file":  "assets\\art\\decals\\dojo_wood_v2\\floor_impact_03.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            151,
+                            1051,
+                            923,
+                            79
+                        ],
+        "file":  "assets\\art\\decals\\dojo_wood_v2\\floor_scuff_light.png",
+        "height":  256
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            173,
+                            121,
+                            209,
+                            777
+                        ],
+        "file":  "assets\\art\\decals\\dojo_wood_v2\\wall_impact_01.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            645,
+                            123,
+                            229,
+                            754
+                        ],
+        "file":  "assets\\art\\decals\\dojo_wood_v2\\wall_impact_02.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1174,
+                            131,
+                            212,
+                            755
+                        ],
+        "file":  "assets\\art\\decals\\dojo_wood_v2\\wall_impact_03.png",
+        "height":  1024
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            59,
+                            118,
+                            846,
+                            74
+                        ],
+        "file":  "assets\\art\\decals\\gym_rubber_v1\\floor_impact_01.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            41,
+                            354,
+                            929,
+                            119
+                        ],
+        "file":  "assets\\art\\decals\\gym_rubber_v1\\floor_impact_02.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            30,
+                            615,
+                            1016,
+                            133
+                        ],
+        "file":  "assets\\art\\decals\\gym_rubber_v1\\floor_impact_03.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            58,
+                            888,
+                            911,
+                            74
+                        ],
+        "file":  "assets\\art\\decals\\gym_rubber_v1\\floor_scuff_light.png",
+        "height":  256
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1223,
+                            8,
+                            103,
+                            248
+                        ],
+        "file":  "assets\\art\\decals\\gym_rubber_v1\\wall_impact_01.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1205,
+                            256,
+                            159,
+                            256
+                        ],
+        "file":  "assets\\art\\decals\\gym_rubber_v1\\wall_impact_02.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1205,
+                            512,
+                            194,
+                            294
+                        ],
+        "file":  "assets\\art\\decals\\gym_rubber_v1\\wall_impact_03.png",
+        "height":  1024
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            164,
+                            129,
+                            658,
+                            58
+                        ],
+        "file":  "assets\\art\\decals\\courtyard_stone_v1\\floor_impact_01.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            49,
+                            343,
+                            921,
+                            95
+                        ],
+        "file":  "assets\\art\\decals\\courtyard_stone_v1\\floor_impact_02.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            27,
+                            612,
+                            1003,
+                            148
+                        ],
+        "file":  "assets\\art\\decals\\courtyard_stone_v1\\floor_impact_03.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            131,
+                            867,
+                            830,
+                            90
+                        ],
+        "file":  "assets\\art\\decals\\courtyard_stone_v1\\floor_scuff_light.png",
+        "height":  256
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1176,
+                            29,
+                            111,
+                            218
+                        ],
+        "file":  "assets\\art\\decals\\courtyard_stone_v1\\wall_impact_01.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1178,
+                            268,
+                            139,
+                            242
+                        ],
+        "file":  "assets\\art\\decals\\courtyard_stone_v1\\wall_impact_02.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1186,
+                            519,
+                            160,
+                            287
+                        ],
+        "file":  "assets\\art\\decals\\courtyard_stone_v1\\wall_impact_03.png",
+        "height":  1024
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            97,
+                            141,
+                            849,
+                            72
+                        ],
+        "file":  "assets\\art\\decals\\rooftop_concrete_v1\\floor_impact_01.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            81,
+                            374,
+                            944,
+                            110
+                        ],
+        "file":  "assets\\art\\decals\\rooftop_concrete_v1\\floor_impact_02.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            30,
+                            613,
+                            1037,
+                            143
+                        ],
+        "file":  "assets\\art\\decals\\rooftop_concrete_v1\\floor_impact_03.png",
+        "height":  256
+    },
+    {
+        "width":  1024,
+        "source_rect":  [
+                            78,
+                            884,
+                            952,
+                            79
+                        ],
+        "file":  "assets\\art\\decals\\rooftop_concrete_v1\\floor_scuff_light.png",
+        "height":  256
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1246,
+                            7,
+                            88,
+                            237
+                        ],
+        "file":  "assets\\art\\decals\\rooftop_concrete_v1\\wall_impact_01.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1230,
+                            265,
+                            132,
+                            236
+                        ],
+        "file":  "assets\\art\\decals\\rooftop_concrete_v1\\wall_impact_02.png",
+        "height":  1024
+    },
+    {
+        "width":  512,
+        "source_rect":  [
+                            1234,
+                            525,
+                            136,
+                            263
+                        ],
+        "file":  "assets\\art\\decals\\rooftop_concrete_v1\\wall_impact_03.png",
+        "height":  1024
+    }
+]
