@@ -138,10 +138,10 @@ var _speech: Dictionary = {}
 var _speech_font: Font = null
 const SPEECH_FONT_SIZE: int = 20
 const SPEECH_POP_TIME: float = 0.12
-## Fonts with Bengali glyphs, tried in order (installed system fonts: nothing
-## is bundled or downloaded). Nirmala UI and Vrinda ship with Windows.
-const SPEECH_FONT_NAMES: PackedStringArray = ["Nirmala UI", "Vrinda", "Shonar Bangla", "Noto Sans Bengali",
-	"Noto Serif Bengali", "Lohit Bengali", "Kalpurush", "SolaimanLipi"]
+## Bengali speech and comic words: Noto Sans Bengali, bundled (SIL Open Font
+## License, assets/fonts/noto_sans_bengali/OFL.txt) so it renders the same on
+## every platform, browsers included.
+const SPEECH_FONT_PATH := "res://assets/fonts/noto_sans_bengali/NotoSansBengali.ttf"
 ## Big centred countdown text ("3", "2", "1", "FIGHT!") and its age in seconds,
 ## for the pop-in scale animation.
 var _count_text: String = ""
@@ -927,14 +927,12 @@ func _on_button_pressed() -> void:
 		restart_pressed.emit()
 
 
-## Callout under a fighter's health bar ("GUARD BREAK", "COUNTER", "PARRY").
-## A font for speech bubbles: a system font with Bengali script (complex
-## shaping by the text server), falling back to the game font.
+## A font for speech bubbles: the bundled Bengali font (complex shaping by the
+## text server), falling back to the game font for anything else.
 static func make_speech_font() -> Font:
-	var sys := SystemFont.new()
-	sys.font_names = SPEECH_FONT_NAMES
-	sys.fallbacks = [ThemeDB.fallback_font]
-	return sys
+	var bengali := (load(SPEECH_FONT_PATH) as FontFile).duplicate() as FontFile
+	bengali.fallbacks = [ThemeDB.fallback_font]
+	return bengali
 
 
 func show_speech(fighter: Fighter, text: String) -> void:

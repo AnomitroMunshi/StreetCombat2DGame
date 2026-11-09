@@ -254,7 +254,20 @@ func _initialize() -> void:
 
 	print("[speech font]")
 	var font := Hud.make_speech_font()
-	_check(font.has_char(0x0986) and font.has_char(0x09CB), "speech font has Bengali glyphs (%s)" % (font as SystemFont).get_font_name())
+	_check(font.has_char(0x0986) and font.has_char(0x09CB), "speech font has Bengali glyphs (%s)" % font.get_font_name())
+	_check(font is FontFile and font.resource_path == "" and font.get_font_name().contains("Bengali"),
+		"the bundled Bengali font, not a system font (renders in browsers too)")
+	# Every Bengali character the game says exists in the bundled font.
+	var lines: Array[String] = []
+	for v in StyleRegistry.by_id(&"bangla_maar").quotes.values():
+		lines.append(String(v))
+	lines.append_array(["ঠাস!", "ধুম!"])
+	var missing := ""
+	for line in lines:
+		for ch in line:
+			if ch.unicode_at(0) >= 0x980 and ch.unicode_at(0) <= 0x9FF and not font.has_char(ch.unicode_at(0)):
+				missing += ch
+	_check(missing == "", "every Bengali character in the speech lines is in the font (%s)" % missing)
 
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
