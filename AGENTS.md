@@ -1,4 +1,4 @@
-# Street Combat workspace instructions
+# Gully Fight workspace instructions
 
 ## Arena art and decals
 

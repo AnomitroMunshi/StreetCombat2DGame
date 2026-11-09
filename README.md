@@ -1,4 +1,4 @@
-# Street Combat
+# Gully Fight
 
 A 2D side-view hand-to-hand fighting game for Godot 4: one player against
 one AI in a training hall, with nine martial arts. Each style has its own

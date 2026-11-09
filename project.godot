@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Street Combat"
+config/name="Gully Fight"
 config/description="2D side-view martial arts fighting prototype."
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
