@@ -100,6 +100,11 @@ func _ready() -> void:
 		else:
 			_bgm_out = player
 	_build_sfx()
+	# The procedural loop backs up a music id without a track file (every id has
+	# one today). The web build runs without threads (any host can serve it),
+	# so it skips the loop rather than render it on the main thread.
+	if OS.has_feature("web"):
+		return
 	_bgm_thread = Thread.new()
 	_bgm_thread.start(_render_bgm)
 

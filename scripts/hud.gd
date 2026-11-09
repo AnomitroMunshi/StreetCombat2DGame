@@ -732,7 +732,7 @@ func show_pause_button(on: bool) -> void:
 
 
 func set_paused(on: bool) -> void:
-	_pause_button.text = "▶  RESUME" if on else "II  PAUSE"
+	_pause_button.text = "RESUME" if on else "II  PAUSE"
 	show_settings_button(on)
 
 
@@ -838,7 +838,7 @@ func show_style_select(styles: Array[MartialArtStyle], selected_id: StringName) 
 		card.visible = true
 		card.custom_minimum_size = Vector2(STYLE_CARD_W, 54.0)
 		card.add_theme_font_size_override("font_size", 15)
-		card.text = "%s\n%s" % [st.display_name.to_upper(), _stars(st.difficulty)]
+		card.text = "%s\nDIFFICULTY %s" % [st.display_name.to_upper(), _difficulty_text(st.difficulty)]
 		if st.id == selected_id:
 			chosen = st
 			var hi := StyleBoxFlat.new()
@@ -870,13 +870,15 @@ func get_selected_style_id() -> StringName:
 	return _selected_id
 
 
-static func _stars(n: int) -> String:
-	return "★".repeat(n) + "☆".repeat(5 - n)
+## "3/5": plain text, which every font has (the web build has no system font
+## to fall back on for symbols such as stars).
+static func _difficulty_text(n: int) -> String:
+	return "%d/5" % n
 
 
 static func _style_details(st: MartialArtStyle) -> String:
 	var t := "[b][font_size=22]%s[/font_size][/b]   [color=#b9a98f]%s · difficulty %s[/color]\n" % [
-		st.display_name.to_upper(), String(st.category).to_upper(), _stars(st.difficulty)]
+		st.display_name.to_upper(), String(st.category).to_upper(), _difficulty_text(st.difficulty)]
 	t += "%s\n\n" % st.description
 	for s in st.strengths:
 		t += "[color=#8fd18f]+ %s[/color]\n" % s
