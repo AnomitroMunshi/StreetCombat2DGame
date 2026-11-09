@@ -1,0 +1,11 @@
+# Gully Fight on Cloudflare Pages (see tools/web/README.md).
+# Pages serves the small files; the engine (index.wasm) and game data
+# (index.pck) are over Pages' 25 MiB file limit, so they live in the R2
+# bucket below and functions/[[path]].js serves them on the same site.
+name = "gully-fight"
+pages_build_output_dir = "../../build/site"
+compatibility_date = "2025-01-01"
+
+[[r2_buckets]]
+binding = "GAME"
+bucket_name = "gully-fight-game"

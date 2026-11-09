@@ -14,3 +14,6 @@ Thumbs.db
 
 # Test runner progress log
 tests/last_run.log
+
+# Cloudflare local simulator state
+.wrangler/
